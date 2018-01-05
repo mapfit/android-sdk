@@ -3,8 +3,8 @@
   "id": "vendor0001",
   "title": "Coffee Shop 1",
   "address": "395 Flatbush Ave Extension, D, Brooklyn, NY 11201",
-  "lat": 40.6902223,
-  "lon": -73.9770368,
+  "lat": 40.693825,
+  "lon": -73.998691,
   "opensAt": "08:00",
   "closesAt": "22:00",
   "open24Hours" : false
