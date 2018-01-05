@@ -74,7 +74,8 @@ class CoffeeShopActivity : AppCompatActivity() {
             override fun onMapReady(mapfitMap: MapfitMap) {
                 setupMap(mapfitMap)
                 coffeeShops?.let { addMarkersFromCoffeeShops(it) }
-                mapfitMap.addPolygon(repository.getLowerManhattanPoly())
+//                mapfitMap.addPolygon(repository.getLowerManhattanPoly())
+//                mapfitMap.addPolyline()
 
             }
         })
@@ -84,7 +85,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         override fun onFilterChecked(filterType: FilterType, isChecked: Boolean) {
             when (filterType) {
                 FilterType.ZOOM_CONTROLS -> {
-                    mapfitMap.getMapOptions().isZoomControlsVisible = isChecked
+//                    mapfitMap.getMapOptions().isZoomControlsVisible = isChecked
                 }
             }
 
@@ -115,7 +116,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         mapfitMap.apply {
             setCenter(LatLng(40.700798, -74.0050177), 500)
             setZoom(13f, 500)
-            setOnMarkerClickListener(onMarkerClickListener)
+//            setOnMarkerClickListener(onMarkerClickListener)
         }
     }
 
@@ -142,25 +143,25 @@ class CoffeeShopActivity : AppCompatActivity() {
 
     private fun addMarkersFromCoffeeShops(coffeeShops: List<CoffeeShop>) {
 
-        coffeeShops.forEach { shop ->
-
-            val marker = mapfitMap.addMarker(LatLng(shop.lat, shop.lon))
-                    .setIcon(MapfitMarker.DARK_CAFE)
-                    .setData(shop)
-
-            markers.add(marker)
-
-            // creating a layer of shops that are always open
-            if (shop.open24Hours) {
-                alwaysOpenShopLayer.add(marker)
-            }
-
-        }
+//        coffeeShops.forEach { shop ->
+//
+//            val marker = mapfitMap.addMarker(LatLng(shop.lat, shop.lon))
+//                    .setIcon(MapfitMarker.DARK_CAFE)
+//                    .setData(shop)
+//
+//            markers.add(marker)
+//
+//            // creating a layer of shops that are always open
+//            if (shop.open24Hours) {
+//                alwaysOpenShopLayer.add(marker)
+//            }
+//
+//        }
 
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.coffee_shops, menu)
+//        menuInflater.inflate(R.menu.coffee_shops, menu)
         return true
     }
 

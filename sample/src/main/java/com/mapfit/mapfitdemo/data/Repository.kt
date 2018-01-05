@@ -54,6 +54,7 @@ class Repository(private val context: Context) {
         filters.add(Filter(FilterType.ALL_MARKERS, "Markers", true))
         filters.add(Filter(FilterType.ZOOM_CONTROLS, "Zoom Controls", true))
 //        filters.add(Filter(FilterType.MAP_STYLE, "Map Style", true))
+        filters.add(Filter(FilterType.CAMERA_STYLE, "Camera Style", true))
         filters.add(Filter(FilterType.ALWAYS_OPEN, "Always Open Vendors", false))
 
         return filters

@@ -2,7 +2,6 @@ package com.mapfit.mapfitsdk
 
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
 import com.mapzen.tangram.MapController
-import com.mapzen.tangram.MapView
 
 /**
  * Created by dogangulcan on 12/21/17.
@@ -24,7 +23,7 @@ class MapOptions internal constructor(
             TODO()
         }
 
-    var mapTheme = MapStyle.MAPFIT_NIGHT
+    var mapTheme = MapStyle.MAPFIT_DAY
         set(value) {
             tangramMap.loadSceneFile(value.toString())
             field = value
@@ -43,7 +42,8 @@ class MapOptions internal constructor(
 
     var cameraType: CameraType = CameraType.PERSPECTIVE
         set(value) {
-            TODO()
+            tangramMap.cameraType = MapController.CameraType.valueOf(value.name)
+            field = value
         }
 
     var isPanEnabled = true

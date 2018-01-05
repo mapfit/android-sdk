@@ -1,6 +1,8 @@
 package com.mapfit.mapfitsdk
 
-import com.mapfit.mapfitsdk.annotations.*
+import com.mapfit.mapfitsdk.annotations.Marker
+import com.mapfit.mapfitsdk.annotations.Polygon
+import com.mapfit.mapfitsdk.annotations.Polyline
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener
@@ -30,6 +32,7 @@ abstract class MapfitMap {
      */
     abstract fun setCenterWithLayer(layer: Layer, duration: Long = 0, paddingPercentage: Float)
 
+
     abstract fun getCenter(): LatLng
 
     /**
@@ -37,67 +40,72 @@ abstract class MapfitMap {
      *
      * @return marker
      */
-    abstract fun addMarker(latLng: LatLng): Marker
+    internal abstract fun addMarker(latLng: LatLng): Marker
 
-    abstract fun removeMarker(marker: Marker): Boolean
+    internal abstract fun removeMarker(marker: Marker): Boolean
 
     /**
      * Adds a polyline to default layer.
      *
      * @return polyline
      */
-    abstract fun addPolyline(): Polyline
+    internal abstract fun addPolyline(): Polyline
 
-    abstract fun removePolyline(polyline: Polyline)
+    internal abstract fun removePolyline(polyline: Polyline)
 
     /**
      * Adds a polygon to default layer.
      *
      * @return polygon
      */
-    abstract fun addPolygon(polygon: List<List<LatLng>>): Polygon
+    internal abstract fun addPolygon(polygon: List<List<LatLng>>): Polygon
 
-    abstract fun removePolygon(polygon: Polygon)
+    internal abstract fun removePolygon(polygon: Polygon)
 
     abstract fun addLayer(layer: Layer)
 
-    abstract fun removeLayer(layer: Layer)
+    internal abstract fun removeLayer(layer: Layer)
 
-
+    /**
+     * Sets zoom level of the map.
+     *
+     * @param zoomLevel Zoom level for the view
+     * @param duration optional duration for zooming in milliseconds
+     */
     abstract fun setZoom(zoomLevel: Float, duration: Int = 0)
 
     abstract fun getZoom(): Float
 
-    abstract fun setBounds(latLngBounds: LatLngBounds)
+    internal abstract fun setBounds(latLngBounds: LatLngBounds)
 
-    abstract fun getBounds(): LatLngBounds
+    internal abstract fun getBounds(): LatLngBounds
 
     abstract fun setOnMapClickListener(onMapClickListener: OnMapClickListener)
 
     abstract fun setOnMapDoubleClickListener(onMapDoubleClickListener: OnMapDoubleClickListener)
 
-    abstract fun setOnMarkerClickListener(onMarkerClickListener: OnMarkerClickListener)
+    internal abstract fun setOnMarkerClickListener(onMarkerClickListener: OnMarkerClickListener)
 
-    abstract fun setOnPolylineClickListener(onPolylineClickListener: OnPolylineClickListener)
+    internal abstract fun setOnPolylineClickListener(onPolylineClickListener: OnPolylineClickListener)
 
-    abstract fun setOnPolygonClickListener(onPolygonClickListener: OnPolygonClickListener)
+    internal abstract fun setOnPolygonClickListener(onPolygonClickListener: OnPolygonClickListener)
 
-    abstract fun getMapOptions(): MapOptions
+    internal abstract fun getMapOptions(): MapOptions
 
-    abstract fun getDirectionsOptions(): DirectionsOptions
+    internal abstract fun getDirectionsOptions(): DirectionsOptions
 
-    abstract fun setTilt(angle: Float)
+    internal abstract fun setTilt(angle: Float)
 
-    abstract fun getTilt(): Float
+    internal abstract fun getTilt(): Float
 
-    abstract fun setRotation(angle: Float)
+    internal abstract fun setRotation(angle: Float)
 
-    abstract fun getRotation(): Float
+    internal abstract fun getRotation(): Float
 
     /**
      * Will reCenter the map.
      * @param duration if given, the camera will move with ease.
      */
-    abstract fun reCenter(duration: Long = 0)
+    internal abstract fun reCenter(duration: Long = 0)
 
 }

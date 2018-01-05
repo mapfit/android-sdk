@@ -12,9 +12,12 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
-import com.mapfit.mapfitsdk.annotations.*
 import com.mapfit.mapfitsdk.annotations.Marker
-import com.mapfit.mapfitsdk.annotations.callback.*
+import com.mapfit.mapfitsdk.annotations.Polygon
+import com.mapfit.mapfitsdk.annotations.Polyline
+import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
+import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
+import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener
 import com.mapfit.mapfitsdk.geo.LatLng
 import com.mapfit.mapfitsdk.geo.LatLngBounds
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
@@ -40,6 +43,10 @@ class MapView(
     private lateinit var tangramMap: com.mapzen.tangram.MapController
     private lateinit var mapOptions: MapOptions
 
+    // Views
+    private val tangramMapView by lazy { MapView(context, attributeSet) }
+    private val controlsView: View by lazy { getUiControlView() }
+
     private val annotationLayer = Layer()
     private var tilt: Float = 0f
     private var isDirectionsEnabled = false
@@ -49,11 +56,10 @@ class MapView(
     private lateinit var mapCenter: LatLng
     private var isUserLocationEnabled = true
 
-    private val controlsView: View by lazy { getUiControlView() }
-    private val tangramMapView by lazy { MapView(context, attributeSet) }
 
     private val dataLayers = mutableListOf<MapData>()
 
+    // Click Listeners
     private var markerClickListener: OnMarkerClickListener? = null
     private var polylineClickListener: OnPolylineClickListener? = null
     private var polygonClickListener: OnPolygonClickListener? = null
@@ -203,8 +209,8 @@ class MapView(
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun setOnMarkerClickListener(markerClickListener: OnMarkerClickListener) {
-            this@MapView.markerClickListener = markerClickListener
+        override fun setOnMarkerClickListener(onMarkerClickListener: OnMarkerClickListener) {
+            this@MapView.markerClickListener = onMarkerClickListener
         }
 
         override fun addMarker(latLng: LatLng): Marker {
@@ -240,7 +246,7 @@ class MapView(
         }
 
         override fun addPolyline(): Polyline {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            return Polyline()
         }
 
         override fun getZoom(): Float {
@@ -256,7 +262,8 @@ class MapView(
         }
 
         override fun getCenter(): LatLng {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            val position = tangramMap.position
+            return LatLng(position.latitude, position.longitude)
         }
 
         override fun reCenter(duration: Long) {
@@ -264,6 +271,7 @@ class MapView(
         }
 
         override fun addLayer(layer: Layer) {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
         override fun removeLayer(layer: Layer) {
@@ -290,7 +298,7 @@ class MapView(
             if (isValidZoomLevel(zoomLevel)) {
                 when (zoomLevel) {
                     !in 1F..mapOptions.maxZoom -> Log.w("MapView", "Zoom level exceeds maximum level.")
-                    else -> tangramMap.setZoomEased(zoomLevel, duration.toInt())
+                    else -> tangramMap.setZoomEased(zoomLevel, duration)
                 }
             }
         }
