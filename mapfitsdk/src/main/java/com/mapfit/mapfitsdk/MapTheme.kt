@@ -5,7 +5,7 @@ package com.mapfit.mapfitsdk
  *
  * Created by dogangulcan on 12/21/17.
  */
-enum class MapStyle(private val scenePath: String) {
+enum class MapTheme(private val scenePath: String) {
     MAPFIT_DAY("asset:///mapfit-day.yaml"),
     MAPFIT_NIGHT("asset:///mapfit-night.yaml");
 

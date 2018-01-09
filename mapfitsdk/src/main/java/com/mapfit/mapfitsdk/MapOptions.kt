@@ -1,5 +1,6 @@
 package com.mapfit.mapfitsdk
 
+import android.support.annotation.FloatRange
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
 import com.mapzen.tangram.MapController
 
@@ -11,68 +12,82 @@ class MapOptions internal constructor(
         private val tangramMap: MapController
 ) {
 
-    var maxZoom: Float = 20.5f
-        set(value) {
-            if (isValidZoomLevel(value)) {
-                field = value
-            }
-        }
+    companion object {
+        const val MAP_MIN_ZOOM = 1.0
+        const val MAP_MAX_ZOOM = 20.5
+    }
 
-    var minZoom: Float = 20.5f
-        set(value) {
-            TODO()
-        }
+    private var maxZoom: Float = 20.5f
 
-    var mapTheme = MapStyle.MAPFIT_DAY
+    private var minZoom: Float = 1f
+
+    internal var mapTheme = MapTheme.MAPFIT_DAY
         set(value) {
             tangramMap.loadSceneFile(value.toString())
             field = value
         }
 
-    var isCompassVisible = false
+    private var isCompassVisible = false
         set(value) {
             TODO()
         }
 
-    var isZoomControlsVisible = true
+    private var isZoomControlsVisible = true
         set(value) {
             mapView.setZoomControlVisibility(value)
             field = value
         }
 
-    var cameraType: CameraType = CameraType.PERSPECTIVE
+    private var cameraType: CameraType = CameraType.PERSPECTIVE
         set(value) {
             tangramMap.cameraType = MapController.CameraType.valueOf(value.name)
             field = value
         }
 
-    var isPanEnabled = true
+    private var isPanEnabled = true
         set(value) {
             TODO()
         }
 
-    var isPinchEnabled = true
+    private var isPinchEnabled = true
         set(value) {
             TODO()
         }
 
-    var isRotateEnabled = true
+    private var isRotateEnabled = true
         set(value) {
             TODO()
         }
 
-    var isTiltEnabled = true
+    private var isTiltEnabled = true
         set(value) {
             TODO()
         }
 
-    var is3dBuildingsEnabled = true
+    private var is3dBuildingsEnabled = true
         set(value) {
             TODO()
         }
 
 
-    enum class CameraType {
+    /**
+     * @param zoomLevel desired maximum zoom level
+     */
+    internal fun setMaxZoom(@FloatRange(from = MAP_MIN_ZOOM, to = MAP_MAX_ZOOM) zoomLevel: Float) {
+        if (isValidZoomLevel(zoomLevel)) {
+            maxZoom = zoomLevel
+        }
+    }
+
+    internal fun getMaxZoom() = maxZoom
+
+    internal fun setMinZoom(@FloatRange(from = MAP_MIN_ZOOM, to = MAP_MAX_ZOOM) zoomLevel: Float) {
+        if (isValidZoomLevel(zoomLevel)) {
+            minZoom = zoomLevel
+        }
+    }
+
+    private enum class CameraType {
         PERSPECTIVE,
         ISOMETRIC,
         FLAT

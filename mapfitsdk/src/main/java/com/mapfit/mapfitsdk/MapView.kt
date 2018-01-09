@@ -23,8 +23,7 @@ import com.mapfit.mapfitsdk.geo.LatLngBounds
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
 import com.mapzen.tangram.*
 import com.mapzen.tangram.MapView
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
+import org.jetbrains.annotations.NotNull
 
 
 /**
@@ -40,7 +39,7 @@ class MapView(
     private val ANIMATION_DURATION = 200
     private val ZOOM_STEP_LEVEL = 1
 
-    private lateinit var tangramMap: com.mapzen.tangram.MapController
+    internal lateinit var tangramMap: com.mapzen.tangram.MapController
     private lateinit var mapOptions: MapOptions
 
     // Views
@@ -48,6 +47,8 @@ class MapView(
     private val controlsView: View by lazy { getUiControlView() }
 
     private val annotationLayer = Layer()
+    internal val layers = mutableListOf(annotationLayer)
+
     private var tilt: Float = 0f
     private var isDirectionsEnabled = false
     private lateinit var directionsOptions: DirectionsOptions
@@ -55,7 +56,6 @@ class MapView(
 
     private lateinit var mapCenter: LatLng
     private var isUserLocationEnabled = true
-
 
     private val dataLayers = mutableListOf<MapData>()
 
@@ -68,13 +68,12 @@ class MapView(
 
     private val zoomControlsView: LinearLayout
 
-    private val layers = mutableListOf(annotationLayer)
-
     init {
         addView(tangramMapView)
         addView(controlsView)
 
         zoomControlsView = controlsView.findViewById(R.id.zoomControls)
+
         controlsView.findViewById<View>(R.id.imgAttribution).setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://mapfit.com/"))
 
@@ -84,6 +83,7 @@ class MapView(
                 Log.d(TAG, "No Intent available to handle opening https://mapfit.com/")
             }
         }
+
         controlsView.findViewById<ImageView>(R.id.btnZoomIn).setOnClickListener {
             mapfitMap.setZoom(mapfitMap.getZoom() + ZOOM_STEP_LEVEL,
                     ANIMATION_DURATION)
@@ -92,10 +92,10 @@ class MapView(
             mapfitMap.setZoom(mapfitMap.getZoom() - ZOOM_STEP_LEVEL,
                     ANIMATION_DURATION)
         }
+
     }
 
-
-    fun getMapAsync(onMapReadyCallback: OnMapReadyCallback) {
+    fun getMapAsync(@NotNull onMapReadyCallback: OnMapReadyCallback) {
 
         tangramMap = tangramMapView.getMap { sceneId, sceneError ->
             onMapReady()
@@ -105,29 +105,41 @@ class MapView(
         mapOptions = MapOptions(this, tangramMap)
 
         tangramMap.loadSceneFile(mapOptions.mapTheme.toString())
+
     }
 
     private fun onMapReady() {
-        tangramMap.setDoubleTapResponder(zoomOnDoubleTap)
+        tangramMap.setTapResponder(singleTapResponder())
+        tangramMap.setDoubleTapResponder(doubleTapResponder())
+        tangramMap.setMarkerPickListener(markerPickListener())
 
-        tangramMap.setTapResponder(object : TouchInput.TapResponder {
+
+        tangramMap.setSceneLoadListener({ sceneId, sceneError ->
+            Log.e("SCENELOADLISTENER!!!", "")
+        })
+    }
+
+    internal fun singleTapResponder(): TouchInput.TapResponder {
+        return object : TouchInput.TapResponder {
             override fun onSingleTapUp(x: Float, y: Float): Boolean {
+                Log.e("onSingleTapUp!!!", "")
                 return true
             }
 
             override fun onSingleTapConfirmed(x: Float, y: Float): Boolean {
-                async(UI) {
-                    tangramMap.pickMarker(x, y)
-                }
+                tangramMap.pickMarker(x, y)
+                mapClickListener?.onMapClicked(screenPositionToLatLng(PointF(x, y)))
                 return true
             }
-        })
+        }
+    }
 
-        tangramMap.setMarkerPickListener(markerPickListener())
-
-        tangramMap.setDoubleTapResponder(zoomOnDoubleTap)
-
-
+    internal fun doubleTapResponder(): TouchInput.DoubleTapResponder? {
+        return TouchInput.DoubleTapResponder { x, y ->
+            mapDoubleClickListener?.onMapDoubleClicked(screenPositionToLatLng(PointF(x, y)))
+            setZoomOnDoubleTap(x, y)
+            true
+        }
     }
 
     private fun markerPickListener(): (MarkerPickResult?, Float, Float) -> Unit {
@@ -152,14 +164,17 @@ class MapView(
         }
     }
 
-    private val zoomOnDoubleTap = { x: Float, y: Float ->
-        val latLng = tangramMap.screenPositionToLngLat(PointF(x, y))
-        tangramMap.setPositionEased(latLng, ANIMATION_DURATION)
-        tangramMap.setZoomEased(tangramMap.zoom + 1f, ANIMATION_DURATION)
-        true
+    private fun setZoomOnDoubleTap(x: Float, y: Float) {
+        val lngLat = tangramMap.screenPositionToLngLat(PointF(x, y))
+        tangramMap.setPositionEased(lngLat, ANIMATION_DURATION)
+        tangramMap.setZoomEased(tangramMap.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION)
     }
 
-    private val mapfitMap = object : MapfitMap() {
+    internal val mapfitMap = object : MapfitMap() {
+
+        override fun getLayers(): List<Layer> {
+            return layers
+        }
 
         override fun setCenterWithLayer(layer: Layer, duration: Long, paddingPercentage: Float) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -174,11 +189,11 @@ class MapView(
         }
 
         override fun setOnMapClickListener(onMapClickListener: OnMapClickListener) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            mapClickListener = onMapClickListener
         }
 
         override fun setOnMapDoubleClickListener(onMapDoubleClickListener: OnMapDoubleClickListener) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            mapDoubleClickListener = onMapDoubleClickListener
         }
 
         override fun setOnPolylineClickListener(onPolylineClickListener: OnPolylineClickListener) {
@@ -228,21 +243,16 @@ class MapView(
 
         override fun addPolygon(polygon: List<List<LatLng>>): Polygon {
 
-
             val poly = polygon.map {
                 it.map {
                     LngLat(it.lon, it.lat)
                 }
             }
 
-
             val tMarker = tangramMap.addMarker()
             tMarker.setPolygon(com.mapzen.tangram.geometry.Polygon(poly, null))
 
-
-            val mapfitPolygon = Polygon(tMarker)
-
-            return mapfitPolygon
+            return Polygon(tMarker)
         }
 
         override fun addPolyline(): Polyline {
@@ -254,11 +264,15 @@ class MapView(
         }
 
         override fun setCenter(latLng: LatLng, duration: Long) {
-            tangramMap.setPositionEased(
-                    LngLat(latLng.lon, latLng.lat),
-                    duration.toInt(),
-                    MapController.EaseType.CUBIC
-            )
+            if (duration.toInt() == 0) {
+                tangramMap.position = LngLat(latLng.lon, latLng.lat)
+            } else {
+                tangramMap.setPositionEased(
+                        LngLat(latLng.lon, latLng.lat),
+                        duration.toInt(),
+                        MapController.EaseType.CUBIC
+                )
+            }
         }
 
         override fun getCenter(): LatLng {
@@ -271,11 +285,12 @@ class MapView(
         }
 
         override fun addLayer(layer: Layer) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            layer.bindTo(this@MapView)
+            layers.add(layer)
         }
 
         override fun removeLayer(layer: Layer) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            layers.remove(layer)
         }
 
         override fun removeMarker(marker: Marker): Boolean =
@@ -297,14 +312,27 @@ class MapView(
         override fun setZoom(zoomLevel: Float, duration: Int) {
             if (isValidZoomLevel(zoomLevel)) {
                 when (zoomLevel) {
-                    !in 1F..mapOptions.maxZoom -> Log.w("MapView", "Zoom level exceeds maximum level.")
-                    else -> tangramMap.setZoomEased(zoomLevel, duration)
+                    !in 1F..mapOptions.getMaxZoom() -> {
+                        Log.w("MapView", "Zoom level exceeds maximum level.")
+                    }
+                    else -> {
+                        if (duration == 0) {
+                            tangramMap.zoom = (zoomLevel)
+                        } else {
+                            tangramMap.setZoomEased(zoomLevel, duration)
+                        }
+                    }
                 }
             }
         }
     }
 
-    fun setZoomControlVisibility(visible: Boolean) {
+    private fun screenPositionToLatLng(screenPosition: PointF): LatLng {
+        val lngLat = tangramMap.screenPositionToLngLat(PointF(screenPosition.x, screenPosition.y))
+        return LatLng(lngLat.latitude, lngLat.longitude)
+    }
+
+    internal fun setZoomControlVisibility(visible: Boolean) {
         zoomControlsView.visibility = if (visible) View.VISIBLE else View.GONE
     }
 

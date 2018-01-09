@@ -8,6 +8,9 @@ import com.mapfit.mapfitsdk.annotations.Annotation
 class Layer {
 
     private val annotations = mutableListOf<Annotation>()
+    private val maps = mutableListOf<MapView>()
+
+    val isVisible = true
 
     internal fun add(annotation: Annotation) {
         annotations.add(annotation)
@@ -18,6 +21,10 @@ class Layer {
     }
 
     internal fun getAnnotations(): List<Annotation> = annotations
+
+    internal fun bindTo(mapView: MapView) {
+        maps.add(mapView)
+    }
 
 
 }

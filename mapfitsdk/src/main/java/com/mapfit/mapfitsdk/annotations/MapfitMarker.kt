@@ -5,6 +5,7 @@ package com.mapfit.mapfitsdk.annotations
  */
 enum class MapfitMarker(private val iconUrl: String) {
 
+    DARK_DEFAULT("darktheme/default"),
     DARK_ACTIVE("darktheme/active"),
     DARK_AIRPORT("darktheme/airport"),
     DARK_ARTS("darktheme/arts"),
@@ -31,6 +32,7 @@ enum class MapfitMarker(private val iconUrl: String) {
     DARK_RESTAURANT("darktheme/restaurant"),
     DARK_SHOPPING("darktheme/shopping"),
 
+    LIGHT_DEFAULT("lighttheme/default"),
     LIGHT_ACTIVE("lighttheme/active"),
     LIGHT_AIRPORT("lighttheme/airport"),
     LIGHT_ARTS("lighttheme/arts"),

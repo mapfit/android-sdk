@@ -27,7 +27,7 @@ class Marker internal constructor(private val tgMarker: com.mapzen.tangram.Marke
         }
 
     init {
-        setIcon(MapfitMarker.DARK_ACTIVE)
+        setIcon(MapfitMarker.LIGHT_DEFAULT)
         tgMarker?.setStylingFromString(markerOptions.style)
 
     }

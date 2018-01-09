@@ -30,9 +30,20 @@ abstract class MapfitMap {
      *
      * @param layer the map will center accordingly to
      */
-    abstract fun setCenterWithLayer(layer: Layer, duration: Long = 0, paddingPercentage: Float)
+    internal abstract fun setCenterWithLayer(layer: Layer, duration: Long = 0, paddingPercentage: Float)
 
+    /**
+     * Adds the given layer to the map.
+     *
+     * @param layer to add to the map
+     */
+    abstract fun addLayer(layer: Layer)
 
+    internal abstract fun getLayers(): List<Layer>
+
+    /**
+     * @return center of the visible map
+     */
     abstract fun getCenter(): LatLng
 
     /**
@@ -62,8 +73,6 @@ abstract class MapfitMap {
 
     internal abstract fun removePolygon(polygon: Polygon)
 
-    abstract fun addLayer(layer: Layer)
-
     internal abstract fun removeLayer(layer: Layer)
 
     /**
@@ -74,6 +83,9 @@ abstract class MapfitMap {
      */
     abstract fun setZoom(zoomLevel: Float, duration: Int = 0)
 
+    /**
+     * @return current zoom level of the map
+     */
     abstract fun getZoom(): Float
 
     internal abstract fun setBounds(latLngBounds: LatLngBounds)
@@ -90,6 +102,10 @@ abstract class MapfitMap {
 
     internal abstract fun setOnPolygonClickListener(onPolygonClickListener: OnPolygonClickListener)
 
+    /**
+     * MapOptions can be used to changing options for the map. For instance, setting maximum zoom
+     * level or turning zoom controls off.
+     */
     internal abstract fun getMapOptions(): MapOptions
 
     internal abstract fun getDirectionsOptions(): DirectionsOptions

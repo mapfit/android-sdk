@@ -25,6 +25,7 @@ import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*
 import android.support.design.widget.BottomSheetBehavior
 import android.view.View
+import com.mapfit.mapfitsdk.OnMapDoubleClickListener
 import kotlinx.android.synthetic.main.content_coffee_shops.view.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.delay
@@ -73,9 +74,11 @@ class CoffeeShopActivity : AppCompatActivity() {
         map.getMapAsync(object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
                 setupMap(mapfitMap)
-                coffeeShops?.let { addMarkersFromCoffeeShops(it) }
+//                coffeeShops?.let { addMarkersFromCoffeeShops(it) }
 //                mapfitMap.addPolygon(repository.getLowerManhattanPoly())
 //                mapfitMap.addPolyline()
+//
+//                mapfitMap.getMapOptions().setMaxZoom(55.0f)
 
             }
         })
@@ -118,6 +121,7 @@ class CoffeeShopActivity : AppCompatActivity() {
             setZoom(13f, 500)
 //            setOnMarkerClickListener(onMarkerClickListener)
         }
+
     }
 
     private val onMarkerClickListener = object : OnMarkerClickListener {
