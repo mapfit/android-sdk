@@ -3,10 +3,7 @@
 /local.properties
 .idea
 .DS_Store
-.build
 /build
+.build
 /captures
 .externalNativeBuild
-mapfit-gl
-mapfit-gl
-mapfit-gl

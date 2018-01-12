@@ -1,11 +1,13 @@
 package com.mapfit.mapfitsdk
 
-import com.mapfit.mapfitsdk.annotations.AnnotationClickListener
-import com.mapfit.mapfitsdk.annotations.Layer
 import com.mapfit.mapfitsdk.annotations.Marker
+import com.mapfit.mapfitsdk.annotations.Polygon
+import com.mapfit.mapfitsdk.annotations.Polyline
+import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
+import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
+import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener
 import com.mapfit.mapfitsdk.geo.LatLng
-import com.mapzen.tangram.geometry.Polygon
-import com.mapzen.tangram.geometry.Polyline
+import com.mapfit.mapfitsdk.geo.LatLngBounds
 
 
 /**
@@ -17,64 +19,109 @@ abstract class MapfitMap {
 
     /**
      * Sets the center of the map.
+     *
      * @param latLng coordinates
      * @param duration if given, the camera will move with ease.
      */
     abstract fun setCenter(latLng: LatLng, duration: Long = 0)
 
-    abstract fun getCenter(): LatLng
+    /**
+     * Sets the center of the map accordingly to the layer.
+     *
+     * @param layer the map will center accordingly to
+     */
+    internal abstract fun setCenterWithLayer(layer: Layer, duration: Long = 0, paddingPercentage: Float)
 
     /**
-     * Will recenter the map.
-     * @param duration if given, the camera will move with ease.
+     * Adds the given layer to the map.
+     *
+     * @param layer to add to the map
      */
-    abstract fun recenter(duration: Long = 0)
+    abstract fun addLayer(layer: Layer)
 
-    abstract fun addLayer(midtownLayer: Layer)
+    internal abstract fun getLayers(): List<Layer>
 
-    abstract fun removeLayer(layer: Layer)
+    /**
+     * @return center of the visible map
+     */
+    abstract fun getCenter(): LatLng
 
     /**
      * Adds a marker on the default layer.
      *
      * @return marker
      */
-    abstract fun addMarker(latLng: LatLng = LatLng(0.0, 0.0)): Marker
+    internal abstract fun addMarker(latLng: LatLng): Marker
 
-    abstract fun removeMarker(marker: Marker)
-
-    /**
-     * Adds a polygon to default layer.
-     *
-     * @return polygon
-     */
-    abstract fun addPolygon(): Polygon
-
-    abstract fun removePolygon(polygon: Polygon)
+    internal abstract fun removeMarker(marker: Marker): Boolean
 
     /**
      * Adds a polyline to default layer.
      *
      * @return polyline
      */
-    abstract fun addPolyline(): Polyline
+    internal abstract fun addPolyline(): Polyline
 
-    abstract fun removePolyline(polyline: Polyline)
+    internal abstract fun removePolyline(polyline: Polyline)
 
-    abstract fun setMapOptions(mapOptions: MapOptions)
+    /**
+     * Adds a polygon to default layer.
+     *
+     * @return polygon
+     */
+    internal abstract fun addPolygon(polygon: List<List<LatLng>>): Polygon
 
-    abstract fun getMapOptions(): MapOptions
+    internal abstract fun removePolygon(polygon: Polygon)
 
-    abstract fun setZoomLevel(zoomLevel: Float, duration: Long = 0)
+    internal abstract fun removeLayer(layer: Layer)
 
-    abstract fun getZoomLevel(): Float
+    /**
+     * Sets zoom level of the map.
+     *
+     * @param zoomLevel Zoom level for the view
+     * @param duration optional duration for zooming in milliseconds
+     */
+    abstract fun setZoom(zoomLevel: Float, duration: Int = 0)
 
-    abstract fun addMarkers(jsonString: String): MutableList<Marker>
+    /**
+     * @return current zoom level of the map
+     */
+    abstract fun getZoom(): Float
 
-    abstract fun addBuilding(address: String)
+    internal abstract fun setBounds(latLngBounds: LatLngBounds)
 
-    abstract fun addBuilding(latLng: LatLng)
+    internal abstract fun getBounds(): LatLngBounds
 
-    abstract fun setOnAnnotationClickListener(annotationClickListener : AnnotationClickListener)
+    abstract fun setOnMapClickListener(onMapClickListener: OnMapClickListener)
+
+    abstract fun setOnMapDoubleClickListener(onMapDoubleClickListener: OnMapDoubleClickListener)
+
+    internal abstract fun setOnMarkerClickListener(onMarkerClickListener: OnMarkerClickListener)
+
+    internal abstract fun setOnPolylineClickListener(onPolylineClickListener: OnPolylineClickListener)
+
+    internal abstract fun setOnPolygonClickListener(onPolygonClickListener: OnPolygonClickListener)
+
+    /**
+     * MapOptions can be used to changing options for the map. For instance, setting maximum zoom
+     * level or turning zoom controls off.
+     */
+    internal abstract fun getMapOptions(): MapOptions
+
+    internal abstract fun getDirectionsOptions(): DirectionsOptions
+
+    internal abstract fun setTilt(angle: Float)
+
+    internal abstract fun getTilt(): Float
+
+    internal abstract fun setRotation(angle: Float)
+
+    internal abstract fun getRotation(): Float
+
+    /**
+     * Will reCenter the map.
+     * @param duration if given, the camera will move with ease.
+     */
+    internal abstract fun reCenter(duration: Long = 0)
 
 }

@@ -1,1 +1,1 @@
-include ':app', ':mapfitsdk'
+include ':sample', ':mapfitsdk'

@@ -3,39 +3,47 @@ package com.mapfit.mapfitsdk.annotations
 import android.graphics.drawable.Drawable
 import android.support.annotation.DrawableRes
 import android.support.annotation.NonNull
-import com.mapfit.mapfitsdk.annotations.base.AnnotationStyle
-import com.mapfit.mapfitsdk.annotations.base.MapfitMarker
+import android.util.Log
 import com.mapfit.mapfitsdk.geo.LatLng
 import com.mapfit.mapfitsdk.utils.loadImageFromUrl
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 
 /**
  * Created by dogangulcan on 12/19/17.
  */
-class Marker internal constructor(private val marker: com.mapzen.tangram.Marker? = null) : Annotation() {
+class Marker internal constructor(private val tgMarker: com.mapzen.tangram.Marker? = null) : Annotation() {
 
 
-    var mlocation: LatLng = LatLng(0.0, 0.0)
+    var position: LatLng = LatLng(0.0, 0.0)
+
+    var isFlat: Boolean = false
+
+    val markerOptions = MarkerOptions(tgMarker)
+
+    var data: Any? = null
+        set(value) {
+            tgMarker?.userData = value
+            field = value
+        }
 
     init {
-        setIcon(MapfitMarker.DARK_ACTIVE)
-        setStyle(AnnotationStyle.POINT.style)
+        setIcon(MapfitMarker.LIGHT_DEFAULT)
+        tgMarker?.setStylingFromString(markerOptions.style)
+
     }
 
     fun setPosition(latLng: LatLng): Marker {
-        mlocation = latLng
+        position = latLng
         return this
     }
 
     fun setIcon(drawable: Drawable): Marker {
-        marker?.setDrawable(drawable)
+        tgMarker?.setDrawable(drawable)
         return this
     }
 
     fun setIcon(@DrawableRes drawableId: Int): Marker {
-        marker?.setDrawable(drawableId)
+        tgMarker?.setDrawable(drawableId)
         return this
     }
 
@@ -47,32 +55,37 @@ class Marker internal constructor(private val marker: com.mapzen.tangram.Marker?
     /**
      * Set icon with a url consist of a image.
      */
+    @Synchronized
     fun setIcon(imageUrl: String): Marker {
+        Log.i("tgMarker", "setIcon called")
 
         launch {
             val drawable = loadImageFromUrl(imageUrl)
-
-            async(UI) {
-                marker?.setDrawable(drawable.await())
-            }
+            drawable.join()
+            tgMarker?.setDrawable(drawable.await())
         }
 
+
         return this
     }
 
-    fun setStyle(style: String): Marker {
-        marker?.setStylingFromString(style)
-        return this
+    override fun setDrawOder(index: Int) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override fun setZIndex(index: Int) {}
+    override fun setVisible(visible: Boolean) {
+        tgMarker?.isVisible = visible
+    }
 
-    override fun hide() {}
+    override fun getId(): Long? = tgMarker?.markerId
 
-    override fun show() {}
+    internal fun getMarker(): com.mapzen.tangram.Marker? {
+        return tgMarker
+    }
 
-    override fun getId(): Long? = marker?.markerId
-
-    override fun getLocation(): LatLng = mlocation
+    fun setData(data: Any): Marker {
+        this.data = data
+        return this
+    }
 
 }
