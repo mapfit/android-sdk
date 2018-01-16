@@ -76,7 +76,6 @@ class CoffeeShopActivity : AppCompatActivity() {
 //                mapfitMap.addPolyline()
 //
 //                mapfitMap.getMapOptions().setMaxZoom(55.0f)
-
             }
         })
     }
@@ -159,6 +158,16 @@ class CoffeeShopActivity : AppCompatActivity() {
 //
 //        }
 
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        map.onDestroy()
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        map.onLowMemory()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
