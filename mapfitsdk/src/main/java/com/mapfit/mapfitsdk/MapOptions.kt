@@ -2,14 +2,13 @@ package com.mapfit.mapfitsdk
 
 import android.support.annotation.FloatRange
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
-import com.mapzen.tangram.MapController
 
 /**
  * Created by dogangulcan on 12/21/17.
  */
 class MapOptions internal constructor(
         private val mapView: com.mapfit.mapfitsdk.MapView,
-        private val tangramMap: MapController
+        private val mapController: MapController
 ) {
 
     companion object {
@@ -23,7 +22,7 @@ class MapOptions internal constructor(
 
     internal var mapTheme = MapTheme.MAPFIT_DAY
         set(value) {
-            tangramMap.loadSceneFile(value.toString())
+            mapController.loadSceneFile(value.toString())
             field = value
         }
 
@@ -40,7 +39,7 @@ class MapOptions internal constructor(
 
     private var cameraType: CameraType = CameraType.PERSPECTIVE
         set(value) {
-            tangramMap.cameraType = MapController.CameraType.valueOf(value.name)
+            mapController.cameraType = MapController.CameraType.valueOf(value.name)
             field = value
         }
 

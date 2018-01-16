@@ -1,4 +1,4 @@
-package com.mapzen.tangram;
+package com.mapfit.tangram;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -7,8 +7,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Keep;
 
-import com.mapzen.tangram.geometry.Polygon;
-import com.mapzen.tangram.geometry.Polyline;
+import com.mapfit.mapfitsdk.MapController;
+import com.mapfit.tangram.geometry.Polygon;
+import com.mapfit.tangram.geometry.Polyline;
 
 /**
  * Class used to display points, polylines, and bitmaps dynamically on a map. Do not create one of
@@ -25,9 +26,10 @@ public class Marker {
 
     /**
      * Package private constructor for creating a new {@link Marker}.
-     * @param context the context to use for decoding bitmap resources
+     *
+     * @param context  the context to use for decoding bitmap resources
      * @param markerId the marker id
-     * @param map the map this marker is added to
+     * @param map      the map this marker is added to
      */
     Marker(Context context, long markerId, MapController map) {
         this.context = context;
@@ -37,6 +39,7 @@ public class Marker {
 
     /**
      * Custom user data storage.
+     *
      * @param userData The user data to hold in this marker.
      */
     public void setUserData(Object userData) {
@@ -45,6 +48,7 @@ public class Marker {
 
     /**
      * Gets custom user data.
+     *
      * @return The user data held by this marker.
      */
     public Object getUserData() {
@@ -53,6 +57,7 @@ public class Marker {
 
     /**
      * Returns the {@link Marker} id
+     *
      * @return marker id
      */
     public long getMarkerId() {
@@ -63,7 +68,7 @@ public class Marker {
      * Used to style the marker
      * Sets draw rules from a draw group of a scene layer in the scene file, used to load the scene.
      * This draw group must be defined in the loaded scene file.
-     *
+     * <p>
      * <ul>
      * <li>layers.layer_a.layer_b.draw.some_draw_rule</li>
      * <li>layers.layer_c.draw.another_draw_rule</li>
@@ -73,21 +78,21 @@ public class Marker {
      * @return whether the styling was successfully set on the marker.
      */
     public boolean setStylingFromPath(String path) {
-        return map.setMarkerStylingFromPath(markerId, path);
+//        return map.setMarkerStylingFromPath(markerId, path);
+        return false;
     }
 
     /**
      * Used to style the marker
      * Sets the styling to be used to display either a point, polyline, or bitmap for this marker.
      * If the marker is going to be used to display a bitmap, a 'points' style must be set.
-     *
+     * <p>
      * <ul>
      * <li>{ style: 'points', color: 'white', size: [50px, 50px], order: 2000, collide: false }</li>
      * <li>{ style: 'lines', color: '#06a6d4', width: 5px, order: 2000 }</li>
      * <li>{ style: 'polygons', color: '#06a6d4', width: 5px, order: 2000 }</li>
      * </ul>
      *
-     * @param styleStr the style string
      * @return whether the style was successfully set
      */
     public boolean setStylingFromString(String styleString) {
@@ -96,7 +101,7 @@ public class Marker {
 
     /**
      * Sets the drawable resource id to be used to load a bitmap. When displaying a drawable, a
-     * 'points' style must also be set on the marker (see {@link Marker#setStyling(String)}.
+     * 'points' style must also be set on the marker (see {@link Marker#(String)}.
      *
      * @param drawableId the drawable resource id
      * @return whether the drawable's bitmap was successfully set
@@ -110,7 +115,7 @@ public class Marker {
 
     /**
      * Sets the drawable to be used to load a bitmap. When displaying a drawable, a
-     * 'points' style must also be set on the marker (see {@link Marker#setStyling(String)}.
+     * 'points' style must also be set on the marker (see {@link Marker#(String)}.
      *
      * @param drawable the drawable
      * @return whether the drawable's bitmap was successfully set
@@ -126,18 +131,22 @@ public class Marker {
 
     /**
      * Sets the coordinate location, where the marker should be displayed.
+     *
      * @param point lat/lng location
      * @return whether the point was successfully set
      */
     public boolean setPoint(LngLat point) {
-        return map.setMarkerPoint(markerId, point.longitude, point.latitude);
+//        return map.setMarkerPoint(markerId, point.longitude, point.latitude);
+        return false;
+
     }
 
     /**
      * Sets the coordinate location, where the marker should be displayed with animation.
-     * @param point lat/lng location
+     *
+     * @param point    lat/lng location
      * @param duration animation duration in milliseconds
-     * @param ease animation type
+     * @param ease     animation type
      * @return whether the point was successfully set
      */
     public boolean setPointEased(LngLat point, int duration, MapController.EaseType ease) {
@@ -149,7 +158,7 @@ public class Marker {
 
     /**
      * Sets the polyline to be displayed. When using this method, a 'polyline' style must also be
-     * set. See {@link Marker#setStyling(String)}.
+     *
      * @param polyline the polyline to display
      * @return whether the polyline was successfully set
      */
@@ -157,13 +166,16 @@ public class Marker {
         if (polyline == null) {
             return false;
         }
-        return map.setMarkerPolyline(markerId, polyline.getCoordinateArray(),
-                polyline.getCoordinateArray().length/2);
+//        return map.setMarkerPolyline(markerId, polyline.getCoordinateArray(),
+//                polyline.getCoordinateArray().length/2);
+        return false;
+
     }
 
     /**
      * Sets the polygon to be displayed. When using this method, a 'polygon' style must also be
-     * set. See {@link Marker#setStyling(String)}.
+     * set. See {@link Marker#(String)}.
+     *
      * @param polygon the polygon to display
      * @return whether the polygon was successfully set
      */
@@ -171,12 +183,15 @@ public class Marker {
         if (polygon == null) {
             return false;
         }
-        return map.setMarkerPolygon(markerId, polygon.getCoordinateArray(),
-                polygon.getRingArray(), polygon.getRingArray().length);
+//        return map.setMarkerPolygon(markerId, polygon.getCoordinateArray(),
+//                polygon.getRingArray(), polygon.getRingArray().length);
+//
+        return false;
     }
 
     /**
      * Changes the marker's visibility on the map.
+     *
      * @param visible whether or not the marker should be visible
      * @return whether the marker's visibility was successfully set
      */
@@ -190,6 +205,7 @@ public class Marker {
 
     /**
      * Sets the draw order for the marker to be used in z-order collisions.
+     *
      * @param drawOrder the draw order to set
      * @return whether the marker's draw order was successfully set
      */
@@ -199,6 +215,7 @@ public class Marker {
 
     /**
      * Returns whether or not the marker is visible on the map.
+     *
      * @return whether the marker is visible on the map
      */
     public boolean isVisible() {

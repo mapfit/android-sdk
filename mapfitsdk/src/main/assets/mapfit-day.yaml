@@ -329,7 +329,7 @@ global:
     major_road2a:               white
     major_road2b:               white
     major_road3:                white
-    major_road4:                [.945,.574,.289.1] # low zoom
+    major_road4:                [.945,.574,.289,1] # low zoom
     major_road5:                [.988,.945,.914,1] # medium zoom
     major_road6:                [.999,.999,.999,1] # high zoom (>17)
     major_casing1:              '#E1E1E1'

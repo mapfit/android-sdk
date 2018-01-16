@@ -1,4 +1,4 @@
-package com.mapzen.tangram;
+package com.mapfit.tangram;
 
 import android.support.annotation.Keep;
 

@@ -14,9 +14,6 @@ import com.mapfit.mapfitdemo.module.coffeeshop.data.Repository
 import com.mapfit.mapfitdemo.ui.adapter.FilterAdapter
 import com.mapfit.mapfitdemo.ui.adapter.FilterType
 import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener
-import com.mapfit.mapfitsdk.Layer
-import com.mapfit.mapfitsdk.MapfitMap
-import com.mapfit.mapfitsdk.OnMapReadyCallback
 import com.mapfit.mapfitsdk.annotations.*
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
 import com.mapfit.mapfitsdk.geo.LatLng
@@ -25,7 +22,7 @@ import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*
 import android.support.design.widget.BottomSheetBehavior
 import android.view.View
-import com.mapfit.mapfitsdk.OnMapDoubleClickListener
+import com.mapfit.mapfitsdk.*
 import kotlinx.android.synthetic.main.content_coffee_shops.view.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.delay

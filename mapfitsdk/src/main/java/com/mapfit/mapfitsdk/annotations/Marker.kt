@@ -1,9 +1,13 @@
 package com.mapfit.mapfitsdk.annotations
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.support.annotation.DrawableRes
 import android.support.annotation.NonNull
-import android.util.Log
+import com.mapfit.mapfitsdk.MapController
 import com.mapfit.mapfitsdk.geo.LatLng
 import com.mapfit.mapfitsdk.utils.loadImageFromUrl
 import kotlinx.coroutines.experimental.launch
@@ -11,25 +15,26 @@ import kotlinx.coroutines.experimental.launch
 /**
  * Created by dogangulcan on 12/19/17.
  */
-class Marker internal constructor(private val tgMarker: com.mapzen.tangram.Marker? = null) : Annotation() {
+class Marker internal constructor(
+        val context: Context,
+        var markerId: Long,
+        val mapController: MapController
+) : Annotation() {
 
 
     var position: LatLng = LatLng(0.0, 0.0)
 
     var isFlat: Boolean = false
 
-    val markerOptions = MarkerOptions(tgMarker)
+    var isMarkerVisible: Boolean = true
+
+
+    val markerOptions = MarkerOptions(markerId, mapController)
 
     var data: Any? = null
-        set(value) {
-            tgMarker?.userData = value
-            field = value
-        }
 
     init {
         setIcon(MapfitMarker.LIGHT_DEFAULT)
-        tgMarker?.setStylingFromString(markerOptions.style)
-
     }
 
     fun setPosition(latLng: LatLng): Marker {
@@ -37,13 +42,33 @@ class Marker internal constructor(private val tgMarker: com.mapzen.tangram.Marke
         return this
     }
 
+    private fun setPositionEased(latLng: LatLng, duration: Int): Marker {
+        mapController.setMarkerPointEased(
+                markerId,
+                latLng.lon,
+                latLng.lat,
+                duration,
+                MapController.EaseType.CUBIC
+        )
+        position = latLng
+        return this
+    }
+
     fun setIcon(drawable: Drawable): Marker {
-        tgMarker?.setDrawable(drawable)
+        val density = context.resources.displayMetrics.densityDpi
+        val bitmapDrawable = drawable as BitmapDrawable
+        bitmapDrawable.setTargetDensity(density)
+        val bitmap = bitmapDrawable.bitmap
+        bitmap.density = density
+        setBitmap(bitmap)
         return this
     }
 
     fun setIcon(@DrawableRes drawableId: Int): Marker {
-        tgMarker?.setDrawable(drawableId)
+        val options = BitmapFactory.Options()
+        options.inTargetDensity = context.resources.displayMetrics.densityDpi
+        val bitmap = BitmapFactory.decodeResource(context.resources, drawableId, options)
+        setBitmap(bitmap)
         return this
     }
 
@@ -55,37 +80,60 @@ class Marker internal constructor(private val tgMarker: com.mapzen.tangram.Marke
     /**
      * Set icon with a url consist of a image.
      */
-    @Synchronized
     fun setIcon(imageUrl: String): Marker {
-        Log.i("tgMarker", "setIcon called")
-
         launch {
             val drawable = loadImageFromUrl(imageUrl)
-            drawable.join()
-            tgMarker?.setDrawable(drawable.await())
+            drawable.await()?.let { setIcon(it) }
         }
-
 
         return this
     }
 
     override fun setDrawOder(index: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        mapController.setMarkerDrawOrder(markerId, index)
     }
 
-    override fun setVisible(visible: Boolean) {
-        tgMarker?.isVisible = visible
-    }
-
-    override fun getId(): Long? = tgMarker?.markerId
-
-    internal fun getMarker(): com.mapzen.tangram.Marker? {
-        return tgMarker
-    }
+    override fun getId(): Long? = markerId
 
     fun setData(data: Any): Marker {
         this.data = data
         return this
+    }
+
+    private fun setBitmap(bitmap: Bitmap): Boolean {
+        val density = context.resources.displayMetrics.densityDpi
+        val width = bitmap.getScaledWidth(density)
+        val height = bitmap.getScaledHeight(density)
+
+        val argb = IntArray(width * height)
+        bitmap.getPixels(argb, 0, width, 0, 0, width, height)
+
+        val abgr = IntArray(width * height)
+        var row: Int
+        var col: Int
+        for (i in argb.indices) {
+            col = i % width
+            row = i / width
+            val pix = argb[i]
+            val pb = pix shr 16 and 0xff
+            val pr = pix shl 16 and 0x00ff0000
+            val pix1 = pix and -0xff0100 or pr or pb
+            val flippedIndex = (height - 1 - row) * width + col
+            abgr[flippedIndex] = pix1
+        }
+
+        return mapController.setMarkerBitmap(markerId, width, height, abgr)
+    }
+
+    fun invalidate() {
+        this.markerId = 0
+    }
+
+    override fun setVisible(visible: Boolean) {
+        val success = mapController.setMarkerVisible(markerId, visible)
+        if (success) {
+            isMarkerVisible = visible
+        }
     }
 
 }

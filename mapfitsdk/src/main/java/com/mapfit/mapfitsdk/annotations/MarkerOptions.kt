@@ -1,13 +1,21 @@
 package com.mapfit.mapfitsdk.annotations
 
-import com.mapzen.tangram.Marker
+import com.mapfit.mapfitsdk.MapController
+import com.mapfit.tangram.Marker
 
 /**
  * Defines marker options for [Marker]
  *
  * Created by dogangulcan on 1/3/18.
  */
-class MarkerOptions(private val tgMarker: Marker?) {
+class MarkerOptions internal constructor(
+        private var markerId: Long,
+        private val mapController: MapController
+) {
+
+    init {
+        updateStyle()
+    }
 
     /**
      * Height of the marker in pixels.
@@ -15,31 +23,35 @@ class MarkerOptions(private val tgMarker: Marker?) {
     var height = 50
         set(value) {
             field = value
-            updateStype()
+            updateStyle()
         }
 
     var width = 50
         set(value) {
             field = value
-            updateStype()
+            updateStyle()
         }
 
     var drawOrder = 2000
         set(value) {
             field = value
-            updateStype()
+            updateStyle()
         }
 
     var color = "white"
         set(value) {
             field = value
-            updateStype()
+            updateStyle()
         }
 
     internal var style = "{ style: 'points', anchor: top, color: $color, size: [${height}px, ${width}px], order: $drawOrder, interactive: true, collide: false }"
+        set(value) {
+            field = value
+            updateStyle()
+        }
 
-    private fun updateStype() {
-        tgMarker?.setStylingFromString(style)
+    private fun updateStyle() {
+        mapController.setMarkerStylingFromString(markerId, style)
     }
 
 }

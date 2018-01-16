@@ -1,15 +1,14 @@
-package com.mapzen.tangram;
+package com.mapfit.tangram;
 
 import android.support.annotation.Keep;
 
-import com.mapzen.tangram.MapController.Error;
+import com.mapfit.mapfitsdk.MapController.Error;
 
 /**
  * {@code SceneError} Holds an error status and its associated scene updated
  */
 @Keep
 public class SceneError {
-
 
     private SceneUpdate sceneUpdate;
     private Error error;

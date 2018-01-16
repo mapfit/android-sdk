@@ -1,6 +1,6 @@
-package com.mapzen.tangram.geometry;
+package com.mapfit.tangram.geometry;
 
-import com.mapzen.tangram.LngLat;
+import com.mapfit.tangram.LngLat;
 
 import java.util.Map;
 

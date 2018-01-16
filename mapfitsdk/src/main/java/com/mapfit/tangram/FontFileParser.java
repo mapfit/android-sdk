@@ -1,4 +1,4 @@
-package com.mapzen.tangram;
+package com.mapfit.tangram;
 
 import android.util.Xml;
 
@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-class FontFileParser {
+public class FontFileParser {
 
     private Map<String, String> fontDict = new HashMap<String, String>();
     private Map<Integer, ArrayList<String>> fallbackFontDict = new HashMap<Integer, ArrayList<String>>();
@@ -100,7 +100,9 @@ class FontFileParser {
                 }
 
                 // fallback_fonts.xml entries have no names
-                if (namesets.isEmpty()) { namesets.add("sans-serif"); }
+                if (namesets.isEmpty()) {
+                    namesets.add("sans-serif");
+                }
 
                 for (String filename : filesets) {
                     for (String fontname : namesets) {
@@ -161,7 +163,9 @@ class FontFileParser {
                         String tag = parser.getName();
                         if ("font".equals(tag)) {
                             String weightStr = parser.getAttributeValue(null, "weight");
-                            if (weightStr != null) { familyWeights.add(weightStr); }
+                            if (weightStr != null) {
+                                familyWeights.add(weightStr);
+                            }
                             weightStr = (weightStr == null) ? "400" : weightStr;
 
                             String filename = parser.nextText();
@@ -295,9 +299,9 @@ class FontFileParser {
             } else {
                 processDocument(parser);
             }
-        } catch(XmlPullParserException e) {
+        } catch (XmlPullParserException e) {
             e.printStackTrace();
-        } catch(IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -328,7 +332,7 @@ class FontFileParser {
         String fallback = "";
 
         while (it.hasNext()) {
-            Map.Entry<Integer, ArrayList<String>> pair = (Map.Entry)it.next();
+            Map.Entry<Integer, ArrayList<String>> pair = (Map.Entry) it.next();
             Integer diff = Math.abs(pair.getKey() - weightHint);
 
             if (diff < diffWeight) {

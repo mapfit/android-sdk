@@ -1,9 +1,10 @@
-package com.mapzen.tangram;
+package com.mapfit.mapfitsdk;
 
-import com.mapzen.tangram.geometry.Geometry;
-import com.mapzen.tangram.geometry.Point;
-import com.mapzen.tangram.geometry.Polygon;
-import com.mapzen.tangram.geometry.Polyline;
+import com.mapfit.tangram.LngLat;
+import com.mapfit.tangram.geometry.Geometry;
+import com.mapfit.tangram.geometry.Point;
+import com.mapfit.tangram.geometry.Polygon;
+import com.mapfit.tangram.geometry.Polyline;
 
 import java.util.List;
 import java.util.Map;

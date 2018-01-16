@@ -1,8 +1,8 @@
-package com.mapzen.tangram.geometry;
+package com.mapfit.tangram.geometry;
 
 import android.support.annotation.Keep;
 
-import com.mapzen.tangram.LngLat;
+import com.mapfit.tangram.LngLat;
 
 import java.util.List;
 import java.util.Map;
