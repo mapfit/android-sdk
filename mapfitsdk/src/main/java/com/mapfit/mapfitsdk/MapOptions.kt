@@ -1,6 +1,7 @@
 package com.mapfit.mapfitsdk
 
 import android.support.annotation.FloatRange
+import android.support.v7.content.res.AppCompatResources
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
 
 /**
@@ -22,14 +23,21 @@ class MapOptions internal constructor(
 
     internal var mapTheme = MapTheme.MAPFIT_DAY
         set(value) {
-            mapController.loadSceneFile(value.toString())
-            val attributionImage = when (value) {
-                MapTheme.MAPFIT_DAY -> R.drawable.ic_watermark_light
-                MapTheme.MAPFIT_NIGHT -> R.drawable.ic_watermark_dark
+            if (value != field) {
+                updateScene(value)
+                field = value
             }
-            mapView.attributionImage.setImageResource(attributionImage)
-            field = value
         }
+
+    private fun updateScene(value: MapTheme) {
+        mapController.loadSceneFile(value.toString())
+        val attributionImage = when (value) {
+            MapTheme.MAPFIT_DAY -> R.drawable.ic_watermark_light
+            MapTheme.MAPFIT_NIGHT -> R.drawable.ic_watermark_dark
+        }
+//        val drawable = AppCompatResources.getDrawable(mapView.context, attributionImage)
+        mapView.attributionImage.setImageResource(attributionImage)
+    }
 
     private var isCompassVisible = false
         set(value) {
@@ -73,7 +81,6 @@ class MapOptions internal constructor(
             TODO()
         }
 
-
     /**
      * @param zoomLevel desired maximum zoom level
      */
@@ -95,5 +102,9 @@ class MapOptions internal constructor(
         PERSPECTIVE,
         ISOMETRIC,
         FLAT
+    }
+
+    internal fun loadDefaultTheme() {
+        updateScene(MapTheme.MAPFIT_DAY)
     }
 }

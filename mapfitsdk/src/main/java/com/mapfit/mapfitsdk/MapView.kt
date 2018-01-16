@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.PointF
 import android.net.Uri
 import android.opengl.GLSurfaceView
+import android.support.v7.app.AppCompatDelegate
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
@@ -50,8 +51,14 @@ class MapView(
         LayoutInflater.from(context)
                 .inflate(R.layout.overlay_map_controls, this, false)
     }
-    internal lateinit var attributionImage: ImageView
 
+    internal val attributionImage: ImageView by lazy {
+        controlsView.findViewById<ImageView>(R.id.imgAttribution)
+    }
+
+    private val zoomControlsView: LinearLayout by lazy {
+        controlsView.findViewById<LinearLayout>(R.id.zoomControls)
+    }
 
     private val annotationLayer = Layer()
     internal val layers = mutableListOf(annotationLayer)
@@ -73,10 +80,9 @@ class MapView(
     private var mapClickListener: OnMapClickListener? = null
     private var mapDoubleClickListener: OnMapDoubleClickListener? = null
 
-    private lateinit var zoomControlsView: LinearLayout
 
     init {
-
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
     }
 
     fun getMapAsync(@NotNull onMapReadyCallback: OnMapReadyCallback) {
@@ -84,15 +90,15 @@ class MapView(
         if (::mapController.isInitialized) {
             onMapReadyCallback.onMapReady(mapfitMap)
         }
+
         initMapController(onMapReadyCallback)
         initUiControls()
+
+
     }
 
     private fun initUiControls() {
         addView(controlsView)
-
-        zoomControlsView = controlsView.findViewById(R.id.zoomControls)
-        attributionImage = controlsView.findViewById(R.id.imgAttribution)
         attributionImage.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://mapfit.com/"))
 
@@ -124,7 +130,8 @@ class MapView(
             })
 
             mapOptions = MapOptions(this@MapView, this)
-            loadSceneFile(mapOptions.mapTheme.toString())
+            mapOptions.loadDefaultTheme()
+
         }
     }
 
