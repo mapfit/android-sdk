@@ -6,7 +6,7 @@ import android.support.test.annotation.UiThreadTest
 import android.support.test.runner.AndroidJUnit4
 import com.mapfit.mapfitsdk.MapOptions.Companion.MAP_MAX_ZOOM
 import com.mapfit.mapfitsdk.MapOptions.Companion.MAP_MIN_ZOOM
-import com.mapfit.mapfitsdk.geo.LatLng
+import com.mapfit.mapfitsdk.geometry.LatLng
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test

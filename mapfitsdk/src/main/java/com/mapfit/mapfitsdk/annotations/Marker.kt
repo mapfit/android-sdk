@@ -8,7 +8,7 @@ import android.graphics.drawable.Drawable
 import android.support.annotation.DrawableRes
 import android.support.annotation.NonNull
 import com.mapfit.mapfitsdk.MapController
-import com.mapfit.mapfitsdk.geo.LatLng
+import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.utils.loadImageFromUrl
 import kotlinx.coroutines.experimental.launch
 

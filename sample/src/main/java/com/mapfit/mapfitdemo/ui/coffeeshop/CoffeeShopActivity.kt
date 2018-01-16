@@ -16,7 +16,7 @@ import com.mapfit.mapfitdemo.ui.adapter.FilterType
 import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener
 import com.mapfit.mapfitsdk.annotations.*
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
-import com.mapfit.mapfitsdk.geo.LatLng
+import com.mapfit.mapfitsdk.geometry.LatLng
 import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*

@@ -1,4 +1,4 @@
-package com.mapfit.mapfitsdk.geo
+package com.mapfit.mapfitsdk.geometry
 
 /**
  * Created by dogangulcan on 1/4/18.

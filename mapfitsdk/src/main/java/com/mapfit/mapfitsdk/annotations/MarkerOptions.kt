@@ -1,7 +1,6 @@
 package com.mapfit.mapfitsdk.annotations
 
 import com.mapfit.mapfitsdk.MapController
-import com.mapfit.tangram.Marker
 
 /**
  * Defines marker options for [Marker]

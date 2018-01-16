@@ -10,10 +10,10 @@ import android.support.annotation.Keep;
 import android.util.DisplayMetrics;
 
 import com.mapfit.mapfitsdk.annotations.Marker;
+import com.mapfit.mapfitsdk.geometry.LatLng;
 import com.mapfit.tangram.FontFileParser;
 import com.mapfit.tangram.HttpHandler;
 import com.mapfit.tangram.LabelPickResult;
-import com.mapfit.tangram.LngLat;
 import com.mapfit.tangram.MarkerPickResult;
 import com.mapfit.tangram.SceneError;
 import com.mapfit.tangram.SceneUpdate;
@@ -260,10 +260,10 @@ public class MapController implements Renderer {
         displayMetrics = mapView.getContext().getResources().getDisplayMetrics();
         assetManager = mapView.getContext().getAssets();
 
-        fontFileParser = new FontFileParser();
+//        fontFileParser = new FontFileParser();
 
         // Parse font file description
-        fontFileParser.parse();
+//        fontFileParser.parse();
 
         mapPointer = nativeInit(this, assetManager);
         if (mapPointer <= 0) {
@@ -435,9 +435,9 @@ public class MapController implements Renderer {
      *
      * @param position LngLat of the position to set
      */
-    public void setPosition(LngLat position) {
+    public void setPosition(LatLng position) {
         checkPointer(mapPointer);
-        nativeSetPosition(mapPointer, position.longitude, position.latitude);
+        nativeSetPosition(mapPointer, position.getLon(), position.getLat());
     }
 
     /**
@@ -446,7 +446,7 @@ public class MapController implements Renderer {
      * @param position LngLat of the position to set
      * @param duration Time in milliseconds to ease to the given position
      */
-    public void setPositionEased(LngLat position, int duration) {
+    public void setPositionEased(LatLng position, int duration) {
         setPositionEased(position, duration, DEFAULT_EASE_TYPE);
     }
 
@@ -457,10 +457,10 @@ public class MapController implements Renderer {
      * @param duration Time in milliseconds to ease to the given position
      * @param ease     Type of easing to use
      */
-    public void setPositionEased(LngLat position, int duration, EaseType ease) {
+    public void setPositionEased(LatLng position, int duration, EaseType ease) {
         float seconds = duration / 1000.f;
         checkPointer(mapPointer);
-        nativeSetPositionEased(mapPointer, position.longitude, position.latitude, seconds, ease.ordinal());
+        nativeSetPositionEased(mapPointer, position.getLon(), position.getLat(), seconds, ease.ordinal());
     }
 
     /**
@@ -468,8 +468,8 @@ public class MapController implements Renderer {
      *
      * @return The current map position in a LngLat
      */
-    public LngLat getPosition() {
-        return getPosition(new LngLat());
+    public LatLng getPosition() {
+        return getPosition(new LatLng());
     }
 
     /**
@@ -478,11 +478,13 @@ public class MapController implements Renderer {
      * @param out LngLat to be reused as the output
      * @return LngLat of the center of the map view
      */
-    public LngLat getPosition(LngLat out) {
+    public LatLng getPosition(LatLng out) {
         double[] tmp = {0, 0};
         checkPointer(mapPointer);
         nativeGetPosition(mapPointer, tmp);
-        return out.set(tmp[0], tmp[1]);
+        out.setLat(tmp[1]);
+        out.setLon(tmp[0]);
+        return out;
     }
 
     /**
@@ -641,11 +643,11 @@ public class MapController implements Renderer {
      * @return LngLat corresponding to the given point, or null if the screen position
      * does not intersect a geographic location (this can happen at high tilt angles).
      */
-    public LngLat screenPositionToLngLat(PointF screenPosition) {
+    public LatLng screenPositionToLatLng(PointF screenPosition) {
         double[] tmp = {screenPosition.x, screenPosition.y};
         checkPointer(mapPointer);
         if (nativeScreenPositionToLngLat(mapPointer, tmp)) {
-            return new LngLat(tmp[0], tmp[1]);
+            return new LatLng(tmp[1], tmp[0]);
         }
         return null;
     }
@@ -657,8 +659,8 @@ public class MapController implements Renderer {
      * @return Position in pixels from the top-left corner of the map area (the point
      * may not lie within the viewable screen area)
      */
-    public PointF lngLatToScreenPosition(LngLat lngLat) {
-        double[] tmp = {lngLat.longitude, lngLat.latitude};
+    public PointF lngLatToScreenPosition(LatLng lngLat) {
+        double[] tmp = {lngLat.getLon(), lngLat.getLat()};
         checkPointer(mapPointer);
         nativeLngLatToScreenPosition(mapPointer, tmp);
         return new PointF((float) tmp[0], (float) tmp[1]);
@@ -1500,16 +1502,16 @@ public class MapController implements Renderer {
     @Keep
     String getFontFilePath(String key) {
 
-        return fontFileParser.getFontFile(key);
-//        return "";
+//        return fontFileParser.getFontFile(key);
+        return "";
 
     }
 
     @Keep
     String getFontFallbackFilePath(int importance, int weightHint) {
 
-        return fontFileParser.getFontFallback(importance, weightHint);
-//        return "";
+//        return fontFileParser.getFontFallback(importance, weightHint);
+        return "";
     }
 
 }

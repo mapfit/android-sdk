@@ -32,8 +32,8 @@ import okhttp3.TlsVersion;
  */
 public class HttpHandler {
 
-    protected OkHttpClient okClient;
-    protected CachePolicy cachePolicy;
+    private OkHttpClient okClient;
+    private CachePolicy cachePolicy;
 
     /**
      * Enables TLS v1.2 when creating SSLSockets.
@@ -49,7 +49,7 @@ public class HttpHandler {
 
         final SSLSocketFactory delegate;
 
-        public Tls12SocketFactory(SSLSocketFactory base) {
+        Tls12SocketFactory(SSLSocketFactory base) {
             this.delegate = base;
         }
 
@@ -106,8 +106,9 @@ public class HttpHandler {
     /**
      * Construct an {@code HttpHandler} with cache.
      * Cache map data in a directory with a specified size limit
+     *
      * @param directory Directory in which map data will be cached
-     * @param maxSize Maximum size of data to cache, in bytes
+     * @param maxSize   Maximum size of data to cache, in bytes
      */
     public HttpHandler(File directory, long maxSize) {
         this(directory, maxSize, null);
@@ -116,9 +117,10 @@ public class HttpHandler {
     /**
      * Construct an {@code HttpHandler} with cache.
      * Cache map data in a directory with a specified size limit
+     *
      * @param directory Directory in which map data will be cached
-     * @param maxSize Maximum size of data to cache, in bytes
-     * @param policy Cache policy to apply on requests
+     * @param maxSize   Maximum size of data to cache, in bytes
+     * @param policy    Cache policy to apply on requests
      */
     public HttpHandler(File directory, long maxSize, CachePolicy policy) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
@@ -169,8 +171,9 @@ public class HttpHandler {
 
     /**
      * Begin an HTTP request
-     * @param url URL for the requested resource
-     * @param cb Callback for handling request result
+     *
+     * @param url           URL for the requested resource
+     * @param cb            Callback for handling request result
      * @param requestHandle the identifier for the request
      * @return The Okhttp3.Call enqueued for execution
      */
@@ -186,24 +189,25 @@ public class HttpHandler {
         call.enqueue(cb);
     }
 
-   /**
-    * Cancel an HTTP request
-    * @param requestHandle the identifier for the request to be cancelled
-    */
-   public void onCancel(long requestHandle) {
-       // check and cancel running call
-       for (Call runningCall : okClient.dispatcher().runningCalls()) {
-           if (runningCall.request().tag().equals(requestHandle)) {
-               runningCall.cancel();
-           }
-       }
+    /**
+     * Cancel an HTTP request
+     *
+     * @param requestHandle the identifier for the request to be cancelled
+     */
+    public void onCancel(long requestHandle) {
+        // check and cancel running call
+        for (Call runningCall : okClient.dispatcher().runningCalls()) {
+            if (runningCall.request().tag().equals(requestHandle)) {
+                runningCall.cancel();
+            }
+        }
 
-       // check and cancel queued call
-       for (Call queuedCall : okClient.dispatcher().queuedCalls()) {
-           if (queuedCall.request().tag().equals(requestHandle)) {
-               queuedCall.cancel();
-           }
-       }
-   }
+        // check and cancel queued call
+        for (Call queuedCall : okClient.dispatcher().queuedCalls()) {
+            if (queuedCall.request().tag().equals(requestHandle)) {
+                queuedCall.cancel();
+            }
+        }
+    }
 
 }

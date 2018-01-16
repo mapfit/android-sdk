@@ -23,6 +23,11 @@ class MapOptions internal constructor(
     internal var mapTheme = MapTheme.MAPFIT_DAY
         set(value) {
             mapController.loadSceneFile(value.toString())
+            val attributionImage = when (value) {
+                MapTheme.MAPFIT_DAY -> R.drawable.ic_watermark_light
+                MapTheme.MAPFIT_NIGHT -> R.drawable.ic_watermark_dark
+            }
+            mapView.attributionImage.setImageResource(attributionImage)
             field = value
         }
 

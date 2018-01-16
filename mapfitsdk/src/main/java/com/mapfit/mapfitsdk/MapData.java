@@ -1,10 +1,8 @@
 package com.mapfit.mapfitsdk;
 
-import com.mapfit.tangram.LngLat;
+import com.mapfit.mapfitsdk.geometry.LatLng;
 import com.mapfit.tangram.geometry.Geometry;
 import com.mapfit.tangram.geometry.Point;
-import com.mapfit.tangram.geometry.Polygon;
-import com.mapfit.tangram.geometry.Polyline;
 
 import java.util.List;
 import java.util.Map;
@@ -67,8 +65,8 @@ public class MapData {
      * the scene file used by the map; may be null.
      * @return This object, for chaining.
      */
-    public MapData addPoint(LngLat point, Map<String, String> properties) {
-        addFeature(new Point(point, properties));
+    public MapData addPoint(LatLng point, Map<String, String> properties) {
+//        addFeature(new Point(point, properties));
         return this;
     }
 
@@ -79,8 +77,8 @@ public class MapData {
      * the scene file used by the map; may be null.
      * @return This object, for chaining.
      */
-    public MapData addPolyline(List<LngLat> polyline, Map<String, String> properties) {
-        addFeature(new Polyline(polyline, properties));
+    public MapData addPolyline(List<LatLng> polyline, Map<String, String> properties) {
+//        addFeature(new Polyline(polyline, properties));
         return this;
     }
 
@@ -94,8 +92,8 @@ public class MapData {
      * the scene file used by the map; may be null.
      * @return This object, for chaining.
      */
-    public MapData addPolygon(List<List<LngLat>> polygon, Map<String, String> properties) {
-        addFeature(new Polygon(polygon, properties));
+    public MapData addPolygon(List<List<LatLng>> polygon, Map<String, String> properties) {
+//        addFeature(new Polygon(polygon, properties));
         return this;
     }
 

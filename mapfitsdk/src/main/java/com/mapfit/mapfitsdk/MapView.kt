@@ -19,11 +19,10 @@ import com.mapfit.mapfitsdk.annotations.Polyline
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener
-import com.mapfit.mapfitsdk.geo.LatLng
-import com.mapfit.mapfitsdk.geo.LatLngBounds
+import com.mapfit.mapfitsdk.geometry.LatLng
+import com.mapfit.mapfitsdk.geometry.LatLngBounds
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
 import com.mapfit.tangram.ConfigChooser
-import com.mapfit.tangram.LngLat
 import com.mapfit.tangram.MarkerPickResult
 import com.mapfit.tangram.TouchInput
 import org.jetbrains.annotations.NotNull
@@ -45,11 +44,14 @@ class MapView(
     internal lateinit var mapController: MapController
     private lateinit var mapOptions: MapOptions
 
+
     // Views
     private val controlsView: View by lazy {
         LayoutInflater.from(context)
                 .inflate(R.layout.overlay_map_controls, this, false)
     }
+    internal lateinit var attributionImage: ImageView
+
 
     private val annotationLayer = Layer()
     internal val layers = mutableListOf(annotationLayer)
@@ -90,7 +92,8 @@ class MapView(
         addView(controlsView)
 
         zoomControlsView = controlsView.findViewById(R.id.zoomControls)
-        controlsView.findViewById<View>(R.id.imgAttribution).setOnClickListener {
+        attributionImage = controlsView.findViewById(R.id.imgAttribution)
+        attributionImage.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://mapfit.com/"))
 
             if (intent.resolveActivity(context.packageManager) != null) {
@@ -134,7 +137,7 @@ class MapView(
 
             override fun onSingleTapConfirmed(x: Float, y: Float): Boolean {
                 mapController.pickMarker(x, y)
-                mapClickListener?.onMapClicked(screenPositionToLatLng(PointF(x, y)))
+                mapClickListener?.onMapClicked(mapController.screenPositionToLatLng(PointF(x, y)))
                 return true
             }
         }
@@ -142,7 +145,7 @@ class MapView(
 
     internal fun doubleTapResponder(): TouchInput.DoubleTapResponder? {
         return TouchInput.DoubleTapResponder { x, y ->
-            mapDoubleClickListener?.onMapDoubleClicked(screenPositionToLatLng(PointF(x, y)))
+            mapDoubleClickListener?.onMapDoubleClicked(mapController.screenPositionToLatLng(PointF(x, y)))
             setZoomOnDoubleTap(x, y)
             true
         }
@@ -171,7 +174,7 @@ class MapView(
     }
 
     private fun setZoomOnDoubleTap(x: Float, y: Float) {
-        val lngLat = mapController.screenPositionToLngLat(PointF(x, y))
+        val lngLat = mapController.screenPositionToLatLng(PointF(x, y))
         mapController.setPositionEased(lngLat, ANIMATION_DURATION)
         mapController.setZoomEased(mapController.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION)
     }
@@ -245,7 +248,7 @@ class MapView(
 
             val poly = polygon.map {
                 it.map {
-                    LngLat(it.lon, it.lat)
+                    LatLng(it.lat, it.lon)
                 }
             }
 
@@ -265,10 +268,10 @@ class MapView(
 
         override fun setCenter(latLng: LatLng, duration: Long) {
             if (duration.toInt() == 0) {
-                mapController.position = LngLat(latLng.lon, latLng.lat)
+                mapController.position = latLng
             } else {
                 mapController.setPositionEased(
-                        LngLat(latLng.lon, latLng.lat),
+                        latLng,
                         duration.toInt(),
                         MapController.EaseType.CUBIC
                 )
@@ -277,7 +280,7 @@ class MapView(
 
         override fun getCenter(): LatLng {
             val position = mapController.position
-            return LatLng(position.latitude, position.longitude)
+            return LatLng(position.lat, position.lon)
         }
 
         override fun reCenter(duration: Long) {
@@ -285,7 +288,7 @@ class MapView(
         }
 
         override fun addLayer(layer: Layer) {
-            layer.bindTo(this@MapView)
+            layer.bindTo(mapController)
             layers.add(layer)
         }
 
@@ -326,10 +329,10 @@ class MapView(
         }
     }
 
-    private fun screenPositionToLatLng(screenPosition: PointF): LatLng {
-        val lngLat = mapController.screenPositionToLngLat(PointF(screenPosition.x, screenPosition.y))
-        return LatLng(lngLat.latitude, lngLat.longitude)
-    }
+//    private fun screenPositionToLatLng(screenPosition: PointF): LatLng {
+//        val lngLat = mapController.screenPositionToLatLng(PointF(screenPosition.x, screenPosition.y))
+//        return LatLng(lngLat.latitude, lngLat.longitude)
+//    }
 
     internal fun setZoomControlVisibility(visible: Boolean) {
         zoomControlsView.visibility = if (visible) View.VISIBLE else View.GONE

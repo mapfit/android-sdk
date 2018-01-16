@@ -2,7 +2,7 @@ package com.mapfit.tangram;
 
 import android.support.annotation.Keep;
 
-import com.mapfit.mapfitsdk.geo.LatLng;
+import com.mapfit.mapfitsdk.geometry.LatLng;
 
 /**
  * {@code MarkerPickResult} represents labels that can be selected on the screen
@@ -11,11 +11,11 @@ import com.mapfit.mapfitsdk.geo.LatLng;
 public class MarkerPickResult {
 
     private com.mapfit.mapfitsdk.annotations.Marker marker;
-    private LngLat coordinates;
+    private LatLng coordinates;
 
     private MarkerPickResult(com.mapfit.mapfitsdk.annotations.Marker marker, double longitude, double latitude) {
         this.marker = marker;
-        this.coordinates = new LngLat(longitude, latitude);
+        this.coordinates = new LatLng(longitude, latitude);
     }
 
     /**
@@ -29,7 +29,7 @@ public class MarkerPickResult {
      * @return The coordinate of the feature for which this label has been created
      */
     public LatLng getCoordinates() {
-        return new LatLng(coordinates.latitude, coordinates.longitude);
+        return coordinates;
     }
 
 }

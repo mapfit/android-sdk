@@ -1,6 +1,6 @@
 package com.mapfit.mapfitsdk.utils
 
-import com.mapfit.mapfitsdk.geo.LatLng
+import com.mapfit.mapfitsdk.geometry.LatLng
 
 
 /**
