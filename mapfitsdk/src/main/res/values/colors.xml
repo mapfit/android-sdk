@@ -1,22 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="azure">#009eff</color>
-    <color name="trueBlue">#0020d4</color>
-    <color name="ceruleanBlue">#0855ec</color>
-    <color name="paleGrey">#edf3f7</color>
-    <color name="darkBlueGrey">#132836</color>
-    <color name="darkIndigo">#071e2e</color>
-    <color name="paleBlue">#ebf5fe</color>
-    <color name="paleBlueTwo">#d8edfe</color>
-    <color name="lightBlueGrey">#c9e2f2</color>
-    <color name="lightBlueGreyTwo">#bed7e7</color>
-    <color name="greyBlue">#7e9fb5</color>
-    <color name="greyBlueTwo">#6a7f93</color>
-    <color name="lightGreyBlue">#c9e2f2</color>
-    <color name="lightGreyBlueTwo">#bed7e7</color>
-    <color name="cadetBlue">#4b7491</color>
-    <color name="lightNavy">#124364</color>
+    <color name="cerulean_blue">#0955ec</color>
+    <color name="pink">#ff90c3</color>
+    <color name="darkish_pink">#dc3983</color>
+    <color name="dark_blue_grey_20">#33132836</color>
+    <color name="silver">#c7cfd4</color>
+    <color name="silver_two">#dde2e5</color>
+    <color name="cool_grey">#a9b1b5</color>
+    <color name="cool_grey_two">#95979a</color>
+    <color name="gunmetal">#535658</color>
+    <color name="charcoal_grey">#414346</color>
 
 
 </resources>
