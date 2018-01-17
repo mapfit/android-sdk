@@ -1,4 +1,4 @@
-package com.mapzen.tangram.geometry;
+package com.mapfit.tangram.geometry;
 
 import java.util.Map;
 

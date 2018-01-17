@@ -1,6 +1,6 @@
-package com.mapzen.tangram.geometry;
+package com.mapfit.tangram.geometry;
 
-import com.mapzen.tangram.LngLat;
+import com.mapfit.mapfitsdk.geometry.LatLng;
 
 import java.util.Map;
 
@@ -9,10 +9,10 @@ import java.util.Map;
  */
 public class Point extends Geometry {
 
-    public Point(LngLat point, Map<String, String> properties) {
+    public Point(LatLng point, Map<String, String> properties) {
         this.coordinates = new double[2];
-        coordinates[0] = point.longitude;
-        coordinates[1] = point.latitude;
+        coordinates[0] = point.getLon();
+        coordinates[1] = point.getLat();
         if (properties != null) {
             this.properties = getStringMapAsArray(properties);
         }

@@ -1,4 +1,4 @@
-package com.mapzen.tangram;
+package com.mapfit.mapfitsdk;
 
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
@@ -9,7 +9,16 @@ import android.os.Handler;
 import android.support.annotation.Keep;
 import android.util.DisplayMetrics;
 
-import com.mapzen.tangram.TouchInput.Gestures;
+import com.mapfit.mapfitsdk.annotations.Marker;
+import com.mapfit.mapfitsdk.geometry.LatLng;
+import com.mapfit.tangram.FontFileParser;
+import com.mapfit.tangram.HttpHandler;
+import com.mapfit.tangram.LabelPickResult;
+import com.mapfit.tangram.MarkerPickResult;
+import com.mapfit.tangram.SceneError;
+import com.mapfit.tangram.SceneUpdate;
+import com.mapfit.tangram.TouchInput;
+import com.mapfit.tangram.TouchInput.Gestures;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -88,12 +97,14 @@ public class MapController implements Renderer {
     public interface FeaturePickListener {
         /**
          * Receive information about features found in a call to {@link #pickFeature(float, float)}
+         *
          * @param properties A mapping of string keys to string or number values
-         * @param positionX The horizontal screen coordinate of the picked location
-         * @param positionY The vertical screen coordinate of the picked location
+         * @param positionX  The horizontal screen coordinate of the picked location
+         * @param positionY  The vertical screen coordinate of the picked location
          */
         void onFeaturePick(Map<String, String> properties, float positionX, float positionY);
     }
+
     /**
      * Interface for a callback to receive information about labels picked from the map
      * Triggered after a call of {@link #pickLabel(float, float)}
@@ -104,9 +115,10 @@ public class MapController implements Renderer {
     public interface LabelPickListener {
         /**
          * Receive information about labels found in a call to {@link #pickLabel(float, float)}
+         *
          * @param labelPickResult The {@link LabelPickResult} that has been selected
-         * @param positionX The horizontal screen coordinate of the picked location
-         * @param positionY The vertical screen coordinate of the picked location
+         * @param positionX       The horizontal screen coordinate of the picked location
+         * @param positionY       The vertical screen coordinate of the picked location
          */
         void onLabelPick(LabelPickResult labelPickResult, float positionX, float positionY);
     }
@@ -121,9 +133,10 @@ public class MapController implements Renderer {
     public interface MarkerPickListener {
         /**
          * Receive information about marker found in a call to {@link #pickMarker(float, float)}
+         *
          * @param markerPickResult The {@link MarkerPickResult} the marker that has been selected
-         * @param positionX The horizontal screen coordinate of the picked location
-         * @param positionY The vertical screen coordinate of the picked location
+         * @param positionX        The horizontal screen coordinate of the picked location
+         * @param positionY        The vertical screen coordinate of the picked location
          */
         void onMarkerPick(MarkerPickResult markerPickResult, float positionX, float positionY);
     }
@@ -147,8 +160,9 @@ public class MapController implements Renderer {
     public interface SceneLoadListener {
         /**
          * Received when a scene load or update finishes. If sceneError is not null then the operation did not succeed.
-         * @param sceneId The identifier returned by {@link #updateSceneAsync(List< SceneUpdate >)} or
-         * {@link #loadSceneFileAsync(String, List< SceneUpdate >)}.
+         *
+         * @param sceneId    The identifier returned by {@link #updateSceneAsync(List< SceneUpdate >)} or
+         *                   {@link #loadSceneFileAsync(String, List< SceneUpdate >)}.
          * @param sceneError A {@link SceneError} holding error information, or null if no error occurred.
          */
         void onSceneReady(int sceneId, SceneError sceneError);
@@ -166,6 +180,7 @@ public class MapController implements Renderer {
 
     /**
      * Capture MapView as Bitmap.
+     *
      * @param waitForCompleteView Delay the capture until the view is fully loaded and
      *                            no ease- or label-animation is running.
      */
@@ -199,13 +214,14 @@ public class MapController implements Renderer {
 
     /**
      * Construct a MapController using a custom scene file
+     *
      * @param view GLSurfaceView for the map display; input events from this
-     * view will be handled by the MapController's TouchInput gesture detector.
-     * It also provides the Context in which the map will function; the asset
-     * bundle for this activity must contain all the local files that the map
-     * will need.
+     *             view will be handled by the MapController's TouchInput gesture detector.
+     *             It also provides the Context in which the map will function; the asset
+     *             bundle for this activity must contain all the local files that the map
+     *             will need.
      */
-    protected MapController(GLSurfaceView view) {
+    MapController(GLSurfaceView view) {
 
         // Set up MapView
         mapView = view;
@@ -244,10 +260,10 @@ public class MapController implements Renderer {
         displayMetrics = mapView.getContext().getResources().getDisplayMetrics();
         assetManager = mapView.getContext().getAssets();
 
-        fontFileParser = new FontFileParser();
+//        fontFileParser = new FontFileParser();
 
         // Parse font file description
-        fontFileParser.parse();
+//        fontFileParser.parse();
 
         mapPointer = nativeInit(this, assetManager);
         if (mapPointer <= 0) {
@@ -262,7 +278,7 @@ public class MapController implements Renderer {
             public void run() {
                 // Dispose each data sources by first removing it from the HashMap values and then
                 // calling remove(), so that we don't improperly modify the HashMap while iterating.
-                for (Iterator<MapData> it = clientTileSources.values().iterator(); it.hasNext();) {
+                for (Iterator<MapData> it = clientTileSources.values().iterator(); it.hasNext(); ) {
                     MapData mapData = it.next();
                     it.remove();
                     mapData.remove();
@@ -279,6 +295,7 @@ public class MapController implements Renderer {
      * Load a new scene file synchronously.
      * Use {@link #setSceneLoadListener(SceneLoadListener)} for notification when the new scene is
      * ready.
+     *
      * @param path Location of the YAML scene file within the application assets
      * @return Scene ID An identifier for the scene being loaded, the same value will be passed to
      * {@link SceneLoadListener#onSceneReady(int sceneId, SceneError sceneError)} when loading is complete.
@@ -291,6 +308,7 @@ public class MapController implements Renderer {
      * Load a new scene file asynchronously.
      * Use {@link #setSceneLoadListener(SceneLoadListener)} for notification when the new scene is
      * ready.
+     *
      * @param path Location of the YAML scene file within the application assets
      * @return Scene ID An identifier for the scene being loaded, the same value will be passed to
      * {@link SceneLoadListener#onSceneReady(int sceneId, SceneError sceneError)} when loading is complete.
@@ -304,7 +322,8 @@ public class MapController implements Renderer {
      * If scene updates triggers an error, they won't be applied.
      * Use {@link #setSceneLoadListener(SceneLoadListener)} for notification when the new scene is
      * ready.
-     * @param path Location of the YAML scene file within the application assets
+     *
+     * @param path         Location of the YAML scene file within the application assets
      * @param sceneUpdates List of {@code SceneUpdate}
      * @return Scene ID An identifier for the scene being loaded, the same value will be passed to
      * {@link SceneLoadListener#onSceneReady(int sceneId, SceneError sceneError)} when loading is complete.
@@ -323,7 +342,8 @@ public class MapController implements Renderer {
      * If scene updates triggers an error, they won't be applied.
      * Use {@link #setSceneLoadListener(SceneLoadListener)} for notification when the new scene is
      * ready.
-     * @param path Location of the YAML scene file within the application assets
+     *
+     * @param path         Location of the YAML scene file within the application assets
      * @param sceneUpdates List of {@code SceneUpdate}
      * @return Scene ID An identifier for the scene being loaded, the same value will be passed to
      * {@link SceneLoadListener#onSceneReady(int sceneId, SceneError sceneError)} when loading is complete.
@@ -342,7 +362,8 @@ public class MapController implements Renderer {
      * If scene updates triggers an error, they won't be applied.
      * Use {@link #setSceneLoadListener(SceneLoadListener)} for notification when the new scene is
      * ready.
-     * @param yaml YAML scene String
+     *
+     * @param yaml         YAML scene String
      * @param resourceRoot base path to resolve relative URLs
      * @param sceneUpdates List of {@code SceneUpdate}
      * @return Scene ID An identifier for the scene being loaded, the same value will be passed to
@@ -361,7 +382,8 @@ public class MapController implements Renderer {
      * If scene updates triggers an error, they won't be applied.
      * Use {@link #setSceneLoadListener(SceneLoadListener)} for notification when the new scene is
      * ready.
-     * @param yaml YAML scene String
+     *
+     * @param yaml         YAML scene String
      * @param resourceRoot base path to resolve relative URLs
      * @param sceneUpdates List of {@code SceneUpdate}
      * @return Scene ID An identifier for the scene being loaded, the same value will be passed to
@@ -380,6 +402,7 @@ public class MapController implements Renderer {
      * If a updates trigger an error, scene updates won't be applied.
      * Use {@link #setSceneLoadListener(SceneLoadListener)} for notification when the new scene is
      * ready.
+     *
      * @param sceneUpdates List of {@code SceneUpdate}
      * @return new scene ID
      */
@@ -400,6 +423,7 @@ public class MapController implements Renderer {
     /**
      * Set the {@link HttpHandler} for retrieving remote map resources; a default-constructed
      * HttpHandler is suitable for most cases, but methods can be extended to modify resource URLs
+     *
      * @param handler the HttpHandler to use
      */
     public void setHttpHandler(HttpHandler handler) {
@@ -408,56 +432,64 @@ public class MapController implements Renderer {
 
     /**
      * Set the geographic position of the center of the map view
+     *
      * @param position LngLat of the position to set
      */
-    public void setPosition(LngLat position) {
+    public void setPosition(LatLng position) {
         checkPointer(mapPointer);
-        nativeSetPosition(mapPointer, position.longitude, position.latitude);
+        nativeSetPosition(mapPointer, position.getLon(), position.getLat());
     }
 
     /**
      * Set the geographic position of the center of the map view with default easing
+     *
      * @param position LngLat of the position to set
      * @param duration Time in milliseconds to ease to the given position
      */
-    public void setPositionEased(LngLat position, int duration) {
+    public void setPositionEased(LatLng position, int duration) {
         setPositionEased(position, duration, DEFAULT_EASE_TYPE);
     }
 
     /**
      * Set the geographic position of the center of the map view with custom easing
+     *
      * @param position LngLat of the position to set
      * @param duration Time in milliseconds to ease to the given position
-     * @param ease Type of easing to use
+     * @param ease     Type of easing to use
      */
-    public void setPositionEased(LngLat position, int duration, EaseType ease) {
+    public void setPositionEased(LatLng position, int duration, EaseType ease) {
         float seconds = duration / 1000.f;
         checkPointer(mapPointer);
-        nativeSetPositionEased(mapPointer, position.longitude, position.latitude, seconds, ease.ordinal());
+        nativeSetPositionEased(mapPointer, position.getLon(), position.getLat(), seconds, ease.ordinal());
     }
 
     /**
      * Get the geographic position of the center of the map view
+     *
      * @return The current map position in a LngLat
      */
-    public LngLat getPosition() {
-        return getPosition(new LngLat());
+    public LatLng getPosition() {
+        return getPosition(new LatLng());
     }
 
     /**
      * Get the geographic position of the center of the map view
+     *
      * @param out LngLat to be reused as the output
      * @return LngLat of the center of the map view
      */
-    public LngLat getPosition(LngLat out) {
-        double[] tmp = { 0, 0 };
+    public LatLng getPosition(LatLng out) {
+        double[] tmp = {0, 0};
         checkPointer(mapPointer);
         nativeGetPosition(mapPointer, tmp);
-        return out.set(tmp[0], tmp[1]);
+        out.setLat(tmp[1]);
+        out.setLon(tmp[0]);
+        return out;
     }
 
     /**
      * Set the zoom level of the map view
+     *
      * @param zoom Zoom level; lower values show more area
      */
     public void setZoom(float zoom) {
@@ -467,7 +499,8 @@ public class MapController implements Renderer {
 
     /**
      * Set the zoom level of the map view with default easing
-     * @param zoom Zoom level; lower values show more area
+     *
+     * @param zoom     Zoom level; lower values show more area
      * @param duration Time in milliseconds to ease to given zoom
      */
     public void setZoomEased(float zoom, int duration) {
@@ -476,9 +509,10 @@ public class MapController implements Renderer {
 
     /**
      * Set the zoom level of the map view with custom easing
-     * @param zoom Zoom level; lower values show more area
+     *
+     * @param zoom     Zoom level; lower values show more area
      * @param duration Time in milliseconds to ease to given zoom
-     * @param ease Type of easing to use
+     * @param ease     Type of easing to use
      */
     public void setZoomEased(float zoom, int duration, EaseType ease) {
         float seconds = duration / 1000.f;
@@ -488,6 +522,7 @@ public class MapController implements Renderer {
 
     /**
      * Get the zoom level of the map view
+     *
      * @return Zoom level; lower values show more area
      */
     public float getZoom() {
@@ -497,6 +532,7 @@ public class MapController implements Renderer {
 
     /**
      * Set the rotation of the view
+     *
      * @param rotation Counter-clockwise rotation in radians; 0 corresponds to North pointing up
      */
     public void setRotation(float rotation) {
@@ -506,6 +542,7 @@ public class MapController implements Renderer {
 
     /**
      * Set the rotation of the view with default easing
+     *
      * @param rotation Counter-clockwise rotation in radians; 0 corresponds to North pointing up
      * @param duration Time in milliseconds to ease to the given rotation
      */
@@ -515,9 +552,10 @@ public class MapController implements Renderer {
 
     /**
      * Set the rotation of the view with custom easing
+     *
      * @param rotation Counter-clockwise rotation in radians; 0 corresponds to North pointing up
      * @param duration Time in milliseconds to ease to the given rotation
-     * @param ease Type of easing to use
+     * @param ease     Type of easing to use
      */
     public void setRotationEased(float rotation, int duration, EaseType ease) {
         float seconds = duration / 1000.f;
@@ -527,6 +565,7 @@ public class MapController implements Renderer {
 
     /**
      * Get the rotation of the view
+     *
      * @return Counter-clockwise rotation in radians; 0 corresponds to North pointing up
      */
     public float getRotation() {
@@ -536,6 +575,7 @@ public class MapController implements Renderer {
 
     /**
      * Set the tilt angle of the view
+     *
      * @param tilt Tilt angle in radians; 0 corresponds to straight down
      */
     public void setTilt(float tilt) {
@@ -545,7 +585,8 @@ public class MapController implements Renderer {
 
     /**
      * Set the tilt angle of the view with default easing
-     * @param tilt Tilt angle in radians; 0 corresponds to straight down
+     *
+     * @param tilt     Tilt angle in radians; 0 corresponds to straight down
      * @param duration Time in milliseconds to ease to the given tilt
      */
     public void setTiltEased(float tilt, int duration) {
@@ -554,9 +595,10 @@ public class MapController implements Renderer {
 
     /**
      * Set the tilt angle of the view with custom easing
-     * @param tilt Tilt angle in radians; 0 corresponds to straight down
+     *
+     * @param tilt     Tilt angle in radians; 0 corresponds to straight down
      * @param duration Time in milliseconds to ease to the given tilt
-     * @param ease Type of easing to use
+     * @param ease     Type of easing to use
      */
     public void setTiltEased(float tilt, int duration, EaseType ease) {
         float seconds = duration / 1000.f;
@@ -566,6 +608,7 @@ public class MapController implements Renderer {
 
     /**
      * Get the tilt angle of the view
+     *
      * @return Tilt angle in radians; 0 corresponds to straight down
      */
     public float getTilt() {
@@ -575,6 +618,7 @@ public class MapController implements Renderer {
 
     /**
      * Set the camera type for the map view
+     *
      * @param type A {@code CameraType}
      */
     public void setCameraType(CameraType type) {
@@ -584,6 +628,7 @@ public class MapController implements Renderer {
 
     /**
      * Get the camera type currently in use for the map view
+     *
      * @return A {@code CameraType}
      */
     public CameraType getCameraType() {
@@ -593,39 +638,42 @@ public class MapController implements Renderer {
 
     /**
      * Find the geographic coordinates corresponding to the given position on screen
+     *
      * @param screenPosition Position in pixels from the top-left corner of the map area
      * @return LngLat corresponding to the given point, or null if the screen position
      * does not intersect a geographic location (this can happen at high tilt angles).
      */
-    public LngLat screenPositionToLngLat(PointF screenPosition) {
-        double[] tmp = { screenPosition.x, screenPosition.y };
+    public LatLng screenPositionToLatLng(PointF screenPosition) {
+        double[] tmp = {screenPosition.x, screenPosition.y};
         checkPointer(mapPointer);
         if (nativeScreenPositionToLngLat(mapPointer, tmp)) {
-            return new LngLat(tmp[0], tmp[1]);
+            return new LatLng(tmp[1], tmp[0]);
         }
         return null;
     }
 
     /**
      * Find the position on screen corresponding to the given geographic coordinates
+     *
      * @param lngLat Geographic coordinates
      * @return Position in pixels from the top-left corner of the map area (the point
      * may not lie within the viewable screen area)
      */
-    public PointF lngLatToScreenPosition(LngLat lngLat) {
-        double[] tmp = { lngLat.longitude, lngLat.latitude };
+    public PointF lngLatToScreenPosition(LatLng lngLat) {
+        double[] tmp = {lngLat.getLon(), lngLat.getLat()};
         checkPointer(mapPointer);
         nativeLngLatToScreenPosition(mapPointer, tmp);
-        return new PointF((float)tmp[0], (float)tmp[1]);
+        return new PointF((float) tmp[0], (float) tmp[1]);
     }
 
     /**
      * Construct a collection of drawable map features.
+     *
      * @param name The name of the data collection. Once added to a map, features from this
-     * {@code MapData} will be available from a data source with this name, just like a data source
-     * specified in a scene file. You cannot create more than one data source with the same name.
-     * If you call {@code addDataLayer} with the same name more than once, the same {@code MapData}
-     * object will be returned.
+     *             {@code MapData} will be available from a data source with this name, just like a data source
+     *             specified in a scene file. You cannot create more than one data source with the same name.
+     *             If you call {@code addDataLayer} with the same name more than once, the same {@code MapData}
+     *             object will be returned.
      */
     public MapData addDataLayer(String name) {
         return addDataLayer(name, false);
@@ -633,14 +681,15 @@ public class MapController implements Renderer {
 
     /**
      * Construct a collection of drawable map features.
-     * @param name The name of the data collection. Once added to a map, features from this
+     *
+     * @param name             The name of the data collection. Once added to a map, features from this
      * @param generateCentroid boolean to control <a href=
-     * "https://mapzen.com/documentation/tangram/sources/#generate_label_centroids"> label centroid
-     * generation</a> for polygon geometry
-     * {@code MapData} will be available from a data source with this name, just like a data source
-     * specified in a scene file. You cannot create more than one data source with the same name.
-     * If you call {@code addDataLayer} with the same name more than once, the same {@code MapData}
-     * object will be returned.
+     *                         "https://mapzen.com/documentation/tangram/sources/#generate_label_centroids"> label centroid
+     *                         generation</a> for polygon geometry
+     *                         {@code MapData} will be available from a data source with this name, just like a data source
+     *                         specified in a scene file. You cannot create more than one data source with the same name.
+     *                         If you call {@code addDataLayer} with the same name more than once, the same {@code MapData}
+     *                         object will be returned.
      */
     public MapData addDataLayer(String name, boolean generateCentroid) {
         MapData mapData = clientTileSources.get(name);
@@ -659,6 +708,7 @@ public class MapController implements Renderer {
 
     /**
      * For package-internal use only; remove a {@code MapData} from this map
+     *
      * @param mapData The {@code MapData} to remove
      */
     void removeDataLayer(MapData mapData) {
@@ -670,7 +720,7 @@ public class MapController implements Renderer {
 
     /**
      * Manually trigger a re-draw of the map view
-     *
+     * <p>
      * Typically this does not need to be called from outside Tangram, see {@link #setRenderMode(int)}.
      */
     @Keep
@@ -680,9 +730,10 @@ public class MapController implements Renderer {
 
     /**
      * Set whether the map view re-draws continuously
-     *
+     * <p>
      * Typically this does not need to be called from outside Tangram. The map automatically re-renders when the view
      * changes or when any animation in the map requires rendering.
+     *
      * @param renderMode Either 1, to render continuously, or 0, to render only when needed.
      */
     @Keep
@@ -692,6 +743,7 @@ public class MapController implements Renderer {
 
     /**
      * Set a responder for tap gestures
+     *
      * @param responder TapResponder to call
      */
     public void setTapResponder(final TouchInput.TapResponder responder) {
@@ -710,6 +762,7 @@ public class MapController implements Renderer {
 
     /**
      * Set a responder for double-tap gestures
+     *
      * @param responder DoubleTapResponder to call
      */
     public void setDoubleTapResponder(final TouchInput.DoubleTapResponder responder) {
@@ -723,6 +776,7 @@ public class MapController implements Renderer {
 
     /**
      * Set a responder for long press gestures
+     *
      * @param responder LongPressResponder to call
      */
     public void setLongPressResponder(final TouchInput.LongPressResponder responder) {
@@ -738,6 +792,7 @@ public class MapController implements Renderer {
 
     /**
      * Set a responder for pan gestures
+     *
      * @param responder PanResponder to call; if onPan returns true, normal panning behavior will not occur
      */
     public void setPanResponder(final TouchInput.PanResponder responder) {
@@ -762,6 +817,7 @@ public class MapController implements Renderer {
 
     /**
      * Set a responder for rotate gestures
+     *
      * @param responder RotateResponder to call; if onRotate returns true, normal rotation behavior will not occur
      */
     public void setRotateResponder(final TouchInput.RotateResponder responder) {
@@ -778,6 +834,7 @@ public class MapController implements Renderer {
 
     /**
      * Set a responder for scale gestures
+     *
      * @param responder ScaleResponder to call; if onScale returns true, normal scaling behavior will not occur
      */
     public void setScaleResponder(final TouchInput.ScaleResponder responder) {
@@ -794,6 +851,7 @@ public class MapController implements Renderer {
 
     /**
      * Set a responder for shove (vertical two-finger drag) gestures
+     *
      * @param responder ShoveResponder to call; if onShove returns true, normal tilting behavior will not occur
      */
     public void setShoveResponder(final TouchInput.ShoveResponder responder) {
@@ -810,8 +868,9 @@ public class MapController implements Renderer {
 
     /**
      * Set whether the gesture {@code second} can be recognized while {@code first} is in progress
-     * @param first Initial gesture type
-     * @param second Subsequent gesture type
+     *
+     * @param first   Initial gesture type
+     * @param second  Subsequent gesture type
      * @param allowed True if {@code second} should be recognized, else false
      */
     public void setSimultaneousGestureAllowed(Gestures first, Gestures second, boolean allowed) {
@@ -820,7 +879,8 @@ public class MapController implements Renderer {
 
     /**
      * Get whether the gesture {@code second} can be recognized while {@code first} is in progress
-     * @param first Initial gesture type
+     *
+     * @param first  Initial gesture type
      * @param second Subsequent gesture type
      * @return True if {@code second} will be recognized, else false
      */
@@ -830,6 +890,7 @@ public class MapController implements Renderer {
 
     /**
      * Set the radius to use when picking features on the map. The default radius is 0.5 dp.
+     *
      * @param radius The radius in dp (density-independent pixels).
      */
     public void setPickRadius(float radius) {
@@ -839,6 +900,7 @@ public class MapController implements Renderer {
 
     /**
      * Set a listener for feature pick events
+     *
      * @param listener The {@link FeaturePickListener} to call
      */
     public void setFeaturePickListener(final FeaturePickListener listener) {
@@ -857,6 +919,7 @@ public class MapController implements Renderer {
 
     /**
      * Set a listener for scene update error statuses
+     *
      * @param listener The {@link SceneLoadListener} to call after scene has loaded
      */
     public void setSceneLoadListener(final SceneLoadListener listener) {
@@ -865,6 +928,7 @@ public class MapController implements Renderer {
 
     /**
      * Set a listener for label pick events
+     *
      * @param listener The {@link LabelPickListener} to call
      */
     public void setLabelPickListener(final LabelPickListener listener) {
@@ -883,6 +947,7 @@ public class MapController implements Renderer {
 
     /**
      * Set a listener for marker pick events
+     *
      * @param listener The {@link MarkerPickListener} to call
      */
     public void setMarkerPickListener(final MarkerPickListener listener) {
@@ -902,6 +967,7 @@ public class MapController implements Renderer {
     /**
      * Query the map for geometry features at the given screen coordinates; results will be returned
      * in a callback to the object set by {@link #setFeaturePickListener(FeaturePickListener)}
+     *
      * @param posX The horizontal screen coordinate
      * @param posY The vertical screen coordinate
      */
@@ -915,6 +981,7 @@ public class MapController implements Renderer {
     /**
      * Query the map for labeled features at the given screen coordinates; results will be returned
      * in a callback to the object set by {@link #setLabelPickListener(LabelPickListener)}
+     *
      * @param posX The horizontal screen coordinate
      * @param posY The vertical screen coordinate
      */
@@ -928,6 +995,7 @@ public class MapController implements Renderer {
     /**
      * Query the map for a {@link Marker} at the given screen coordinates; results will be returned
      * in a callback to the object set by {@link #setMarkerPickListener(MarkerPickListener)}
+     *
      * @param posX The horizontal screen coordinate
      * @param posY The vertical screen coordinate
      */
@@ -941,6 +1009,7 @@ public class MapController implements Renderer {
     /**
      * Adds a {@link Marker} to the map which can be used to dynamically add points and polylines
      * to the map.
+     *
      * @return Newly created {@link Marker} object.
      */
     public Marker addMarker() {
@@ -955,14 +1024,15 @@ public class MapController implements Renderer {
 
     /**
      * Removes the passed in {@link Marker} from the map.
+     *
      * @param marker to remove from the map.
      * @return whether or not the marker was removed
      */
     public boolean removeMarker(Marker marker) {
         checkPointer(mapPointer);
-        checkId(marker.getMarkerId());
-        markers.remove(marker.getMarkerId());
-        return nativeMarkerRemove(mapPointer, marker.getMarkerId());
+        checkId(marker.getId());
+        markers.remove(marker.getId());
+        return nativeMarkerRemove(mapPointer, marker.getId());
     }
 
     /**
@@ -982,6 +1052,7 @@ public class MapController implements Renderer {
 
     /**
      * Set a listener for view complete events.
+     *
      * @param listener The {@link ViewCompleteListener} to call when the view is complete
      */
     public void setViewCompleteListener(final ViewCompleteListener listener) {
@@ -1000,6 +1071,7 @@ public class MapController implements Renderer {
 
     /**
      * Enqueue a Runnable to be executed synchronously on the rendering thread
+     *
      * @param r Runnable to run
      */
     public void queueEvent(Runnable r) {
@@ -1008,8 +1080,9 @@ public class MapController implements Renderer {
 
     /**
      * Make a debugging feature active or inactive
+     *
      * @param flag The feature to set
-     * @param on True to activate the feature, false to deactivate
+     * @param on   True to activate the feature, false to deactivate
      */
     public void setDebugFlag(DebugFlag flag, boolean on) {
         nativeSetDebugFlag(flag.ordinal(), on);
@@ -1018,6 +1091,7 @@ public class MapController implements Renderer {
     /**
      * Set whether the OpenGL state will be cached between subsequent frames. This improves
      * rendering efficiency, but can cause errors if your application code makes OpenGL calls.
+     *
      * @param use Whether to use a cached OpenGL state; false by default
      */
     public void useCachedGlState(boolean use) {
@@ -1027,9 +1101,10 @@ public class MapController implements Renderer {
 
     /**
      * Sets an opaque background color used as default color when a scene is being loaded
-     * @param red red component of the background color
+     *
+     * @param red   red component of the background color
      * @param green green component of the background color
-     * @param blue blue component of the background color
+     * @param blue  blue component of the background color
      */
     public void setDefaultBackgroundColor(float red, float green, float blue) {
         checkPointer(mapPointer);
@@ -1096,7 +1171,7 @@ public class MapController implements Renderer {
         return updateStrings;
     }
 
-    boolean setMarkerStylingFromString(long markerId, String styleString) {
+    public boolean setMarkerStylingFromString(long markerId, String styleString) {
         checkPointer(mapPointer);
         checkId(markerId);
         return nativeMarkerSetStylingFromString(mapPointer, markerId, styleString);
@@ -1108,7 +1183,7 @@ public class MapController implements Renderer {
         return nativeMarkerSetStylingFromPath(mapPointer, markerId, path);
     }
 
-    boolean setMarkerBitmap(long markerId, int width, int height, int[] data) {
+    public boolean setMarkerBitmap(long markerId, int width, int height, int[] data) {
         checkPointer(mapPointer);
         checkId(markerId);
         return nativeMarkerSetBitmap(mapPointer, markerId, width, height, data);
@@ -1120,7 +1195,7 @@ public class MapController implements Renderer {
         return nativeMarkerSetPoint(mapPointer, markerId, lng, lat);
     }
 
-    boolean setMarkerPointEased(long markerId, double lng, double lat, int duration, EaseType ease) {
+    public boolean setMarkerPointEased(long markerId, double lng, double lat, int duration, EaseType ease) {
         checkPointer(mapPointer);
         checkId(markerId);
         float seconds = duration / 1000.f;
@@ -1139,13 +1214,13 @@ public class MapController implements Renderer {
         return nativeMarkerSetPolygon(mapPointer, markerId, coordinates, rings, count);
     }
 
-    boolean setMarkerVisible(long markerId, boolean visible) {
+    public boolean setMarkerVisible(long markerId, boolean visible) {
         checkPointer(mapPointer);
         checkId(markerId);
         return nativeMarkerSetVisible(mapPointer, markerId, visible);
     }
 
-    boolean setMarkerDrawOrder(long markerId, int drawOrder) {
+    public boolean setMarkerDrawOrder(long markerId, int drawOrder) {
         checkPointer(mapPointer);
         checkId(markerId);
         return nativeMarkerSetDrawOrder(mapPointer, markerId, drawOrder);
@@ -1164,60 +1239,112 @@ public class MapController implements Renderer {
         System.loadLibrary("tangram");
     }
 
-    private synchronized native void nativeOnLowMemory(long mapPtr);
-    private synchronized native long nativeInit(MapController instance, AssetManager assetManager);
+    synchronized native void nativeOnLowMemory(long mapPtr);
+
+    synchronized native long nativeInit(MapController instance, AssetManager assetManager);
+
     private synchronized native void nativeDispose(long mapPtr);
+
     private synchronized native int nativeLoadScene(long mapPtr, String path, String[] updateStrings);
+
     private synchronized native int nativeLoadSceneAsync(long mapPtr, String path, String[] updateStrings);
+
     private synchronized native int nativeLoadSceneYaml(long mapPtr, String yaml, String resourceRoot, String[] updateStrings);
+
     private synchronized native int nativeLoadSceneYamlAsync(long mapPtr, String yaml, String resourceRoot, String[] updateStrings);
+
     private synchronized native void nativeSetupGL(long mapPtr);
+
     private synchronized native void nativeResize(long mapPtr, int width, int height);
+
     private synchronized native boolean nativeUpdate(long mapPtr, float dt);
+
     private synchronized native void nativeRender(long mapPtr);
+
     private synchronized native void nativeSetPosition(long mapPtr, double lon, double lat);
+
     private synchronized native void nativeSetPositionEased(long mapPtr, double lon, double lat, float seconds, int ease);
+
     private synchronized native void nativeGetPosition(long mapPtr, double[] lonLatOut);
+
     private synchronized native void nativeSetZoom(long mapPtr, float zoom);
+
     private synchronized native void nativeSetZoomEased(long mapPtr, float zoom, float seconds, int ease);
+
     private synchronized native float nativeGetZoom(long mapPtr);
+
     private synchronized native void nativeSetRotation(long mapPtr, float radians);
+
     private synchronized native void nativeSetRotationEased(long mapPtr, float radians, float seconds, int ease);
+
     private synchronized native float nativeGetRotation(long mapPtr);
+
     private synchronized native void nativeSetTilt(long mapPtr, float radians);
+
     private synchronized native void nativeSetTiltEased(long mapPtr, float radians, float seconds, int ease);
+
     private synchronized native float nativeGetTilt(long mapPtr);
+
     private synchronized native boolean nativeScreenPositionToLngLat(long mapPtr, double[] coordinates);
+
     private synchronized native boolean nativeLngLatToScreenPosition(long mapPtr, double[] coordinates);
+
     private synchronized native void nativeSetPixelScale(long mapPtr, float scale);
+
     private synchronized native void nativeSetCameraType(long mapPtr, int type);
+
     private synchronized native int nativeGetCameraType(long mapPtr);
+
     private synchronized native void nativeHandleTapGesture(long mapPtr, float posX, float posY);
+
     private synchronized native void nativeHandleDoubleTapGesture(long mapPtr, float posX, float posY);
+
     private synchronized native void nativeHandlePanGesture(long mapPtr, float startX, float startY, float endX, float endY);
+
     private synchronized native void nativeHandleFlingGesture(long mapPtr, float posX, float posY, float velocityX, float velocityY);
+
     private synchronized native void nativeHandlePinchGesture(long mapPtr, float posX, float posY, float scale, float velocity);
+
     private synchronized native void nativeHandleRotateGesture(long mapPtr, float posX, float posY, float rotation);
+
     private synchronized native void nativeHandleShoveGesture(long mapPtr, float distance);
+
     private synchronized native int nativeUpdateScene(long mapPtr, String[] updateStrings);
+
     private synchronized native void nativeSetPickRadius(long mapPtr, float radius);
+
     private synchronized native void nativePickFeature(long mapPtr, float posX, float posY, FeaturePickListener listener);
+
     private synchronized native void nativePickLabel(long mapPtr, float posX, float posY, LabelPickListener listener);
+
     private synchronized native void nativePickMarker(MapController instance, long mapPtr, float posX, float posY, MarkerPickListener listener);
+
     private synchronized native long nativeMarkerAdd(long mapPtr);
+
     private synchronized native boolean nativeMarkerRemove(long mapPtr, long markerID);
+
     private synchronized native boolean nativeMarkerSetStylingFromString(long mapPtr, long markerID, String styling);
+
     private synchronized native boolean nativeMarkerSetStylingFromPath(long mapPtr, long markerID, String path);
+
     private synchronized native boolean nativeMarkerSetBitmap(long mapPtr, long markerID, int width, int height, int[] data);
+
     private synchronized native boolean nativeMarkerSetPoint(long mapPtr, long markerID, double lng, double lat);
+
     private synchronized native boolean nativeMarkerSetPointEased(long mapPtr, long markerID, double lng, double lat, float duration, int ease);
+
     private synchronized native boolean nativeMarkerSetPolyline(long mapPtr, long markerID, double[] coordinates, int count);
+
     private synchronized native boolean nativeMarkerSetPolygon(long mapPtr, long markerID, double[] coordinates, int[] rings, int count);
+
     private synchronized native boolean nativeMarkerSetVisible(long mapPtr, long markerID, boolean visible);
+
     private synchronized native boolean nativeMarkerSetDrawOrder(long mapPtr, long markerID, int drawOrder);
+
     private synchronized native void nativeMarkerRemoveAll(long mapPtr);
 
     private synchronized native void nativeUseCachedGlState(long mapPtr, boolean use);
+
     private synchronized native void nativeCaptureSnapshot(long mapPtr, int[] buffer);
 
     private synchronized native void nativeSetDefaultBackgroundColor(long mapPtr, float r, float g, float b);
@@ -1225,9 +1352,13 @@ public class MapController implements Renderer {
     private native void nativeOnUrlComplete(long mapPtr, long requestHandle, byte[] rawDataBytes, String errorMessage);
 
     synchronized native long nativeAddTileSource(long mapPtr, String name, boolean generateCentroid);
+
     synchronized native void nativeRemoveTileSource(long mapPtr, long sourcePtr);
+
     synchronized native void nativeClearTileSource(long mapPtr, long sourcePtr);
+
     synchronized native void nativeAddFeature(long mapPtr, long sourcePtr, double[] coordinates, int[] rings, String[] properties);
+
     synchronized native void nativeAddGeoJson(long mapPtr, long sourcePtr, String geoJson);
 
     native void nativeSetDebugFlag(int flag, boolean on);
@@ -1270,7 +1401,7 @@ public class MapController implements Renderer {
         }
 
         boolean viewComplete;
-        synchronized(this) {
+        synchronized (this) {
             viewComplete = nativeUpdate(mapPointer, delta);
             nativeRender(mapPointer);
         }
@@ -1352,7 +1483,8 @@ public class MapController implements Renderer {
     }
 
     // Called from JNI on worker or render-thread.
-    void sceneReadyCallback(final int sceneId, final SceneError error) {
+    @Keep
+    public void sceneReadyCallback(final int sceneId, final SceneError error) {
 
         final SceneLoadListener cb = sceneLoadListener;
         if (cb != null) {
@@ -1370,14 +1502,16 @@ public class MapController implements Renderer {
     @Keep
     String getFontFilePath(String key) {
 
-        return fontFileParser.getFontFile(key);
+//        return fontFileParser.getFontFile(key);
+        return "";
 
     }
 
     @Keep
     String getFontFallbackFilePath(int importance, int weightHint) {
 
-        return fontFileParser.getFontFallback(importance, weightHint);
+//        return fontFileParser.getFontFallback(importance, weightHint);
+        return "";
     }
 
 }

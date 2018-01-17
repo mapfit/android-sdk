@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.PointF
 import android.net.Uri
+import android.opengl.GLSurfaceView
+import android.support.v7.app.AppCompatDelegate
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,11 +20,12 @@ import com.mapfit.mapfitsdk.annotations.Polyline
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener
-import com.mapfit.mapfitsdk.geo.LatLng
-import com.mapfit.mapfitsdk.geo.LatLngBounds
+import com.mapfit.mapfitsdk.geometry.LatLng
+import com.mapfit.mapfitsdk.geometry.LatLngBounds
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
-import com.mapzen.tangram.*
-import com.mapzen.tangram.MapView
+import com.mapfit.tangram.ConfigChooser
+import com.mapfit.tangram.MarkerPickResult
+import com.mapfit.tangram.TouchInput
 import org.jetbrains.annotations.NotNull
 
 
@@ -39,12 +42,23 @@ class MapView(
     private val ANIMATION_DURATION = 200
     private val ZOOM_STEP_LEVEL = 1
 
-    internal lateinit var tangramMap: com.mapzen.tangram.MapController
+    internal lateinit var mapController: MapController
     private lateinit var mapOptions: MapOptions
 
+
     // Views
-    private val tangramMapView by lazy { MapView(context, attributeSet) }
-    private val controlsView: View by lazy { getUiControlView() }
+    private val controlsView: View by lazy {
+        LayoutInflater.from(context)
+                .inflate(R.layout.overlay_map_controls, this, false)
+    }
+
+    internal val attributionImage: ImageView by lazy {
+        controlsView.findViewById<ImageView>(R.id.imgAttribution)
+    }
+
+    private val zoomControlsView: LinearLayout by lazy {
+        controlsView.findViewById<LinearLayout>(R.id.zoomControls)
+    }
 
     private val annotationLayer = Layer()
     internal val layers = mutableListOf(annotationLayer)
@@ -66,15 +80,26 @@ class MapView(
     private var mapClickListener: OnMapClickListener? = null
     private var mapDoubleClickListener: OnMapDoubleClickListener? = null
 
-    private val zoomControlsView: LinearLayout
 
     init {
-        addView(tangramMapView)
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+    }
+
+    fun getMapAsync(@NotNull onMapReadyCallback: OnMapReadyCallback) {
+
+        if (::mapController.isInitialized) {
+            onMapReadyCallback.onMapReady(mapfitMap)
+        }
+
+        initMapController(onMapReadyCallback)
+        initUiControls()
+
+
+    }
+
+    private fun initUiControls() {
         addView(controlsView)
-
-        zoomControlsView = controlsView.findViewById(R.id.zoomControls)
-
-        controlsView.findViewById<View>(R.id.imgAttribution).setOnClickListener {
+        attributionImage.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://mapfit.com/"))
 
             if (intent.resolveActivity(context.packageManager) != null) {
@@ -83,7 +108,6 @@ class MapView(
                 Log.d(TAG, "No Intent available to handle opening https://mapfit.com/")
             }
         }
-
         controlsView.findViewById<ImageView>(R.id.btnZoomIn).setOnClickListener {
             mapfitMap.setZoom(mapfitMap.getZoom() + ZOOM_STEP_LEVEL,
                     ANIMATION_DURATION)
@@ -92,31 +116,23 @@ class MapView(
             mapfitMap.setZoom(mapfitMap.getZoom() - ZOOM_STEP_LEVEL,
                     ANIMATION_DURATION)
         }
-
     }
 
-    fun getMapAsync(@NotNull onMapReadyCallback: OnMapReadyCallback) {
+    private fun initMapController(onMapReadyCallback: OnMapReadyCallback) {
+        mapController = MapController(getGLSurfaceView())
+        mapController.apply {
+            init()
+            setTapResponder(singleTapResponder())
+            setDoubleTapResponder(doubleTapResponder())
+            setMarkerPickListener(markerPickListener())
+            setSceneLoadListener({ _, _ ->
+                onMapReadyCallback.onMapReady(mapfitMap)
+            })
 
-        tangramMap = tangramMapView.getMap { sceneId, sceneError ->
-            onMapReady()
-            onMapReadyCallback.onMapReady(mapfitMap)
+            mapOptions = MapOptions(this@MapView, this)
+            mapOptions.loadDefaultTheme()
+
         }
-
-        mapOptions = MapOptions(this, tangramMap)
-
-        tangramMap.loadSceneFile(mapOptions.mapTheme.toString())
-
-    }
-
-    private fun onMapReady() {
-        tangramMap.setTapResponder(singleTapResponder())
-        tangramMap.setDoubleTapResponder(doubleTapResponder())
-        tangramMap.setMarkerPickListener(markerPickListener())
-
-
-        tangramMap.setSceneLoadListener({ sceneId, sceneError ->
-            Log.e("SCENELOADLISTENER!!!", "")
-        })
     }
 
     internal fun singleTapResponder(): TouchInput.TapResponder {
@@ -127,8 +143,8 @@ class MapView(
             }
 
             override fun onSingleTapConfirmed(x: Float, y: Float): Boolean {
-                tangramMap.pickMarker(x, y)
-                mapClickListener?.onMapClicked(screenPositionToLatLng(PointF(x, y)))
+                mapController.pickMarker(x, y)
+                mapClickListener?.onMapClicked(mapController.screenPositionToLatLng(PointF(x, y)))
                 return true
             }
         }
@@ -136,7 +152,7 @@ class MapView(
 
     internal fun doubleTapResponder(): TouchInput.DoubleTapResponder? {
         return TouchInput.DoubleTapResponder { x, y ->
-            mapDoubleClickListener?.onMapDoubleClicked(screenPositionToLatLng(PointF(x, y)))
+            mapDoubleClickListener?.onMapDoubleClicked(mapController.screenPositionToLatLng(PointF(x, y)))
             setZoomOnDoubleTap(x, y)
             true
         }
@@ -165,9 +181,9 @@ class MapView(
     }
 
     private fun setZoomOnDoubleTap(x: Float, y: Float) {
-        val lngLat = tangramMap.screenPositionToLngLat(PointF(x, y))
-        tangramMap.setPositionEased(lngLat, ANIMATION_DURATION)
-        tangramMap.setZoomEased(tangramMap.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION)
+        val lngLat = mapController.screenPositionToLatLng(PointF(x, y))
+        mapController.setPositionEased(lngLat, ANIMATION_DURATION)
+        mapController.setZoomEased(mapController.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION)
     }
 
     internal val mapfitMap = object : MapfitMap() {
@@ -229,28 +245,22 @@ class MapView(
         }
 
         override fun addMarker(latLng: LatLng): Marker {
-            val tMarker = tangramMap.addMarker()
-
-            tMarker.setPointEased(LngLat(latLng.lon, latLng.lat), 200, MapController.EaseType.CUBIC)
-
-            val mapfitMarker = Marker(tMarker)
-
-            mapfitMarker.setPosition(latLng) // no access to position of Tangram Marker
-            annotationLayer.add(mapfitMarker)
-
-            return mapfitMarker
+            val marker = mapController.addMarker()
+            marker.setPosition(latLng)
+            annotationLayer.add(marker)
+            return marker
         }
 
         override fun addPolygon(polygon: List<List<LatLng>>): Polygon {
 
             val poly = polygon.map {
                 it.map {
-                    LngLat(it.lon, it.lat)
+                    LatLng(it.lat, it.lon)
                 }
             }
 
-            val tMarker = tangramMap.addMarker()
-            tMarker.setPolygon(com.mapzen.tangram.geometry.Polygon(poly, null))
+            val tMarker = mapController.addMarker()
+//            tMarker.setPolygon(com.mapfit.tangram.geometry.Polygon(poly, null))
 
             return Polygon(tMarker)
         }
@@ -260,15 +270,15 @@ class MapView(
         }
 
         override fun getZoom(): Float {
-            return tangramMap.zoom
+            return mapController.zoom
         }
 
         override fun setCenter(latLng: LatLng, duration: Long) {
             if (duration.toInt() == 0) {
-                tangramMap.position = LngLat(latLng.lon, latLng.lat)
+                mapController.position = latLng
             } else {
-                tangramMap.setPositionEased(
-                        LngLat(latLng.lon, latLng.lat),
+                mapController.setPositionEased(
+                        latLng,
                         duration.toInt(),
                         MapController.EaseType.CUBIC
                 )
@@ -276,8 +286,8 @@ class MapView(
         }
 
         override fun getCenter(): LatLng {
-            val position = tangramMap.position
-            return LatLng(position.latitude, position.longitude)
+            val position = mapController.position
+            return LatLng(position.lat, position.lon)
         }
 
         override fun reCenter(duration: Long) {
@@ -285,7 +295,7 @@ class MapView(
         }
 
         override fun addLayer(layer: Layer) {
-            layer.bindTo(this@MapView)
+            layer.bindTo(mapController)
             layers.add(layer)
         }
 
@@ -294,8 +304,7 @@ class MapView(
         }
 
         override fun removeMarker(marker: Marker): Boolean =
-                tangramMap.removeMarker(marker.getMarker())
-
+                mapController.removeMarker(marker)
 
         override fun removePolygon(polygon: Polygon) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -317,9 +326,9 @@ class MapView(
                     }
                     else -> {
                         if (duration == 0) {
-                            tangramMap.zoom = (zoomLevel)
+                            mapController.zoom = (zoomLevel)
                         } else {
-                            tangramMap.setZoomEased(zoomLevel, duration)
+                            mapController.setZoomEased(zoomLevel, duration)
                         }
                     }
                 }
@@ -327,10 +336,10 @@ class MapView(
         }
     }
 
-    private fun screenPositionToLatLng(screenPosition: PointF): LatLng {
-        val lngLat = tangramMap.screenPositionToLngLat(PointF(screenPosition.x, screenPosition.y))
-        return LatLng(lngLat.latitude, lngLat.longitude)
-    }
+//    private fun screenPositionToLatLng(screenPosition: PointF): LatLng {
+//        val lngLat = mapController.screenPositionToLatLng(PointF(screenPosition.x, screenPosition.y))
+//        return LatLng(lngLat.latitude, lngLat.longitude)
+//    }
 
     internal fun setZoomControlVisibility(visible: Boolean) {
         zoomControlsView.visibility = if (visible) View.VISIBLE else View.GONE
@@ -340,7 +349,39 @@ class MapView(
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    private fun getUiControlView(): View =
-            LayoutInflater.from(context)
-                    .inflate(R.layout.overlay_map_controls, this, false)
+    private fun getGLSurfaceView(): GLSurfaceView {
+        val glSurfaceView = GLSurfaceView(context)
+        glSurfaceView.setEGLContextClientVersion(2)
+        glSurfaceView.preserveEGLContextOnPause = true
+        glSurfaceView.setEGLConfigChooser(ConfigChooser(8, 8, 8, 0, 16, 8))
+
+        addView(glSurfaceView)
+        return glSurfaceView
+    }
+
+    private fun disposeMap() {
+
+        if (mapController != null) {
+            // MapController has been initialized, so we'll dispose it now.
+            mapController.dispose()
+        }
+//        mapController = null
+
+    }
+
+    /**
+     * You must call this method from the parent Activity/Fragment's corresponding method.
+     * Any access to MapView.mapController is illegal after this call.
+     */
+    fun onDestroy() {
+        disposeMap()
+    }
+
+    /**
+     * You must call this method from the parent Activity/Fragment's corresponding method.
+     */
+    fun onLowMemory() {
+        mapController.onLowMemory()
+    }
+
 }
