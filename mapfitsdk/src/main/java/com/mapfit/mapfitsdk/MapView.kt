@@ -42,7 +42,7 @@ class MapView(
     private val ANIMATION_DURATION = 200
     private val ZOOM_STEP_LEVEL = 1
 
-    internal lateinit var mapController: MapController
+    private lateinit var mapController: MapController
     private lateinit var mapOptions: MapOptions
 
 
@@ -52,16 +52,17 @@ class MapView(
                 .inflate(R.layout.overlay_map_controls, this, false)
     }
 
-    internal val attributionImage: ImageView by lazy {
-        controlsView.findViewById<ImageView>(R.id.imgAttribution)
-    }
+    private val attributionImage: ImageView = controlsView.findViewById(R.id.imgAttribution)
+
+    @JvmSynthetic
+    internal fun getAttributionImage(): ImageView = attributionImage
 
     private val zoomControlsView: LinearLayout by lazy {
         controlsView.findViewById<LinearLayout>(R.id.zoomControls)
     }
 
     private val annotationLayer = Layer()
-    internal val layers = mutableListOf(annotationLayer)
+    private val layers = mutableListOf(annotationLayer)
 
     private var tilt: Float = 0f
     private var isDirectionsEnabled = false
@@ -135,6 +136,7 @@ class MapView(
         }
     }
 
+    @JvmSynthetic
     internal fun singleTapResponder(): TouchInput.TapResponder {
         return object : TouchInput.TapResponder {
             override fun onSingleTapUp(x: Float, y: Float): Boolean {
@@ -150,6 +152,7 @@ class MapView(
         }
     }
 
+    @JvmSynthetic
     internal fun doubleTapResponder(): TouchInput.DoubleTapResponder? {
         return TouchInput.DoubleTapResponder { x, y ->
             mapDoubleClickListener?.onMapDoubleClicked(mapController.screenPositionToLatLng(PointF(x, y)))
@@ -162,20 +165,20 @@ class MapView(
         return { markerPickResult, _, _ ->
 
             markerPickResult?.run {
-                val annotation = annotationLayer.getAnnotations().find {
-                    it.getId() == markerPickResult.marker.markerId
-                }
+                //                val annotation = annotationLayer.getAnnotations().find {
+//                    it.getId() == markerPickResult.marker
+//                }
 
-                annotation?.let {
-                    when (it) {
-                        is Marker -> markerClickListener?.onMarkerClicked(it)
-                        is Polyline -> {
-                        }
-                        else -> {
-                        }
-                    }
-
-                }
+//                annotation?.let {
+//                    when (it) {
+//                        is Marker -> markerClickListener?.onMarkerClicked(it)
+//                        is Polyline -> {
+//                        }
+//                        else -> {
+//                        }
+//                    }
+//
+//                }
             }
         }
     }
@@ -186,7 +189,7 @@ class MapView(
         mapController.setZoomEased(mapController.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION)
     }
 
-    internal val mapfitMap = object : MapfitMap() {
+    private val mapfitMap = object : MapfitMap() {
 
         override fun getLayers(): List<Layer> {
             return layers
@@ -273,6 +276,10 @@ class MapView(
             return mapController.zoom
         }
 
+        override fun setCenter(latLng: LatLng) {
+            setCenter(latLng, 0)
+        }
+
         override fun setCenter(latLng: LatLng, duration: Long) {
             if (duration.toInt() == 0) {
                 mapController.position = latLng
@@ -295,7 +302,7 @@ class MapView(
         }
 
         override fun addLayer(layer: Layer) {
-            layer.bindTo(mapController)
+//            layer.bindTo(mapController)
             layers.add(layer)
         }
 
@@ -341,6 +348,7 @@ class MapView(
 //        return LatLng(lngLat.latitude, lngLat.longitude)
 //    }
 
+    @JvmSynthetic
     internal fun setZoomControlVisibility(visible: Boolean) {
         zoomControlsView.visibility = if (visible) View.VISIBLE else View.GONE
     }

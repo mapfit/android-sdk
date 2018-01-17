@@ -7,8 +7,10 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.support.annotation.DrawableRes
 import android.support.annotation.NonNull
+import android.util.Log
 import com.mapfit.mapfitsdk.MapController
 import com.mapfit.mapfitsdk.geometry.LatLng
+import com.mapfit.mapfitsdk.utils.isValid
 import com.mapfit.mapfitsdk.utils.loadImageFromUrl
 import kotlinx.coroutines.experimental.launch
 
@@ -16,45 +18,68 @@ import kotlinx.coroutines.experimental.launch
  * Created by dogangulcan on 12/19/17.
  */
 class Marker internal constructor(
-        val context: Context,
-        var markerId: Long,
-        val mapController: MapController
+        private val context: Context,
+        private var markerId: Long,
+        private val mapController: MapController
 ) : Annotation() {
 
 
-    var position: LatLng = LatLng(0.0, 0.0)
+    private var position: LatLng = LatLng(0.0, 0.0)
 
-    var isFlat: Boolean = false
+    private var isFlat: Boolean = false
 
-    var isMarkerVisible: Boolean = true
+    private var isVisible: Boolean = true
 
+    private val markerOptions = MarkerOptions(markerId, mapController)
 
-    val markerOptions = MarkerOptions(markerId, mapController)
-
-    var data: Any? = null
+    private var data: Any? = null
 
     init {
         setIcon(MapfitMarker.LIGHT_DEFAULT)
     }
 
+    fun getPosition(): LatLng = position
+
     fun setPosition(latLng: LatLng): Marker {
-        position = latLng
+        if (latLng.isValid()) {
+            val markerPositionSet = mapController.setMarkerPointEased(
+                    markerId,
+                    latLng.lon,
+                    latLng.lat,
+                    0,
+                    MapController.EaseType.CUBIC
+            )
+
+            updatePosition(markerPositionSet, latLng)
+        }
         return this
     }
 
     private fun setPositionEased(latLng: LatLng, duration: Int): Marker {
-        mapController.setMarkerPointEased(
-                markerId,
-                latLng.lon,
-                latLng.lat,
-                duration,
-                MapController.EaseType.CUBIC
-        )
-        position = latLng
+        if (latLng.isValid()) {
+            val markerPositionSet = mapController.setMarkerPointEased(
+                    markerId,
+                    latLng.lon,
+                    latLng.lat,
+                    duration,
+                    MapController.EaseType.CUBIC
+            )
+
+            updatePosition(markerPositionSet, latLng)
+        }
         return this
     }
 
-    fun setIcon(drawable: Drawable): Marker {
+    private fun updatePosition(markerPositionSet: Boolean, latLng: LatLng) {
+        if (markerPositionSet) {
+            position = latLng
+        } else {
+            Log.e("Mapfit",
+                    "Setting Marker position is failed for ${latLng.lat}, ${latLng.lon}")
+        }
+    }
+
+    private fun setIcon(drawable: Drawable): Marker {
         val density = context.resources.displayMetrics.densityDpi
         val bitmapDrawable = drawable as BitmapDrawable
         bitmapDrawable.setTargetDensity(density)
@@ -64,7 +89,7 @@ class Marker internal constructor(
         return this
     }
 
-    fun setIcon(@DrawableRes drawableId: Int): Marker {
+    private fun setIcon(@DrawableRes drawableId: Int): Marker {
         val options = BitmapFactory.Options()
         options.inTargetDensity = context.resources.displayMetrics.densityDpi
         val bitmap = BitmapFactory.decodeResource(context.resources, drawableId, options)
@@ -72,7 +97,7 @@ class Marker internal constructor(
         return this
     }
 
-    fun setIcon(@NonNull mapfitMarker: MapfitMarker): Marker {
+    private fun setIcon(@NonNull mapfitMarker: MapfitMarker): Marker {
         setIcon(mapfitMarker.getMarkerUrl())
         return this
     }
@@ -80,7 +105,7 @@ class Marker internal constructor(
     /**
      * Set icon with a url consist of a image.
      */
-    fun setIcon(imageUrl: String): Marker {
+    private fun setIcon(imageUrl: String): Marker {
         launch {
             val drawable = loadImageFromUrl(imageUrl)
             drawable.await()?.let { setIcon(it) }
@@ -89,13 +114,13 @@ class Marker internal constructor(
         return this
     }
 
-    override fun setDrawOder(index: Int) {
+    private fun setDrawOder(index: Int) {
         mapController.setMarkerDrawOrder(markerId, index)
     }
 
-    override fun getId(): Long? = markerId
+    override fun getId(): Long = markerId
 
-    fun setData(data: Any): Marker {
+    private fun setData(data: Any): Marker {
         this.data = data
         return this
     }
@@ -125,15 +150,13 @@ class Marker internal constructor(
         return mapController.setMarkerBitmap(markerId, width, height, abgr)
     }
 
-    fun invalidate() {
-        this.markerId = 0
-    }
-
-    override fun setVisible(visible: Boolean) {
+    private fun setVisible(visible: Boolean) {
         val success = mapController.setMarkerVisible(markerId, visible)
         if (success) {
-            isMarkerVisible = visible
+            isVisible = visible
         }
     }
+
+    private fun getVisible(): Boolean = isVisible
 
 }

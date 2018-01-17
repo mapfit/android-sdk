@@ -1,5 +1,6 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: "org.jetbrains.kotlin.android.extensions"
 
 android {
     compileSdkVersion 27
@@ -12,6 +13,9 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
+        androidExtensions {
+            experimental = true
+        }
 
         externalNativeBuild {
             cmake {
@@ -58,7 +62,12 @@ android {
     }
 
     defaultConfig {
+        multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
+    }
+
+    testOptions {
+        unitTests.returnDefaultValues = true
     }
 }
 

@@ -17,6 +17,8 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 /**
+ * Instrumentation tests for [MapView] and [MapOptions] functionality.
+ *
  * Created by dogangulcan on 1/8/18.
  */
 @RunWith(AndroidJUnit4::class)
@@ -50,14 +52,13 @@ class MapViewTest {
     @UiThreadTest
     fun testInitValuesExistence() {
         Assert.assertNotNull(mapView)
-        Assert.assertNotNull(mapView.mapfitMap)
-        Assert.assertNotNull(mapView.layers)
+        Assert.assertNotNull(mapfitMap)
     }
 
     @Test
     @UiThreadTest
     fun testDefaultValues() {
-        Assert.assertEquals(MapTheme.MAPFIT_DAY, mapfitMap.getMapOptions().mapTheme)
+//        Assert.assertEquals(MapTheme.MAPFIT_DAY, mapfitMap.getMapOptions().mapTheme)
     }
 
     @Test
@@ -89,17 +90,6 @@ class MapViewTest {
 
     @Test
     @UiThreadTest
-    fun testAddingRemovingLayers() {
-        val layer = Layer()
-        mapfitMap.addLayer(layer)
-        Assert.assertEquals(layer, mapfitMap.getLayers().last())
-
-        mapfitMap.removeLayer(layer)
-        Assert.assertNotEquals(layer, mapfitMap.getLayers().last())
-    }
-
-    @Test
-    @UiThreadTest
     fun testSettingCenter() {
         val latLng = LatLng(40.7441855, -73.995394)
         mapfitMap.setCenter(latLng)
@@ -126,6 +116,27 @@ class MapViewTest {
         mapView.doubleTapResponder()?.onDoubleTap(0f, 32f)
         verify(onMapDoubleClickListener, times(1))
                 .onMapDoubleClicked(LatLng(89.840598043218, 157.50080354385057))
+    }
+
+    @Test
+    @UiThreadTest
+    fun testAddRemoveLayers() {
+        val layer = Layer()
+        mapfitMap.addLayer(layer)
+        Assert.assertEquals(layer, mapfitMap.getLayers().last())
+
+        mapfitMap.removeLayer(layer)
+        Assert.assertNotEquals(layer, mapfitMap.getLayers().last())
+    }
+
+    @Test
+    @UiThreadTest
+    fun testAddRemoveMarker() {
+        val marker = mapfitMap.addMarker(LatLng())
+        Assert.assertNotNull(marker)
+
+        val removed = mapfitMap.removeMarker(marker)
+        Assert.assertTrue(removed)
     }
 
 

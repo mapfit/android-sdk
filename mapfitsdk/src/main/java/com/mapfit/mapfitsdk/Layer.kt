@@ -11,21 +11,21 @@ class Layer {
     private val maps = mutableListOf<MapController>()
 
     val isVisible = true
-    internal var pointer: Long = 0
+//    internal var pointer: Long = 0
 
-    internal fun add(annotation: Annotation) {
+    fun add(annotation: Annotation) {
         annotations.add(annotation)
     }
 
-    internal fun setVisible(boolean: Boolean) {
-        annotations.forEach { it.setVisible(boolean) }
-    }
+//    private fun setVisible(boolean: Boolean) {
+//        annotations.forEach { it.setVisible(boolean) }
+//    }
 
-    internal fun getAnnotations(): List<Annotation> = annotations
-
-    internal fun bindTo(map: MapController) {
-        maps.add(map)
-    }
+//    internal fun getAnnotations(): List<Annotation> = annotations
+//
+//    internal fun bindTo(map: MapController) {
+//        maps.add(map)
+//    }
 
 
 }

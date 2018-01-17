@@ -12,10 +12,6 @@ class MarkerOptions internal constructor(
         private val mapController: MapController
 ) {
 
-    init {
-        updateStyle()
-    }
-
     /**
      * Height of the marker in pixels.
      */
@@ -48,6 +44,10 @@ class MarkerOptions internal constructor(
             field = value
             updateStyle()
         }
+
+    init {
+        updateStyle()
+    }
 
     private fun updateStyle() {
         mapController.setMarkerStylingFromString(markerId, style)

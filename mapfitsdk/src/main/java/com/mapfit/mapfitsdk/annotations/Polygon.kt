@@ -6,22 +6,16 @@ import com.mapfit.mapfitsdk.annotations.base.AnnotationStyle
  * Created by dogangulcan on 12/22/17.
  */
 class Polygon internal constructor(private val tgMarker: Marker) : Annotation() {
-    override fun getId(): Long? {
+    override fun getId(): Long {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
 
     init {
-        tgMarker.markerOptions.style = (AnnotationStyle.POLYGON.style)
+//        tgMarker.markerOptions.style = (AnnotationStyle.POLYGON.style)
     }
 
-    override fun setDrawOder(index: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
-    override fun setVisible(visible: Boolean) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 //
 //    fun Polygon(polygon: List<List<LatLng>>, properties: Map<String, String>?): ??? {
 //        this.rings = IntArray(polygon.size)
