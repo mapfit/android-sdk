@@ -1,7 +1,6 @@
 package com.mapfit.mapfitsdk.annotations
 
 import com.mapfit.mapfitsdk.annotations.base.AnnotationStyle
-import com.mapzen.tangram.Marker
 
 /**
  * Created by dogangulcan on 12/22/17.
@@ -13,7 +12,7 @@ class Polygon internal constructor(private val tgMarker: Marker) : Annotation() 
 
 
     init {
-        tgMarker.setStylingFromString(AnnotationStyle.POLYGON.style)
+        tgMarker.markerOptions.style = (AnnotationStyle.POLYGON.style)
     }
 
     override fun setDrawOder(index: Int) {
@@ -23,6 +22,25 @@ class Polygon internal constructor(private val tgMarker: Marker) : Annotation() 
     override fun setVisible(visible: Boolean) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
-
-
+//
+//    fun Polygon(polygon: List<List<LatLng>>, properties: Map<String, String>?): ??? {
+//        this.rings = IntArray(polygon.size)
+//        var i = 0
+//        var n_points = 0
+//        for (ring in polygon) {
+//            n_points += ring.size
+//            rings[i++] = ring.size
+//        }
+//        this.coordinates = DoubleArray(2 * n_points)
+//        var j = 0
+//        for (ring in polygon) {
+//            for ((lat, lon) in ring) {
+//                coordinates[j++] = lon
+//                coordinates[j++] = lat
+//            }
+//        }
+//        if (properties != null) {
+//            this.properties = getStringMapAsArray(properties)
+//        }
+//    }
 }

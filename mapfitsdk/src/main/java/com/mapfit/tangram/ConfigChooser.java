@@ -11,7 +11,7 @@
  * governing permissions and limitations under the License.
  */
 
-package com.mapzen.tangram;
+package com.mapfit.tangram;
 
 import android.opengl.GLSurfaceView.EGLConfigChooser;
 

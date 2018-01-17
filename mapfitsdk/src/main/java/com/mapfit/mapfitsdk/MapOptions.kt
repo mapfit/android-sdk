@@ -1,15 +1,15 @@
 package com.mapfit.mapfitsdk
 
 import android.support.annotation.FloatRange
+import android.support.v7.content.res.AppCompatResources
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
-import com.mapzen.tangram.MapController
 
 /**
  * Created by dogangulcan on 12/21/17.
  */
 class MapOptions internal constructor(
         private val mapView: com.mapfit.mapfitsdk.MapView,
-        private val tangramMap: MapController
+        private val mapController: MapController
 ) {
 
     companion object {
@@ -23,9 +23,21 @@ class MapOptions internal constructor(
 
     internal var mapTheme = MapTheme.MAPFIT_DAY
         set(value) {
-            tangramMap.loadSceneFile(value.toString())
-            field = value
+            if (value != field) {
+                updateScene(value)
+                field = value
+            }
         }
+
+    private fun updateScene(value: MapTheme) {
+        mapController.loadSceneFile(value.toString())
+        val attributionImage = when (value) {
+            MapTheme.MAPFIT_DAY -> R.drawable.ic_watermark_light
+            MapTheme.MAPFIT_NIGHT -> R.drawable.ic_watermark_dark
+        }
+//        val drawable = AppCompatResources.getDrawable(mapView.context, attributionImage)
+        mapView.attributionImage.setImageResource(attributionImage)
+    }
 
     private var isCompassVisible = false
         set(value) {
@@ -40,7 +52,7 @@ class MapOptions internal constructor(
 
     private var cameraType: CameraType = CameraType.PERSPECTIVE
         set(value) {
-            tangramMap.cameraType = MapController.CameraType.valueOf(value.name)
+            mapController.cameraType = MapController.CameraType.valueOf(value.name)
             field = value
         }
 
@@ -69,7 +81,6 @@ class MapOptions internal constructor(
             TODO()
         }
 
-
     /**
      * @param zoomLevel desired maximum zoom level
      */
@@ -91,5 +102,9 @@ class MapOptions internal constructor(
         PERSPECTIVE,
         ISOMETRIC,
         FLAT
+    }
+
+    internal fun loadDefaultTheme() {
+        updateScene(MapTheme.MAPFIT_DAY)
     }
 }

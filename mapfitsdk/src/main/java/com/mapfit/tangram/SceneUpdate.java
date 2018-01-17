@@ -1,4 +1,4 @@
-package com.mapzen.tangram;
+package com.mapfit.tangram;
 
 /**
  * {@code SceneUpdate} Represents a DataStructure to specify a yaml path and the corresponding value for a Scene Update.
@@ -11,7 +11,8 @@ public class SceneUpdate {
 
     /**
      * Add a point feature to this collection.
-     * @param path Series of yaml keys separated by a ".". Represents the scene path to be updated
+     *
+     * @param path  Series of yaml keys separated by a ".". Represents the scene path to be updated
      * @param value A yaml string which will update the value at the specified path
      */
     public SceneUpdate(String path, String value) {
@@ -19,8 +20,13 @@ public class SceneUpdate {
         this.componentValue = value;
     }
 
-    public String getPath() { return componentPath; }
-    public String getValue() { return componentValue; }
+    public String getPath() {
+        return componentPath;
+    }
+
+    public String getValue() {
+        return componentValue;
+    }
 
     @Override
     public String toString() {
