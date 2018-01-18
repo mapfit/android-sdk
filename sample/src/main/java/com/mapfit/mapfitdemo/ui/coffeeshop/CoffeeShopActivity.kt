@@ -1,6 +1,7 @@
 package com.mapfit.mapfitdemo.ui.coffeeshop
 
 import android.os.Bundle
+import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.view.GravityCompat
 import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
@@ -8,25 +9,23 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import com.mapfit.mapfitdemo.R
 import com.mapfit.mapfitdemo.data.model.CoffeeShop
 import com.mapfit.mapfitdemo.module.coffeeshop.data.Repository
 import com.mapfit.mapfitdemo.ui.adapter.FilterAdapter
 import com.mapfit.mapfitdemo.ui.adapter.FilterType
 import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener
-import com.mapfit.mapfitsdk.annotations.*
+import com.mapfit.mapfitsdk.Layer
+import com.mapfit.mapfitsdk.MapfitMap
+import com.mapfit.mapfitsdk.OnMapReadyCallback
+import com.mapfit.mapfitsdk.annotations.Marker
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
 import com.mapfit.mapfitsdk.geometry.LatLng
 import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*
-import android.support.design.widget.BottomSheetBehavior
-import android.view.View
-import com.mapfit.mapfitsdk.*
-import kotlinx.android.synthetic.main.content_coffee_shops.view.*
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
 
 
 /**
@@ -71,7 +70,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         map.getMapAsync(object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
                 setupMap(mapfitMap)
-//                coffeeShops?.let { addMarkersFromCoffeeShops(it) }
+                coffeeShops?.let { addMarkersFromCoffeeShops(it) }
 //                mapfitMap.addPolygon(repository.getLowerManhattanPoly())
 //                mapfitMap.addPolyline()
 //
@@ -122,41 +121,40 @@ class CoffeeShopActivity : AppCompatActivity() {
 
     private val onMarkerClickListener = object : OnMarkerClickListener {
         override fun onMarkerClicked(marker: Marker) {
-            marker.setIcon(MapfitMarker.DARK_AUTO)
-            mapfitMap.setCenter(marker.position, 300)
+//            marker.setIcon(MapfitMarker.DARK_AUTO)
+            mapfitMap.setCenter(marker.getPosition(), 300)
 
-            marker.data?.let {
-                bottom_sheet.txtTitle.text = (it as CoffeeShop).title
-                bottom_sheet.txtSubTitle.text = (it).address
-            }
+//            marker.data?.let {
+//                bottom_sheet.txtTitle.text = (it as CoffeeShop).title
+//                bottom_sheet.txtSubTitle.text = (it).address
+//            }
 
-
-            bottomSheetHideJob.cancel()
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-            bottomSheetHideJob = launch {
-                delay(1500)
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-            }
+//            bottomSheetHideJob.cancel()
+//            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+//            bottomSheetHideJob = launch {
+//                delay(1500)
+//                bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+//            }
 
         }
     }
 
     private fun addMarkersFromCoffeeShops(coffeeShops: List<CoffeeShop>) {
 
-//        coffeeShops.forEach { shop ->
-//
-//            val marker = mapfitMap.addMarker(LatLng(shop.lat, shop.lon))
-//                    .setIcon(MapfitMarker.DARK_CAFE)
-//                    .setData(shop)
-//
-//            markers.add(marker)
-//
-//            // creating a layer of shops that are always open
-//            if (shop.open24Hours) {
-//                alwaysOpenShopLayer.add(marker)
-//            }
-//
-//        }
+        coffeeShops.forEach { shop ->
+
+            val marker = mapfitMap.addMarker(LatLng(shop.lat, shop.lon))
+//            marker.invalidate()
+
+
+            markers.add(marker)
+
+            // creating a layer of shops that are always open
+            if (shop.open24Hours) {
+                alwaysOpenShopLayer.add(marker)
+            }
+
+        }
 
     }
 

@@ -3,6 +3,7 @@ package com.mapfit.mapfitsdk
 import android.support.annotation.FloatRange
 import android.support.v7.content.res.AppCompatResources
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
+import kotlinx.android.synthetic.main.overlay_map_controls.view.*
 
 /**
  * Created by dogangulcan on 12/21/17.
@@ -36,7 +37,7 @@ class MapOptions internal constructor(
             MapTheme.MAPFIT_NIGHT -> R.drawable.ic_watermark_dark
         }
 //        val drawable = AppCompatResources.getDrawable(mapView.context, attributionImage)
-        mapView.attributionImage.setImageResource(attributionImage)
+        mapView.getAttributionImage().setImageResource(attributionImage)
     }
 
     private var isCompassVisible = false

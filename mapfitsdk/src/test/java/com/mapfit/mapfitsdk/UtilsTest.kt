@@ -8,6 +8,8 @@ import org.junit.Assert
 import org.junit.Test
 
 /**
+ * Unit tests for utils.
+ *
  * Created by dogangulcan on 1/8/18.
  */
 class UtilsTest {

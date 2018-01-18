@@ -468,23 +468,20 @@ public class MapController implements Renderer {
      *
      * @return The current map position in a LngLat
      */
-    public LatLng getPosition() {
-        return getPosition(new LatLng());
-    }
+//    public LatLng getPosition() {
+//        return getPosition();
+//    }
 
     /**
      * Get the geographic position of the center of the map view
      *
-     * @param out LngLat to be reused as the output
      * @return LngLat of the center of the map view
      */
-    public LatLng getPosition(LatLng out) {
+    public LatLng getPosition() {
         double[] tmp = {0, 0};
         checkPointer(mapPointer);
         nativeGetPosition(mapPointer, tmp);
-        out.setLat(tmp[1]);
-        out.setLon(tmp[0]);
-        return out;
+        return new LatLng(tmp[1], tmp[0]);
     }
 
     /**
@@ -1015,7 +1012,6 @@ public class MapController implements Renderer {
     public Marker addMarker() {
         checkPointer(mapPointer);
         long markerId = nativeMarkerAdd(mapPointer);
-
         Marker marker = new Marker(mapView.getContext(), markerId, this);
         markers.put(markerId, marker);
 
@@ -1043,9 +1039,8 @@ public class MapController implements Renderer {
         nativeMarkerRemoveAll(mapPointer);
 
         // Invalidate all markers so their ids are unusable
-        for (Marker marker : markers.values()) {
-            marker.invalidate();
-        }
+//        for (Marker marker : markers.values()) {
+//        }
 
         markers.clear();
     }

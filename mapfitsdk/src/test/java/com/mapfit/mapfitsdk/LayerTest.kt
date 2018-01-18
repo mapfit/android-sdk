@@ -1,10 +1,11 @@
-package com.mapfit.mapfitsdk.map
+package com.mapfit.mapfitsdk
 
-import com.mapfit.mapfitsdk.Layer
 import junit.framework.Assert
 import org.junit.Test
 
 /**
+ * Unit tests for [Layer].
+ *
  * Created by dogangulcan on 1/5/18.
  */
 class LayerTest {
