@@ -21,10 +21,15 @@ abstract class MapfitMap {
      * Sets the center of the map.
      *
      * @param latLng coordinates
-     * @param duration optional, the camera will move with ease.
      */
     abstract fun setCenter(latLng: LatLng)
 
+    /**
+     * Sets the center of the map.
+     *
+     * @param latLng coordinates
+     * @param duration optional, the camera will move with ease.
+     */
     abstract fun setCenter(latLng: LatLng, duration: Long = 0)
 
     /**
@@ -41,6 +46,12 @@ abstract class MapfitMap {
      */
     abstract fun addLayer(layer: Layer)
 
+
+    /**
+     * Returns the layers of the map.
+     *
+     * @return layer list
+     */
     abstract fun getLayers(): List<Layer>
 
     /**
@@ -55,6 +66,12 @@ abstract class MapfitMap {
      */
     abstract fun addMarker(latLng: LatLng): Marker
 
+    /**
+     * Removes the given marker from the map.
+     *
+     * @param marker to be removed
+     * @return isRemoved
+     */
     abstract fun removeMarker(marker: Marker): Boolean
 
     /**

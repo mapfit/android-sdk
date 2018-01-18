@@ -21,6 +21,9 @@ import com.mapfit.mapfitsdk.MapfitMap
 import com.mapfit.mapfitsdk.OnMapReadyCallback
 import com.mapfit.mapfitsdk.annotations.Marker
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
+import com.mapfit.mapfitsdk.geocoder.Geocoder
+import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
+import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
 import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
@@ -71,6 +74,10 @@ class CoffeeShopActivity : AppCompatActivity() {
             override fun onMapReady(mapfitMap: MapfitMap) {
                 setupMap(mapfitMap)
                 coffeeShops?.let { addMarkersFromCoffeeShops(it) }
+
+                addMapfitOfficeWithGeocoder()
+
+
 //                mapfitMap.addPolygon(repository.getLowerManhattanPoly())
 //                mapfitMap.addPolyline()
 //
@@ -109,7 +116,7 @@ class CoffeeShopActivity : AppCompatActivity() {
     }
 
     private fun setupMap(mapfitMap: MapfitMap) {
-        this@CoffeeShopActivity.mapfitMap = mapfitMap
+        this.mapfitMap = mapfitMap
 
         mapfitMap.apply {
             setCenter(LatLng(40.700798, -74.0050177), 500)
@@ -156,6 +163,23 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         }
 
+    }
+
+    private fun addMapfitOfficeWithGeocoder() {
+        Geocoder().geocodeAddress("343 gold street brooklyn", object : GeocoderCallback {
+            override fun onResponse(addressList: List<Address>) {
+                addressList.forEach { address ->
+                    if (address.entrances.isNotEmpty()) {
+                        address.entrances.forEach {
+                            mapfitMap.addMarker(LatLng(it.latitude, it.longitude))
+                        }
+                    } else {
+                        mapfitMap.addMarker(LatLng(address.latitude, address.longitude))
+                    }
+
+                }
+            }
+        })
     }
 
     override fun onDestroy() {
