@@ -16,7 +16,7 @@ import com.mapfit.mapfitsdk.geometry.LatLngBounds
  *
  * Created by dogangulcan on 12/19/17.
  */
-abstract class MapfitMap {
+ abstract class MapfitMap {
 
     /**
      * Sets the center of the map.

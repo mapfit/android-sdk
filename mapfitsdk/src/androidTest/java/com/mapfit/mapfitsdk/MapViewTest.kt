@@ -6,7 +6,6 @@ import android.support.test.annotation.UiThreadTest
 import android.support.test.runner.AndroidJUnit4
 import com.mapfit.mapfitsdk.MapOptions.Companion.MAP_MAX_ZOOM
 import com.mapfit.mapfitsdk.MapOptions.Companion.MAP_MIN_ZOOM
-import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.geometry.LatLng
 import org.junit.Assert
 import org.junit.Before
@@ -28,17 +27,12 @@ class MapViewTest {
     private val mMockContext: Context = InstrumentationRegistry.getContext()
     private lateinit var mapView: com.mapfit.mapfitsdk.MapView
     private lateinit var mapfitMap: MapfitMap
-    private lateinit var mapfit: Mapfit
 
     @Mock
     private lateinit var onMapClickListener: OnMapClickListener
 
     @Mock
     private lateinit var onMapDoubleClickListener: OnMapDoubleClickListener
-
-    @Mock
-    private lateinit var onMarkerAddedCallback: OnMarkerAddedCallback
-
 
     @Before
     @UiThreadTest
@@ -65,7 +59,7 @@ class MapViewTest {
     @Test
     @UiThreadTest
     fun testMapfitConfiguration() {
-//        mapfit = Mapfit.getInstance(mMockContext, BuildConfig.)
+
     }
 
 
@@ -145,26 +139,6 @@ class MapViewTest {
 
         mapfitMap.removeLayer(layer)
         Assert.assertNotEquals(layer, mapfitMap.getLayers().last())
-    }
-
-    @Test
-    @UiThreadTest
-    fun testAddRemoveMarker() {
-        val marker = mapfitMap.addMarker(LatLng())
-        Assert.assertNotNull(marker)
-
-        val removed = mapfitMap.removeMarker(marker)
-        Assert.assertTrue(removed)
-    }
-
-    @Test
-    @UiThreadTest
-    fun testAddMarkerWithAddress() {
-        mapfitMap.addMarker("343 gold street brooklyn", onMarkerAddedCallback)
-        val expectedMarker = mapfitMap.addMarker(LatLng(40.69408, -73.98288))
-
-        verify(onMarkerAddedCallback, times(1))
-                .onMarkerAdded(expectedMarker)
     }
 
 

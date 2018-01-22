@@ -8,7 +8,7 @@ import android.text.TextUtils
 /**
  * Created by dogangulcan on 12/18/17.
  */
-class Mapfit private constructor(private val context: Context, apiKey: String) {
+class Mapfit private constructor(private val context: Context?, apiKey: String) {
 
 
     companion object {
@@ -22,7 +22,7 @@ class Mapfit private constructor(private val context: Context, apiKey: String) {
         private lateinit var MAPFIT_API_KEY: String
 
         @JvmStatic
-        fun getInstance(context: Context, apiKey: String): Mapfit {
+        fun getInstance(context: Context? = null, apiKey: String): Mapfit {
             MAPFIT_API_KEY = apiKey
             appContext = context
             return synchronized(this) {

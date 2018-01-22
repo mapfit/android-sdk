@@ -1,6 +1,5 @@
 package com.mapfit.mapfitsdk.geocoder
 
-import android.net.Uri
 import com.mapfit.mapfitsdk.BuildConfig
 import com.mapfit.mapfitsdk.Mapfit
 import com.mapfit.mapfitsdk.geocoder.Geocoder.HttpHandler.geocodeParser
@@ -55,6 +54,7 @@ class Geocoder {
                 if (response != null && response.isSuccessful) {
 
                     async(UI) {
+
                         val addressList =
                                 bg {
                                     response.body()?.string()?.let {
@@ -75,18 +75,10 @@ class Geocoder {
         })
     }
 
-    private fun createRequestUrl(address: String): String {
-        val builder = Uri.Builder()
-
-        builder.scheme("https")
-                .authority("api.mapfit.com")
-                .appendPath("v2")
-                .appendPath("geocode")
-                .appendQueryParameter("street_address", address)
-                .appendQueryParameter("building", "false")
-                .appendQueryParameter("api_key", Mapfit.getApiKey())
-
-        return builder.build().toString()
-    }
+    private fun createRequestUrl(address: String): String =
+            "https://api.mapfit.com/v2/geocode?" +
+                    "street_address=$address" +
+                    "&building=false" +
+                    "&api_key=${Mapfit.getApiKey()}"
 
 }

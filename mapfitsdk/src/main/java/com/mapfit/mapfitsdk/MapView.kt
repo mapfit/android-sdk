@@ -228,7 +228,7 @@ class MapView(
                 }
 
                 override fun onError(message: String, e: Exception) {
-                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                    onMarkerAddedCallback.onError(e)
                 }
             })
         }
