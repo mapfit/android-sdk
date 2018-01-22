@@ -17,16 +17,23 @@ import android.widget.RelativeLayout
 import com.mapfit.mapfitsdk.annotations.Marker
 import com.mapfit.mapfitsdk.annotations.Polygon
 import com.mapfit.mapfitsdk.annotations.Polyline
+import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener
+import com.mapfit.mapfitsdk.geocoder.Geocoder
+import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
+import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.LatLngBounds
+import com.mapfit.mapfitsdk.utils.isEmpty
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
 import com.mapfit.tangram.ConfigChooser
 import com.mapfit.tangram.MarkerPickResult
 import com.mapfit.tangram.TouchInput
+import kotlinx.android.synthetic.main.overlay_map_controls.view.*
 import org.jetbrains.annotations.NotNull
+import java.io.IOException
 
 
 /**
@@ -44,6 +51,7 @@ class MapView(
 
     private lateinit var mapController: MapController
     private lateinit var mapOptions: MapOptions
+    private val geocoder by lazy { Geocoder() }
 
 
     // Views
@@ -101,13 +109,19 @@ class MapView(
     private fun initUiControls() {
         addView(controlsView)
         attributionImage.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://mapfit.com/"))
 
-            if (intent.resolveActivity(context.packageManager) != null) {
-                context.startActivity(intent)
+            if (containerAttribute.visibility == View.VISIBLE) {
+                containerAttribute.visibility = View.GONE
             } else {
-                Log.d(TAG, "No Intent available to handle opening https://mapfit.com/")
+                containerAttribute.visibility = View.VISIBLE
             }
+//            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://mapfit.com/"))
+//
+//            if (intent.resolveActivity(context.packageManager) != null) {
+//                context.startActivity(intent)
+//            } else {
+//                Log.d(TAG, "No Intent available to handle opening https://mapfit.com/")
+//            }
         }
         controlsView.findViewById<ImageView>(R.id.btnZoomIn).setOnClickListener {
             mapfitMap.setZoom(mapfitMap.getZoom() + ZOOM_STEP_LEVEL,
@@ -190,6 +204,34 @@ class MapView(
     }
 
     private val mapfitMap = object : MapfitMap() {
+
+        override fun addMarker(address: String, onMarkerAddedCallback: OnMarkerAddedCallback) {
+            geocoder.geocodeAddress(address, object : GeocoderCallback {
+                override fun onSuccess(addressList: List<Address>) {
+
+                    var latLng = LatLng()
+                    addressList.forEach { address ->
+                        latLng = if (address.entrances.isNotEmpty()) {
+                            LatLng(address.entrances.first().latitude,
+                                    address.entrances.first().longitude)
+                        } else {
+                            LatLng(address.latitude, address.longitude)
+                        }
+                    }
+
+                    if (latLng.isEmpty()) {
+                        onMarkerAddedCallback.onError(IOException("No coordinates found for given address."))
+                    } else {
+                        val marker = mapController.addMarker().setPosition(latLng)
+                        onMarkerAddedCallback.onMarkerAdded(marker)
+                    }
+                }
+
+                override fun onError(message: String, e: Exception) {
+                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                }
+            })
+        }
 
         override fun getLayers(): List<Layer> {
             return layers

@@ -21,4 +21,6 @@ data class LatLng(
     init {
         isValid()
     }
+
+
 }

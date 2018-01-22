@@ -12,9 +12,9 @@ import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener
  *
  * Created by dogangulcan on 12/27/17.
  */
-class FilterVH(view: View, val onFilterChecked: OnFilterCheckedListener) : RecyclerView.ViewHolder(view) {
+class SwitchFilterVH(view: View, private val onFilterChecked: OnFilterCheckedListener) : RecyclerView.ViewHolder(view) {
 
-    val switch = view.findViewById<SwitchCompat>(R.id.filterSwitch)
+    private val switch = view.findViewById<SwitchCompat>(R.id.filterSwitch)
 
     fun bind(filter: Filter) {
 

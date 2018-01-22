@@ -1,9 +1,7 @@
 package com.mapfit.mapfitsdk
 
 import android.support.annotation.FloatRange
-import android.support.v7.content.res.AppCompatResources
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
-import kotlinx.android.synthetic.main.overlay_map_controls.view.*
 
 /**
  * Created by dogangulcan on 12/21/17.

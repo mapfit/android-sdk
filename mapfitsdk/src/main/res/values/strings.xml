@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MapfitSDK</string>
+    <string name="legal_notices">Legal Notices</string>
+    <string name="build_your_map">Build your map</string>
 </resources>

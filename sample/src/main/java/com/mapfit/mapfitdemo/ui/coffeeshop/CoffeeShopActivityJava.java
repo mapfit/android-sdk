@@ -85,6 +85,11 @@ class CoffeeShopActivityJava extends AppCompatActivity {
 
     private OnFilterCheckedListener onFilterCheckedListener = new OnFilterCheckedListener() {
         @Override
+        public void onClearMarkersClicked() {
+
+        }
+
+        @Override
         public void onFilterChecked(@NotNull FilterType filterType, boolean isChecked) {
             switch (filterType) {
                 case ZOOM_CONTROLS:

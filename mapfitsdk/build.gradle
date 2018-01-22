@@ -49,12 +49,14 @@ android {
     buildTypes {
 
         debug {
+            buildConfigField "Boolean", "DEBUG_MODE", "true"
             externalNativeBuild {
                 cmake.cppFlags '-g'
             }
         }
 
         release {
+            buildConfigField "Boolean", "DEBUG_MODE", "false"
             externalNativeBuild {
                 cmake.cppFlags '-g0'
             }
@@ -82,6 +84,7 @@ dependencies {
     api 'com.android.support:support-annotations:27.0.2'
 
     api 'com.squareup.okhttp3:okhttp:3.9.1'
+    api 'com.squareup.okhttp3:logging-interceptor:3.9.1'
 
     testImplementation 'junit:junit:4.12'
     testCompile "org.mockito:mockito-core:2.13.0"

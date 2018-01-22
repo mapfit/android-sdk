@@ -269,6 +269,9 @@ public class MapController implements Renderer {
         if (mapPointer <= 0) {
             throw new RuntimeException("Unable to create a native Map object! There may be insufficient memory available.");
         }
+
+
+
     }
 
     void dispose() {

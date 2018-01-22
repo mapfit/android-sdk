@@ -159,4 +159,7 @@ class Marker internal constructor(
 
     private fun getVisible(): Boolean = isVisible
 
+    fun remove() {
+        mapController.removeMarker(this)
+    }
 }
