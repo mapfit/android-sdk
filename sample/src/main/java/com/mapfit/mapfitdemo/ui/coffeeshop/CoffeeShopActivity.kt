@@ -1,5 +1,6 @@
 package com.mapfit.mapfitdemo.ui.coffeeshop
 
+import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.view.GravityCompat
@@ -10,6 +11,10 @@ import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
+import android.widget.Toast
 import com.mapfit.mapfitdemo.R
 import com.mapfit.mapfitdemo.data.model.CoffeeShop
 import com.mapfit.mapfitdemo.module.coffeeshop.data.Repository
@@ -20,7 +25,11 @@ import com.mapfit.mapfitsdk.Layer
 import com.mapfit.mapfitsdk.MapfitMap
 import com.mapfit.mapfitsdk.OnMapReadyCallback
 import com.mapfit.mapfitsdk.annotations.Marker
+import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
+import com.mapfit.mapfitsdk.geocoder.Geocoder
+import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
+import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
 import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
@@ -55,6 +64,8 @@ class CoffeeShopActivity : AppCompatActivity() {
 
     private fun init() {
         setSupportActionBar(toolbar)
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(toolbar.windowToken, 0)
 
         val filterAdapter = FilterAdapter(onFilterCheckedListener)
         filterAdapter.addItems(repository.getFilters())
@@ -69,8 +80,14 @@ class CoffeeShopActivity : AppCompatActivity() {
     private fun initMap() {
         map.getMapAsync(object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
+
                 setupMap(mapfitMap)
+                addMapfitOfficeWithGeocoder()
+                setupMarkerWithAddressInput()
+
                 coffeeShops?.let { addMarkersFromCoffeeShops(it) }
+
+
 //                mapfitMap.addPolygon(repository.getLowerManhattanPoly())
 //                mapfitMap.addPolyline()
 //
@@ -80,6 +97,12 @@ class CoffeeShopActivity : AppCompatActivity() {
     }
 
     private val onFilterCheckedListener = object : OnFilterCheckedListener {
+        override fun onClearMarkersClicked() {
+            markers.forEach { it.remove() }
+            drawerLayout.closeDrawer(GravityCompat.END)
+        }
+
+
         override fun onFilterChecked(filterType: FilterType, isChecked: Boolean) {
             when (filterType) {
                 FilterType.ZOOM_CONTROLS -> {
@@ -109,7 +132,7 @@ class CoffeeShopActivity : AppCompatActivity() {
     }
 
     private fun setupMap(mapfitMap: MapfitMap) {
-        this@CoffeeShopActivity.mapfitMap = mapfitMap
+        this.mapfitMap = mapfitMap
 
         mapfitMap.apply {
             setCenter(LatLng(40.700798, -74.0050177), 500)
@@ -139,6 +162,51 @@ class CoffeeShopActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupMarkerWithAddressInput() {
+
+        edtAddress.setOnEditorActionListener(TextView.OnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                addMarkerWithAddress()
+                return@OnEditorActionListener true
+            }
+            false
+        })
+
+        btnAddMarker.setOnClickListener {
+            addMarkerWithAddress()
+        }
+    }
+
+    private fun addMarkerWithAddress() {
+
+        val address = edtAddress.text.toString()
+        if (address.isBlank()) {
+
+        } else {
+
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(toolbar.windowToken, 0)
+
+            mapfitMap.addMarker(address, object : OnMarkerAddedCallback {
+
+                override fun onMarkerAdded(marker: Marker) {
+                    mapfitMap.setCenter(marker.getPosition(), 300)
+                    mapfitMap.setZoom(17f, 300)
+                    edtAddress.setText("")
+                    markers.add(marker)
+                }
+
+                override fun onError(exception: Exception) {
+                    Toast.makeText(this@CoffeeShopActivity,
+                            "Couldn't find a valid location for given address",
+                            Toast.LENGTH_LONG).show()
+
+                }
+
+            })
+        }
+    }
+
     private fun addMarkersFromCoffeeShops(coffeeShops: List<CoffeeShop>) {
 
         coffeeShops.forEach { shop ->
@@ -158,6 +226,28 @@ class CoffeeShopActivity : AppCompatActivity() {
 
     }
 
+    private fun addMapfitOfficeWithGeocoder() {
+        Geocoder().geocodeAddress("119w 24th st new york ny",
+                object : GeocoderCallback {
+
+                    override fun onError(message: String, e: Exception) {
+                        print(e)
+                    }
+
+                    override fun onSuccess(addressList: List<Address>) {
+                        addressList.forEach { address ->
+                            if (address.entrances.isNotEmpty()) {
+                                address.entrances.forEach {
+                                    markers.add(mapfitMap.addMarker(LatLng(it.latitude, it.longitude)))
+                                }
+                            } else {
+                                markers.add(mapfitMap.addMarker(LatLng(address.latitude, address.longitude)))
+                            }
+                        }
+                    }
+                })
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         map.onDestroy()
@@ -169,13 +259,18 @@ class CoffeeShopActivity : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-//        menuInflater.inflate(R.menu.coffee_shops, menu)
+        menuInflater.inflate(R.menu.coffee_shops, menu)
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
-            R.id.action_filter -> drawerLayout.openDrawer(GravityCompat.END)
+//            R.id.action_clear_markers -> {
+//                markers.forEach { it.remove() }
+//            }
+            R.id.action_filter -> {
+                drawerLayout.openDrawer(GravityCompat.END)
+            }
         }
         return super.onOptionsItemSelected(item)
     }

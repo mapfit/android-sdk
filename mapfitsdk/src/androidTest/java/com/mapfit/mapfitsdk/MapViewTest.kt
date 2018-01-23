@@ -55,9 +55,21 @@ class MapViewTest {
         Assert.assertNotNull(mapfitMap)
     }
 
+
+    @Test
+    @UiThreadTest
+    fun testMapfitConfiguration() {
+
+    }
+
+
     @Test
     @UiThreadTest
     fun testDefaultValues() {
+//        val response = ()
+//                .addHeader("Content-Type", "application/json; charset=utf-8")
+//                .addHeader("Cache-Control", "no-cache")
+//                .setBody("{}")
 //        Assert.assertEquals(MapTheme.MAPFIT_DAY, mapfitMap.getMapOptions().mapTheme)
     }
 
@@ -127,16 +139,6 @@ class MapViewTest {
 
         mapfitMap.removeLayer(layer)
         Assert.assertNotEquals(layer, mapfitMap.getLayers().last())
-    }
-
-    @Test
-    @UiThreadTest
-    fun testAddRemoveMarker() {
-        val marker = mapfitMap.addMarker(LatLng())
-        Assert.assertNotNull(marker)
-
-        val removed = mapfitMap.removeMarker(marker)
-        Assert.assertTrue(removed)
     }
 
 

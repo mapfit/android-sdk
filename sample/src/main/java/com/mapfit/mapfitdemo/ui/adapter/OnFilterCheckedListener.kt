@@ -7,4 +7,6 @@ interface OnFilterCheckedListener {
 
     fun onFilterChecked(filterType: FilterType, isChecked: Boolean)
 
+    fun onClearMarkersClicked()
+
 }

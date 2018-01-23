@@ -3,6 +3,7 @@ package com.mapfit.mapfitsdk
 import com.mapfit.mapfitsdk.annotations.Marker
 import com.mapfit.mapfitsdk.annotations.Polygon
 import com.mapfit.mapfitsdk.annotations.Polyline
+import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener
@@ -15,7 +16,14 @@ import com.mapfit.mapfitsdk.geometry.LatLngBounds
  *
  * Created by dogangulcan on 12/19/17.
  */
-abstract class MapfitMap {
+ abstract class MapfitMap {
+
+    /**
+     * Sets the center of the map.
+     *
+     * @param latLng coordinates
+     */
+    abstract fun setCenter(latLng: LatLng)
 
     /**
      * Sets the center of the map.
@@ -23,8 +31,6 @@ abstract class MapfitMap {
      * @param latLng coordinates
      * @param duration optional, the camera will move with ease.
      */
-    abstract fun setCenter(latLng: LatLng)
-
     abstract fun setCenter(latLng: LatLng, duration: Long = 0)
 
     /**
@@ -41,6 +47,12 @@ abstract class MapfitMap {
      */
     abstract fun addLayer(layer: Layer)
 
+
+    /**
+     * Returns the layers of the map.
+     *
+     * @return layer list
+     */
     abstract fun getLayers(): List<Layer>
 
     /**
@@ -49,12 +61,28 @@ abstract class MapfitMap {
     abstract fun getCenter(): LatLng
 
     /**
-     * Adds a marker on the default layer.
+     * Adds a marker on the default layer on given coordinates.
      *
      * @return marker
      */
     abstract fun addMarker(latLng: LatLng): Marker
 
+    /**
+     * Adds a marker on the default layer for the given address. Marker will be placed at the
+     * coordinates of main entrance if the address belongs to a building. If there are no entrance
+     * information for given address, marker will be placed to the most accurate coordinates.
+     *
+     * @param address an address such as "119w 24th st NY" venue names are shouldn't be given
+     * @param onMarkerAddedCallback for response and errors
+     */
+    abstract fun addMarker(address: String, onMarkerAddedCallback: OnMarkerAddedCallback)
+
+    /**
+     * Removes the given marker from the map.
+     *
+     * @param marker to be removed
+     * @return isRemoved
+     */
     abstract fun removeMarker(marker: Marker): Boolean
 
     /**

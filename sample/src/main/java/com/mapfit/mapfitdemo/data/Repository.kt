@@ -51,11 +51,13 @@ class Repository(private val context: Context) {
     fun getFilters(): List<Filter> {
         val filters = mutableListOf<Filter>()
 
-        filters.add(Filter(FilterType.ALL_MARKERS, "Markers", true))
-        filters.add(Filter(FilterType.ZOOM_CONTROLS, "Zoom Controls", true))
+        filters.add(Filter(FilterType.CLEAR_MARKERS, "Clear Markers", true))
+
+//        filters.add(Filter(FilterType.ALL_MARKERS, "Markers", true))
+//        filters.add(Filter(FilterType.ZOOM_CONTROLS, "Zoom Controls", true))
 //        filters.add(Filter(FilterType.MAP_STYLE, "Map Style", true))
-        filters.add(Filter(FilterType.CAMERA_STYLE, "Camera Style", true))
-        filters.add(Filter(FilterType.ALWAYS_OPEN, "Always Open Vendors", false))
+//        filters.add(Filter(FilterType.CAMERA_STYLE, "Camera Style", true))
+//        filters.add(Filter(FilterType.ALWAYS_OPEN, "Always Open Vendors", false))
 
         return filters
     }

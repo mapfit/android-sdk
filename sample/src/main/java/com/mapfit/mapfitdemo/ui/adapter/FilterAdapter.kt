@@ -6,7 +6,8 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import com.mapfit.mapfitdemo.R
 import com.mapfit.mapfitdemo.data.model.Filter
-import com.mapfit.mapfitdemo.ui.adapter.vh.FilterVH
+import com.mapfit.mapfitdemo.ui.adapter.vh.ButtonFilterVH
+import com.mapfit.mapfitdemo.ui.adapter.vh.SwitchFilterVH
 
 /**
  * Created by dogangulcan on 12/27/17.
@@ -17,23 +18,30 @@ class FilterAdapter(private val onFilterChecked: OnFilterCheckedListener) : Recy
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
         when (holder) {
-            is FilterVH -> holder.bind(filters[position])
+            is SwitchFilterVH -> holder.bind(filters[position])
+            is ButtonFilterVH -> holder.bind(filters[position])
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder? {
 
-        val itemView = LayoutInflater.from(parent?.context).inflate(R.layout.list_item_filter, parent, false)
-        return FilterVH(itemView, onFilterChecked)
-//
-//        return when (FilterType.values()[viewType]) {
-//            FilterType.ZOOM_CONTROLS,
-//            FilterType.ALL_MARKERS,
-//            FilterType.ALWAYS_OPEN -> {
-//
-//            }
-//
-//        }
+        return when (FilterType.values()[viewType]) {
+            FilterType.ZOOM_CONTROLS,
+            FilterType.ALL_MARKERS,
+            FilterType.ALWAYS_OPEN -> {
+                val itemView = LayoutInflater.from(parent?.context).inflate(R.layout.list_item_filter_switch, parent, false)
+                return SwitchFilterVH(itemView, onFilterChecked)
+            }
+            FilterType.CLEAR_MARKERS -> {
+                val itemView = LayoutInflater.from(parent?.context).inflate(R.layout.list_item_filter_button, parent, false)
+                return ButtonFilterVH(itemView, onFilterChecked)
+            }
+
+
+            else -> {
+                return null
+            }
+        }
 
     }
 

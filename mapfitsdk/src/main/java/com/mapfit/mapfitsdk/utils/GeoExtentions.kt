@@ -28,3 +28,5 @@ fun LatLng.isValid(): Boolean {
 
     return isLatValid && isLonValid
 }
+
+fun LatLng.isEmpty(): Boolean = lat == 0.0 && lon == 0.0
