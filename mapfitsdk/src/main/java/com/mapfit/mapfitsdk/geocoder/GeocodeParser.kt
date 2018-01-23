@@ -46,13 +46,14 @@ internal class GeocodeParser internal constructor() {
 
                 val locality = addressJson.getSafeString("locality")
                 val postalCode = addressJson.getSafeString("postal_code")
+                val country = addressJson.getSafeString("country")
                 val adminArea = addressJson.getSafeString("admin_1")
                 val neighborhood = addressJson.getSafeString("neighborhood")
                 val streetAddress = addressJson.getSafeString("street_address")
 
-                val statusCode: LocationStatus? = if (addressJson.has("status-code")) {
+                val statusCode: LocationStatus? = if (addressJson.has("response_type")) {
                     LocationStatus.values()
-                            .find { status -> status.code == addressJson.getInt("status-code") }
+                            .find { status -> status.code == addressJson.getInt("response_type") }
                 } else {
                     LocationStatus.ERROR
                 }
@@ -74,6 +75,7 @@ internal class GeocodeParser internal constructor() {
                         postalCode = postalCode,
                         adminArea = adminArea,
                         neighborhood = neighborhood,
+                        country = country,
                         status = statusCode,
                         streetAddress = streetAddress,
                         entrances = entrances ?: emptyList(),
@@ -121,7 +123,7 @@ internal class GeocodeParser internal constructor() {
                 val entranceType = EntranceType.values()
                         .find { status ->
                             status.sourceName
-                                    .contentEquals(entranceJson.getString("entrance-type"))
+                                    .contentEquals(entranceJson.getString("entrance_type"))
                         }
 
                 val entrance = Entrance(lat, lon, entranceType)
