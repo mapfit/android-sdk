@@ -1,10 +1,12 @@
 package com.mapfit.mapfitsdk.geocoder
 
+import com.mapfit.mapfitsdk.BuildConfig
 import com.mapfit.mapfitsdk.exceptions.MapfitAuthorizationException
 import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geocoder.model.Entrance
 import com.mapfit.mapfitsdk.geocoder.model.EntranceType
 import com.mapfit.mapfitsdk.geocoder.model.LocationStatus
+import com.mapfit.mapfitsdk.utils.DebugUtils
 import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONException
@@ -30,6 +32,7 @@ internal class GeocodeParser internal constructor() {
             val message = jsonObject.getString("error")
             Pair(message, exception)
         } catch (e: Exception) {
+            DebugUtils.logException(e)
             Pair("An error has occurred", exception)
         }
     }
@@ -86,7 +89,7 @@ internal class GeocodeParser internal constructor() {
                 addressList.add(address)
 
             } catch (e: JSONException) {
-                e.printStackTrace()
+                DebugUtils.logException(e)
             }
 
         }
@@ -107,7 +110,7 @@ internal class GeocodeParser internal constructor() {
                 val longitude = jsonObject?.getDouble("lon")
                 Pair(latitude ?: 0.0, longitude ?: 0.0)
             } catch (e: JSONException) {
-                e.printStackTrace()
+                DebugUtils.logException(e)
                 Pair(0.0, 0.0)
             }
 
@@ -130,7 +133,7 @@ internal class GeocodeParser internal constructor() {
                 entrances.add(entrance)
 
             } catch (e: JSONException) {
-                e.printStackTrace()
+                DebugUtils.logException(e)
             }
         }
 

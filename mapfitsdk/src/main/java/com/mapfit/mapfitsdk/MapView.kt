@@ -1,6 +1,5 @@
 package com.mapfit.mapfitsdk
 
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.graphics.PointF
@@ -28,10 +27,16 @@ import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.LatLngBounds
 import com.mapfit.mapfitsdk.utils.isEmpty
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
+import com.mapfit.mapfitsdk.utils.startActivitySafe
 import com.mapfit.tangram.ConfigChooser
 import com.mapfit.tangram.MarkerPickResult
 import com.mapfit.tangram.TouchInput
 import kotlinx.android.synthetic.main.overlay_map_controls.view.*
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 import org.jetbrains.annotations.NotNull
 import java.io.IOException
 
@@ -94,13 +99,14 @@ class MapView(
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
     }
 
-    fun getMapAsync(@NotNull onMapReadyCallback: OnMapReadyCallback) {
+    @JvmOverloads
+    fun getMapAsync(mapTheme: MapTheme = MapTheme.MAPFIT_DAY, @NotNull onMapReadyCallback: OnMapReadyCallback) {
 
         if (::mapController.isInitialized) {
             onMapReadyCallback.onMapReady(mapfitMap)
         }
 
-        initMapController(onMapReadyCallback)
+        initMapController(mapTheme, onMapReadyCallback)
         initUiControls()
 
 
@@ -109,31 +115,44 @@ class MapView(
     private fun initUiControls() {
         addView(controlsView)
         attributionImage.setOnClickListener {
+            attributionAnimJob?.cancel()
 
             if (containerAttribute.visibility == View.VISIBLE) {
                 containerAttribute.visibility = View.GONE
             } else {
                 containerAttribute.visibility = View.VISIBLE
             }
-//            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://mapfit.com/"))
+
+            attributionAnimJob = launch {
+                delay(2000)
+                async(UI) {
+                    if (containerAttribute.visibility == View.VISIBLE) {
+                        containerAttribute.visibility = View.GONE
+                    }
+                }
+            }
+        }
 //
-//            if (intent.resolveActivity(context.packageManager) != null) {
-//                context.startActivity(intent)
-//            } else {
-//                Log.d(TAG, "No Intent available to handle opening https://mapfit.com/")
-//            }
+
+
+        btnLegal.setOnClickListener({
+            context.startActivitySafe(mapfitLegalIntent)
+        })
+
+        btnBuildYourMap.setOnClickListener({
+            context.startActivitySafe(mapfitWebsiteIntent)
+        })
+
+        btnZoomIn.setOnClickListener {
+            mapfitMap.setZoom(mapfitMap.getZoom() + ZOOM_STEP_LEVEL, ANIMATION_DURATION)
         }
-        controlsView.findViewById<ImageView>(R.id.btnZoomIn).setOnClickListener {
-            mapfitMap.setZoom(mapfitMap.getZoom() + ZOOM_STEP_LEVEL,
-                    ANIMATION_DURATION)
-        }
-        controlsView.findViewById<ImageView>(R.id.btnZoomOut).setOnClickListener {
-            mapfitMap.setZoom(mapfitMap.getZoom() - ZOOM_STEP_LEVEL,
-                    ANIMATION_DURATION)
+
+        btnZoomOut.setOnClickListener {
+            mapfitMap.setZoom(mapfitMap.getZoom() - ZOOM_STEP_LEVEL, ANIMATION_DURATION)
         }
     }
 
-    private fun initMapController(onMapReadyCallback: OnMapReadyCallback) {
+    private fun initMapController(mapTheme: MapTheme, onMapReadyCallback: OnMapReadyCallback) {
         mapController = MapController(getGLSurfaceView())
         mapController.apply {
             init()
@@ -145,7 +164,7 @@ class MapView(
             })
 
             mapOptions = MapOptions(this@MapView, this)
-            mapOptions.loadDefaultTheme()
+            mapOptions.setTheme(mapTheme)
 
         }
     }
@@ -433,5 +452,17 @@ class MapView(
     fun onLowMemory() {
         mapController.onLowMemory()
     }
+
+
+    private val mapfitWebsiteIntent by lazy {
+        Intent(Intent.ACTION_VIEW, Uri.parse("https://mapfit.com/"))
+    }
+
+    private val mapfitLegalIntent by lazy {
+        Intent(Intent.ACTION_VIEW, Uri.parse("https://mapfit.com/legalnotices"))
+    }
+
+    private var attributionAnimJob: Job? = null
+
 
 }

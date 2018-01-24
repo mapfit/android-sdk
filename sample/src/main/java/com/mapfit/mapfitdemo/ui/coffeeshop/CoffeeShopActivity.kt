@@ -22,6 +22,7 @@ import com.mapfit.mapfitdemo.ui.adapter.FilterAdapter
 import com.mapfit.mapfitdemo.ui.adapter.FilterType
 import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener
 import com.mapfit.mapfitsdk.Layer
+import com.mapfit.mapfitsdk.MapTheme
 import com.mapfit.mapfitsdk.MapfitMap
 import com.mapfit.mapfitsdk.OnMapReadyCallback
 import com.mapfit.mapfitsdk.annotations.Marker
@@ -78,7 +79,7 @@ class CoffeeShopActivity : AppCompatActivity() {
     }
 
     private fun initMap() {
-        map.getMapAsync(object : OnMapReadyCallback {
+        map.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
 
                 setupMap(mapfitMap)
@@ -97,6 +98,15 @@ class CoffeeShopActivity : AppCompatActivity() {
     }
 
     private val onFilterCheckedListener = object : OnFilterCheckedListener {
+        override fun onSpinnerItemSelected(filterType: FilterType, string: String) {
+            when (filterType) {
+                FilterType.MAP_THEME -> {
+                    mapfitMap.getMapOptions().setTheme(MapTheme.valueOf(string))
+                    drawerLayout.closeDrawer(GravityCompat.END)
+                }
+            }
+        }
+
         override fun onClearMarkersClicked() {
             markers.forEach { it.remove() }
             drawerLayout.closeDrawer(GravityCompat.END)
@@ -137,6 +147,8 @@ class CoffeeShopActivity : AppCompatActivity() {
         mapfitMap.apply {
             setCenter(LatLng(40.700798, -74.0050177), 500)
             setZoom(13f, 500)
+
+
 //            setOnMarkerClickListener(onMarkerClickListener)
         }
 

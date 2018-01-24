@@ -8,7 +8,7 @@ import com.mapfit.mapfitdemo.data.model.Filter
 import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener
 
 /**
- * ViewHol
+ * ViewHolder with a switch.
  *
  * Created by dogangulcan on 12/27/17.
  */
@@ -16,7 +16,7 @@ class SwitchFilterVH(view: View, private val onFilterChecked: OnFilterCheckedLis
 
     private val switch = view.findViewById<SwitchCompat>(R.id.filterSwitch)
 
-    fun bind(filter: Filter) {
+    fun bind(filter: Filter<*>) {
 
         switch.text = filter.title
         switch.isChecked = filter.isActive

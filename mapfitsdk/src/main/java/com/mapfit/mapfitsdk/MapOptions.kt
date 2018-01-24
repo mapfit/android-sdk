@@ -1,7 +1,9 @@
 package com.mapfit.mapfitsdk
 
 import android.support.annotation.FloatRange
+import android.support.v4.content.ContextCompat
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
+import kotlinx.android.synthetic.main.overlay_map_controls.view.*
 
 /**
  * Created by dogangulcan on 12/21/17.
@@ -20,21 +22,30 @@ class MapOptions internal constructor(
 
     private var minZoom: Float = 1f
 
-    internal var mapTheme = MapTheme.MAPFIT_DAY
-        set(value) {
-            if (value != field) {
-                updateScene(value)
-                field = value
-            }
+    private var theme: MapTheme? = null
+
+
+    fun setTheme(theme: MapTheme) {
+        if (this.theme == null || this.theme != theme) {
+            updateScene(theme)
+            this.theme = theme
         }
+    }
 
     private fun updateScene(value: MapTheme) {
         mapController.loadSceneFile(value.toString())
         val attributionImage = when (value) {
-            MapTheme.MAPFIT_DAY -> R.drawable.ic_watermark_light
-            MapTheme.MAPFIT_NIGHT -> R.drawable.ic_watermark_dark
+            MapTheme.MAPFIT_DAY -> {
+                mapView.btnLegal?.setTextColor(ContextCompat.getColor(mapView.context, R.color.dark_text))
+                mapView.btnBuildYourMap?.setTextColor(ContextCompat.getColor(mapView.context, R.color.dark_text))
+                R.drawable.ic_watermark_light
+            }
+            MapTheme.MAPFIT_NIGHT -> {
+                mapView.btnLegal?.setTextColor(ContextCompat.getColor(mapView.context, R.color.light_text))
+                mapView.btnBuildYourMap?.setTextColor(ContextCompat.getColor(mapView.context, R.color.light_text))
+                R.drawable.ic_watermark_dark
+            }
         }
-//        val drawable = AppCompatResources.getDrawable(mapView.context, attributionImage)
         mapView.getAttributionImage().setImageResource(attributionImage)
     }
 

@@ -1,5 +1,6 @@
 package com.mapfit.mapfitsdk.utils
 
+import android.content.Context
 import android.graphics.drawable.Drawable
 import android.util.Log
 import com.mapfit.mapfitsdk.MapOptions.Companion.MAP_MAX_ZOOM
@@ -7,6 +8,10 @@ import com.mapfit.mapfitsdk.MapOptions.Companion.MAP_MIN_ZOOM
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
 import java.net.URL
+import android.net.NetworkInfo
+import android.content.Context.CONNECTIVITY_SERVICE
+import android.net.ConnectivityManager
+import com.mapfit.mapfitsdk.Mapfit
 
 
 /**
@@ -24,14 +29,14 @@ fun isValidZoomLevel(zoomLevel: Float): Boolean {
 }
 
 fun loadImageFromUrl(url: String): Deferred<Drawable?> = async {
-    if (isValidImageUrl(url)) {
+    if (isValidImageUrl(url) && isNetworkAvailable()) {
         try {
             val inputStream = URL(url).openStream()
             val drawable = Drawable.createFromStream(inputStream, "")
 
             drawable
         } catch (e: Exception) {
-            e.printStackTrace()
+            DebugUtils.logException(e)
             null
         }
     } else {
@@ -43,4 +48,10 @@ fun loadImageFromUrl(url: String): Deferred<Drawable?> = async {
 fun isValidImageUrl(url: String): Boolean {
     val imgRg = """(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*\.(?:jpg|gif|png))""".toRegex()
     return imgRg.containsMatchIn(url)
+}
+
+private fun isNetworkAvailable(): Boolean {
+    val connectivityManager = Mapfit.getContext()?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val activeNetworkInfo = connectivityManager.activeNetworkInfo
+    return activeNetworkInfo != null && activeNetworkInfo.isConnected
 }

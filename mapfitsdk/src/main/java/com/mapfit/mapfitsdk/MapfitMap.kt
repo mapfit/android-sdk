@@ -16,7 +16,7 @@ import com.mapfit.mapfitsdk.geometry.LatLngBounds
  *
  * Created by dogangulcan on 12/19/17.
  */
- abstract class MapfitMap {
+abstract class MapfitMap {
 
     /**
      * Sets the center of the map.
@@ -136,7 +136,7 @@ import com.mapfit.mapfitsdk.geometry.LatLngBounds
      * MapOptions can be used to changing options for the map. For instance, setting maximum zoom
      * level or turning zoom controls off.
      */
-    protected abstract fun getMapOptions(): MapOptions
+    abstract fun getMapOptions(): MapOptions
 
     protected abstract fun getDirectionsOptions(): DirectionsOptions
 

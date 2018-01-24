@@ -11,6 +11,8 @@
     <color name="cool_grey_two">#95979a</color>
     <color name="gunmetal">#535658</color>
     <color name="charcoal_grey">#414346</color>
+    <color name="dark_text">#212121</color>
+    <color name="light_text">#fafafa</color>
 
 
 </resources>
