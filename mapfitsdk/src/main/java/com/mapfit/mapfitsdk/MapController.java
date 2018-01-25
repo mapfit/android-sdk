@@ -485,7 +485,9 @@ public class MapController implements Renderer {
         mapView.post(new Runnable() {
             @Override
             public void run() {
-                kotlin.Pair<LatLng, Float> pair = latlngBounds.getVisibleBounds(mapView);
+                kotlin.Pair<LatLng, Float> pair = latlngBounds.getVisibleBounds(
+                        mapView.getWidth(),
+                        mapView.getHeight());
                 lastCenter = pair.component1();
                 checkPointer(mapPointer);
                 nativeSetZoom(mapPointer, pair.component2());

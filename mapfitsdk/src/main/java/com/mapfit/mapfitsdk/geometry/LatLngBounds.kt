@@ -1,8 +1,5 @@
 package com.mapfit.mapfitsdk.geometry
 
-import android.view.View
-import com.mapfit.mapfitsdk.utils.getCenterLatlng
-
 
 /**
  * Created by dogangulcan on 1/4/18.
@@ -45,17 +42,17 @@ class LatLngBounds(
         fun build() = LatLngBounds(this)
     }
 
-    fun getVisibleBounds(mapView: View): Pair<LatLng, Float> {
+    fun getVisibleBounds(viewWidth: Int, viewHeight: Int): Pair<LatLng, Float> {
         val ry1 = Math.log((Math.sin(Math.toRadians(southWest.lat)) + 1) / Math.cos(Math.toRadians(southWest.lat)))
         val ry2 = Math.log((Math.sin(Math.toRadians(nortEast.lat)) + 1) / Math.cos(Math.toRadians(nortEast.lat)))
         val ryc = (ry1 + ry2) / 2
         val centerX = Math.toDegrees(Math.atan(Math.sinh(ryc)))
 
-        val resolutionHorizontal = (nortEast.lon - southWest.lon) / mapView.width
+        val resolutionHorizontal = (nortEast.lon - southWest.lon) / viewWidth
 
         val vy0 = Math.log(Math.tan(Math.PI * (0.25 + centerX / 360)))
         val vy1 = Math.log(Math.tan(Math.PI * (0.25 + nortEast.lat / 360)))
-        val viewHeightHalf = mapView.height / 2.0f
+        val viewHeightHalf = viewHeight / 2.0f
         val zoomFactorPowered = viewHeightHalf / (40.7436654315252 * (vy1 - vy0))
         val resolutionVertical = 360.0 / (zoomFactorPowered * 256)
 

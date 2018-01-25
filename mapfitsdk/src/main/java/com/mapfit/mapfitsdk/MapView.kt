@@ -25,7 +25,7 @@ import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
 import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.LatLngBounds
-import com.mapfit.mapfitsdk.utils.isEmpty
+import com.mapfit.mapfitsdk.geometry.isEmpty
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
 import com.mapfit.mapfitsdk.utils.startActivitySafe
 import com.mapfit.tangram.ConfigChooser
@@ -70,8 +70,8 @@ class MapView(
     @JvmSynthetic
     internal fun getAttributionImage(): ImageView = attributionImage
 
-    internal val zoomControlsView: LinearLayout by lazy {
-        controlsView.findViewById<LinearLayout>(R.id.zoomControls)
+    internal val zoomControlsView: RelativeLayout by lazy {
+        controlsView.findViewById<RelativeLayout>(R.id.zoomControls)
     }
 
     internal val btnRecenter: View by lazy {
@@ -85,19 +85,13 @@ class MapView(
     private val annotationLayer = Layer()
     private val layers = mutableListOf(annotationLayer)
 
-    private val dataLayers = mutableListOf<MapData>()
-
     // Click Listeners
     private var markerClickListener: OnMarkerClickListener? = null
-    private var polylineClickListener: OnPolylineClickListener? = null
-    private var polygonClickListener: OnPolygonClickListener? = null
     private var mapClickListener: OnMapClickListener? = null
     private var mapDoubleClickListener: OnMapDoubleClickListener? = null
 
     private var viewHeight: Int? = null
     private var viewWidth: Int? = null
-
-    private var zoomControls: View? = null
 
     init {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
@@ -116,7 +110,6 @@ class MapView(
 
         initMapController(mapTheme, onMapReadyCallback)
         initUiControls()
-
 
     }
 
@@ -182,7 +175,7 @@ class MapView(
             })
 
             mapOptions = MapOptions(this@MapView, this)
-            mapOptions.setTheme(mapTheme)
+            mapOptions.theme = mapTheme
 
         }
     }

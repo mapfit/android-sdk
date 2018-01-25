@@ -23,15 +23,14 @@ class MapOptions internal constructor(
 
     private var minZoom: Float = 1f
 
-    private var theme: MapTheme? = null
+    var theme: MapTheme? = null
+        set(value) {
+            if (field == null || field != value) {
+                value?.let { updateScene(value) }
+                field = value
 
-
-    fun setTheme(theme: MapTheme) {
-        if (this.theme == null || this.theme != theme) {
-            updateScene(theme)
-            this.theme = theme
+            }
         }
-    }
 
     private fun updateScene(value: MapTheme) {
         mapController.loadSceneFile(value.toString())
@@ -124,10 +123,6 @@ class MapOptions internal constructor(
         PERSPECTIVE,
         ISOMETRIC,
         FLAT
-    }
-
-    internal fun loadDefaultTheme() {
-        updateScene(MapTheme.MAPFIT_DAY)
     }
 
 }

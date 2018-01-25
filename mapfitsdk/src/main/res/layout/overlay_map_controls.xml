@@ -63,45 +63,45 @@
         android:orientation="vertical">
 
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/zoomControls"
-            android:layout_width="wrap_content"
-            android:layout_height="78dp"
-            android:background="@drawable/ic_zoom_bg"
-            android:gravity="center"
+            android:layout_width="58dp"
+            android:layout_height="96dp"
             android:orientation="vertical"
             android:visibility="gone"
             tools:visibility="visible">
 
             <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/zoom_bg" />
+
+            <ImageView
                 android:id="@+id/btnZoomIn"
-                android:layout_width="38dp"
-                android:layout_height="38dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="6dp"
                 android:adjustViewBounds="true"
                 android:clickable="true"
                 android:scaleType="centerInside"
                 app:srcCompat="@drawable/ic_zoom_in" />
 
-            <!--app:srcCompat="@drawazoom_buttons_bg24dp"-->
-
-            <ImageView
-                android:id="@+id/border"
-                android:layout_width="24dp"
-                android:layout_height="wrap_content"
-                android:adjustViewBounds="true"
-                android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_zoom_break" />
-
             <ImageView
                 android:id="@+id/btnZoomOut"
-                android:layout_width="38dp"
-                android:layout_height="38dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignLeft="@+id/btnZoomIn"
+                android:layout_alignParentBottom="true"
+                android:layout_alignStart="@+id/btnZoomIn"
+                android:layout_marginBottom="12dp"
                 android:adjustViewBounds="true"
                 android:clickable="true"
                 android:scaleType="centerInside"
                 app:srcCompat="@drawable/ic_zoom_out" />
 
-        </LinearLayout>
+        </RelativeLayout>
 
         <ImageView
             android:id="@+id/btnCompass"

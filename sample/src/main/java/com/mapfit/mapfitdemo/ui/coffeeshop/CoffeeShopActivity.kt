@@ -99,7 +99,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         override fun onSpinnerItemSelected(filterType: FilterType, string: String) {
             when (filterType) {
                 FilterType.MAP_THEME -> {
-                    mapfitMap.getMapOptions().setTheme(MapTheme.valueOf(string))
+                    mapfitMap.getMapOptions().theme=MapTheme.valueOf(string)
                     drawerLayout.closeDrawer(GravityCompat.END)
                 }
             }
@@ -149,14 +149,14 @@ class CoffeeShopActivity : AppCompatActivity() {
             //            setCenter(LatLng(40.700798, -74.0050177), 500)
 //            setZoom(13f, 500)
 
-//            boundaryBuilder()
+            boundaryBuilder()
 
 //            addMapfitOfficeWithGeocoder()
 //            setupMarkerWithAddressInput()
 //
 //            coffeeShops?.let { addMarkersFromCoffeeShops(it) }
 
-            setMapBoundsToColorado()
+//            setMapBoundsToColorado()
 //            setMapBoundsToUtah()
 //            setOnMarkerClickListener(onMarkerClickListener)
         }

@@ -1,11 +1,5 @@
-package com.mapfit.mapfitsdk
+package com.mapfit.mapfitsdk.geometry
 
-import com.mapfit.mapfitsdk.geometry.LatLng
-import com.mapfit.mapfitsdk.utils.isValid
-import com.mapfit.mapfitsdk.utils.isValidImageUrl
-import com.mapfit.mapfitsdk.utils.isValidZoomLevel
-import com.mapfit.mapfitsdk.utils.loadImageFromUrl
-import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Assert
 import org.junit.Test
 

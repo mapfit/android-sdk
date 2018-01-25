@@ -1,6 +1,4 @@
-package com.mapfit.mapfitsdk.utils
-
-import com.mapfit.mapfitsdk.geometry.LatLng
+package com.mapfit.mapfitsdk.geometry
 
 
 /**
