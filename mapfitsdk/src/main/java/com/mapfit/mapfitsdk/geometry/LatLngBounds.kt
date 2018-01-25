@@ -45,23 +45,6 @@ class LatLngBounds(
         fun build() = LatLngBounds(this)
     }
 
-    fun getZoomLevel(mapView: View): Float {
-        val (WORLD_HEIGHT, WORLD_WIDTH) = Pair(512, 512)
-        val latFraction = (Math.toRadians(nortEast.lat) - Math.toRadians(southWest.lat)) / Math.PI
-        val lngDiff = nortEast.lon - southWest.lon
-        val lngFraction = if (lngDiff < 0) {
-            lngDiff + 360
-        } else {
-            lngDiff / 360
-        }
-
-        val latZoom = Math.log(mapView.height / WORLD_HEIGHT / latFraction) / .693147180559945309417
-        val lngZoom = Math.log(mapView.width / WORLD_WIDTH / lngFraction) / .693147180559945309417
-
-//        return Math.floor(Math.min(latZoom, lngZoom)).toFloat()
-        return (Math.min(latZoom, lngZoom)).toFloat()
-    }
-
     fun getVisibleBounds(mapView: View): Pair<LatLng, Float> {
         val ry1 = Math.log((Math.sin(Math.toRadians(southWest.lat)) + 1) / Math.cos(Math.toRadians(southWest.lat)))
         val ry2 = Math.log((Math.sin(Math.toRadians(nortEast.lat)) + 1) / Math.cos(Math.toRadians(nortEast.lat)))
@@ -80,9 +63,6 @@ class LatLngBounds(
         val resolution = Math.max(resolutionHorizontal, resolutionVertical) * paddingFactor
         val zoom = kotlin.math.log(360 / (resolution * 512), 2.0)
 
-        val lon = center.lon
-
-//        return Pair(LatLng(centerX, lon), zoom.toFloat())
         return Pair(center, zoom.toFloat())
     }
 

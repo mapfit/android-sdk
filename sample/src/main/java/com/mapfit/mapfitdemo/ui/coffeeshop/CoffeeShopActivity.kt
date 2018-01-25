@@ -38,8 +38,6 @@ import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
 
 
 /**
@@ -114,13 +112,13 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         override fun onFilterChecked(filterType: FilterType, isChecked: Boolean) {
             when (filterType) {
-                FilterType.ZOOM_CONTROLS -> {
-                    mapfitMap.getMapOptions().isZoomControlsVisible = isChecked
-                }
-                FilterType.PAN_GESTURE -> mapfitMap.setIsPanEnabled(isChecked)
-                FilterType.ROTATE_GESTURE -> mapfitMap.setIsRotateEnabled(isChecked)
-                FilterType.PINCH_GESTURE -> mapfitMap.setIsPinchEnabled(isChecked)
-                FilterType.TILT_GESTURE -> mapfitMap.setIsTiltEnabled(isChecked)
+                FilterType.ZOOM_CONTROLS -> mapfitMap.getMapOptions().zoomControlsEnabled = isChecked
+                FilterType.COMPASS -> mapfitMap.getMapOptions().compassButtonEnabled = isChecked
+                FilterType.RECENTER -> mapfitMap.getMapOptions().recenterButtonEnabled = isChecked
+                FilterType.PAN_GESTURE -> mapfitMap.getMapOptions().panEnabled = isChecked
+                FilterType.ROTATE_GESTURE -> mapfitMap.getMapOptions().rotateEnabled = isChecked
+                FilterType.PINCH_GESTURE -> mapfitMap.getMapOptions().pinchEnabled = isChecked
+                FilterType.TILT_GESTURE -> mapfitMap.getMapOptions().tiltEnabled = isChecked
             }
 
             drawerLayout.closeDrawer(GravityCompat.END)
@@ -197,12 +195,12 @@ class CoffeeShopActivity : AppCompatActivity() {
         mapfitMap.addMarker(sw)
         mapfitMap.setBounds(bounds)
 
-        launch {
-            delay(2000)
-            val afterBounds = mapfitMap.getBounds()
-            delay(5000)
-            mapfitMap.setBounds(afterBounds)
-        }
+//        launch {
+//            delay(2000)
+//            val afterBounds = mapfitMap.getBounds()
+//            delay(5000)
+//            mapfitMap.setBounds(afterBounds)
+//        }
 
     }
 

@@ -2,6 +2,7 @@ package com.mapfit.mapfitsdk
 
 import android.support.annotation.FloatRange
 import android.support.v4.content.ContextCompat
+import android.view.View
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
 import kotlinx.android.synthetic.main.overlay_map_controls.view.*
 
@@ -49,14 +50,21 @@ class MapOptions internal constructor(
         mapView.getAttributionImage().setImageResource(attributionImage)
     }
 
-    private var isCompassVisible = false
+    var compassButtonEnabled = false
         set(value) {
-            TODO()
+            mapView.btnCompass.visibility = if (value) View.VISIBLE else View.GONE
+            field = value
         }
 
-    var isZoomControlsVisible = true
+    var recenterButtonEnabled = false
         set(value) {
-            mapView.setZoomControlVisibility(value)
+            mapView.btnRecenter.visibility = if (value) View.VISIBLE else View.GONE
+            field = value
+        }
+
+    var zoomControlsEnabled = true
+        set(value) {
+            mapView.zoomControlsView.visibility = if (value) View.VISIBLE else View.GONE
             field = value
         }
 
@@ -66,24 +74,28 @@ class MapOptions internal constructor(
             field = value
         }
 
-    private var isPanEnabled = true
+    var panEnabled = true
         set(value) {
-            TODO()
+            mapController.touchInput.panEnabled = value
+            field = value
         }
 
-    private var isPinchEnabled = true
+    var pinchEnabled = true
         set(value) {
-            TODO()
+            mapController.touchInput.pinchEnabled = value
+            field = value
         }
 
-    private var isRotateEnabled = true
+    var rotateEnabled = true
         set(value) {
-            TODO()
+            mapController.touchInput.rotationEnabled = value
+            field = value
         }
 
-    private var isTiltEnabled = true
+    var tiltEnabled = true
         set(value) {
-            TODO()
+            mapController.touchInput.tiltEnabled = value
+            field = value
         }
 
     private var is3dBuildingsEnabled = true
@@ -117,4 +129,5 @@ class MapOptions internal constructor(
     internal fun loadDefaultTheme() {
         updateScene(MapTheme.MAPFIT_DAY)
     }
+
 }

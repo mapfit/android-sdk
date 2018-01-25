@@ -13,5 +13,7 @@ enum class FilterType {
     PAN_GESTURE,
     ROTATE_GESTURE,
     PINCH_GESTURE,
-    TILT_GESTURE
+    TILT_GESTURE,
+    COMPASS,
+    RECENTER
 }

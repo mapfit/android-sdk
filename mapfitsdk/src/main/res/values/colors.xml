@@ -14,5 +14,7 @@
     <color name="dark_text">#212121</color>
     <color name="light_text">#fafafa</color>
 
+    <color name="md_btn_selected">#33969696</color>
+    <color name="md_btn_selected_dark">#40CBCBCB</color>
 
 </resources>

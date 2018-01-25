@@ -70,20 +70,20 @@ class MapView(
     @JvmSynthetic
     internal fun getAttributionImage(): ImageView = attributionImage
 
-    private val zoomControlsView: LinearLayout by lazy {
+    internal val zoomControlsView: LinearLayout by lazy {
         controlsView.findViewById<LinearLayout>(R.id.zoomControls)
+    }
+
+    internal val btnRecenter: View by lazy {
+        controlsView.findViewById<View>(R.id.btnRecenter)
+    }
+
+    internal val btnCompass: View by lazy {
+        controlsView.findViewById<View>(R.id.btnCompass)
     }
 
     private val annotationLayer = Layer()
     private val layers = mutableListOf(annotationLayer)
-
-    private var tilt: Float = 0f
-    private var isDirectionsEnabled = false
-    private lateinit var directionsOptions: DirectionsOptions
-    private val directionsView: View by lazy { getDirectionView() }
-
-    private lateinit var mapCenter: LatLng
-    private var isUserLocationEnabled = true
 
     private val dataLayers = mutableListOf<MapData>()
 
@@ -96,6 +96,8 @@ class MapView(
 
     private var viewHeight: Int? = null
     private var viewWidth: Int? = null
+
+    private var zoomControls: View? = null
 
     init {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
@@ -120,6 +122,7 @@ class MapView(
 
     private fun initUiControls() {
         addView(controlsView)
+
         attributionImage.setOnClickListener {
             attributionAnimJob?.cancel()
 
@@ -153,6 +156,14 @@ class MapView(
 
         btnZoomOut.setOnClickListener {
             mapfitMap.setZoom(mapfitMap.getZoom() - ZOOM_STEP_LEVEL, ANIMATION_DURATION)
+        }
+
+        btnRecenter.setOnClickListener {
+            mapfitMap.reCenter()
+        }
+
+        btnCompass.setOnClickListener {
+            mapController.setRotationEased(0f, ANIMATION_DURATION, MapController.EaseType.CUBIC)
         }
 
 //        zoomControls.setBackgroundResource(R.drawable.zoom_buttons_bg)
@@ -230,30 +241,6 @@ class MapView(
     }
 
     private val mapfitMap = object : MapfitMap() {
-        override fun setIsTiltEnabled(isEnabled: Boolean) {
-            mapController.touchInput.tiltEnabled = isEnabled
-        }
-
-        override fun setIsRotateEnabled(isEnabled: Boolean) {
-            mapController.touchInput.rotationEnabled = isEnabled
-
-        }
-
-        override fun setIsPanEnabled(isEnabled: Boolean) {
-            mapController.touchInput.panEnabled = isEnabled
-        }
-
-        override fun setIsPinchEnabled(isEnabled: Boolean) {
-            mapController.touchInput.pinchEnabled = isEnabled
-        }
-
-        override fun getIsTiltEnabled(): Boolean = mapController.touchInput.tiltEnabled
-
-        override fun getIsRotateEnabled(): Boolean = mapController.touchInput.rotationEnabled
-
-        override fun getIsPanEnabled(): Boolean = mapController.touchInput.panEnabled
-
-        override fun getIsPinchEnabled(): Boolean = mapController.touchInput.pinchEnabled
 
         override fun addMarker(address: String, onMarkerAddedCallback: OnMarkerAddedCallback) {
             geocoder.geocodeAddress(address, object : GeocoderCallback {
@@ -377,6 +364,7 @@ class MapView(
         override fun setCenter(latLng: LatLng, duration: Long) {
             if (duration.toInt() == 0) {
                 mapController.position = latLng
+
             } else {
                 mapController.setPositionEased(
                         latLng,
@@ -386,13 +374,10 @@ class MapView(
             }
         }
 
-        override fun getCenter(): LatLng {
-            val position = mapController.position
-            return LatLng(position.lat, position.lon)
-        }
+        override fun getCenter(): LatLng = mapController.position
 
-        override fun reCenter(duration: Long) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        override fun reCenter() {
+            mapController.reCenter()
         }
 
         override fun addLayer(layer: Layer) {
@@ -442,10 +427,6 @@ class MapView(
 //        return LatLng(lngLat.latitude, lngLat.longitude)
 //    }
 
-    @JvmSynthetic
-    internal fun setZoomControlVisibility(visible: Boolean) {
-        zoomControlsView.visibility = if (visible) View.VISIBLE else View.GONE
-    }
 
     private fun getDirectionView(): View {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

@@ -98,7 +98,7 @@ class CoffeeShopActivityJava extends AppCompatActivity {
         public void onFilterChecked(@NotNull FilterType filterType, boolean isChecked) {
             switch (filterType) {
                 case ZOOM_CONTROLS:
-//                    mapfitMap.getMapOptions().isZoomControlsVisible = isChecked
+//                    mapfitMap.getMapOptions().setPanEnabled(); = isChecked
                     break;
                 case MAP_THEME:
                     break;

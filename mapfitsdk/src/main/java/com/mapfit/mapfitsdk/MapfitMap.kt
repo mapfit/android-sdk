@@ -148,26 +148,9 @@ abstract class MapfitMap {
 
     protected abstract fun getRotation(): Float
 
-    abstract fun setIsTiltEnabled(isEnabled: Boolean)
-
-    abstract fun setIsRotateEnabled(isEnabled: Boolean)
-
-    abstract fun setIsPanEnabled(isEnabled: Boolean)
-
-    abstract fun setIsPinchEnabled(isEnabled: Boolean)
-
-    abstract fun getIsTiltEnabled(): Boolean
-
-    abstract fun getIsRotateEnabled(): Boolean
-
-    abstract fun getIsPanEnabled(): Boolean
-
-    abstract fun getIsPinchEnabled(): Boolean
-
     /**
      * Will reCenter the map.
-     * @param duration if given, the camera will move with ease.
      */
-    protected abstract fun reCenter(duration: Long = 0)
+    abstract fun reCenter()
 
 }

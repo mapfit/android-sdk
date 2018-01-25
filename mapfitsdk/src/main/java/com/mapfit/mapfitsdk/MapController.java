@@ -40,6 +40,11 @@ import okhttp3.Response;
 public class MapController implements Renderer {
 
 
+    public void reCenter() {
+        if (lastCenter != null)
+            setPositionEased(lastCenter, 200);
+    }
+
     /**
      * Options for interpolating map parameters
      */
@@ -272,7 +277,6 @@ public class MapController implements Renderer {
         }
 
 
-
     }
 
     void dispose() {
@@ -449,6 +453,7 @@ public class MapController implements Renderer {
      */
     public void setPosition(LatLng position) {
         checkPointer(mapPointer);
+        lastCenter = position;
         nativeSetPosition(mapPointer, position.getLon(), position.getLat());
     }
 
@@ -472,6 +477,7 @@ public class MapController implements Renderer {
     public void setPositionEased(LatLng position, int duration, EaseType ease) {
         float seconds = duration / 1000.f;
         checkPointer(mapPointer);
+        lastCenter = position;
         nativeSetPositionEased(mapPointer, position.getLon(), position.getLat(), seconds, ease.ordinal());
     }
 
@@ -480,6 +486,7 @@ public class MapController implements Renderer {
             @Override
             public void run() {
                 kotlin.Pair<LatLng, Float> pair = latlngBounds.getVisibleBounds(mapView);
+                lastCenter = pair.component1();
                 checkPointer(mapPointer);
                 nativeSetZoom(mapPointer, pair.component2());
                 nativeSetPosition(mapPointer, pair.component1().getLon(), pair.component1().getLat());
@@ -1402,6 +1409,7 @@ public class MapController implements Renderer {
     private Map<Long, Marker> markers = new HashMap<>();
     private Handler uiThreadHandler;
     TouchInput touchInput;
+    LatLng lastCenter = null;
 
     // GLSurfaceView.Renderer methods
     // ==============================

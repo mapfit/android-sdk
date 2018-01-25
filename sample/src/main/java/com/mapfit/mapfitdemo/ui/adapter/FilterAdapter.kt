@@ -33,6 +33,8 @@ class FilterAdapter(private val onFilterChecked: OnFilterCheckedListener) : Recy
             FilterType.PINCH_GESTURE,
             FilterType.TILT_GESTURE,
             FilterType.ZOOM_CONTROLS,
+            FilterType.RECENTER,
+            FilterType.COMPASS,
             FilterType.ALL_MARKERS,
             FilterType.ALWAYS_OPEN -> {
                 val itemView = LayoutInflater.from(parent?.context).inflate(R.layout.list_item_filter_switch, parent, false)

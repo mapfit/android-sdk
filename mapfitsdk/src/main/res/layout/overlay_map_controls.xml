@@ -54,49 +54,77 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/zoomControls"
         android:layout_width="wrap_content"
-        android:layout_height="78dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginRight="16dp"
-        android:background="@drawable/ic_zoom_bg"
         android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone"
-        tools:visibility="visible">
+        android:orientation="vertical">
+
+
+        <LinearLayout
+            android:id="@+id/zoomControls"
+            android:layout_width="wrap_content"
+            android:layout_height="78dp"
+            android:background="@drawable/ic_zoom_bg"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <ImageView
+                android:id="@+id/btnZoomIn"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:adjustViewBounds="true"
+                android:clickable="true"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_zoom_in" />
+
+            <!--app:srcCompat="@drawazoom_buttons_bg24dp"-->
+
+            <ImageView
+                android:id="@+id/border"
+                android:layout_width="24dp"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_zoom_break" />
+
+            <ImageView
+                android:id="@+id/btnZoomOut"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:adjustViewBounds="true"
+                android:clickable="true"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_zoom_out" />
+
+        </LinearLayout>
 
         <ImageView
-            android:id="@+id/btnZoomIn"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
-            android:adjustViewBounds="true"
-            android:clickable="true"
-            android:scaleType="centerInside"
-            app:srcCompat="@drawable/ic_zoom_in" />
-
-        <!--app:srcCompat="@drawazoom_buttons_bg24dp"-->
-
-        <ImageView
-            android:id="@+id/border"
-            android:layout_width="24dp"
+            android:id="@+id/btnCompass"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:adjustViewBounds="true"
+            android:clickable="true"
+            android:foreground="@drawable/button_selector"
             android:scaleType="centerInside"
-            app:srcCompat="@drawable/ic_zoom_break" />
+            android:src="@drawable/compass_with_bg"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
         <ImageView
-            android:id="@+id/btnZoomOut"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
-            android:adjustViewBounds="true"
+            android:id="@+id/btnRecenter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
             android:clickable="true"
-            android:scaleType="centerInside"
-            app:srcCompat="@drawable/ic_zoom_out" />
+            android:src="@drawable/re_center"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
-        <!--app:srcCompat="@drawable/ic_remove_black_24dp"-->
     </LinearLayout>
 
 </RelativeLayout>
