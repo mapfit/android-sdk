@@ -10,7 +10,7 @@ import android.support.annotation.NonNull
 import android.util.Log
 import com.mapfit.mapfitsdk.MapController
 import com.mapfit.mapfitsdk.geometry.LatLng
-import com.mapfit.mapfitsdk.utils.isValid
+import com.mapfit.mapfitsdk.geometry.isValid
 import com.mapfit.mapfitsdk.utils.loadImageFromUrl
 import kotlinx.coroutines.experimental.launch
 
@@ -97,7 +97,7 @@ class Marker internal constructor(
         return this
     }
 
-    private fun setIcon(@NonNull mapfitMarker: MapfitMarker): Marker {
+    fun setIcon(@NonNull mapfitMarker: MapfitMarker): Marker {
         setIcon(mapfitMarker.getMarkerUrl())
         return this
     }

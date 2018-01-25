@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:background="#191919">
+    android:theme="@style/Theme.AppCompat"
+    tools:background="#ff0">
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="16dp"
         android:layout_marginLeft="16dp"
         android:layout_marginStart="16dp"
         android:animateLayoutChanges="true"
@@ -35,52 +37,94 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/legal_notices"
-                android:textColor="@android:color/black" />
+                android:textColor="@android:color/black"
+                android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/btnBuildYourMap"
                 style="@style/Base.TextAppearance.AppCompat.Body1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
+                android:layout_marginLeft="4dp"
                 android:text="@string/build_your_map"
-                android:textColor="@android:color/black" />
+                android:textColor="@android:color/black"
+                android:textSize="12sp" />
 
         </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/zoomControls"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="24dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:orientation="vertical"
-        android:visibility="gone">
+        android:gravity="center"
+        android:orientation="vertical">
+
+
+        <RelativeLayout
+            android:id="@+id/zoomControls"
+            android:layout_width="58dp"
+            android:layout_height="96dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/zoom_bg" />
+
+            <ImageView
+                android:id="@+id/btnZoomIn"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="6dp"
+                android:adjustViewBounds="true"
+                android:clickable="true"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_zoom_in" />
+
+            <ImageView
+                android:id="@+id/btnZoomOut"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignLeft="@+id/btnZoomIn"
+                android:layout_alignParentBottom="true"
+                android:layout_alignStart="@+id/btnZoomIn"
+                android:layout_marginBottom="12dp"
+                android:adjustViewBounds="true"
+                android:clickable="true"
+                android:scaleType="centerInside"
+                app:srcCompat="@drawable/ic_zoom_out" />
+
+        </RelativeLayout>
 
         <ImageView
-            android:id="@+id/btnZoomIn"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@android:color/white"
+            android:id="@+id/btnCompass"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
             android:clickable="true"
-            android:scaleType="centerInside" />
-
-        <!--app:srcCompat="@drawable/ic_add_black_24dp"-->
+            android:foreground="@drawable/button_selector"
+            android:scaleType="centerInside"
+            android:src="@drawable/compass_with_bg"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
         <ImageView
-            android:id="@+id/btnZoomOut"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
-            android:background="@android:color/white"
+            android:id="@+id/btnRecenter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
             android:clickable="true"
-            android:scaleType="centerInside" />
+            android:src="@drawable/re_center"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
-        <!--app:srcCompat="@drawable/ic_remove_black_24dp"-->
     </LinearLayout>
 
 </RelativeLayout>

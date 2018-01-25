@@ -85,6 +85,11 @@ class CoffeeShopActivityJava extends AppCompatActivity {
 
     private OnFilterCheckedListener onFilterCheckedListener = new OnFilterCheckedListener() {
         @Override
+        public void onSpinnerItemSelected(@NotNull FilterType filterType, @NotNull String string) {
+
+        }
+
+        @Override
         public void onClearMarkersClicked() {
 
         }
@@ -93,9 +98,9 @@ class CoffeeShopActivityJava extends AppCompatActivity {
         public void onFilterChecked(@NotNull FilterType filterType, boolean isChecked) {
             switch (filterType) {
                 case ZOOM_CONTROLS:
-//                    mapfitMap.getMapOptions().isZoomControlsVisible = isChecked
+//                    mapfitMap.getMapOptions().setPanEnabled(); = isChecked
                     break;
-                case MAP_STYLE:
+                case MAP_THEME:
                     break;
                 case ALL_MARKERS:
                     break;

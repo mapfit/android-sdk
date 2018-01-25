@@ -48,14 +48,27 @@ class Repository(private val context: Context) {
 
     }
 
-    fun getFilters(): List<Filter> {
-        val filters = mutableListOf<Filter>()
+    fun getFilters(): List<Filter<*>> {
+        val filters = mutableListOf<Filter<*>>()
 
-        filters.add(Filter(FilterType.CLEAR_MARKERS, "Clear Markers", true))
+        filters.add(Filter<Any>(FilterType.CLEAR_MARKERS, "Clear Markers", true))
 
 //        filters.add(Filter(FilterType.ALL_MARKERS, "Markers", true))
-//        filters.add(Filter(FilterType.ZOOM_CONTROLS, "Zoom Controls", true))
-//        filters.add(Filter(FilterType.MAP_STYLE, "Map Style", true))
+        filters.add(Filter(FilterType.ZOOM_CONTROLS, "Zoom Controls", false, null))
+        filters.add(Filter(FilterType.RECENTER, "Re-center", false, null))
+        filters.add(Filter(FilterType.COMPASS, "Compass", false, null))
+        filters.add(Filter(FilterType.PAN_GESTURE, "Pan Gesture", true, null))
+        filters.add(Filter(FilterType.ROTATE_GESTURE, "Rotate Gesture", true, null))
+        filters.add(Filter(FilterType.PINCH_GESTURE, "Pinch Gesture", true, null))
+        filters.add(Filter(FilterType.TILT_GESTURE, "Tilt Gesture", true, null))
+
+
+        filters.add(Filter(
+                FilterType.MAP_THEME,
+                "Map Theme",
+                true,
+                listOf("MAPFIT_DAY", "MAPFIT_NIGHT")
+        ))
 //        filters.add(Filter(FilterType.CAMERA_STYLE, "Camera Style", true))
 //        filters.add(Filter(FilterType.ALWAYS_OPEN, "Always Open Vendors", false))
 

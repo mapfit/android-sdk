@@ -1,7 +1,6 @@
-package com.mapfit.mapfitsdk.utils
+package com.mapfit.mapfitsdk.geometry
 
 import android.util.Log
-import com.mapfit.mapfitsdk.geometry.LatLng
 
 /**
  * Extension functions for geometries.

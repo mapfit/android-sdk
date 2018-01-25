@@ -9,4 +9,6 @@ interface OnFilterCheckedListener {
 
     fun onClearMarkersClicked()
 
+    fun onSpinnerItemSelected(filterType: FilterType, string: String)
+
 }

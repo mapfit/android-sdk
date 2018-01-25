@@ -17,7 +17,7 @@ class ButtonFilterVH(view: View, val onFilterChecked: OnFilterCheckedListener) :
 
     val button = view.findViewById<Button>(R.id.filterButton)
 
-    fun bind(filter: Filter) {
+    fun bind(filter: Filter<*>) {
 
         button.text = filter.title
         button.setOnClickListener {

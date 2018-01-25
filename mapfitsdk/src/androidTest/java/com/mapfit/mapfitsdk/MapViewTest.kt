@@ -4,6 +4,7 @@ import android.content.Context
 import android.support.test.InstrumentationRegistry
 import android.support.test.annotation.UiThreadTest
 import android.support.test.runner.AndroidJUnit4
+import android.view.View
 import com.mapfit.mapfitsdk.MapOptions.Companion.MAP_MAX_ZOOM
 import com.mapfit.mapfitsdk.MapOptions.Companion.MAP_MIN_ZOOM
 import com.mapfit.mapfitsdk.geometry.LatLng
@@ -31,6 +32,7 @@ class MapViewTest {
     @Mock
     private lateinit var onMapClickListener: OnMapClickListener
 
+
     @Mock
     private lateinit var onMapDoubleClickListener: OnMapDoubleClickListener
 
@@ -41,7 +43,7 @@ class MapViewTest {
 
         mapView = MapView(mMockContext, null)
 
-        mapView.getMapAsync(object : OnMapReadyCallback {
+        mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
                 this@MapViewTest.mapfitMap = mapfitMap
             }
@@ -55,22 +57,13 @@ class MapViewTest {
         Assert.assertNotNull(mapfitMap)
     }
 
-
-    @Test
-    @UiThreadTest
-    fun testMapfitConfiguration() {
-
-    }
-
-
     @Test
     @UiThreadTest
     fun testDefaultValues() {
-//        val response = ()
-//                .addHeader("Content-Type", "application/json; charset=utf-8")
-//                .addHeader("Cache-Control", "no-cache")
-//                .setBody("{}")
-//        Assert.assertEquals(MapTheme.MAPFIT_DAY, mapfitMap.getMapOptions().mapTheme)
+        Assert.assertEquals(MapTheme.MAPFIT_DAY, mapfitMap.getMapOptions().theme)
+        Assert.assertEquals(View.GONE, mapView.zoomControlsView.visibility)
+        Assert.assertEquals(View.GONE, mapView.btnRecenter.visibility)
+        Assert.assertEquals(View.GONE, mapView.btnCompass.visibility)
     }
 
     @Test
@@ -141,5 +134,39 @@ class MapViewTest {
         Assert.assertNotEquals(layer, mapfitMap.getLayers().last())
     }
 
+
+    @Test
+    @UiThreadTest
+    fun testStyleChanges() {
+        mapfitMap.getMapOptions().theme = MapTheme.MAPFIT_NIGHT
+        Assert.assertEquals(MapTheme.MAPFIT_NIGHT, mapfitMap.getMapOptions().theme)
+    }
+
+    @Test
+    fun testZoomControlVisibility() {
+        mapfitMap.getMapOptions().zoomControlsEnabled = true
+        Assert.assertEquals(View.VISIBLE, mapView.zoomControlsView.visibility)
+
+        mapfitMap.getMapOptions().zoomControlsEnabled = false
+        Assert.assertEquals(View.GONE, mapView.zoomControlsView.visibility)
+    }
+
+    @Test
+    fun testCompassVisibility() {
+        mapfitMap.getMapOptions().compassButtonEnabled = true
+        Assert.assertEquals(View.VISIBLE, mapView.btnCompass.visibility)
+
+        mapfitMap.getMapOptions().compassButtonEnabled = false
+        Assert.assertEquals(View.GONE, mapView.btnCompass.visibility)
+    }
+
+    @Test
+    fun testRecenterVisibility() {
+        mapfitMap.getMapOptions().recenterButtonEnabled = true
+        Assert.assertEquals(View.VISIBLE, mapView.btnRecenter.visibility)
+
+        mapfitMap.getMapOptions().recenterButtonEnabled = false
+        Assert.assertEquals(View.GONE, mapView.btnRecenter.visibility)
+    }
 
 }

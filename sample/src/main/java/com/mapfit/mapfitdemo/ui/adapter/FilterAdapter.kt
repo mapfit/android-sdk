@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import com.mapfit.mapfitdemo.R
 import com.mapfit.mapfitdemo.data.model.Filter
 import com.mapfit.mapfitdemo.ui.adapter.vh.ButtonFilterVH
+import com.mapfit.mapfitdemo.ui.adapter.vh.SpinnerFilterVH
 import com.mapfit.mapfitdemo.ui.adapter.vh.SwitchFilterVH
 
 /**
@@ -14,19 +15,26 @@ import com.mapfit.mapfitdemo.ui.adapter.vh.SwitchFilterVH
  */
 class FilterAdapter(private val onFilterChecked: OnFilterCheckedListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val filters = mutableListOf<Filter>()
+    private val filters = mutableListOf<Filter<*>>()
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
         when (holder) {
             is SwitchFilterVH -> holder.bind(filters[position])
             is ButtonFilterVH -> holder.bind(filters[position])
+            is SpinnerFilterVH -> holder.bind(filters[position] as Filter<List<String>>)
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder? {
 
         return when (FilterType.values()[viewType]) {
+            FilterType.PAN_GESTURE,
+            FilterType.ROTATE_GESTURE,
+            FilterType.PINCH_GESTURE,
+            FilterType.TILT_GESTURE,
             FilterType.ZOOM_CONTROLS,
+            FilterType.RECENTER,
+            FilterType.COMPASS,
             FilterType.ALL_MARKERS,
             FilterType.ALWAYS_OPEN -> {
                 val itemView = LayoutInflater.from(parent?.context).inflate(R.layout.list_item_filter_switch, parent, false)
@@ -36,7 +44,10 @@ class FilterAdapter(private val onFilterChecked: OnFilterCheckedListener) : Recy
                 val itemView = LayoutInflater.from(parent?.context).inflate(R.layout.list_item_filter_button, parent, false)
                 return ButtonFilterVH(itemView, onFilterChecked)
             }
-
+            FilterType.MAP_THEME -> {
+                val itemView = LayoutInflater.from(parent?.context).inflate(R.layout.list_item_filter_spinner, parent, false)
+                return SpinnerFilterVH(itemView, onFilterChecked)
+            }
 
             else -> {
                 return null
@@ -51,7 +62,7 @@ class FilterAdapter(private val onFilterChecked: OnFilterCheckedListener) : Recy
 
     override fun getItemCount(): Int = filters.size
 
-    fun addItems(filters: List<Filter>) = this.filters.addAll(filters)
+    fun addItems(filters: List<Filter<*>>) = this.filters.addAll(filters)
 
 
 }

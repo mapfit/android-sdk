@@ -1,6 +1,5 @@
 package com.mapfit.mapfitsdk
 
-import android.content.ContentValues.TAG
 import android.content.Context
 import android.content.Intent
 import android.graphics.PointF
@@ -26,12 +25,18 @@ import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
 import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.LatLngBounds
-import com.mapfit.mapfitsdk.utils.isEmpty
+import com.mapfit.mapfitsdk.geometry.isEmpty
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
+import com.mapfit.mapfitsdk.utils.startActivitySafe
 import com.mapfit.tangram.ConfigChooser
 import com.mapfit.tangram.MarkerPickResult
 import com.mapfit.tangram.TouchInput
 import kotlinx.android.synthetic.main.overlay_map_controls.view.*
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 import org.jetbrains.annotations.NotNull
 import java.io.IOException
 
@@ -65,75 +70,100 @@ class MapView(
     @JvmSynthetic
     internal fun getAttributionImage(): ImageView = attributionImage
 
-    private val zoomControlsView: LinearLayout by lazy {
-        controlsView.findViewById<LinearLayout>(R.id.zoomControls)
+    internal val zoomControlsView: RelativeLayout by lazy {
+        controlsView.findViewById<RelativeLayout>(R.id.zoomControls)
+    }
+
+    internal val btnRecenter: View by lazy {
+        controlsView.findViewById<View>(R.id.btnRecenter)
+    }
+
+    internal val btnCompass: View by lazy {
+        controlsView.findViewById<View>(R.id.btnCompass)
     }
 
     private val annotationLayer = Layer()
     private val layers = mutableListOf(annotationLayer)
 
-    private var tilt: Float = 0f
-    private var isDirectionsEnabled = false
-    private lateinit var directionsOptions: DirectionsOptions
-    private val directionsView: View by lazy { getDirectionView() }
-
-    private lateinit var mapCenter: LatLng
-    private var isUserLocationEnabled = true
-
-    private val dataLayers = mutableListOf<MapData>()
-
     // Click Listeners
     private var markerClickListener: OnMarkerClickListener? = null
-    private var polylineClickListener: OnPolylineClickListener? = null
-    private var polygonClickListener: OnPolygonClickListener? = null
     private var mapClickListener: OnMapClickListener? = null
     private var mapDoubleClickListener: OnMapDoubleClickListener? = null
 
+    private var viewHeight: Int? = null
+    private var viewWidth: Int? = null
 
     init {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+        post {
+            viewHeight = height
+            viewWidth = width
+        }
     }
 
-    fun getMapAsync(@NotNull onMapReadyCallback: OnMapReadyCallback) {
+    @JvmOverloads
+    fun getMapAsync(mapTheme: MapTheme = MapTheme.MAPFIT_DAY, @NotNull onMapReadyCallback: OnMapReadyCallback) {
 
         if (::mapController.isInitialized) {
             onMapReadyCallback.onMapReady(mapfitMap)
         }
 
-        initMapController(onMapReadyCallback)
+        initMapController(mapTheme, onMapReadyCallback)
         initUiControls()
-
 
     }
 
     private fun initUiControls() {
         addView(controlsView)
+
         attributionImage.setOnClickListener {
+            attributionAnimJob?.cancel()
 
             if (containerAttribute.visibility == View.VISIBLE) {
                 containerAttribute.visibility = View.GONE
             } else {
                 containerAttribute.visibility = View.VISIBLE
             }
-//            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://mapfit.com/"))
-//
-//            if (intent.resolveActivity(context.packageManager) != null) {
-//                context.startActivity(intent)
-//            } else {
-//                Log.d(TAG, "No Intent available to handle opening https://mapfit.com/")
-//            }
+
+            attributionAnimJob = launch {
+                delay(2000)
+                async(UI) {
+                    if (containerAttribute.visibility == View.VISIBLE) {
+                        containerAttribute.visibility = View.GONE
+                    }
+                }
+            }
         }
-        controlsView.findViewById<ImageView>(R.id.btnZoomIn).setOnClickListener {
-            mapfitMap.setZoom(mapfitMap.getZoom() + ZOOM_STEP_LEVEL,
-                    ANIMATION_DURATION)
+
+        btnLegal.setOnClickListener({
+            context.startActivitySafe(mapfitLegalIntent)
+        })
+
+        btnBuildYourMap.setOnClickListener({
+            context.startActivitySafe(mapfitWebsiteIntent)
+        })
+
+        btnZoomIn.setOnClickListener {
+            mapfitMap.setZoom(mapfitMap.getZoom() + ZOOM_STEP_LEVEL, ANIMATION_DURATION)
         }
-        controlsView.findViewById<ImageView>(R.id.btnZoomOut).setOnClickListener {
-            mapfitMap.setZoom(mapfitMap.getZoom() - ZOOM_STEP_LEVEL,
-                    ANIMATION_DURATION)
+
+        btnZoomOut.setOnClickListener {
+            mapfitMap.setZoom(mapfitMap.getZoom() - ZOOM_STEP_LEVEL, ANIMATION_DURATION)
         }
+
+        btnRecenter.setOnClickListener {
+            mapfitMap.reCenter()
+        }
+
+        btnCompass.setOnClickListener {
+            mapController.setRotationEased(0f, ANIMATION_DURATION, MapController.EaseType.CUBIC)
+        }
+
+//        zoomControls.setBackgroundResource(R.drawable.zoom_buttons_bg)
+
     }
 
-    private fun initMapController(onMapReadyCallback: OnMapReadyCallback) {
+    private fun initMapController(mapTheme: MapTheme, onMapReadyCallback: OnMapReadyCallback) {
         mapController = MapController(getGLSurfaceView())
         mapController.apply {
             init()
@@ -145,7 +175,7 @@ class MapView(
             })
 
             mapOptions = MapOptions(this@MapView, this)
-            mapOptions.loadDefaultTheme()
+            mapOptions.theme = mapTheme
 
         }
     }
@@ -242,11 +272,13 @@ class MapView(
         }
 
         override fun setBounds(latLngBounds: LatLngBounds) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            mapController.setLatlngBounds(latLngBounds, 100)
         }
 
         override fun getBounds(): LatLngBounds {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            val sw = mapController.screenPositionToLatLng(PointF(0f, viewHeight?.toFloat() ?: 0f))
+            val ne = mapController.screenPositionToLatLng(PointF(viewWidth?.toFloat() ?: 0f, 0f))
+            return LatLngBounds(ne, sw)
         }
 
         override fun setOnMapClickListener(onMapClickListener: OnMapClickListener) {
@@ -325,6 +357,7 @@ class MapView(
         override fun setCenter(latLng: LatLng, duration: Long) {
             if (duration.toInt() == 0) {
                 mapController.position = latLng
+
             } else {
                 mapController.setPositionEased(
                         latLng,
@@ -334,13 +367,10 @@ class MapView(
             }
         }
 
-        override fun getCenter(): LatLng {
-            val position = mapController.position
-            return LatLng(position.lat, position.lon)
-        }
+        override fun getCenter(): LatLng = mapController.position
 
-        override fun reCenter(duration: Long) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        override fun reCenter() {
+            mapController.reCenter()
         }
 
         override fun addLayer(layer: Layer) {
@@ -390,10 +420,6 @@ class MapView(
 //        return LatLng(lngLat.latitude, lngLat.longitude)
 //    }
 
-    @JvmSynthetic
-    internal fun setZoomControlVisibility(visible: Boolean) {
-        zoomControlsView.visibility = if (visible) View.VISIBLE else View.GONE
-    }
 
     private fun getDirectionView(): View {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -433,5 +459,17 @@ class MapView(
     fun onLowMemory() {
         mapController.onLowMemory()
     }
+
+
+    private val mapfitWebsiteIntent by lazy {
+        Intent(Intent.ACTION_VIEW, Uri.parse("https://mapfit.com/"))
+    }
+
+    private val mapfitLegalIntent by lazy {
+        Intent(Intent.ACTION_VIEW, Uri.parse("https://mapfit.com/legalnotices"))
+    }
+
+    private var attributionAnimJob: Job? = null
+
 
 }

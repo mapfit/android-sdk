@@ -41,7 +41,7 @@ class MarkerTest {
         Mapfit.getInstance(mMockContext, "591dccc4e499ca0001a4c6a41a2ed1be54804856508265221862231b")
         val mapView = MapView(mMockContext, null)
 
-        mapView.getMapAsync(object : OnMapReadyCallback {
+        mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
                 this@MarkerTest.mapfitMap = mapfitMap
             }
