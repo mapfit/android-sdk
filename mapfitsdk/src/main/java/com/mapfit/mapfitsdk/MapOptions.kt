@@ -54,7 +54,7 @@ class MapOptions internal constructor(
             TODO()
         }
 
-    private var isZoomControlsVisible = true
+    var isZoomControlsVisible = true
         set(value) {
             mapView.setZoomControlVisibility(value)
             field = value

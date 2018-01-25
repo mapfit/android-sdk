@@ -138,7 +138,6 @@ class MapView(
                 }
             }
         }
-//
 
         btnLegal.setOnClickListener({
             context.startActivitySafe(mapfitLegalIntent)
@@ -155,6 +154,9 @@ class MapView(
         btnZoomOut.setOnClickListener {
             mapfitMap.setZoom(mapfitMap.getZoom() - ZOOM_STEP_LEVEL, ANIMATION_DURATION)
         }
+
+//        zoomControls.setBackgroundResource(R.drawable.zoom_buttons_bg)
+
     }
 
     private fun initMapController(mapTheme: MapTheme, onMapReadyCallback: OnMapReadyCallback) {

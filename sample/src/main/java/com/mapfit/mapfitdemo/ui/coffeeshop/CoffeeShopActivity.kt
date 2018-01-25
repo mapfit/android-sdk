@@ -112,11 +112,10 @@ class CoffeeShopActivity : AppCompatActivity() {
             drawerLayout.closeDrawer(GravityCompat.END)
         }
 
-
         override fun onFilterChecked(filterType: FilterType, isChecked: Boolean) {
             when (filterType) {
                 FilterType.ZOOM_CONTROLS -> {
-//                    mapfitMap.getMapOptions().isZoomControlsVisible = isChecked
+                    mapfitMap.getMapOptions().isZoomControlsVisible = isChecked
                 }
                 FilterType.PAN_GESTURE -> mapfitMap.setIsPanEnabled(isChecked)
                 FilterType.ROTATE_GESTURE -> mapfitMap.setIsRotateEnabled(isChecked)

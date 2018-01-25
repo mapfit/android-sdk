@@ -28,6 +28,10 @@ class FilterAdapter(private val onFilterChecked: OnFilterCheckedListener) : Recy
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder? {
 
         return when (FilterType.values()[viewType]) {
+            FilterType.PAN_GESTURE,
+            FilterType.ROTATE_GESTURE,
+            FilterType.PINCH_GESTURE,
+            FilterType.TILT_GESTURE,
             FilterType.ZOOM_CONTROLS,
             FilterType.ALL_MARKERS,
             FilterType.ALWAYS_OPEN -> {
@@ -42,14 +46,6 @@ class FilterAdapter(private val onFilterChecked: OnFilterCheckedListener) : Recy
                 val itemView = LayoutInflater.from(parent?.context).inflate(R.layout.list_item_filter_spinner, parent, false)
                 return SpinnerFilterVH(itemView, onFilterChecked)
             }
-            FilterType.PAN_GESTURE,
-            FilterType.ROTATE_GESTURE,
-            FilterType.PINCH_GESTURE,
-            FilterType.TILT_GESTURE -> {
-                val itemView = LayoutInflater.from(parent?.context).inflate(R.layout.list_item_filter_switch, parent, false)
-                return SwitchFilterVH(itemView, onFilterChecked)
-            }
-
 
             else -> {
                 return null
