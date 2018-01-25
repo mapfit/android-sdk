@@ -97,7 +97,7 @@ class Marker internal constructor(
         return this
     }
 
-    private fun setIcon(@NonNull mapfitMarker: MapfitMarker): Marker {
+    fun setIcon(@NonNull mapfitMarker: MapfitMarker): Marker {
         setIcon(mapfitMarker.getMarkerUrl())
         return this
     }

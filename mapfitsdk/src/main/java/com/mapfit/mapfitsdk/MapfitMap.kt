@@ -118,9 +118,9 @@ abstract class MapfitMap {
      */
     abstract fun getZoom(): Float
 
-    protected abstract fun setBounds(latLngBounds: LatLngBounds)
+    abstract fun setBounds(latLngBounds: LatLngBounds)
 
-    protected abstract fun getBounds(): LatLngBounds
+    abstract fun getBounds(): LatLngBounds
 
     abstract fun setOnMapClickListener(onMapClickListener: OnMapClickListener)
 
@@ -147,6 +147,22 @@ abstract class MapfitMap {
     protected abstract fun setRotation(angle: Float)
 
     protected abstract fun getRotation(): Float
+
+    abstract fun setIsTiltEnabled(isEnabled: Boolean)
+
+    abstract fun setIsRotateEnabled(isEnabled: Boolean)
+
+    abstract fun setIsPanEnabled(isEnabled: Boolean)
+
+    abstract fun setIsPinchEnabled(isEnabled: Boolean)
+
+    abstract fun getIsTiltEnabled(): Boolean
+
+    abstract fun getIsRotateEnabled(): Boolean
+
+    abstract fun getIsPanEnabled(): Boolean
+
+    abstract fun getIsPinchEnabled(): Boolean
 
     /**
      * Will reCenter the map.

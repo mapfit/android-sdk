@@ -42,6 +42,13 @@ class FilterAdapter(private val onFilterChecked: OnFilterCheckedListener) : Recy
                 val itemView = LayoutInflater.from(parent?.context).inflate(R.layout.list_item_filter_spinner, parent, false)
                 return SpinnerFilterVH(itemView, onFilterChecked)
             }
+            FilterType.PAN_GESTURE,
+            FilterType.ROTATE_GESTURE,
+            FilterType.PINCH_GESTURE,
+            FilterType.TILT_GESTURE -> {
+                val itemView = LayoutInflater.from(parent?.context).inflate(R.layout.list_item_filter_switch, parent, false)
+                return SwitchFilterVH(itemView, onFilterChecked)
+            }
 
 
             else -> {

@@ -11,6 +11,7 @@ import android.util.DisplayMetrics;
 
 import com.mapfit.mapfitsdk.annotations.Marker;
 import com.mapfit.mapfitsdk.geometry.LatLng;
+import com.mapfit.mapfitsdk.geometry.LatLngBounds;
 import com.mapfit.tangram.FontFileParser;
 import com.mapfit.tangram.HttpHandler;
 import com.mapfit.tangram.LabelPickResult;
@@ -99,7 +100,7 @@ public class MapController implements Renderer {
          * Receive information about features found in a call to {@link #pickFeature(float, float)}
          *
          * @param properties A mapping of string keys to string or number values
-         * @param positionX  The horizontal screen coordinate of the picked location
+         * @param positionX  The horizontal screen coordginate of the picked location
          * @param positionY  The vertical screen coordinate of the picked location
          */
         void onFeaturePick(Map<String, String> properties, float positionX, float positionY);
@@ -294,6 +295,14 @@ public class MapController implements Renderer {
         });
     }
 
+    //    private Boolean isTiltEnabled = true;
+//    private Boolean isRotationEnabled = true;
+//    private Boolean isPinchEnabled = true;
+//    private Boolean isPanEnabled = true;
+    void setTiltEnabled(boolean enabled) {
+        touchInput.setTiltEnabled(enabled);
+    }
+
     /**
      * Load a new scene file synchronously.
      * Use {@link #setSceneLoadListener(SceneLoadListener)} for notification when the new scene is
@@ -466,6 +475,17 @@ public class MapController implements Renderer {
         nativeSetPositionEased(mapPointer, position.getLon(), position.getLat(), seconds, ease.ordinal());
     }
 
+    public void setLatlngBounds(final LatLngBounds latlngBounds, final int padding) {
+        mapView.post(new Runnable() {
+            @Override
+            public void run() {
+                kotlin.Pair<LatLng, Float> pair = latlngBounds.getVisibleBounds(mapView);
+                checkPointer(mapPointer);
+                nativeSetZoom(mapPointer, pair.component2());
+                nativeSetPosition(mapPointer, pair.component1().getLon(), pair.component1().getLat());
+            }
+        });
+    }
     /**
      * Get the geographic position of the center of the map view
      *
@@ -1368,7 +1388,6 @@ public class MapController implements Renderer {
     private long time = System.nanoTime();
     private GLSurfaceView mapView;
     private AssetManager assetManager;
-    private TouchInput touchInput;
     private FontFileParser fontFileParser;
     private DisplayMetrics displayMetrics = new DisplayMetrics();
     private HttpHandler httpHandler;
@@ -1382,6 +1401,7 @@ public class MapController implements Renderer {
     private Map<String, MapData> clientTileSources = new HashMap<>();
     private Map<Long, Marker> markers = new HashMap<>();
     private Handler uiThreadHandler;
+    TouchInput touchInput;
 
     // GLSurfaceView.Renderer methods
     // ==============================

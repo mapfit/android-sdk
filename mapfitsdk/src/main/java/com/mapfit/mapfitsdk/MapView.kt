@@ -94,9 +94,15 @@ class MapView(
     private var mapClickListener: OnMapClickListener? = null
     private var mapDoubleClickListener: OnMapDoubleClickListener? = null
 
+    private var viewHeight: Int? = null
+    private var viewWidth: Int? = null
 
     init {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+        post {
+            viewHeight = height
+            viewWidth = width
+        }
     }
 
     @JvmOverloads
@@ -133,7 +139,6 @@ class MapView(
             }
         }
 //
-
 
         btnLegal.setOnClickListener({
             context.startActivitySafe(mapfitLegalIntent)
@@ -223,6 +228,30 @@ class MapView(
     }
 
     private val mapfitMap = object : MapfitMap() {
+        override fun setIsTiltEnabled(isEnabled: Boolean) {
+            mapController.touchInput.tiltEnabled = isEnabled
+        }
+
+        override fun setIsRotateEnabled(isEnabled: Boolean) {
+            mapController.touchInput.rotationEnabled = isEnabled
+
+        }
+
+        override fun setIsPanEnabled(isEnabled: Boolean) {
+            mapController.touchInput.panEnabled = isEnabled
+        }
+
+        override fun setIsPinchEnabled(isEnabled: Boolean) {
+            mapController.touchInput.pinchEnabled = isEnabled
+        }
+
+        override fun getIsTiltEnabled(): Boolean = mapController.touchInput.tiltEnabled
+
+        override fun getIsRotateEnabled(): Boolean = mapController.touchInput.rotationEnabled
+
+        override fun getIsPanEnabled(): Boolean = mapController.touchInput.panEnabled
+
+        override fun getIsPinchEnabled(): Boolean = mapController.touchInput.pinchEnabled
 
         override fun addMarker(address: String, onMarkerAddedCallback: OnMarkerAddedCallback) {
             geocoder.geocodeAddress(address, object : GeocoderCallback {
@@ -261,11 +290,13 @@ class MapView(
         }
 
         override fun setBounds(latLngBounds: LatLngBounds) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            mapController.setLatlngBounds(latLngBounds, 100)
         }
 
         override fun getBounds(): LatLngBounds {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            val sw = mapController.screenPositionToLatLng(PointF(0f, viewHeight?.toFloat() ?: 0f))
+            val ne = mapController.screenPositionToLatLng(PointF(viewWidth?.toFloat() ?: 0f, 0f))
+            return LatLngBounds(ne, sw)
         }
 
         override fun setOnMapClickListener(onMapClickListener: OnMapClickListener) {

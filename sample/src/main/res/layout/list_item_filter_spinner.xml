@@ -2,11 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/filterButton"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="48dp"
     android:orientation="horizontal"
-    android:paddingBottom="8dp"
-    android:paddingLeft="16dp"
-    android:paddingTop="8dp">
+    android:weightSum="4">
 
     <TextView
         style="@style/Base.TextAppearance.AppCompat.Body2"
@@ -14,12 +12,18 @@
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center_vertical"
+        android:paddingBottom="8dp"
+        android:paddingLeft="16dp"
+        android:paddingTop="8dp"
         android:text="Theme" />
 
     <android.support.v7.widget.AppCompatSpinner
         android:id="@+id/spinner"
         android:layout_width="0dp"
-        android:layout_height="36dp"
-        android:layout_weight="3" />
+        android:layout_height="match_parent"
+        android:layout_weight="3"
+        android:gravity="right"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp" />
 
 </LinearLayout>

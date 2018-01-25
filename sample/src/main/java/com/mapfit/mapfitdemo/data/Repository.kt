@@ -55,6 +55,12 @@ class Repository(private val context: Context) {
 
 //        filters.add(Filter(FilterType.ALL_MARKERS, "Markers", true))
 //        filters.add(Filter(FilterType.ZOOM_CONTROLS, "Zoom Controls", true))
+        filters.add(Filter(FilterType.PAN_GESTURE, "Pan Gesture", true, null))
+        filters.add(Filter(FilterType.ROTATE_GESTURE, "Rotate Gesture", true, null))
+        filters.add(Filter(FilterType.PINCH_GESTURE, "Pinch Gesture", true, null))
+        filters.add(Filter(FilterType.TILT_GESTURE, "Tilt Gesture", true, null))
+
+
         filters.add(Filter(
                 FilterType.MAP_THEME,
                 "Map Theme",

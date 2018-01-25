@@ -25,6 +25,7 @@ import com.mapfit.mapfitsdk.Layer
 import com.mapfit.mapfitsdk.MapTheme
 import com.mapfit.mapfitsdk.MapfitMap
 import com.mapfit.mapfitsdk.OnMapReadyCallback
+import com.mapfit.mapfitsdk.annotations.MapfitMarker
 import com.mapfit.mapfitsdk.annotations.Marker
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
@@ -32,10 +33,13 @@ import com.mapfit.mapfitsdk.geocoder.Geocoder
 import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
 import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
+import com.mapfit.mapfitsdk.geometry.LatLngBounds
 import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*
 import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 
 
 /**
@@ -83,10 +87,6 @@ class CoffeeShopActivity : AppCompatActivity() {
             override fun onMapReady(mapfitMap: MapfitMap) {
 
                 setupMap(mapfitMap)
-                addMapfitOfficeWithGeocoder()
-                setupMarkerWithAddressInput()
-
-                coffeeShops?.let { addMarkersFromCoffeeShops(it) }
 
 
 //                mapfitMap.addPolygon(repository.getLowerManhattanPoly())
@@ -118,6 +118,10 @@ class CoffeeShopActivity : AppCompatActivity() {
                 FilterType.ZOOM_CONTROLS -> {
 //                    mapfitMap.getMapOptions().isZoomControlsVisible = isChecked
                 }
+                FilterType.PAN_GESTURE -> mapfitMap.setIsPanEnabled(isChecked)
+                FilterType.ROTATE_GESTURE -> mapfitMap.setIsRotateEnabled(isChecked)
+                FilterType.PINCH_GESTURE -> mapfitMap.setIsPinchEnabled(isChecked)
+                FilterType.TILT_GESTURE -> mapfitMap.setIsTiltEnabled(isChecked)
             }
 
             drawerLayout.closeDrawer(GravityCompat.END)
@@ -145,12 +149,72 @@ class CoffeeShopActivity : AppCompatActivity() {
         this.mapfitMap = mapfitMap
 
         mapfitMap.apply {
-            setCenter(LatLng(40.700798, -74.0050177), 500)
-            setZoom(13f, 500)
+            //            setCenter(LatLng(40.700798, -74.0050177), 500)
+//            setZoom(13f, 500)
 
+//            boundaryBuilder()
 
+//            addMapfitOfficeWithGeocoder()
+//            setupMarkerWithAddressInput()
+//
+//            coffeeShops?.let { addMarkersFromCoffeeShops(it) }
+
+            setMapBoundsToColorado()
+//            setMapBoundsToUtah()
 //            setOnMarkerClickListener(onMarkerClickListener)
         }
+
+    }
+
+    private fun boundaryBuilder() {
+        val latLngList = listOf(
+                LatLng(37.198504, -83.272133),
+                LatLng(29.652243, -29.042111),
+                LatLng(38.246623, -82.737144),
+                LatLng(36.691771, -110.030517),
+                LatLng(37.940202, -107.461721),
+                LatLng(39.400789, -80.243273))
+
+        val boundsBuilder = LatLngBounds.Builder()
+
+        latLngList.forEach {
+            mapfitMap.addMarker(it)
+            boundsBuilder.include(it)
+        }
+
+        val bounds = boundsBuilder.build()
+        mapfitMap.setBounds(bounds)
+        mapfitMap.addMarker(bounds.southWest).setIcon(MapfitMarker.DARK_BAR)
+        mapfitMap.addMarker(bounds.nortEast).setIcon(MapfitMarker.DARK_AIRPORT)
+
+    }
+
+    private fun setMapBoundsToColorado() {
+        val ne = LatLng(40.991366, -102.068297)
+        val sw = LatLng(37.040997, -108.995177)
+        val bounds = LatLngBounds(ne, sw)
+
+        mapfitMap.addMarker(ne)
+        mapfitMap.addMarker(sw)
+        mapfitMap.setBounds(bounds)
+
+        launch {
+            delay(2000)
+            val afterBounds = mapfitMap.getBounds()
+            delay(5000)
+            mapfitMap.setBounds(afterBounds)
+        }
+
+    }
+
+    private fun setMapBoundsToUtah() {
+        val ne = LatLng(38.334804, -111.245101)
+        val sw = LatLng(38.326325, -111.351381)
+        val bounds = LatLngBounds(ne, sw)
+
+        mapfitMap.addMarker(ne)
+        mapfitMap.addMarker(sw)
+        mapfitMap.setBounds(bounds)
 
     }
 
