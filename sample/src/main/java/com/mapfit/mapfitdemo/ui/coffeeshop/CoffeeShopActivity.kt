@@ -152,7 +152,7 @@ class CoffeeShopActivity : AppCompatActivity() {
             boundaryBuilder()
 
 //            addMapfitOfficeWithGeocoder()
-//            setupMarkerWithAddressInput()
+            setupMarkerWithAddressInput()
 //
 //            coffeeShops?.let { addMarkersFromCoffeeShops(it) }
 
