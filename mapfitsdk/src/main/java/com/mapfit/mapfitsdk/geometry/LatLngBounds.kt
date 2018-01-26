@@ -5,12 +5,12 @@ package com.mapfit.mapfitsdk.geometry
  * Created by dogangulcan on 1/4/18.
  */
 class LatLngBounds(
-        var nortEast: LatLng = LatLng(),
-        var southWest: LatLng = LatLng()
+    var northEast: LatLng = LatLng(),
+    var southWest: LatLng = LatLng()
 ) {
 
     val center by lazy {
-        getCenterLatlng(listOf(nortEast, southWest))
+        getCenterLatlng(listOf(northEast, southWest))
     }
 
     private constructor(builder: Builder) : this() {
@@ -27,7 +27,7 @@ class LatLngBounds(
             if (east == null || east!! < it.lon) east = it.lon
         }
 
-        nortEast = LatLng(north ?: 0.0, east ?: 0.0)
+        northEast = LatLng(north ?: 0.0, east ?: 0.0)
         southWest = LatLng(south ?: 0.0, west ?: 0.0)
     }
 
@@ -43,15 +43,21 @@ class LatLngBounds(
     }
 
     fun getVisibleBounds(viewWidth: Int, viewHeight: Int): Pair<LatLng, Float> {
-        val ry1 = Math.log((Math.sin(Math.toRadians(southWest.lat)) + 1) / Math.cos(Math.toRadians(southWest.lat)))
-        val ry2 = Math.log((Math.sin(Math.toRadians(nortEast.lat)) + 1) / Math.cos(Math.toRadians(nortEast.lat)))
+        val ry1 = Math.log(
+            (Math.sin(Math.toRadians(southWest.lat)) + 1) / Math.cos(
+                Math.toRadians(southWest.lat)
+            )
+        )
+        val ry2 =
+            Math.log((Math.sin(Math.toRadians(northEast.lat)) + 1) / Math.cos(Math.toRadians(
+                northEast.lat)))
         val ryc = (ry1 + ry2) / 2
         val centerX = Math.toDegrees(Math.atan(Math.sinh(ryc)))
 
-        val resolutionHorizontal = (nortEast.lon - southWest.lon) / viewWidth
+        val resolutionHorizontal = (northEast.lon - southWest.lon) / viewWidth
 
         val vy0 = Math.log(Math.tan(Math.PI * (0.25 + centerX / 360)))
-        val vy1 = Math.log(Math.tan(Math.PI * (0.25 + nortEast.lat / 360)))
+        val vy1 = Math.log(Math.tan(Math.PI * (0.25 + northEast.lat / 360)))
         val viewHeightHalf = viewHeight / 2.0f
         val zoomFactorPowered = viewHeightHalf / (40.7436654315252 * (vy1 - vy0))
         val resolutionVertical = 360.0 / (zoomFactorPowered * 256)

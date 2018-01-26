@@ -8,6 +8,7 @@ import android.opengl.GLSurfaceView.Renderer;
 import android.os.Handler;
 import android.support.annotation.Keep;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import com.mapfit.mapfitsdk.annotations.Marker;
 import com.mapfit.mapfitsdk.geometry.LatLng;
@@ -495,21 +496,13 @@ public class MapController implements Renderer {
             }
         });
     }
-    /**
-     * Get the geographic position of the center of the map view
-     *
-     * @return The current map position in a LngLat
-     */
-//    public LatLng getPosition() {
-//        return getPosition();
-//    }
 
     /**
      * Get the geographic position of the center of the map view
      *
      * @return LngLat of the center of the map view
      */
-    public LatLng getPosition() {
+    LatLng getPosition() {
         double[] tmp = {0, 0};
         checkPointer(mapPointer);
         nativeGetPosition(mapPointer, tmp);
@@ -521,7 +514,7 @@ public class MapController implements Renderer {
      *
      * @param zoom Zoom level; lower values show more area
      */
-    public void setZoom(float zoom) {
+    void setZoom(float zoom) {
         checkPointer(mapPointer);
         nativeSetZoom(mapPointer, zoom);
     }
@@ -532,7 +525,7 @@ public class MapController implements Renderer {
      * @param zoom     Zoom level; lower values show more area
      * @param duration Time in milliseconds to ease to given zoom
      */
-    public void setZoomEased(float zoom, int duration) {
+    void setZoomEased(float zoom, int duration) {
         setZoomEased(zoom, duration, DEFAULT_EASE_TYPE);
     }
 
@@ -543,7 +536,7 @@ public class MapController implements Renderer {
      * @param duration Time in milliseconds to ease to given zoom
      * @param ease     Type of easing to use
      */
-    public void setZoomEased(float zoom, int duration, EaseType ease) {
+    void setZoomEased(float zoom, int duration, EaseType ease) {
         float seconds = duration / 1000.f;
         checkPointer(mapPointer);
         nativeSetZoomEased(mapPointer, zoom, seconds, ease.ordinal());
@@ -554,7 +547,7 @@ public class MapController implements Renderer {
      *
      * @return Zoom level; lower values show more area
      */
-    public float getZoom() {
+    float getZoom() {
         checkPointer(mapPointer);
         return nativeGetZoom(mapPointer);
     }
@@ -564,7 +557,7 @@ public class MapController implements Renderer {
      *
      * @param rotation Counter-clockwise rotation in radians; 0 corresponds to North pointing up
      */
-    public void setRotation(float rotation) {
+    void setRotation(float rotation) {
         checkPointer(mapPointer);
         nativeSetRotation(mapPointer, rotation);
     }
@@ -838,6 +831,7 @@ public class MapController implements Renderer {
             public boolean onFling(float posX, float posY, float velocityX, float velocityY) {
                 if (responder == null || !responder.onFling(posX, posY, velocityX, velocityY)) {
                     nativeHandleFlingGesture(mapPointer, posX, posY, velocityX, velocityY);
+
                 }
                 return true;
             }
@@ -873,6 +867,8 @@ public class MapController implements Renderer {
                 if (responder == null || !responder.onScale(x, y, scale, velocity)) {
                     nativeHandlePinchGesture(mapPointer, x, y, scale, velocity);
                 }
+
+                Log.e("SCALE", "SCALE CALLED");
                 return true;
             }
         });
@@ -1046,7 +1042,6 @@ public class MapController implements Renderer {
         long markerId = nativeMarkerAdd(mapPointer);
         Marker marker = new Marker(mapView.getContext(), markerId, this);
         markers.put(markerId, marker);
-
         return marker;
     }
 

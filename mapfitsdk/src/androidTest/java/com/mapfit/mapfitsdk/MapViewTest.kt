@@ -1,21 +1,28 @@
 package com.mapfit.mapfitsdk
 
-import android.content.Context
-import android.support.test.InstrumentationRegistry
 import android.support.test.annotation.UiThreadTest
+import android.support.test.espresso.Espresso.onView
+import android.support.test.espresso.action.ViewActions.*
+import android.support.test.espresso.matcher.ViewMatchers.withId
+import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
 import android.view.View
 import com.mapfit.mapfitsdk.MapOptions.Companion.MAP_MAX_ZOOM
 import com.mapfit.mapfitsdk.MapOptions.Companion.MAP_MIN_ZOOM
 import com.mapfit.mapfitsdk.geometry.LatLng
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.runBlocking
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
+import org.mockito.Mockito
+import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
+import android.view.MotionEvent
+
 
 /**
  * Instrumentation tests for [MapView] and [MapOptions] functionality.
@@ -25,23 +32,38 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class MapViewTest {
 
-    private val mMockContext: Context = InstrumentationRegistry.getContext()
     private lateinit var mapView: com.mapfit.mapfitsdk.MapView
     private lateinit var mapfitMap: MapfitMap
 
     @Mock
     private lateinit var onMapClickListener: OnMapClickListener
 
-
     @Mock
     private lateinit var onMapDoubleClickListener: OnMapDoubleClickListener
+
+    @Mock
+    private lateinit var onMapLongClickListener: OnMapLongClickListener
+
+    @Mock
+    private lateinit var onMapPanListener: OnMapPanListener
+
+    @Mock
+    private lateinit var onMapPinchListener: OnMapPinchListener
+
+    @Rule
+    @JvmField
+    val activityRule: ActivityTestRule<DummyActivity> = ActivityTestRule(
+        DummyActivity::class.java,
+        true,
+        true
+    )
 
     @Before
     @UiThreadTest
     fun init() {
         MockitoAnnotations.initMocks(this)
 
-        mapView = MapView(mMockContext, null)
+        mapView = activityRule.activity.findViewById(R.id.mapView)
 
         mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
@@ -64,6 +86,7 @@ class MapViewTest {
         Assert.assertEquals(View.GONE, mapView.zoomControlsView.visibility)
         Assert.assertEquals(View.GONE, mapView.btnRecenter.visibility)
         Assert.assertEquals(View.GONE, mapView.btnCompass.visibility)
+        Assert.assertEquals(View.VISIBLE, mapView.getAttributionImage().visibility)
     }
 
     @Test
@@ -107,24 +130,6 @@ class MapViewTest {
 
     @Test
     @UiThreadTest
-    fun testMapClickListener() {
-        mapfitMap.setOnMapClickListener(onMapClickListener)
-        mapView.singleTapResponder().onSingleTapConfirmed(0f, 32f)
-        verify(onMapClickListener, times(1))
-                .onMapClicked(LatLng(89.840598043218, 157.50080354385057))
-    }
-
-    @Test
-    @UiThreadTest
-    fun testOnMapDoubleClickListener() {
-        mapfitMap.setOnMapDoubleClickListener(onMapDoubleClickListener)
-        mapView.doubleTapResponder()?.onDoubleTap(0f, 32f)
-        verify(onMapDoubleClickListener, times(1))
-                .onMapDoubleClicked(LatLng(89.840598043218, 157.50080354385057))
-    }
-
-    @Test
-    @UiThreadTest
     fun testAddRemoveLayers() {
         val layer = Layer()
         mapfitMap.addLayer(layer)
@@ -143,6 +148,7 @@ class MapViewTest {
     }
 
     @Test
+    @UiThreadTest
     fun testZoomControlVisibility() {
         mapfitMap.getMapOptions().zoomControlsEnabled = true
         Assert.assertEquals(View.VISIBLE, mapView.zoomControlsView.visibility)
@@ -152,6 +158,7 @@ class MapViewTest {
     }
 
     @Test
+    @UiThreadTest
     fun testCompassVisibility() {
         mapfitMap.getMapOptions().compassButtonEnabled = true
         Assert.assertEquals(View.VISIBLE, mapView.btnCompass.visibility)
@@ -161,6 +168,7 @@ class MapViewTest {
     }
 
     @Test
+    @UiThreadTest
     fun testRecenterVisibility() {
         mapfitMap.getMapOptions().recenterButtonEnabled = true
         Assert.assertEquals(View.VISIBLE, mapView.btnRecenter.visibility)
@@ -168,5 +176,79 @@ class MapViewTest {
         mapfitMap.getMapOptions().recenterButtonEnabled = false
         Assert.assertEquals(View.GONE, mapView.btnRecenter.visibility)
     }
+
+    @Test
+    fun testMapClickListener() {
+        runBlocking {
+            delay(400)
+            mapfitMap.setOnMapClickListener(onMapClickListener)
+
+            onView(withId(R.id.glSurface)).perform(click())
+            delay(600)
+
+            verify(onMapClickListener, times(1))
+                .onMapClicked(Mockito.any(LatLng::class.java) ?: LatLng())
+        }
+    }
+
+    @Test
+    fun testOnMapDoubleClickListener() {
+        runBlocking {
+            delay(400)
+            mapfitMap.setOnMapDoubleClickListener(onMapDoubleClickListener)
+
+            onView(withId(R.id.glSurface)).perform(doubleClick())
+            delay(600)
+
+            verify(onMapDoubleClickListener, times(1))
+                .onMapDoubleClicked(Mockito.any(LatLng::class.java) ?: LatLng())
+        }
+    }
+
+    @Test
+    fun testOnMapLongClickListener() {
+        runBlocking {
+            delay(400)
+            mapfitMap.setOnMapLongClickListener(onMapLongClickListener)
+
+            onView(withId(R.id.glSurface)).perform(longClick())
+            delay(600)
+
+            verify(onMapLongClickListener, times(1))
+                .onMapLongClicked(Mockito.any(LatLng::class.java) ?: LatLng())
+        }
+    }
+
+    @Test
+    fun testOnMapPanListener() {
+        runBlocking {
+            delay(400)
+            mapfitMap.setOnMapPanListener(onMapPanListener)
+
+            onView(withId(R.id.glSurface)).perform(swipeDown())
+            delay(600)
+
+            verify(onMapPanListener, atLeastOnce()).onMapPan()
+        }
+    }
+
+    @Test
+    fun testOnMapPinchListener() {
+//
+//        runBlocking {
+//            delay(400)
+//            mapfitMap.setOnMapPinchListener(onMapPinchListener)
+//
+//            onView(withId(R.id.glSurface)).perform(event)
+//            delay(600)
+//
+//            verify(onMapPinchListener, atLeastOnce()).onMapPinch()
+//        }
+    }
+
+//    developer can enable a map click listener
+//    developer can enable a marker click listener
+//    developer can enable map pan listener (returns new map centroid or map bounds)
+//    developer can enable map zoom lister (returns new zoom level)
 
 }

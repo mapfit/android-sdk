@@ -35,7 +35,7 @@ class LatLngBoundsTest {
         val expectedNE = LatLng(39.400789, -29.042111)
         val expectedSW = LatLng(29.652243, -110.030517)
 
-        Assert.assertEquals(expectedNE, bounds.nortEast)
+        Assert.assertEquals(expectedNE, bounds.northEast)
         Assert.assertEquals(expectedSW, bounds.southWest)
     }
 

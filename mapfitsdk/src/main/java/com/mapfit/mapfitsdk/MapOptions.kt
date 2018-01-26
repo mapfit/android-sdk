@@ -28,7 +28,6 @@ class MapOptions internal constructor(
             if (field == null || field != value) {
                 value?.let { updateScene(value) }
                 field = value
-
             }
         }
 

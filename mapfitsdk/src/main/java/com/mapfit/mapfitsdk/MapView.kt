@@ -11,7 +11,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import com.mapfit.mapfitsdk.annotations.Marker
 import com.mapfit.mapfitsdk.annotations.Polygon
@@ -47,8 +46,8 @@ import java.io.IOException
  * Created by dogangulcan on 12/18/17.
  */
 class MapView(
-        context: Context,
-        attributeSet: AttributeSet? = null
+    context: Context,
+    attributeSet: AttributeSet? = null
 ) : RelativeLayout(context, attributeSet) {
 
     private val ANIMATION_DURATION = 200
@@ -58,13 +57,11 @@ class MapView(
     private lateinit var mapOptions: MapOptions
     private val geocoder by lazy { Geocoder() }
 
-
     // Views
     private val controlsView: View by lazy {
         LayoutInflater.from(context)
-                .inflate(R.layout.overlay_map_controls, this, false)
+            .inflate(R.layout.overlay_map_controls, this, false)
     }
-
     private val attributionImage: ImageView = controlsView.findViewById(R.id.imgAttribution)
 
     @JvmSynthetic
@@ -89,6 +86,9 @@ class MapView(
     private var markerClickListener: OnMarkerClickListener? = null
     private var mapClickListener: OnMapClickListener? = null
     private var mapDoubleClickListener: OnMapDoubleClickListener? = null
+    private var mapLongClickListener: OnMapLongClickListener? = null
+    private var mapPanListener: OnMapPanListener? = null
+    private var mapPinchListener: OnMapPinchListener? = null
 
     private var viewHeight: Int? = null
     private var viewWidth: Int? = null
@@ -167,9 +167,15 @@ class MapView(
         mapController = MapController(getGLSurfaceView())
         mapController.apply {
             init()
+
             setTapResponder(singleTapResponder())
             setDoubleTapResponder(doubleTapResponder())
+            setLongPressResponder(longClickResponder())
+            setPanResponder(panResponder())
+            setScaleResponder(scaleResponder())
+
             setMarkerPickListener(markerPickListener())
+
             setSceneLoadListener({ _, _ ->
                 onMapReadyCallback.onMapReady(mapfitMap)
             })
@@ -180,8 +186,45 @@ class MapView(
         }
     }
 
+    private fun scaleResponder() = TouchInput.ScaleResponder { x, y, scale, velocity ->
+        var consumed = false
+        mapPinchListener?.let {
+            it.onMapPinch()
+            consumed = true
+        }
+        consumed
+    }
+
+    private fun panResponder() = object : TouchInput.PanResponder {
+        override fun onPan(startX: Float, startY: Float, endX: Float, endY: Float): Boolean {
+            var consumed = false
+            mapPanListener?.let {
+                it.onMapPan()
+                consumed = true
+            }
+            return consumed
+        }
+
+        override fun onFling(
+            posX: Float,
+            posY: Float,
+            velocityX: Float,
+            velocityY: Float
+        ): Boolean {
+            return false
+        }
+    }
+
+    private fun longClickResponder(): TouchInput.LongPressResponder? {
+        return TouchInput.LongPressResponder { x, y ->
+            mapLongClickListener?.onMapLongClicked(
+                mapController.screenPositionToLatLng(PointF(x, y))
+            )
+        }
+    }
+
     @JvmSynthetic
-    internal fun singleTapResponder(): TouchInput.TapResponder {
+    private fun singleTapResponder(): TouchInput.TapResponder {
         return object : TouchInput.TapResponder {
             override fun onSingleTapUp(x: Float, y: Float): Boolean {
                 Log.e("onSingleTapUp!!!", "")
@@ -197,9 +240,16 @@ class MapView(
     }
 
     @JvmSynthetic
-    internal fun doubleTapResponder(): TouchInput.DoubleTapResponder? {
+    private fun doubleTapResponder(): TouchInput.DoubleTapResponder? {
         return TouchInput.DoubleTapResponder { x, y ->
-            mapDoubleClickListener?.onMapDoubleClicked(mapController.screenPositionToLatLng(PointF(x, y)))
+            mapDoubleClickListener?.onMapDoubleClicked(
+                mapController.screenPositionToLatLng(
+                    PointF(
+                        x,
+                        y
+                    )
+                )
+            )
             setZoomOnDoubleTap(x, y)
             true
         }
@@ -209,20 +259,20 @@ class MapView(
         return { markerPickResult, _, _ ->
 
             markerPickResult?.run {
-                //                val annotation = annotationLayer.getAnnotations().find {
-//                    it.getId() == markerPickResult.marker
-//                }
+                val annotation = annotationLayer.annotations.find {
+                    it.getId() == markerPickResult.marker.getId()
+                }
 
-//                annotation?.let {
-//                    when (it) {
-//                        is Marker -> markerClickListener?.onMarkerClicked(it)
-//                        is Polyline -> {
-//                        }
-//                        else -> {
-//                        }
-//                    }
-//
-//                }
+                annotation?.let {
+                    when (it) {
+                        is Marker -> markerClickListener?.onMarkerClicked(it)
+                        is Polyline -> {
+                        }
+                        else -> {
+                        }
+                    }
+
+                }
             }
         }
     }
@@ -234,6 +284,9 @@ class MapView(
     }
 
     private val mapfitMap = object : MapfitMap() {
+        override fun setOnMapPinchListener(onMapPinchListener: OnMapPinchListener) {
+            mapPinchListener = onMapPinchListener
+        }
 
         override fun addMarker(address: String, onMarkerAddedCallback: OnMarkerAddedCallback) {
             geocoder.geocodeAddress(address, object : GeocoderCallback {
@@ -242,8 +295,10 @@ class MapView(
                     var latLng = LatLng()
                     addressList.forEach { address ->
                         latLng = if (address.entrances.isNotEmpty()) {
-                            LatLng(address.entrances.first().latitude,
-                                    address.entrances.first().longitude)
+                            LatLng(
+                                address.entrances.first().latitude,
+                                address.entrances.first().longitude
+                            )
                         } else {
                             LatLng(address.latitude, address.longitude)
                         }
@@ -287,6 +342,14 @@ class MapView(
 
         override fun setOnMapDoubleClickListener(onMapDoubleClickListener: OnMapDoubleClickListener) {
             mapDoubleClickListener = onMapDoubleClickListener
+        }
+
+        override fun setOnMapLongClickListener(onMapLongClickListener: OnMapLongClickListener) {
+            mapLongClickListener = onMapLongClickListener
+        }
+
+        override fun setOnMapPanListener(onMapPanListener: OnMapPanListener) {
+            mapPanListener = onMapPanListener
         }
 
         override fun setOnPolylineClickListener(onPolylineClickListener: OnPolylineClickListener) {
@@ -360,9 +423,9 @@ class MapView(
 
             } else {
                 mapController.setPositionEased(
-                        latLng,
-                        duration.toInt(),
-                        MapController.EaseType.CUBIC
+                    latLng,
+                    duration.toInt(),
+                    MapController.EaseType.CUBIC
                 )
             }
         }
@@ -383,7 +446,7 @@ class MapView(
         }
 
         override fun removeMarker(marker: Marker): Boolean =
-                mapController.removeMarker(marker)
+            mapController.removeMarker(marker)
 
         override fun removePolygon(polygon: Polygon) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -420,17 +483,12 @@ class MapView(
 //        return LatLng(lngLat.latitude, lngLat.longitude)
 //    }
 
-
-    private fun getDirectionView(): View {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
     private fun getGLSurfaceView(): GLSurfaceView {
         val glSurfaceView = GLSurfaceView(context)
         glSurfaceView.setEGLContextClientVersion(2)
         glSurfaceView.preserveEGLContextOnPause = true
         glSurfaceView.setEGLConfigChooser(ConfigChooser(8, 8, 8, 0, 16, 8))
-
+        glSurfaceView.id = R.id.glSurface
         addView(glSurfaceView)
         return glSurfaceView
     }

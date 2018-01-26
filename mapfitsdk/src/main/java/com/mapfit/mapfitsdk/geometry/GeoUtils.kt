@@ -36,3 +36,4 @@ internal fun getCenterLatlng(geoCoordinates: List<LatLng>): LatLng {
 
     return LatLng(centralLatitude * 180 / Math.PI, centralLongitude * 180 / Math.PI)
 }
+
