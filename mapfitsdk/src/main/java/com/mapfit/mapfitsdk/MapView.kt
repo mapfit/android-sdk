@@ -326,8 +326,8 @@ class MapView(
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun setBounds(latLngBounds: LatLngBounds) {
-            mapController.setLatlngBounds(latLngBounds, 100)
+        override fun setBounds(latLngBounds: LatLngBounds, padding: Float) {
+            mapController.setLatlngBounds(latLngBounds, padding)
         }
 
         override fun getBounds(): LatLngBounds {

@@ -148,11 +148,11 @@ class CoffeeShopActivity : AppCompatActivity() {
             //            setCenter(LatLng(40.700798, -74.0050177), 500)
 //            setZoom(13f, 500)
 
-            boundaryBuilder()
+//            boundaryBuilder()
 //            addMapfitOfficeWithGeocoder()
             setupMarkerWithAddressInput()
 //            coffeeShops?.let { addMarkersFromCoffeeShops(it) }
-//            setMapBoundsToColorado()
+            setMapBoundsToColorado()
 //            setMapBoundsToUtah()
             setOnMarkerClickListener(onMarkerClickListener)
             setOnMapLongClickListener(onMapLongClickListener)
@@ -179,7 +179,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         }
 
         val bounds = boundsBuilder.build()
-        mapfitMap.setBounds(bounds)
+        mapfitMap.setBounds(bounds,.8f)
         mapfitMap.addMarker(bounds.southWest).setIcon(MapfitMarker.DARK_BAR)
         mapfitMap.addMarker(bounds.northEast).setIcon(MapfitMarker.DARK_AIRPORT)
 
@@ -192,7 +192,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap.addMarker(ne)
         mapfitMap.addMarker(sw)
-        mapfitMap.setBounds(bounds)
+        mapfitMap.setBounds(bounds,1f)
 
 //        launch {
 //            delay(2000)
@@ -210,7 +210,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap.addMarker(ne)
         mapfitMap.addMarker(sw)
-        mapfitMap.setBounds(bounds)
+        mapfitMap.setBounds(bounds,1f)
 
     }
 
@@ -224,6 +224,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         override fun onMarkerClicked(marker: Marker) {
 //            marker.setIcon(MapfitMarker.DARK_AUTO)
             mapfitMap.setCenter(marker.getPosition(), 300)
+            mapfitMap.getBounds().center
 
 //            marker.data?.let {
 //                bottom_sheet.txtTitle.text = (it as CoffeeShop).title

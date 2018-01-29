@@ -482,13 +482,14 @@ public class MapController implements Renderer {
         nativeSetPositionEased(mapPointer, position.getLon(), position.getLat(), seconds, ease.ordinal());
     }
 
-    public void setLatlngBounds(final LatLngBounds latlngBounds, final int padding) {
+    public void setLatlngBounds(final LatLngBounds latlngBounds, final float padding) {
         mapView.post(new Runnable() {
             @Override
             public void run() {
                 kotlin.Pair<LatLng, Float> pair = latlngBounds.getVisibleBounds(
                         mapView.getWidth(),
-                        mapView.getHeight());
+                        mapView.getHeight(),
+                        padding);
                 lastCenter = pair.component1();
                 checkPointer(mapPointer);
                 nativeSetZoom(mapPointer, pair.component2());

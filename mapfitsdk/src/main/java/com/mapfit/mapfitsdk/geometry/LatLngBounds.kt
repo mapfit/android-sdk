@@ -42,25 +42,24 @@ class LatLngBounds(
         fun build() = LatLngBounds(this)
     }
 
-    fun getVisibleBounds(viewWidth: Int, viewHeight: Int): Pair<LatLng, Float> {
+    fun getVisibleBounds(viewWidth: Int, viewHeight: Int, padding: Float): Pair<LatLng, Float> {
+
         val ry1 = Math.log(
-            (Math.sin(Math.toRadians(southWest.lat)) + 1) / Math.cos(
-                Math.toRadians(southWest.lat)
-            )
+            (Math.sin(Math.toRadians(southWest.lat)) + 1) / Math.cos(Math.toRadians(southWest.lat))
         )
-        val ry2 =
-            Math.log((Math.sin(Math.toRadians(northEast.lat)) + 1) / Math.cos(Math.toRadians(
-                northEast.lat)))
+        val ry2 = Math.log(
+            Math.sin(Math.toRadians(northEast.lat)) + 1
+        ) / Math.cos(Math.toRadians(northEast.lat))
         val ryc = (ry1 + ry2) / 2
         val centerX = Math.toDegrees(Math.atan(Math.sinh(ryc)))
 
-        val resolutionHorizontal = (northEast.lon - southWest.lon) / viewWidth
+        val resolutionHorizontal = (northEast.lon - southWest.lon) / (viewWidth * padding)
 
         val vy0 = Math.log(Math.tan(Math.PI * (0.25 + centerX / 360)))
         val vy1 = Math.log(Math.tan(Math.PI * (0.25 + northEast.lat / 360)))
-        val viewHeightHalf = viewHeight / 2.0f
+        val viewHeightHalf = (viewHeight * padding) / 2.0f
         val zoomFactorPowered = viewHeightHalf / (40.7436654315252 * (vy1 - vy0))
-        val resolutionVertical = 360.0 / (zoomFactorPowered * 256)
+        val resolutionVertical = 360.0 / (zoomFactorPowered * 512)
 
         val paddingFactor = 1.9
         val resolution = Math.max(resolutionHorizontal, resolutionVertical) * paddingFactor

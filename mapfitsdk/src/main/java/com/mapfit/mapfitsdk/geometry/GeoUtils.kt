@@ -16,8 +16,8 @@ internal fun getCenterLatlng(geoCoordinates: List<LatLng>): LatLng {
     var z = 0.0
 
     geoCoordinates.forEach { latLng ->
-        val latitude = latLng.lat * Math.PI / 180
-        val longitude = latLng.lon * Math.PI / 180
+        val latitude = Math.toRadians(latLng.lat)
+        val longitude = Math.toRadians(latLng.lon)
 
         x += Math.cos(latitude) * Math.cos(longitude)
         y += Math.cos(latitude) * Math.sin(longitude)
@@ -34,6 +34,6 @@ internal fun getCenterLatlng(geoCoordinates: List<LatLng>): LatLng {
     val centralSquareRoot = Math.sqrt(x * x + y * y)
     val centralLatitude = Math.atan2(z, centralSquareRoot)
 
-    return LatLng(centralLatitude * 180 / Math.PI, centralLongitude * 180 / Math.PI)
-}
+    return LatLng(Math.toDegrees(centralLatitude), Math.toDegrees(centralLongitude))
 
+}
