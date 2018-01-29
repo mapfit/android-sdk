@@ -7,20 +7,22 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.support.annotation.DrawableRes
 import android.support.annotation.NonNull
+import android.support.annotation.VisibleForTesting
 import android.util.Log
 import com.mapfit.mapfitsdk.MapController
 import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.isValid
 import com.mapfit.mapfitsdk.utils.loadImageFromUrl
 import kotlinx.coroutines.experimental.launch
+import org.jetbrains.annotations.TestOnly
 
 /**
  * Created by dogangulcan on 12/19/17.
  */
 class Marker internal constructor(
-        private val context: Context,
-        private var markerId: Long,
-        private val mapController: MapController
+    private val context: Context,
+    private var markerId: Long,
+    private val mapController: MapController
 ) : Annotation() {
 
 
@@ -43,11 +45,11 @@ class Marker internal constructor(
     fun setPosition(latLng: LatLng): Marker {
         if (latLng.isValid()) {
             val markerPositionSet = mapController.setMarkerPointEased(
-                    markerId,
-                    latLng.lon,
-                    latLng.lat,
-                    0,
-                    MapController.EaseType.CUBIC
+                markerId,
+                latLng.lon,
+                latLng.lat,
+                0,
+                MapController.EaseType.CUBIC
             )
 
             updatePosition(markerPositionSet, latLng)
@@ -58,11 +60,11 @@ class Marker internal constructor(
     private fun setPositionEased(latLng: LatLng, duration: Int): Marker {
         if (latLng.isValid()) {
             val markerPositionSet = mapController.setMarkerPointEased(
-                    markerId,
-                    latLng.lon,
-                    latLng.lat,
-                    duration,
-                    MapController.EaseType.CUBIC
+                markerId,
+                latLng.lon,
+                latLng.lat,
+                duration,
+                MapController.EaseType.CUBIC
             )
 
             updatePosition(markerPositionSet, latLng)
@@ -74,8 +76,10 @@ class Marker internal constructor(
         if (markerPositionSet) {
             position = latLng
         } else {
-            Log.e("Mapfit",
-                    "Setting Marker position is failed for ${latLng.lat}, ${latLng.lon}")
+            Log.e(
+                "Mapfit",
+                "Setting Marker position is failed for ${latLng.lat}, ${latLng.lon}"
+            )
         }
     }
 
@@ -162,4 +166,9 @@ class Marker internal constructor(
     fun remove() {
         mapController.removeMarker(this)
     }
+
+    @TestOnly
+    @VisibleForTesting
+    internal fun getScreenPosition() = mapController.lngLatToScreenPosition(position)
+
 }

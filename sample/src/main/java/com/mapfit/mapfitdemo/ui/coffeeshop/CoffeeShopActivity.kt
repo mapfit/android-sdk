@@ -21,10 +21,7 @@ import com.mapfit.mapfitdemo.module.coffeeshop.data.Repository
 import com.mapfit.mapfitdemo.ui.adapter.FilterAdapter
 import com.mapfit.mapfitdemo.ui.adapter.FilterType
 import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener
-import com.mapfit.mapfitsdk.Layer
-import com.mapfit.mapfitsdk.MapTheme
-import com.mapfit.mapfitsdk.MapfitMap
-import com.mapfit.mapfitsdk.OnMapReadyCallback
+import com.mapfit.mapfitsdk.*
 import com.mapfit.mapfitsdk.annotations.MapfitMarker
 import com.mapfit.mapfitsdk.annotations.Marker
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
@@ -99,7 +96,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         override fun onSpinnerItemSelected(filterType: FilterType, string: String) {
             when (filterType) {
                 FilterType.MAP_THEME -> {
-                    mapfitMap.getMapOptions().theme=MapTheme.valueOf(string)
+                    mapfitMap.getMapOptions().theme = MapTheme.valueOf(string)
                     drawerLayout.closeDrawer(GravityCompat.END)
                 }
             }
@@ -112,7 +109,8 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         override fun onFilterChecked(filterType: FilterType, isChecked: Boolean) {
             when (filterType) {
-                FilterType.ZOOM_CONTROLS -> mapfitMap.getMapOptions().zoomControlsEnabled = isChecked
+                FilterType.ZOOM_CONTROLS -> mapfitMap.getMapOptions().zoomControlsEnabled =
+                        isChecked
                 FilterType.COMPASS -> mapfitMap.getMapOptions().compassButtonEnabled = isChecked
                 FilterType.RECENTER -> mapfitMap.getMapOptions().recenterButtonEnabled = isChecked
                 FilterType.PAN_GESTURE -> mapfitMap.getMapOptions().panEnabled = isChecked
@@ -130,11 +128,12 @@ class CoffeeShopActivity : AppCompatActivity() {
         drawerLayout = drawer_layout
 
         val toggle = ActionBarDrawerToggle(
-                this,
-                drawerLayout,
-                toolbar,
-                R.string.navigation_drawer_open,
-                R.string.navigation_drawer_close)
+            this,
+            drawerLayout,
+            toolbar,
+            R.string.navigation_drawer_open,
+            R.string.navigation_drawer_close
+        )
         toggle.syncState()
         toggle.isDrawerIndicatorEnabled = false
         drawerLayout.addDrawerListener(toggle)
@@ -149,28 +148,28 @@ class CoffeeShopActivity : AppCompatActivity() {
             //            setCenter(LatLng(40.700798, -74.0050177), 500)
 //            setZoom(13f, 500)
 
-            boundaryBuilder()
-
+//            boundaryBuilder()
 //            addMapfitOfficeWithGeocoder()
             setupMarkerWithAddressInput()
-//
 //            coffeeShops?.let { addMarkersFromCoffeeShops(it) }
-
-//            setMapBoundsToColorado()
+            setMapBoundsToColorado()
 //            setMapBoundsToUtah()
-//            setOnMarkerClickListener(onMarkerClickListener)
+            setOnMarkerClickListener(onMarkerClickListener)
+            setOnMapLongClickListener(onMapLongClickListener)
+
         }
 
     }
 
     private fun boundaryBuilder() {
         val latLngList = listOf(
-                LatLng(37.198504, -83.272133),
-                LatLng(29.652243, -29.042111),
-                LatLng(38.246623, -82.737144),
-                LatLng(36.691771, -110.030517),
-                LatLng(37.940202, -107.461721),
-                LatLng(39.400789, -80.243273))
+            LatLng(37.198504, -83.272133),
+            LatLng(29.652243, -29.042111),
+            LatLng(38.246623, -82.737144),
+            LatLng(36.691771, -110.030517),
+            LatLng(37.940202, -107.461721),
+            LatLng(39.400789, -80.243273)
+        )
 
         val boundsBuilder = LatLngBounds.Builder()
 
@@ -180,9 +179,9 @@ class CoffeeShopActivity : AppCompatActivity() {
         }
 
         val bounds = boundsBuilder.build()
-        mapfitMap.setBounds(bounds)
+        mapfitMap.setBounds(bounds,.8f)
         mapfitMap.addMarker(bounds.southWest).setIcon(MapfitMarker.DARK_BAR)
-        mapfitMap.addMarker(bounds.nortEast).setIcon(MapfitMarker.DARK_AIRPORT)
+        mapfitMap.addMarker(bounds.northEast).setIcon(MapfitMarker.DARK_AIRPORT)
 
     }
 
@@ -193,7 +192,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap.addMarker(ne)
         mapfitMap.addMarker(sw)
-        mapfitMap.setBounds(bounds)
+        mapfitMap.setBounds(bounds,1f)
 
 //        launch {
 //            delay(2000)
@@ -211,14 +210,20 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap.addMarker(ne)
         mapfitMap.addMarker(sw)
-        mapfitMap.setBounds(bounds)
+        mapfitMap.setBounds(bounds,1f)
 
+    }
+
+    private val onMapLongClickListener = object : OnMapLongClickListener {
+        override fun onMapLongClicked(latLng: LatLng) {
+        }
     }
 
     private val onMarkerClickListener = object : OnMarkerClickListener {
         override fun onMarkerClicked(marker: Marker) {
 //            marker.setIcon(MapfitMarker.DARK_AUTO)
             mapfitMap.setCenter(marker.getPosition(), 300)
+            mapfitMap.getBounds().center
 
 //            marker.data?.let {
 //                bottom_sheet.txtTitle.text = (it as CoffeeShop).title
@@ -270,9 +275,11 @@ class CoffeeShopActivity : AppCompatActivity() {
                 }
 
                 override fun onError(exception: Exception) {
-                    Toast.makeText(this@CoffeeShopActivity,
-                            "Couldn't find a valid location for given address",
-                            Toast.LENGTH_LONG).show()
+                    Toast.makeText(
+                        this@CoffeeShopActivity,
+                        "Couldn't find a valid location for given address",
+                        Toast.LENGTH_LONG
+                    ).show()
 
                 }
 
@@ -301,24 +308,31 @@ class CoffeeShopActivity : AppCompatActivity() {
 
     private fun addMapfitOfficeWithGeocoder() {
         Geocoder().geocodeAddress("119w 24th st new york ny",
-                object : GeocoderCallback {
+            object : GeocoderCallback {
 
-                    override fun onError(message: String, e: Exception) {
-                        print(e)
-                    }
+                override fun onError(message: String, e: Exception) {
+                    print(e)
+                }
 
-                    override fun onSuccess(addressList: List<Address>) {
-                        addressList.forEach { address ->
-                            if (address.entrances.isNotEmpty()) {
-                                address.entrances.forEach {
-                                    markers.add(mapfitMap.addMarker(LatLng(it.latitude, it.longitude)))
-                                }
-                            } else {
-                                markers.add(mapfitMap.addMarker(LatLng(address.latitude, address.longitude)))
+                override fun onSuccess(addressList: List<Address>) {
+                    addressList.forEach { address ->
+                        if (address.entrances.isNotEmpty()) {
+                            address.entrances.forEach {
+                                markers.add(mapfitMap.addMarker(LatLng(it.latitude, it.longitude)))
                             }
+                        } else {
+                            markers.add(
+                                mapfitMap.addMarker(
+                                    LatLng(
+                                        address.latitude,
+                                        address.longitude
+                                    )
+                                )
+                            )
                         }
                     }
-                })
+                }
+            })
     }
 
     override fun onDestroy() {

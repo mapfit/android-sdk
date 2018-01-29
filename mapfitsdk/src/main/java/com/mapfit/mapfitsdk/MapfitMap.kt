@@ -38,7 +38,11 @@ abstract class MapfitMap {
      *
      * @param layer the map will center accordingly to
      */
-    protected abstract fun setCenterWithLayer(layer: Layer, duration: Long = 0, paddingPercentage: Float)
+    protected abstract fun setCenterWithLayer(
+        layer: Layer,
+        duration: Long = 0,
+        paddingPercentage: Float
+    )
 
     /**
      * Adds the given layer to the map.
@@ -92,6 +96,10 @@ abstract class MapfitMap {
      */
     protected abstract fun addPolyline(): Polyline
 
+    /**
+     * Removes given [Polyline] from the [MapView].
+     * @param polyline to be removed
+     */
     protected abstract fun removePolyline(polyline: Polyline)
 
     /**
@@ -101,8 +109,18 @@ abstract class MapfitMap {
      */
     protected abstract fun addPolygon(polygon: List<List<LatLng>>): Polygon
 
+    /**
+     * Removes given [Polygon] from the [MapView].
+     *
+     * @param polygon to be removed
+     */
     protected abstract fun removePolygon(polygon: Polygon)
 
+    /**
+     * Removes given [Layer] from the [MapView].
+     *
+     * @param layer to be removed
+     */
     abstract fun removeLayer(layer: Layer)
 
     /**
@@ -118,15 +136,49 @@ abstract class MapfitMap {
      */
     abstract fun getZoom(): Float
 
-    abstract fun setBounds(latLngBounds: LatLngBounds)
+    /**
+     * Sets the visible map bounds to given [LatLngBounds]. Zoom level and center will be set from
+     * given [LatLngBounds].
+     *
+     * @param latLngBounds
+     * @param padding between map and bounds as percentage. For 10% padding, you can pass 0.1f.
+     */
+    abstract fun setBounds(latLngBounds: LatLngBounds, padding: Float)
 
+    /**
+     * @return latLngBounds for currently visible [MapView]
+     */
     abstract fun getBounds(): LatLngBounds
 
+    /**
+     * Sets [OnMapClickListener] for [MapView] that single click events will be passed to.
+     */
     abstract fun setOnMapClickListener(onMapClickListener: OnMapClickListener)
 
+    /**
+     * Sets [OnMapDoubleClickListener] for [MapView] that double click events will be passed to.
+     */
     abstract fun setOnMapDoubleClickListener(onMapDoubleClickListener: OnMapDoubleClickListener)
 
-    protected abstract fun setOnMarkerClickListener(onMarkerClickListener: OnMarkerClickListener)
+    /**
+     * Sets [OnMapLongClickListener] for [MapView] that long click events will be passed to.
+     */
+    abstract fun setOnMapLongClickListener(onMapLongClickListener: OnMapLongClickListener)
+
+    /**
+     * Sets [OnMarkerClickListener] for [MapView] that marker click events will be passed to.
+     */
+    abstract fun setOnMarkerClickListener(onMarkerClickListener: OnMarkerClickListener)
+
+    /**
+     * Sets [OnMapPanListener] for [MapView] that pan events will be passed to.x
+     */
+    abstract fun setOnMapPanListener(onMapPanListener: OnMapPanListener)
+
+    /**
+     * Sets [OnMapPinchListener] for [MapView] that pan events will be passed to.x
+     */
+    abstract fun setOnMapPinchListener(onMapPinchListener: OnMapPinchListener)
 
     protected abstract fun setOnPolylineClickListener(onPolylineClickListener: OnPolylineClickListener)
 

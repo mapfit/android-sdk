@@ -7,7 +7,7 @@ import com.mapfit.mapfitsdk.annotations.Annotation
  */
 class Layer {
 
-    private val annotations = mutableListOf<Annotation>()
+    internal val annotations = mutableListOf<Annotation>()
     private val maps = mutableListOf<MapController>()
 
     val isVisible = true

@@ -49,8 +49,6 @@ class GeocodeTest {
         geocoder.geocodeAddress("119 w 24th st new york ny 10011", geocoderCallback)
 
 
-
-
         Thread.sleep(1000)
         verify(geocoderCallback, times(1))
                 .onError(ArgumentMatchers.anyString(),
@@ -60,6 +58,6 @@ class GeocodeTest {
         server.shutdown()
     }
 
-    val mockResponse = "[{ \"locality\": \"New York\", \"postal_code\": \"10011\", \"admin_1\": \"NY\", \"country\" : \"USA\", \"neighborhood\": \"chelsea\", \"response_type\": 1, \"building\": { \"type\": \"Polygon\", \"coordinates\": [[[-73.992953, 40.744257], [-73.993265, 40.744389], [-73.993448, 40.744138], [-73.993136, 40.744006], [-73.992953, 40.744257]]] }, \"street_address\": \"119 W 24th St\", \"entrances\": [{ \"lon\": -73.99324, \"lat\": 40.74405, \"entrance_type\": \"pedestrian-primary\" }] }]"
+    private val mockResponse = "[{ \"locality\": \"New York\", \"postal_code\": \"10011\", \"admin_1\": \"NY\", \"country\" : \"USA\", \"neighborhood\": \"chelsea\", \"response_type\": 1, \"building\": { \"type\": \"Polygon\", \"coordinates\": [[[-73.992953, 40.744257], [-73.993265, 40.744389], [-73.993448, 40.744138], [-73.993136, 40.744006], [-73.992953, 40.744257]]] }, \"street_address\": \"119 W 24th St\", \"entrances\": [{ \"lon\": -73.99324, \"lat\": 40.74405, \"entrance_type\": \"pedestrian-primary\" }] }]"
 
 }
