@@ -44,9 +44,7 @@ class LatLngBounds(
 
     fun getVisibleBounds(viewWidth: Int, viewHeight: Int, padding: Float): Pair<LatLng, Float> {
 
-        val ry1 = Math.log(
-            (Math.sin(Math.toRadians(southWest.lat)) + 1) / Math.cos(Math.toRadians(southWest.lat))
-        )
+        val ry1 = Math.log( (Math.sin(Math.toRadians(southWest.lat)) + 1) / Math.cos(Math.toRadians(southWest.lat)))
         val ry2 = Math.log(
             Math.sin(Math.toRadians(northEast.lat)) + 1
         ) / Math.cos(Math.toRadians(northEast.lat))
@@ -59,10 +57,9 @@ class LatLngBounds(
         val vy1 = Math.log(Math.tan(Math.PI * (0.25 + northEast.lat / 360)))
         val viewHeightHalf = (viewHeight * padding) / 2.0f
         val zoomFactorPowered = viewHeightHalf / (40.7436654315252 * (vy1 - vy0))
-        val resolutionVertical = 360.0 / (zoomFactorPowered * 512)
+        val resolutionVertical = 360.0 / (zoomFactorPowered * 256)
 
-        val paddingFactor = 1.9
-        val resolution = Math.max(resolutionHorizontal, resolutionVertical) * paddingFactor
+        val resolution = Math.max(resolutionHorizontal, resolutionVertical)
         val zoom = kotlin.math.log(360 / (resolution * 512), 2.0)
 
         return Pair(center, zoom.toFloat())

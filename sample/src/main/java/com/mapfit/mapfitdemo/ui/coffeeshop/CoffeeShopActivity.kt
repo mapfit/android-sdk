@@ -216,7 +216,6 @@ class CoffeeShopActivity : AppCompatActivity() {
 
     private val onMapLongClickListener = object : OnMapLongClickListener {
         override fun onMapLongClicked(latLng: LatLng) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
     }
 
