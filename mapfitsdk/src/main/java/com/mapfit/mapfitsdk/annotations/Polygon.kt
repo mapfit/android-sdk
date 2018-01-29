@@ -5,15 +5,7 @@ import com.mapfit.mapfitsdk.annotations.base.AnnotationStyle
 /**
  * Created by dogangulcan on 12/22/17.
  */
-class Polygon internal constructor(private val tgMarker: Marker) : Annotation() {
-    override fun getId(): Long {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-
-    init {
-//        tgMarker.markerOptions.style = (AnnotationStyle.POLYGON.style)
-    }
+class Polygon internal constructor(private val tgMarker: Marker)
 
 
 //
@@ -37,4 +29,3 @@ class Polygon internal constructor(private val tgMarker: Marker) : Annotation() 
 //            this.properties = getStringMapAsArray(properties)
 //        }
 //    }
-}

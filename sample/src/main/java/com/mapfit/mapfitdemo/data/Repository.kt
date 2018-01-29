@@ -20,8 +20,8 @@ class Repository(private val context: Context) {
     fun getCoffeeShops(): List<CoffeeShop> {
 
         val gson = GsonBuilder()
-                .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.TRANSIENT, Modifier.STATIC)
-                .create()
+            .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.TRANSIENT, Modifier.STATIC)
+            .create()
 
         val listType = object : TypeToken<List<CoffeeShop>>() {}.type
         val coffeeShopList: List<CoffeeShop>? = gson.fromJson(getCoffeeShopsJson(), listType)
@@ -55,6 +55,7 @@ class Repository(private val context: Context) {
 
 //        filters.add(Filter(FilterType.ALL_MARKERS, "Markers", true))
         filters.add(Filter(FilterType.ZOOM_CONTROLS, "Zoom Controls", false, null))
+        filters.add(Filter(FilterType.COFFEE_SHOPS, "Coffee Shops", true, null))
         filters.add(Filter(FilterType.RECENTER, "Re-center", false, null))
         filters.add(Filter(FilterType.COMPASS, "Compass", false, null))
         filters.add(Filter(FilterType.PAN_GESTURE, "Pan Gesture", true, null))
@@ -63,12 +64,14 @@ class Repository(private val context: Context) {
         filters.add(Filter(FilterType.TILT_GESTURE, "Tilt Gesture", true, null))
 
 
-        filters.add(Filter(
+        filters.add(
+            Filter(
                 FilterType.MAP_THEME,
                 "Map Theme",
                 true,
                 listOf("MAPFIT_DAY", "MAPFIT_NIGHT")
-        ))
+            )
+        )
 //        filters.add(Filter(FilterType.CAMERA_STYLE, "Camera Style", true))
 //        filters.add(Filter(FilterType.ALWAYS_OPEN, "Always Open Vendors", false))
 

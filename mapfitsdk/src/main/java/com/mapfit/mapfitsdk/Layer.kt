@@ -7,25 +7,32 @@ import com.mapfit.mapfitsdk.annotations.Annotation
  */
 class Layer {
 
-    internal val annotations = mutableListOf<Annotation>()
-    private val maps = mutableListOf<MapController>()
+    val annotations = mutableListOf<Annotation>()
 
-    val isVisible = true
-//    internal var pointer: Long = 0
+    private val bindings = HashMap<MapController, List<Annotation>>()
+
+    var isVisible = true
+        set(value) {
+            if (field != value) {
+                annotations.forEach { it.setVisible(value) }
+                field = value
+            }
+        }
 
     fun add(annotation: Annotation) {
         annotations.add(annotation)
     }
 
-//    private fun setVisible(boolean: Boolean) {
-//        annotations.forEach { it.setVisible(boolean) }
-//    }
+    fun remove(vararg annotation: Annotation) {
+        annotation.forEach {
+            it.remove()
+            annotations.remove(it)
+        }
+    }
 
-//    internal fun getAnnotations(): List<Annotation> = annotations
-//
-//    internal fun bindTo(map: MapController) {
-//        maps.add(map)
-//    }
+    fun clear() {
+        annotations.forEach { it.remove() }
+    }
 
 
 }

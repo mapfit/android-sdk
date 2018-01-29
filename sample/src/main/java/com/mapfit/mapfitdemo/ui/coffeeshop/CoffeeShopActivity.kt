@@ -49,9 +49,9 @@ class CoffeeShopActivity : AppCompatActivity() {
     private val coffeeShops: List<CoffeeShop>? by lazy { repository.getCoffeeShops() }
     private var markers: MutableList<Marker> = mutableListOf()
     private var alwaysOpenShopLayer = Layer()
+    private var coffeeShopsLayer = Layer()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private lateinit var drawerLayout: DrawerLayout
-    private var bottomSheetHideJob = Job()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,6 +112,7 @@ class CoffeeShopActivity : AppCompatActivity() {
                 FilterType.ZOOM_CONTROLS -> mapfitMap.getMapOptions().zoomControlsEnabled =
                         isChecked
                 FilterType.COMPASS -> mapfitMap.getMapOptions().compassButtonEnabled = isChecked
+                FilterType.COFFEE_SHOPS -> coffeeShopsLayer.isVisible = isChecked
                 FilterType.RECENTER -> mapfitMap.getMapOptions().recenterButtonEnabled = isChecked
                 FilterType.PAN_GESTURE -> mapfitMap.getMapOptions().panEnabled = isChecked
                 FilterType.ROTATE_GESTURE -> mapfitMap.getMapOptions().rotateEnabled = isChecked
@@ -145,18 +146,17 @@ class CoffeeShopActivity : AppCompatActivity() {
         this.mapfitMap = mapfitMap
 
         mapfitMap.apply {
-            //            setCenter(LatLng(40.700798, -74.0050177), 500)
-//            setZoom(13f, 500)
+            setCenter(LatLng(40.700798, -74.0050177), 500)
+            setZoom(13f, 500)
 
 //            boundaryBuilder()
 //            addMapfitOfficeWithGeocoder()
             setupMarkerWithAddressInput()
-//            coffeeShops?.let { addMarkersFromCoffeeShops(it) }
-            setMapBoundsToColorado()
+            coffeeShops?.let { addMarkersFromCoffeeShops(it) }
+//            setMapBoundsToColorado()
 //            setMapBoundsToUtah()
             setOnMarkerClickListener(onMarkerClickListener)
             setOnMapLongClickListener(onMapLongClickListener)
-
         }
 
     }
@@ -179,7 +179,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         }
 
         val bounds = boundsBuilder.build()
-        mapfitMap.setBounds(bounds,.8f)
+        mapfitMap.setBounds(bounds, .8f)
         mapfitMap.addMarker(bounds.southWest).setIcon(MapfitMarker.DARK_BAR)
         mapfitMap.addMarker(bounds.northEast).setIcon(MapfitMarker.DARK_AIRPORT)
 
@@ -192,7 +192,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap.addMarker(ne)
         mapfitMap.addMarker(sw)
-        mapfitMap.setBounds(bounds,1f)
+        mapfitMap.setBounds(bounds, 1f)
 
 //        launch {
 //            delay(2000)
@@ -210,7 +210,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap.addMarker(ne)
         mapfitMap.addMarker(sw)
-        mapfitMap.setBounds(bounds,1f)
+        mapfitMap.setBounds(bounds, 1f)
 
     }
 
@@ -292,17 +292,17 @@ class CoffeeShopActivity : AppCompatActivity() {
         coffeeShops.forEach { shop ->
 
             val marker = mapfitMap.addMarker(LatLng(shop.lat, shop.lon))
-//            marker.invalidate()
-
 
             markers.add(marker)
 
-            // creating a layer of shops that are always open
+            coffeeShopsLayer.add(marker)
+
             if (shop.open24Hours) {
                 alwaysOpenShopLayer.add(marker)
             }
-
         }
+
+        coffeeShopsLayer.remove(coffeeShopsLayer.annotations[1])
 
     }
 

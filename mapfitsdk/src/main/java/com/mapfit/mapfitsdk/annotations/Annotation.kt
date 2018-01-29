@@ -5,10 +5,12 @@ package com.mapfit.mapfitsdk.annotations
  */
 abstract class Annotation {
 
-//    abstract fun setDrawOder(index: Int)
+    //    abstract fun setDrawOder(index: Int)
 //
-//    abstract fun setVisible(visible: Boolean)
+    abstract fun setVisible(visible: Boolean)
 
     abstract fun getId(): Long
+
+    abstract fun remove(): Boolean
 
 }

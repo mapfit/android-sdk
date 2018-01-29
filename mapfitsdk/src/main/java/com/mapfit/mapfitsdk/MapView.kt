@@ -266,8 +266,6 @@ class MapView(
                 annotation?.let {
                     when (it) {
                         is Marker -> markerClickListener?.onMarkerClicked(it)
-                        is Polyline -> {
-                        }
                         else -> {
                         }
                     }
@@ -437,16 +435,23 @@ class MapView(
         }
 
         override fun addLayer(layer: Layer) {
-//            layer.bindTo(mapController)
+            layer.annotations.forEach {
+                when (it) {
+                    is Marker -> mapController.addMarker()
+                }
+            }
             layers.add(layer)
         }
 
         override fun removeLayer(layer: Layer) {
             layers.remove(layer)
+            layer.annotations.forEach {  }
         }
 
-        override fun removeMarker(marker: Marker): Boolean =
-            mapController.removeMarker(marker)
+        override fun removeMarker(marker: Marker): Boolean {
+            annotationLayer.remove(marker)
+            return mapController.removeMarker(marker)
+        }
 
         override fun removePolygon(polygon: Polygon) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

@@ -154,7 +154,7 @@ class Marker internal constructor(
         return mapController.setMarkerBitmap(markerId, width, height, abgr)
     }
 
-    private fun setVisible(visible: Boolean) {
+    override fun setVisible(visible: Boolean) {
         val success = mapController.setMarkerVisible(markerId, visible)
         if (success) {
             isVisible = visible
@@ -163,9 +163,7 @@ class Marker internal constructor(
 
     private fun getVisible(): Boolean = isVisible
 
-    fun remove() {
-        mapController.removeMarker(this)
-    }
+    override fun remove(): Boolean = mapController.removeMarker(this)
 
     @TestOnly
     @VisibleForTesting
