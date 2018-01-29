@@ -8,8 +8,8 @@ import com.mapfit.mapfitsdk.MapController
  * Created by dogangulcan on 1/3/18.
  */
 class MarkerOptions internal constructor(
-        private var markerId: Long,
-        private val mapController: MapController
+    private var marker: Marker,
+    private val mapController: MapController
 ) {
 
     /**
@@ -17,14 +17,18 @@ class MarkerOptions internal constructor(
      */
     var height = 50
         set(value) {
-            field = value
-            updateStyle()
+            if (marker.usingDefaultIcon) {
+                field = value
+                updateStyle()
+            }
         }
 
     var width = 50
         set(value) {
-            field = value
-            updateStyle()
+            if (marker.usingDefaultIcon) {
+                field = value
+                updateStyle()
+            }
         }
 
     var drawOrder = 2000
@@ -39,7 +43,8 @@ class MarkerOptions internal constructor(
             updateStyle()
         }
 
-    internal var style = "{ style: 'points', anchor: top, color: $color, size: [${height}px, ${width}px], order: $drawOrder, interactive: true, collide: false }"
+    internal var style =
+        "{ style: 'points', anchor: top, color: $color, size: [${height}px, ${width}px], order: $drawOrder, interactive: true, collide: false }"
         set(value) {
             field = value
             updateStyle()
@@ -50,7 +55,7 @@ class MarkerOptions internal constructor(
     }
 
     private fun updateStyle() {
-        mapController.setMarkerStylingFromString(markerId, style)
+        mapController.setMarkerStylingFromString(marker.getId(), style)
     }
 
 }

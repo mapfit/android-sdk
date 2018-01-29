@@ -179,7 +179,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         }
 
         val bounds = boundsBuilder.build()
-        mapfitMap.setBounds(bounds,.8f)
+        mapfitMap.setBounds(bounds, .8f)
         mapfitMap.addMarker(bounds.southWest).setIcon(MapfitMarker.DARK_BAR)
         mapfitMap.addMarker(bounds.northEast).setIcon(MapfitMarker.DARK_AIRPORT)
 
@@ -192,7 +192,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap.addMarker(ne)
         mapfitMap.addMarker(sw)
-        mapfitMap.setBounds(bounds,1f)
+        mapfitMap.setBounds(bounds, 1f)
 
 //        launch {
 //            delay(2000)
@@ -210,7 +210,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap.addMarker(ne)
         mapfitMap.addMarker(sw)
-        mapfitMap.setBounds(bounds,1f)
+        mapfitMap.setBounds(bounds, 1f)
 
     }
 
@@ -293,7 +293,6 @@ class CoffeeShopActivity : AppCompatActivity() {
 
             val marker = mapfitMap.addMarker(LatLng(shop.lat, shop.lon))
 //            marker.invalidate()
-
 
             markers.add(marker)
 
