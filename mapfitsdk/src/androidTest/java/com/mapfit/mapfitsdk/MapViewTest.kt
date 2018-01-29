@@ -1,5 +1,6 @@
 package com.mapfit.mapfitsdk
 
+import android.app.Instrumentation
 import android.support.test.annotation.UiThreadTest
 import android.support.test.espresso.Espresso.onView
 import android.support.test.espresso.action.ViewActions.*
@@ -22,6 +23,8 @@ import org.mockito.Mockito
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
 import android.view.MotionEvent
+import android.view.MotionEvent.PointerCoords
+import android.view.MotionEvent.PointerProperties
 
 
 /**
@@ -234,21 +237,27 @@ class MapViewTest {
 
     @Test
     fun testOnMapPinchListener() {
-//
-//        runBlocking {
-//            delay(400)
-//            mapfitMap.setOnMapPinchListener(onMapPinchListener)
-//
-//            onView(withId(R.id.glSurface)).perform(event)
-//            delay(600)
-//
-//            verify(onMapPinchListener, atLeastOnce()).onMapPinch()
-//        }
+
+        runBlocking {
+            delay(400)
+            mapfitMap.setOnMapPinchListener(onMapPinchListener)
+
+            onView(withId(R.id.glSurface)).perform(pinchIn())
+            delay(600)
+
+            verify(onMapPinchListener, atLeastOnce()).onMapPinch()
+
+            onView(withId(R.id.glSurface)).perform(pinchOut())
+            delay(600)
+
+            verify(onMapPinchListener, atLeastOnce()).onMapPinch()
+        }
     }
 
 //    developer can enable a map click listener
 //    developer can enable a marker click listener
 //    developer can enable map pan listener (returns new map centroid or map bounds)
 //    developer can enable map zoom lister (returns new zoom level)
+
 
 }
