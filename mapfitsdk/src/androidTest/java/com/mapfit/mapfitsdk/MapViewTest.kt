@@ -1,5 +1,6 @@
 package com.mapfit.mapfitsdk
 
+import android.support.test.InstrumentationRegistry
 import android.support.test.annotation.UiThreadTest
 import android.support.test.espresso.Espresso.onView
 import android.support.test.espresso.action.ViewActions.*
@@ -249,11 +250,5 @@ class MapViewTest {
             verify(onMapPinchListener, atLeastOnce()).onMapPinch()
         }
     }
-
-//    developer can enable a map click listener
-//    developer can enable a marker click listener
-//    developer can enable map pan listener (returns new map centroid or map bounds)
-//    developer can enable map zoom lister (returns new zoom level)
-
 
 }

@@ -294,6 +294,7 @@ class CoffeeShopActivity : AppCompatActivity() {
             val marker = mapfitMap.addMarker(LatLng(shop.lat, shop.lon))
 
             markers.add(marker)
+            marker.setIcon(MapfitMarker.DARK_COMMUNITY)
 
             coffeeShopsLayer.add(marker)
 
