@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.RelativeLayout
 import com.mapfit.mapfitsdk.annotations.Marker
@@ -19,6 +20,7 @@ import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener
+import com.mapfit.mapfitsdk.annotations.widget.PlaceInfo
 import com.mapfit.mapfitsdk.geocoder.Geocoder
 import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
 import com.mapfit.mapfitsdk.geocoder.model.Address
@@ -31,11 +33,8 @@ import com.mapfit.tangram.ConfigChooser
 import com.mapfit.tangram.MarkerPickResult
 import com.mapfit.tangram.TouchInput
 import kotlinx.android.synthetic.main.overlay_map_controls.view.*
-import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
 import org.jetbrains.annotations.NotNull
 import java.io.IOException
 
@@ -48,7 +47,7 @@ import java.io.IOException
 class MapView(
     context: Context,
     attributeSet: AttributeSet? = null
-) : RelativeLayout(context, attributeSet) {
+) : FrameLayout(context, attributeSet) {
 
     private val ANIMATION_DURATION = 200
     private val ZOOM_STEP_LEVEL = 1
@@ -62,6 +61,9 @@ class MapView(
         LayoutInflater.from(context)
             .inflate(R.layout.overlay_map_controls, this, false)
     }
+
+    private val placeInfoFrame = FrameLayout(context)
+
     private val attributionImage: ImageView = controlsView.findViewById(R.id.imgAttribution)
 
     @JvmSynthetic
@@ -80,6 +82,7 @@ class MapView(
     }
 
     private val annotationLayer = Layer()
+
     private val layers = mutableListOf(annotationLayer)
 
     // Click Listeners
@@ -89,9 +92,14 @@ class MapView(
     private var mapLongClickListener: OnMapLongClickListener? = null
     private var mapPanListener: OnMapPanListener? = null
     private var mapPinchListener: OnMapPinchListener? = null
+    private var placeInfoAdapter: MapfitMap.PlaceInfoAdapter? = null
+    private var onPlaceInfoClickListener: MapfitMap.OnPlaceInfoClickListener? = null
 
     private var viewHeight: Int? = null
     private var viewWidth: Int? = null
+
+    private var placeInfoRemoveJob = Job()
+
 
     init {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
@@ -114,6 +122,7 @@ class MapView(
     }
 
     private fun initUiControls() {
+        addView(placeInfoFrame)
         addView(controlsView)
 
         attributionImage.setOnClickListener {
@@ -173,6 +182,7 @@ class MapView(
             setLongPressResponder(longClickResponder())
             setPanResponder(panResponder())
             setScaleResponder(scaleResponder())
+            setShoveResponder(shoveResponder())
 
             setMarkerPickListener(markerPickListener())
 
@@ -186,12 +196,19 @@ class MapView(
         }
     }
 
+    private fun shoveResponder() = TouchInput.ShoveResponder {
+        updatePlaceInfoPosition(false)
+        false
+    }
+
     private fun scaleResponder() = TouchInput.ScaleResponder { x, y, scale, velocity ->
         var consumed = false
         mapPinchListener?.let {
             it.onMapPinch()
             consumed = true
         }
+        updatePlaceInfoPosition(false)
+
         consumed
     }
 
@@ -202,6 +219,8 @@ class MapView(
                 it.onMapPan()
                 consumed = true
             }
+
+            updatePlaceInfoPosition(false)
             return consumed
         }
 
@@ -211,6 +230,7 @@ class MapView(
             velocityX: Float,
             velocityY: Float
         ): Boolean {
+            updatePlaceInfoPosition(true)
             return false
         }
     }
@@ -234,6 +254,10 @@ class MapView(
             override fun onSingleTapConfirmed(x: Float, y: Float): Boolean {
                 mapController.pickMarker(x, y)
                 mapClickListener?.onMapClicked(mapController.screenPositionToLatLng(PointF(x, y)))
+                placeInfoRemoveJob = launch(UI) {
+                    delay(50)
+                    activePlaceInfo?.dispose()
+                }
                 return true
             }
         }
@@ -258,20 +282,28 @@ class MapView(
     private fun markerPickListener(): (MarkerPickResult?, Float, Float) -> Unit {
         return { markerPickResult, _, _ ->
 
-            markerPickResult?.run {
-                val annotation = annotationLayer.annotations.find {
-                    it.getId() == markerPickResult.marker.getId()
-                }
-
-                annotation?.let {
-                    when (it) {
-                        is Marker -> markerClickListener?.onMarkerClicked(it)
-                        is Polyline -> {
-                        }
-                        else -> {
-                        }
+            runBlocking {
+                markerPickResult?.let {
+                    val annotation = annotationLayer.annotations.find {
+                        it.getId() == markerPickResult.marker.getId()
                     }
 
+                    annotation?.let {
+
+                        if (placeInfoRemoveJob.isActive) placeInfoRemoveJob.cancel()
+
+                        when (it) {
+                            is Marker -> {
+                                markerClickListener?.onMarkerClicked(it)
+                                showPlaceInfo(it)
+                            }
+                            is Polyline -> {
+                            }
+                            else -> {
+                            }
+                        }
+
+                    }
                 }
             }
         }
@@ -284,8 +316,16 @@ class MapView(
     }
 
     private val mapfitMap = object : MapfitMap() {
-        override fun setOnMapPinchListener(onMapPinchListener: OnMapPinchListener) {
-            mapPinchListener = onMapPinchListener
+        override fun setOnPlaceInfoClickListener(listener: OnPlaceInfoClickListener) {
+            this@MapView.onPlaceInfoClickListener = listener
+        }
+
+        override fun setPlaceInfoAdapter(adapter: PlaceInfoAdapter) {
+            this@MapView.placeInfoAdapter = adapter
+        }
+
+        override fun setOnMapPinchListener(listener: OnMapPinchListener) {
+            mapPinchListener = listener
         }
 
         override fun addMarker(address: String, onMarkerAddedCallback: OnMarkerAddedCallback) {
@@ -308,6 +348,8 @@ class MapView(
                         onMarkerAddedCallback.onError(IOException("No coordinates found for given address."))
                     } else {
                         val marker = mapController.addMarker().setPosition(latLng)
+                        marker.address = addressList[0]
+                        annotationLayer.add(marker)
                         onMarkerAddedCallback.onMarkerAdded(marker)
                     }
                 }
@@ -318,6 +360,13 @@ class MapView(
             })
         }
 
+        override fun addMarker(latLng: LatLng): Marker {
+            val marker = mapController.addMarker()
+            marker.setPosition(latLng)
+            annotationLayer.add(marker)
+            return marker
+        }
+
         override fun getLayers(): List<Layer> {
             return layers
         }
@@ -326,8 +375,8 @@ class MapView(
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun setBounds(latLngBounds: LatLngBounds, padding: Float) {
-            mapController.setLatlngBounds(latLngBounds, padding)
+        override fun setBounds(bounds: LatLngBounds, padding: Float) {
+            mapController.setLatlngBounds(bounds, padding)
         }
 
         override fun getBounds(): LatLngBounds {
@@ -336,27 +385,27 @@ class MapView(
             return LatLngBounds(ne, sw)
         }
 
-        override fun setOnMapClickListener(onMapClickListener: OnMapClickListener) {
-            mapClickListener = onMapClickListener
+        override fun setOnMapClickListener(listener: OnMapClickListener) {
+            mapClickListener = listener
         }
 
-        override fun setOnMapDoubleClickListener(onMapDoubleClickListener: OnMapDoubleClickListener) {
-            mapDoubleClickListener = onMapDoubleClickListener
+        override fun setOnMapDoubleClickListener(listener: OnMapDoubleClickListener) {
+            mapDoubleClickListener = listener
         }
 
-        override fun setOnMapLongClickListener(onMapLongClickListener: OnMapLongClickListener) {
-            mapLongClickListener = onMapLongClickListener
+        override fun setOnMapLongClickListener(listener: OnMapLongClickListener) {
+            mapLongClickListener = listener
         }
 
-        override fun setOnMapPanListener(onMapPanListener: OnMapPanListener) {
-            mapPanListener = onMapPanListener
+        override fun setOnMapPanListener(listener: OnMapPanListener) {
+            mapPanListener = listener
         }
 
-        override fun setOnPolylineClickListener(onPolylineClickListener: OnPolylineClickListener) {
+        override fun setOnPolylineClickListener(listener: OnPolylineClickListener) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun setOnPolygonClickListener(onPolygonClickListener: OnPolygonClickListener) {
+        override fun setOnPolygonClickListener(listener: OnPolygonClickListener) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
@@ -380,15 +429,8 @@ class MapView(
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun setOnMarkerClickListener(onMarkerClickListener: OnMarkerClickListener) {
-            this@MapView.markerClickListener = onMarkerClickListener
-        }
-
-        override fun addMarker(latLng: LatLng): Marker {
-            val marker = mapController.addMarker()
-            marker.setPosition(latLng)
-            annotationLayer.add(marker)
-            return marker
+        override fun setOnMarkerClickListener(listener: OnMarkerClickListener) {
+            this@MapView.markerClickListener = listener
         }
 
         override fun addPolygon(polygon: List<List<LatLng>>): Polygon {
@@ -445,8 +487,7 @@ class MapView(
             layers.remove(layer)
         }
 
-        override fun removeMarker(marker: Marker): Boolean =
-            mapController.removeMarker(marker)
+        override fun removeMarker(marker: Marker): Boolean = mapController.removeMarker(marker)
 
         override fun removePolygon(polygon: Polygon) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -478,10 +519,47 @@ class MapView(
         }
     }
 
-//    private fun screenPositionToLatLng(screenPosition: PointF): LatLng {
-//        val lngLat = mapController.screenPositionToLatLng(PointF(screenPosition.x, screenPosition.y))
-//        return LatLng(lngLat.latitude, lngLat.longitude)
-//    }
+    fun getPlaceInfoAdapter(): MapfitMap.PlaceInfoAdapter? = placeInfoAdapter
+
+    private var activePlaceInfo: PlaceInfo? = null
+
+    private fun showPlaceInfo(marker: Marker) {
+
+        if (activePlaceInfo != null && activePlaceInfo?.marker != marker) {
+            activePlaceInfo?.dispose()
+        }
+
+        if (activePlaceInfo == null || activePlaceInfo?.marker != marker) {
+
+            val view = if (placeInfoAdapter != null) {
+                placeInfoAdapter?.getPlaceInfoView(marker)
+            } else {
+                val view =
+                    LayoutInflater.from(context)
+                        .inflate(R.layout.widget_place_info, placeInfoFrame)
+
+                val child = (view as FrameLayout).getChildAt(0)
+                child.tag = "default"
+                child.visibility = View.GONE
+                child.findViewById<View>(R.id.container)
+                    .setOnClickListener { onPlaceInfoClickListener?.onPlaceInfoClick(marker) }
+                child
+            }
+            view?.let {
+                activePlaceInfo = PlaceInfo(it, marker)
+                marker.placeInfo = activePlaceInfo
+                activePlaceInfo?.show()
+            }
+        }
+    }
+
+    private fun updatePlaceInfoPosition(repeating: Boolean) {
+        if (!repeating) {
+            activePlaceInfo?.onPositionChanged()
+        } else {
+            activePlaceInfo?.updatePositionDelayed()
+        }
+    }
 
     private fun getGLSurfaceView(): GLSurfaceView {
         val glSurfaceView = GLSurfaceView(context)
@@ -517,7 +595,6 @@ class MapView(
     fun onLowMemory() {
         mapController.onLowMemory()
     }
-
 
     private val mapfitWebsiteIntent by lazy {
         Intent(Intent.ACTION_VIEW, Uri.parse("https://mapfit.com/"))

@@ -7,14 +7,14 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.support.annotation.DrawableRes
 import android.support.annotation.NonNull
-import android.support.annotation.VisibleForTesting
 import android.util.Log
 import com.mapfit.mapfitsdk.MapController
+import com.mapfit.mapfitsdk.annotations.widget.PlaceInfo
+import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.isValid
 import com.mapfit.mapfitsdk.utils.loadImageFromUrl
 import kotlinx.coroutines.experimental.launch
-import org.jetbrains.annotations.TestOnly
 
 /**
  * Created by dogangulcan on 12/19/17.
@@ -32,9 +32,31 @@ class Marker internal constructor(
 
     private var isVisible: Boolean = true
 
-    private val markerOptions = MarkerOptions(markerId, mapController)
+    internal val markerOptions = MarkerOptions(markerId, mapController)
+
+    internal var placeInfo: PlaceInfo? = null
+
+    internal var address: Address? = null
 
     private var data: Any? = null
+
+    var title: String = ""
+        set(value) {
+            field = value
+            placeInfo?.updatePlaceInfo()
+        }
+
+    var subtitle1: String = ""
+        set(value) {
+            field = value
+            placeInfo?.updatePlaceInfo()
+        }
+
+    var subtitle2: String = ""
+        set(value) {
+            field = value
+            placeInfo?.updatePlaceInfo()
+        }
 
     init {
         setIcon(MapfitMarker.LIGHT_DEFAULT)
@@ -167,8 +189,6 @@ class Marker internal constructor(
         mapController.removeMarker(this)
     }
 
-    @TestOnly
-    @VisibleForTesting
     internal fun getScreenPosition() = mapController.lngLatToScreenPosition(position)
 
 }
