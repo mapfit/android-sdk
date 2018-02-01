@@ -542,14 +542,14 @@ class MapView(
             val view = placeInfoAdapter?.getPlaceInfoView(marker)
 
             view?.setOnClickListener {
-                onPlaceInfoClickListener?.onPlaceInfoClick(marker)
+                onPlaceInfoClickListener?.onPlaceInfoClicked(marker)
             }
 
             if (view?.parent != null) {
                 (view.parent as ViewGroup).removeView(view)
             }
 
-            placeInfoFrame.addView(view)
+            view?.let { placeInfoFrame.addView(view) }
             view
 
         } else {
@@ -560,7 +560,7 @@ class MapView(
             child.tag = "default"
             child.findViewById<View>(R.id.container)
                 .setOnClickListener {
-                    onPlaceInfoClickListener?.onPlaceInfoClick(marker)
+                    onPlaceInfoClickListener?.onPlaceInfoClicked(marker)
                 }
             child
         }

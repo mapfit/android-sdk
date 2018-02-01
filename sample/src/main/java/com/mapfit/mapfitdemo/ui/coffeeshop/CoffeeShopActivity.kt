@@ -160,7 +160,7 @@ class CoffeeShopActivity : AppCompatActivity() {
             setOnMapLongClickListener(onMapLongClickListener)
 
             setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
-                override fun onPlaceInfoClick(marker: Marker) {
+                override fun onPlaceInfoClicked(marker: Marker) {
                     Toast.makeText(
                         this@CoffeeShopActivity,
                         "Place info is clicked!",

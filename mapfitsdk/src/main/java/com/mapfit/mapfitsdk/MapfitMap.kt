@@ -243,7 +243,7 @@ abstract class MapfitMap {
          *
          * @param marker The marker of the place info that is clicked on.
          */
-        fun onPlaceInfoClick(marker: Marker)
+        fun onPlaceInfoClicked(marker: Marker)
     }
 
 }

@@ -11,7 +11,7 @@ import kotlinx.coroutines.experimental.*
  * Created by dogangulcan on 1/30/18.
  */
 class PlaceInfo internal constructor(
-    private var infoView: View,
+    internal var infoView: View,
     internal val marker: Marker
 ) {
 
