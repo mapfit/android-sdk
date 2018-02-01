@@ -9,10 +9,12 @@ import android.support.annotation.DrawableRes
 import android.support.annotation.NonNull
 import android.util.Log
 import com.mapfit.mapfitsdk.MapController
+import com.mapfit.mapfitsdk.R
 import com.mapfit.mapfitsdk.annotations.widget.PlaceInfo
 import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.isValid
+import com.mapfit.mapfitsdk.utils.getBitmapFromVectorDrawable
 import com.mapfit.mapfitsdk.utils.loadImageFromUrl
 import kotlinx.coroutines.experimental.launch
 
@@ -39,6 +41,8 @@ class Marker internal constructor(
     internal var address: Address? = null
 
     private var data: Any? = null
+    private var icon: Bitmap? = null
+    private var previousIcon: Bitmap? = null
 
     var title: String = ""
         set(value) {
@@ -140,6 +144,22 @@ class Marker internal constructor(
         return this
     }
 
+    internal fun placeInfoState(shown: Boolean) {
+
+        placeInfo?.apply {
+
+            if (shown) {
+                setBitmap(getBitmapFromVectorDrawable(context, R.drawable.ic_marker_dot))
+            } else {
+                if (getVisible())
+                    previousIcon?.let { setBitmap(previousIcon!!) }
+            }
+        }
+        markerOptions.placeInfoShown(shown)
+
+
+    }
+
     private fun setDrawOder(index: Int) {
         mapController.setMarkerDrawOrder(markerId, index)
     }
@@ -152,6 +172,9 @@ class Marker internal constructor(
     }
 
     private fun setBitmap(bitmap: Bitmap): Boolean {
+        previousIcon = if (previousIcon == null) bitmap else icon
+        icon = bitmap
+
         val density = context.resources.displayMetrics.densityDpi
         val width = bitmap.getScaledWidth(density)
         val height = bitmap.getScaledHeight(density)
@@ -172,6 +195,7 @@ class Marker internal constructor(
             val flippedIndex = (height - 1 - row) * width + col
             abgr[flippedIndex] = pix1
         }
+
 
         return mapController.setMarkerBitmap(markerId, width, height, abgr)
     }

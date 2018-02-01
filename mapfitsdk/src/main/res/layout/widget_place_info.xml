@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginLeft="16dp"
-    android:layout_marginRight="16dp"
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp"
     android:background="@drawable/place_info_bg"
     android:paddingBottom="36dp">
 
@@ -28,10 +28,10 @@
             android:fontFamily="sans-serif-medium"
             android:letterSpacing="0.01"
             android:maxLines="1"
-            android:text="Neighborhood Coffee Roaster"
             android:textColor="#3a3e43"
             android:textSize="16sp"
-            android:textStyle="normal" />
+            android:textStyle="normal"
+            tools:text="Neighborhood Coffee Roaster" />
 
         <TextView
             android:id="@+id/subtitle1"

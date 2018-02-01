@@ -1,6 +1,7 @@
 package com.mapfit.mapfitsdk.annotations
 
 import com.mapfit.mapfitsdk.MapController
+import com.mapfit.mapfitsdk.utils.toPx
 
 /**
  * Defines marker options for [Marker]
@@ -11,6 +12,10 @@ class MarkerOptions internal constructor(
     private var markerId: Long,
     private val mapController: MapController
 ) {
+
+    private val markerDotSide by lazy {
+        10
+    }
 
     /**
      * Height of the marker in pixels.
@@ -39,6 +44,9 @@ class MarkerOptions internal constructor(
             updateStyle()
         }
 
+    private val placeInfoMarkerStyle =
+        "{ style: 'points', anchor: top,color: $color, size: [${markerDotSide}px, ${markerDotSide}px], order: $drawOrder, interactive: true, collide: false }"
+
     internal var style =
         "{ style: 'points', anchor: top, color: $color, size: [${height}px, ${width}px], order: $drawOrder, interactive: true, collide: false }"
         set(value) {
@@ -52,6 +60,14 @@ class MarkerOptions internal constructor(
 
     private fun updateStyle() {
         mapController.setMarkerStylingFromString(markerId, style)
+    }
+
+    internal fun placeInfoShown(isShown: Boolean) {
+        if (isShown) {
+            mapController.setMarkerStylingFromString(markerId, placeInfoMarkerStyle)
+        } else {
+            updateStyle()
+        }
     }
 
 }

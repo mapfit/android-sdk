@@ -8,6 +8,7 @@ import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -34,6 +35,7 @@ import com.mapfit.mapfitsdk.geometry.LatLngBounds
 import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*
+import kotlinx.android.synthetic.main.widget_custom_place_info.view.*
 import kotlinx.coroutines.experimental.Job
 
 
@@ -164,9 +166,23 @@ class CoffeeShopActivity : AppCompatActivity() {
                         "Place info is clicked!",
                         Toast.LENGTH_SHORT
                     ).show()
-
                 }
             })
+
+            // calling inflate without a root ignores layout params
+            val customView = LayoutInflater.from(this@CoffeeShopActivity)
+                .inflate(R.layout.widget_custom_place_info, findViewById(R.id.drawer_layout), false)
+
+//            setPlaceInfoAdapter(object : MapfitMap.PlaceInfoAdapter {
+//                override fun getPlaceInfoView(marker: Marker): View {
+//
+//                    customView.img.setImageResource(R.drawable.ic_watermark_light)
+//                    customView.txtTitle.text = marker.title
+//
+//                    return customView
+//                }
+//            })
+
 
         }
 
