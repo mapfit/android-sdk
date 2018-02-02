@@ -9,7 +9,7 @@ import com.mapfit.mapfitsdk.utils.toPx
  * Created by dogangulcan on 1/3/18.
  */
 class MarkerOptions internal constructor(
-    private var markerId: Long,
+    private var marker: Marker,
     private val mapController: MapController
 ) {
 
@@ -22,14 +22,18 @@ class MarkerOptions internal constructor(
      */
     var height = 50
         set(value) {
-            field = value
-            updateStyle()
+            if (marker.usingDefaultIcon) {
+                field = value
+                updateStyle()
+            }
         }
 
     var width = 50
         set(value) {
-            field = value
-            updateStyle()
+            if (marker.usingDefaultIcon) {
+                field = value
+                updateStyle()
+            }
         }
 
     var drawOrder = 2000
@@ -44,8 +48,10 @@ class MarkerOptions internal constructor(
             updateStyle()
         }
 
+
     private val placeInfoMarkerStyle =
         "{ style: 'points', anchor: top,color: $color, size: [${markerDotSide}px, ${markerDotSide}px], order: $drawOrder, interactive: true, collide: false }"
+
 
     internal var style =
         "{ style: 'points', anchor: top, color: $color, size: [${height}px, ${width}px], order: $drawOrder, interactive: true, collide: false }"
@@ -59,7 +65,7 @@ class MarkerOptions internal constructor(
     }
 
     private fun updateStyle() {
-        mapController.setMarkerStylingFromString(markerId, style)
+        mapController.setMarkerStylingFromString(marker.getId(), style)
     }
 
     internal fun placeInfoShown(isShown: Boolean) {

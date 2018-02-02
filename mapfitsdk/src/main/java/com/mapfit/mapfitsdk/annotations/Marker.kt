@@ -34,7 +34,10 @@ class Marker internal constructor(
 
     private var isVisible: Boolean = true
 
-    internal val markerOptions = MarkerOptions(markerId, mapController)
+    val markerOptions = MarkerOptions(this, mapController)
+
+    private var data: Any? = null
+    internal var usingDefaultIcon: Boolean = true
 
     internal var placeInfo: PlaceInfo? = null
 
@@ -109,38 +112,62 @@ class Marker internal constructor(
         }
     }
 
-    private fun setIcon(drawable: Drawable): Marker {
+    /**
+     * Sets the marker icon with the given drawable.
+     *
+     * @param drawable
+     */
+    fun setIcon(drawable: Drawable): Marker {
         val density = context.resources.displayMetrics.densityDpi
         val bitmapDrawable = drawable as BitmapDrawable
         bitmapDrawable.setTargetDensity(density)
         val bitmap = bitmapDrawable.bitmap
         bitmap.density = density
         setBitmap(bitmap)
-        return this
-    }
-
-    private fun setIcon(@DrawableRes drawableId: Int): Marker {
-        val options = BitmapFactory.Options()
-        options.inTargetDensity = context.resources.displayMetrics.densityDpi
-        val bitmap = BitmapFactory.decodeResource(context.resources, drawableId, options)
-        setBitmap(bitmap)
-        return this
-    }
-
-    fun setIcon(@NonNull mapfitMarker: MapfitMarker): Marker {
-        setIcon(mapfitMarker.getMarkerUrl())
+        usingDefaultIcon = false
         return this
     }
 
     /**
-     * Set icon with a url consist of a image.
+     * Sets the marker icon with the given drawable resource id.
+     *
+     * @param drawableId
      */
-    private fun setIcon(imageUrl: String): Marker {
+    fun setIcon(@DrawableRes drawableId: Int): Marker {
+        val options = BitmapFactory.Options()
+        options.inTargetDensity = context.resources.displayMetrics.densityDpi
+        val bitmap = BitmapFactory.decodeResource(context.resources, drawableId, options)
+        setBitmap(bitmap)
+        usingDefaultIcon = false
+        return this
+    }
+
+    /**
+     * Sets the marker icon with the given [MapfitMarker].
+     *
+     * @param mapfitMarker
+     */
+    fun setIcon(@NonNull mapfitMarker: MapfitMarker): Marker {
+        setIcon(mapfitMarker.getMarkerUrl())
+        markerOptions.height = 50
+        markerOptions.width = 50
+        usingDefaultIcon = true
+        return this
+    }
+
+    /**
+     * Sets the marker icon with the given image URL.
+     *
+     * @param imageUrl
+     */
+    fun setIcon(imageUrl: String): Marker {
         launch {
             val drawable = loadImageFromUrl(imageUrl)
-            drawable.await()?.let { setIcon(it) }
+            drawable.await()?.let {
+                setIcon(it)
+                usingDefaultIcon = false
+            }
         }
-
         return this
     }
 
