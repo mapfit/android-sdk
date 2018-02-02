@@ -40,6 +40,14 @@ class MarkerTest {
     @Mock
     private lateinit var onMarkerClickListener: OnMarkerClickListener
 
+    @Mock
+    private lateinit var onPlaceInfoClickListener: MapfitMap.OnPlaceInfoClickListener
+
+    @Mock
+    private lateinit var placeInfoAdapter: MapfitMap.PlaceInfoAdapter
+
+    val latLng = LatLng(40.693825, -73.998691)
+
     @Rule
     @JvmField
     val activityRule: ActivityTestRule<DummyActivity> = ActivityTestRule(
@@ -69,7 +77,6 @@ class MarkerTest {
     fun testMarkerPosition() {
 
         // initial position
-        val latLng = LatLng(40.693825, -73.998691)
         val marker = mapfitMap.addMarker(latLng)
         Assert.assertEquals(latLng, marker.getPosition())
 
@@ -130,25 +137,72 @@ class MarkerTest {
     }
 
     @Test
-    fun testMapClickListener() {
+    fun testMarkerClickListener() {
         Thread.sleep(500)
 
-        val latLng = LatLng(40.693825, -73.998691)
         mapfitMap.setCenter(latLng)
         Thread.sleep(500)
 
         mapfitMap.setOnMarkerClickListener(onMarkerClickListener)
         val marker = mapfitMap.addMarker(latLng)
-        val screenPosition = marker.getScreenPosition()
+        clickOnMarker(marker)
 
+        verify(onMarkerClickListener, times(1)).onMarkerClicked(marker)
+    }
+
+    @Test
+    fun testDefaultPlaceInfo() {
+        Thread.sleep(500)
+
+        val marker = mapfitMap.addMarker(latLng)
+
+        clickOnMarker(marker)
+
+        Assert.assertNotNull(marker.placeInfo)
+        Assert.assertTrue(marker.placeInfo!!.getVisible())
+    }
+
+    @Test
+    fun testDefaultPlaceInfoClickListener() {
+        Thread.sleep(500)
+
+        val marker = mapfitMap.addMarker(latLng)
+
+        mapfitMap.setOnPlaceInfoClickListener(onPlaceInfoClickListener)
+
+        clickOnMarker(marker)
+        clickOnPlaceInfo(marker)
+
+        verify(onPlaceInfoClickListener, times(1)).onPlaceInfoClicked(marker)
+    }
+
+    @Test
+    fun testPlaceInfoAdapter() {
+        Thread.sleep(500)
+
+        val marker = mapfitMap.addMarker(latLng)
+
+        mapfitMap.setPlaceInfoAdapter(placeInfoAdapter)
+
+        clickOnMarker(marker)
+
+        verify(placeInfoAdapter, times(1)).getPlaceInfoView(marker)
+    }
+
+    private fun clickOnMarker(marker: Marker) {
+        val screenPosition = marker.getScreenPosition()
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
             .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt()))
-
         Thread.sleep(1500)
-        verify(onMarkerClickListener, times(1)).onMarkerClicked(marker)
-
-
     }
+
+    private fun clickOnPlaceInfo(marker: Marker) {
+        val screenPosition = marker.getScreenPosition()
+        Espresso.onView(ViewMatchers.withId(R.id.glSurface))
+            .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt() - 250))
+        Thread.sleep(1500)
+    }
+
 
 }
 

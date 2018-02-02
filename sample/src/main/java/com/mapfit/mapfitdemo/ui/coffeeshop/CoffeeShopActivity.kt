@@ -8,6 +8,7 @@ import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -34,6 +35,7 @@ import com.mapfit.mapfitsdk.geometry.LatLngBounds
 import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*
+import kotlinx.android.synthetic.main.widget_custom_place_info.view.*
 import kotlinx.coroutines.experimental.Job
 
 
@@ -145,17 +147,42 @@ class CoffeeShopActivity : AppCompatActivity() {
         this.mapfitMap = mapfitMap
 
         mapfitMap.apply {
-            //            setCenter(LatLng(40.700798, -74.0050177), 500)
-//            setZoom(13f, 500)
+            setCenter(LatLng(40.700798, -74.0050177), 500)
+            setZoom(13f, 500)
 
 //            boundaryBuilder()
 //            addMapfitOfficeWithGeocoder()
             setupMarkerWithAddressInput()
-//            coffeeShops?.let { addMarkersFromCoffeeShops(it) }
-            setMapBoundsToColorado()
+            coffeeShops?.let { addMarkersFromCoffeeShops(it) }
+//            setMapBoundsToColorado()
 //            setMapBoundsToUtah()
             setOnMarkerClickListener(onMarkerClickListener)
             setOnMapLongClickListener(onMapLongClickListener)
+
+            setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
+                override fun onPlaceInfoClicked(marker: Marker) {
+                    Toast.makeText(
+                        this@CoffeeShopActivity,
+                        "Place info is clicked!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
+
+            // calling inflate without a root ignores layout params
+            val customView = LayoutInflater.from(this@CoffeeShopActivity)
+                .inflate(R.layout.widget_custom_place_info, findViewById(R.id.drawer_layout), false)
+
+//            setPlaceInfoAdapter(object : MapfitMap.PlaceInfoAdapter {
+//                override fun getPlaceInfoView(marker: Marker): View {
+//
+//                    customView.img.setImageResource(R.drawable.ic_watermark_light)
+//                    customView.txtTitle.text = marker.title
+//
+//                    return customView
+//                }
+//            })
+
 
         }
 
@@ -179,7 +206,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         }
 
         val bounds = boundsBuilder.build()
-        mapfitMap.setBounds(bounds,.8f)
+        mapfitMap.setBounds(bounds, .8f)
         mapfitMap.addMarker(bounds.southWest).setIcon(MapfitMarker.DARK_BAR)
         mapfitMap.addMarker(bounds.northEast).setIcon(MapfitMarker.DARK_AIRPORT)
 
@@ -192,7 +219,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap.addMarker(ne)
         mapfitMap.addMarker(sw)
-        mapfitMap.setBounds(bounds,1f)
+        mapfitMap.setBounds(bounds, 1f)
 
 //        launch {
 //            delay(2000)
@@ -210,7 +237,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap.addMarker(ne)
         mapfitMap.addMarker(sw)
-        mapfitMap.setBounds(bounds,1f)
+        mapfitMap.setBounds(bounds, 1f)
 
     }
 
@@ -272,6 +299,7 @@ class CoffeeShopActivity : AppCompatActivity() {
                     mapfitMap.setZoom(17f, 300)
                     edtAddress.setText("")
                     markers.add(marker)
+
                 }
 
                 override fun onError(exception: Exception) {
@@ -294,6 +322,9 @@ class CoffeeShopActivity : AppCompatActivity() {
             val marker = mapfitMap.addMarker(LatLng(shop.lat, shop.lon))
 //            marker.invalidate()
 
+            marker.title = shop.title
+            marker.subtitle1 = shop.address
+            marker.subtitle2 = shop.id
 
             markers.add(marker)
 
