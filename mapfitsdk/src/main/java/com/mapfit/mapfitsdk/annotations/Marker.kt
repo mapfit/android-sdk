@@ -43,7 +43,6 @@ class Marker internal constructor(
 
     internal var address: Address? = null
 
-    private var data: Any? = null
     private var icon: Bitmap? = null
     private var previousIcon: Bitmap? = null
 

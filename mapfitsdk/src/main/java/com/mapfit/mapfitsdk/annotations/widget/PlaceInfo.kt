@@ -20,7 +20,7 @@ class PlaceInfo internal constructor(
     private lateinit var subtitle2View: TextView
     private var viewHeight: Int? = null
     private var viewWidth: Int? = null
-//    private val MARKER_HEIGHT_MULTIPLIER: Float = if (infoView.tag == "default") 1f else 3.3f
+    //    private val MARKER_HEIGHT_MULTIPLIER: Float = if (infoView.tag == "default") 1f else 3.3f
     private var positionUpdateJob = Job()
 
     init {
@@ -65,15 +65,12 @@ class PlaceInfo internal constructor(
             .alpha(1f)
             .setDuration(75)
             .setListener(null)
-
-
     }
 
     internal fun updatePositionDelayed() {
         if (infoView.visibility != View.GONE) {
             runBlocking {
                 positionUpdateJob.cancelAndJoin()
-
                 launch {
                     repeat(1300) {
                         onPositionChanged()
@@ -107,8 +104,7 @@ class PlaceInfo internal constructor(
             val point = marker.getScreenPosition()
             infoView.post {
                 infoView.x = point.x - (viewWidth?.div(2) ?: 0)
-                infoView.y = (point.y - (viewHeight
-                        ?: 0)  )
+                infoView.y = (point.y - (viewHeight ?: 0))
             }
         }
     }

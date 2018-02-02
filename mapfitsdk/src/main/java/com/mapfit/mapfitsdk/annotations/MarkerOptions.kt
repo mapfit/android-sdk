@@ -70,7 +70,7 @@ class MarkerOptions internal constructor(
 
     internal fun placeInfoShown(isShown: Boolean) {
         if (isShown) {
-            mapController.setMarkerStylingFromString(markerId, placeInfoMarkerStyle)
+            mapController.setMarkerStylingFromString(marker.getId(), placeInfoMarkerStyle)
         } else {
             updateStyle()
         }
