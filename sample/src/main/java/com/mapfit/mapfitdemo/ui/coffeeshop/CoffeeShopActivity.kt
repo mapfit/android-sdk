@@ -8,6 +8,7 @@ import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -34,6 +35,7 @@ import com.mapfit.mapfitsdk.geometry.LatLngBounds
 import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*
+import kotlinx.android.synthetic.main.widget_custom_place_info.view.*
 import kotlinx.coroutines.experimental.Job
 
 
@@ -49,9 +51,9 @@ class CoffeeShopActivity : AppCompatActivity() {
     private val coffeeShops: List<CoffeeShop>? by lazy { repository.getCoffeeShops() }
     private var markers: MutableList<Marker> = mutableListOf()
     private var alwaysOpenShopLayer = Layer()
-    private var coffeeShopsLayer = Layer()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private lateinit var drawerLayout: DrawerLayout
+    private var bottomSheetHideJob = Job()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -112,7 +114,6 @@ class CoffeeShopActivity : AppCompatActivity() {
                 FilterType.ZOOM_CONTROLS -> mapfitMap.getMapOptions().zoomControlsEnabled =
                         isChecked
                 FilterType.COMPASS -> mapfitMap.getMapOptions().compassButtonEnabled = isChecked
-                FilterType.COFFEE_SHOPS -> coffeeShopsLayer.isVisible = isChecked
                 FilterType.RECENTER -> mapfitMap.getMapOptions().recenterButtonEnabled = isChecked
                 FilterType.PAN_GESTURE -> mapfitMap.getMapOptions().panEnabled = isChecked
                 FilterType.ROTATE_GESTURE -> mapfitMap.getMapOptions().rotateEnabled = isChecked
@@ -157,6 +158,32 @@ class CoffeeShopActivity : AppCompatActivity() {
 //            setMapBoundsToUtah()
             setOnMarkerClickListener(onMarkerClickListener)
             setOnMapLongClickListener(onMapLongClickListener)
+
+            setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
+                override fun onPlaceInfoClicked(marker: Marker) {
+                    Toast.makeText(
+                        this@CoffeeShopActivity,
+                        "Place info is clicked!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
+
+            // calling inflate without a root ignores layout params
+            val customView = LayoutInflater.from(this@CoffeeShopActivity)
+                .inflate(R.layout.widget_custom_place_info, findViewById(R.id.drawer_layout), false)
+
+//            setPlaceInfoAdapter(object : MapfitMap.PlaceInfoAdapter {
+//                override fun getPlaceInfoView(marker: Marker): View {
+//
+//                    customView.img.setImageResource(R.drawable.ic_watermark_light)
+//                    customView.txtTitle.text = marker.title
+//
+//                    return customView
+//                }
+//            })
+
+
         }
 
     }
@@ -272,6 +299,7 @@ class CoffeeShopActivity : AppCompatActivity() {
                     mapfitMap.setZoom(17f, 300)
                     edtAddress.setText("")
                     markers.add(marker)
+
                 }
 
                 override fun onError(exception: Exception) {
@@ -292,18 +320,20 @@ class CoffeeShopActivity : AppCompatActivity() {
         coffeeShops.forEach { shop ->
 
             val marker = mapfitMap.addMarker(LatLng(shop.lat, shop.lon))
+//            marker.invalidate()
+
+            marker.title = shop.title
+            marker.subtitle1 = shop.address
+            marker.subtitle2 = shop.id
 
             markers.add(marker)
-            marker.setIcon(MapfitMarker.DARK_COMMUNITY)
 
-            coffeeShopsLayer.add(marker)
-
+            // creating a layer of shops that are always open
             if (shop.open24Hours) {
                 alwaysOpenShopLayer.add(marker)
             }
-        }
 
-        coffeeShopsLayer.remove(coffeeShopsLayer.annotations[1])
+        }
 
     }
 

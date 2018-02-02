@@ -1,5 +1,6 @@
 package com.mapfit.mapfitsdk
 
+import android.view.View
 import com.mapfit.mapfitsdk.annotations.Marker
 import com.mapfit.mapfitsdk.annotations.Polygon
 import com.mapfit.mapfitsdk.annotations.Polyline
@@ -65,7 +66,7 @@ abstract class MapfitMap {
     abstract fun getCenter(): LatLng
 
     /**
-     * Adds a marker on the default layer on given coordinates.
+     * Adds a marker on the default layer to the given coordinates.
      *
      * @return marker
      */
@@ -140,10 +141,10 @@ abstract class MapfitMap {
      * Sets the visible map bounds to given [LatLngBounds]. Zoom level and center will be set from
      * given [LatLngBounds].
      *
-     * @param latLngBounds
+     * @param bounds
      * @param padding between map and bounds as percentage. For 10% padding, you can pass 0.1f.
      */
-    abstract fun setBounds(latLngBounds: LatLngBounds, padding: Float)
+    abstract fun setBounds(bounds: LatLngBounds, padding: Float)
 
     /**
      * @return latLngBounds for currently visible [MapView]
@@ -153,36 +154,54 @@ abstract class MapfitMap {
     /**
      * Sets [OnMapClickListener] for [MapView] that single click events will be passed to.
      */
-    abstract fun setOnMapClickListener(onMapClickListener: OnMapClickListener)
+    abstract fun setOnMapClickListener(listener: OnMapClickListener)
 
     /**
      * Sets [OnMapDoubleClickListener] for [MapView] that double click events will be passed to.
      */
-    abstract fun setOnMapDoubleClickListener(onMapDoubleClickListener: OnMapDoubleClickListener)
+    abstract fun setOnMapDoubleClickListener(listener: OnMapDoubleClickListener)
 
     /**
      * Sets [OnMapLongClickListener] for [MapView] that long click events will be passed to.
      */
-    abstract fun setOnMapLongClickListener(onMapLongClickListener: OnMapLongClickListener)
+    abstract fun setOnMapLongClickListener(listener: OnMapLongClickListener)
 
     /**
      * Sets [OnMarkerClickListener] for [MapView] that marker click events will be passed to.
      */
-    abstract fun setOnMarkerClickListener(onMarkerClickListener: OnMarkerClickListener)
+    abstract fun setOnMarkerClickListener(listener: OnMarkerClickListener)
 
     /**
      * Sets [OnMapPanListener] for [MapView] that pan events will be passed to.x
      */
-    abstract fun setOnMapPanListener(onMapPanListener: OnMapPanListener)
+    abstract fun setOnMapPanListener(listener: OnMapPanListener)
 
     /**
      * Sets [OnMapPinchListener] for [MapView] that pan events will be passed to.x
+
+     * @param listener
      */
-    abstract fun setOnMapPinchListener(onMapPinchListener: OnMapPinchListener)
+    abstract fun setOnMapPinchListener(listener: OnMapPinchListener)
 
-    protected abstract fun setOnPolylineClickListener(onPolylineClickListener: OnPolylineClickListener)
+    /**
+     * Used to set custom views for place info.
+     * When the callback is invoked, you can return the view you want to be shown as place info.
+     *
+     * @param adapter the callback to be invoked to obtain your custom place info.
+     */
+    abstract fun setPlaceInfoAdapter(adapter: PlaceInfoAdapter)
 
-    protected abstract fun setOnPolygonClickListener(onPolygonClickListener: OnPolygonClickListener)
+    /**
+     * Sets a callback that's invoked when the user clicks on an info window.
+     *
+     * @param listener The callback that's invoked when the user clicks on an info window.
+     *                 To unset the callback, use null.
+     */
+    abstract fun setOnPlaceInfoClickListener(listener: OnPlaceInfoClickListener)
+
+    protected abstract fun setOnPolylineClickListener(listener: OnPolylineClickListener)
+
+    protected abstract fun setOnPolygonClickListener(listener: OnPolygonClickListener)
 
     /**
      * MapOptions can be used to changing options for the map. For instance, setting maximum zoom
@@ -204,5 +223,27 @@ abstract class MapfitMap {
      * Will reCenter the map.
      */
     abstract fun reCenter()
+
+    interface PlaceInfoAdapter {
+
+        /**
+         * Called when a place info will be shown after a marker click.
+         *
+         * @param marker The marker the user clicked on.
+         * @return View to be shown as a place info. If null is returned the default
+         * info window will be shown.
+         */
+        fun getPlaceInfoView(marker: Marker): View
+    }
+
+    interface OnPlaceInfoClickListener {
+
+        /**
+         * Called when the user clicks on a place info.
+         *
+         * @param marker The marker of the place info that is clicked on.
+         */
+        fun onPlaceInfoClicked(marker: Marker)
+    }
 
 }

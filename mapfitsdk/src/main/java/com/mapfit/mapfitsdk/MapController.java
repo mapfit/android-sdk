@@ -8,7 +8,6 @@ import android.opengl.GLSurfaceView.Renderer;
 import android.os.Handler;
 import android.support.annotation.Keep;
 import android.util.DisplayMetrics;
-import android.util.Log;
 
 import com.mapfit.mapfitsdk.annotations.Marker;
 import com.mapfit.mapfitsdk.geometry.LatLng;
@@ -39,7 +38,6 @@ import okhttp3.Response;
  * {@code MapController} is the main class for interacting with a Tangram map.
  */
 public class MapController implements Renderer {
-
 
     public void reCenter() {
         if (lastCenter != null)
@@ -300,10 +298,6 @@ public class MapController implements Renderer {
         });
     }
 
-    //    private Boolean isTiltEnabled = true;
-//    private Boolean isRotationEnabled = true;
-//    private Boolean isPinchEnabled = true;
-//    private Boolean isPanEnabled = true;
     void setTiltEnabled(boolean enabled) {
         touchInput.setTiltEnabled(enabled);
     }
@@ -832,7 +826,6 @@ public class MapController implements Renderer {
             public boolean onFling(float posX, float posY, float velocityX, float velocityY) {
                 if (responder == null || !responder.onFling(posX, posY, velocityX, velocityY)) {
                     nativeHandleFlingGesture(mapPointer, posX, posY, velocityX, velocityY);
-
                 }
                 return true;
             }
@@ -868,8 +861,6 @@ public class MapController implements Renderer {
                 if (responder == null || !responder.onScale(x, y, scale, velocity)) {
                     nativeHandlePinchGesture(mapPointer, x, y, scale, velocity);
                 }
-
-                Log.e("SCALE", "SCALE CALLED");
                 return true;
             }
         });
@@ -1407,7 +1398,7 @@ public class MapController implements Renderer {
     private Map<Long, Marker> markers = new HashMap<>();
     private Handler uiThreadHandler;
     TouchInput touchInput;
-    LatLng lastCenter = null;
+    private LatLng lastCenter = null;
 
     // GLSurfaceView.Renderer methods
     // ==============================

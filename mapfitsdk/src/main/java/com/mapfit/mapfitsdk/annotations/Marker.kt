@@ -7,14 +7,16 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.support.annotation.DrawableRes
 import android.support.annotation.NonNull
-import android.support.annotation.VisibleForTesting
 import android.util.Log
 import com.mapfit.mapfitsdk.MapController
+import com.mapfit.mapfitsdk.R
+import com.mapfit.mapfitsdk.annotations.widget.PlaceInfo
+import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.isValid
+import com.mapfit.mapfitsdk.utils.getBitmapFromVectorDrawable
 import com.mapfit.mapfitsdk.utils.loadImageFromUrl
 import kotlinx.coroutines.experimental.launch
-import org.jetbrains.annotations.TestOnly
 
 /**
  * Created by dogangulcan on 12/19/17.
@@ -32,9 +34,35 @@ class Marker internal constructor(
 
     private var isVisible: Boolean = true
 
-    private val markerOptions = MarkerOptions(markerId, mapController)
+    val markerOptions = MarkerOptions(this, mapController)
 
     private var data: Any? = null
+    internal var usingDefaultIcon: Boolean = true
+
+    internal var placeInfo: PlaceInfo? = null
+
+    internal var address: Address? = null
+
+    private var icon: Bitmap? = null
+    private var previousIcon: Bitmap? = null
+
+    var title: String = ""
+        set(value) {
+            field = value
+            placeInfo?.updatePlaceInfo()
+        }
+
+    var subtitle1: String = ""
+        set(value) {
+            field = value
+            placeInfo?.updatePlaceInfo()
+        }
+
+    var subtitle2: String = ""
+        set(value) {
+            field = value
+            placeInfo?.updatePlaceInfo()
+        }
 
     init {
         setIcon(MapfitMarker.LIGHT_DEFAULT)
@@ -83,39 +111,79 @@ class Marker internal constructor(
         }
     }
 
-    private fun setIcon(drawable: Drawable): Marker {
+    /**
+     * Sets the marker icon with the given drawable.
+     *
+     * @param drawable
+     */
+    fun setIcon(drawable: Drawable): Marker {
         val density = context.resources.displayMetrics.densityDpi
         val bitmapDrawable = drawable as BitmapDrawable
         bitmapDrawable.setTargetDensity(density)
         val bitmap = bitmapDrawable.bitmap
         bitmap.density = density
         setBitmap(bitmap)
-        return this
-    }
-
-    private fun setIcon(@DrawableRes drawableId: Int): Marker {
-        val options = BitmapFactory.Options()
-        options.inTargetDensity = context.resources.displayMetrics.densityDpi
-        val bitmap = BitmapFactory.decodeResource(context.resources, drawableId, options)
-        setBitmap(bitmap)
-        return this
-    }
-
-    fun setIcon(@NonNull mapfitMarker: MapfitMarker): Marker {
-        setIcon(mapfitMarker.getMarkerUrl())
+        usingDefaultIcon = false
         return this
     }
 
     /**
-     * Set icon with a url consist of a image.
+     * Sets the marker icon with the given drawable resource id.
+     *
+     * @param drawableId
      */
-    private fun setIcon(imageUrl: String): Marker {
+    fun setIcon(@DrawableRes drawableId: Int): Marker {
+        val options = BitmapFactory.Options()
+        options.inTargetDensity = context.resources.displayMetrics.densityDpi
+        val bitmap = BitmapFactory.decodeResource(context.resources, drawableId, options)
+        setBitmap(bitmap)
+        usingDefaultIcon = false
+        return this
+    }
+
+    /**
+     * Sets the marker icon with the given [MapfitMarker].
+     *
+     * @param mapfitMarker
+     */
+    fun setIcon(@NonNull mapfitMarker: MapfitMarker): Marker {
+        setIcon(mapfitMarker.getMarkerUrl())
+        markerOptions.height = 50
+        markerOptions.width = 50
+        usingDefaultIcon = true
+        return this
+    }
+
+    /**
+     * Sets the marker icon with the given image URL.
+     *
+     * @param imageUrl
+     */
+    fun setIcon(imageUrl: String): Marker {
         launch {
             val drawable = loadImageFromUrl(imageUrl)
-            drawable.await()?.let { setIcon(it) }
+            drawable.await()?.let {
+                setIcon(it)
+                usingDefaultIcon = false
+            }
         }
-
         return this
+    }
+
+    internal fun placeInfoState(shown: Boolean) {
+
+        placeInfo?.apply {
+
+            if (shown) {
+                setBitmap(getBitmapFromVectorDrawable(context, R.drawable.ic_marker_dot))
+            } else {
+                if (getVisible())
+                    previousIcon?.let { setBitmap(previousIcon!!) }
+            }
+        }
+        markerOptions.placeInfoShown(shown)
+
+
     }
 
     private fun setDrawOder(index: Int) {
@@ -130,6 +198,9 @@ class Marker internal constructor(
     }
 
     private fun setBitmap(bitmap: Bitmap): Boolean {
+        previousIcon = if (previousIcon == null) bitmap else icon
+        icon = bitmap
+
         val density = context.resources.displayMetrics.densityDpi
         val width = bitmap.getScaledWidth(density)
         val height = bitmap.getScaledHeight(density)
@@ -151,6 +222,7 @@ class Marker internal constructor(
             abgr[flippedIndex] = pix1
         }
 
+
         return mapController.setMarkerBitmap(markerId, width, height, abgr)
     }
 
@@ -165,8 +237,6 @@ class Marker internal constructor(
 
     override fun remove(): Boolean = mapController.removeMarker(this)
 
-    @TestOnly
-    @VisibleForTesting
     internal fun getScreenPosition() = mapController.lngLatToScreenPosition(position)
 
 }
