@@ -18,10 +18,12 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class LayerTest {
 
-    private lateinit var mapView: com.mapfit.mapfitsdk.MapView
     private lateinit var mapfitMap: MapfitMap
 
+    private lateinit var mapfitMap2: MapfitMap
+
     private val mMockContext = InstrumentationRegistry.getContext()
+    private val latLng = LatLng(40.693825, -73.998691)
 
 
     @Before
@@ -29,11 +31,15 @@ class LayerTest {
     fun init() {
         MockitoAnnotations.initMocks(this)
 
-        mapView = MapView(mMockContext)
-
-        mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
+        MapView(mMockContext).getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
                 this@LayerTest.mapfitMap = mapfitMap
+            }
+        })
+
+        MapView(mMockContext).getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
+            override fun onMapReady(mapfitMap: MapfitMap) {
+                this@LayerTest.mapfitMap2 = mapfitMap
             }
         })
     }
@@ -43,6 +49,39 @@ class LayerTest {
     fun testLayerDefaults() {
         val layer = Layer()
         Assert.assertTrue(layer.isVisible)
+    }
+
+    @Test
+    @UiThreadTest
+    fun testAdding() {
+
+        // create marker, add to a layer, add layer to another map
+
+        val marker = mapfitMap.addMarker(latLng)
+        val layer = Layer()
+        layer.add(marker)
+        mapfitMap2.addLayer(layer)
+
+    }
+
+
+    @Test
+    @UiThreadTest
+    fun testRemovingLayerFromAMap() {
+        // all markers on the map that are in layer should be removed from the map
+    }
+
+    @Test
+    @UiThreadTest
+    fun testDisposingLayer() {
+        // all markers should be removed from all maps that layer is attached to
+    }
+
+    @Test
+    @UiThreadTest
+    fun testDuplicates() {
+        // adding layer to a map has same marker should not duplicate
+
     }
 
     @Test
@@ -62,23 +101,5 @@ class LayerTest {
         Assert.assertTrue(layer.annotations.size == 0)
     }
 
-    @Test
-    @UiThreadTest
-    fun testAddRemove() {
-//        val latLng = LatLng(40.693825, -73.998691)
-//        val marker = mapfitMap.addMarker(latLng)
-//
-//        val layer = Layer()
-//
-//        layer.add(marker)
-//
-//        val sameMarker = layer.annotations.find { it == marker }
-//        Assert.assertTrue(sameMarker != null)
-//
-//        layer.remove(marker)
-//        val sameMarkerCandidate = layer.annotations.find { it == marker }
-//        Assert.assertTrue(sameMarkerCandidate == null)
-
-    }
 
 }

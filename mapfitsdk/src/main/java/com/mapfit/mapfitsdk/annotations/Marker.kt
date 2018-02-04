@@ -3,6 +3,7 @@ package com.mapfit.mapfitsdk.annotations
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.PointF
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.support.annotation.DrawableRes
@@ -27,75 +28,97 @@ class Marker internal constructor(
     private val mapController: MapController
 ) : Annotation() {
 
-
     private var position: LatLng = LatLng(0.0, 0.0)
 
     private var isFlat: Boolean = false
 
     private var isVisible: Boolean = true
 
-    val markerOptions = MarkerOptions(this, mapController)
+    val markerOptions = MarkerOptions(this, mutableListOf(mapController))
 
     private var data: Any? = null
     internal var usingDefaultIcon: Boolean = true
 
-    internal var placeInfo: PlaceInfo? = null
+    //    internal var placeInfo: PlaceInfo? = null
+    internal var placeInfoMap = HashMap<MapController, PlaceInfo?>()
 
     internal var address: Address? = null
 
     private var icon: Bitmap? = null
     private var previousIcon: Bitmap? = null
+    private var iconChangedWhenPlaceInfo: Bitmap? = null
 
     var title: String = ""
         set(value) {
             field = value
-            placeInfo?.updatePlaceInfo()
+            updatePlaceInfoFields()
         }
 
     var subtitle1: String = ""
         set(value) {
             field = value
-            placeInfo?.updatePlaceInfo()
+            updatePlaceInfoFields()
         }
 
     var subtitle2: String = ""
         set(value) {
             field = value
-            placeInfo?.updatePlaceInfo()
+            updatePlaceInfoFields()
         }
+
+    private fun updatePlaceInfoFields() {
+        placeInfoMap?.values?.forEach {
+            it?.updatePlaceInfo()
+        }
+    }
 
     init {
         setIcon(MapfitMarker.LIGHT_DEFAULT)
+        mapBindings[mapController] = markerId
+        initAnnotation(mapController, markerId)
+    }
+
+    override fun initAnnotation(mapController: MapController, id: Long) {
+        markerOptions.mapController.add(mapController)
+        markerOptions.updateStyle()
+        icon?.let { setBitmap(it, mapController, id) }
+        setPosition(position)
     }
 
     fun getPosition(): LatLng = position
 
     fun setPosition(latLng: LatLng): Marker {
         if (latLng.isValid()) {
-            val markerPositionSet = mapController.setMarkerPointEased(
-                markerId,
-                latLng.lon,
-                latLng.lat,
-                0,
-                MapController.EaseType.CUBIC
-            )
 
-            updatePosition(markerPositionSet, latLng)
+            mapBindings.forEach {
+                val markerPositionSet = it.key.setMarkerPointEased(
+                    it.value,
+                    latLng.lon,
+                    latLng.lat,
+                    0,
+                    MapController.EaseType.CUBIC
+                )
+
+                updatePosition(markerPositionSet, latLng)
+            }
+
         }
         return this
     }
 
     private fun setPositionEased(latLng: LatLng, duration: Int): Marker {
         if (latLng.isValid()) {
-            val markerPositionSet = mapController.setMarkerPointEased(
-                markerId,
-                latLng.lon,
-                latLng.lat,
-                duration,
-                MapController.EaseType.CUBIC
-            )
+            mapBindings.forEach {
+                val markerPositionSet = it.key.setMarkerPointEased(
+                    it.value,
+                    latLng.lon,
+                    latLng.lat,
+                    duration,
+                    MapController.EaseType.CUBIC
+                )
 
-            updatePosition(markerPositionSet, latLng)
+                updatePosition(markerPositionSet, latLng)
+            }
         }
         return this
     }
@@ -122,7 +145,7 @@ class Marker internal constructor(
         bitmapDrawable.setTargetDensity(density)
         val bitmap = bitmapDrawable.bitmap
         bitmap.density = density
-        setBitmap(bitmap)
+        setBitmap(bitmap, mapController)
         usingDefaultIcon = false
         return this
     }
@@ -136,7 +159,7 @@ class Marker internal constructor(
         val options = BitmapFactory.Options()
         options.inTargetDensity = context.resources.displayMetrics.densityDpi
         val bitmap = BitmapFactory.decodeResource(context.resources, drawableId, options)
-        setBitmap(bitmap)
+        setBitmap(bitmap, mapController)
         usingDefaultIcon = false
         return this
     }
@@ -170,36 +193,59 @@ class Marker internal constructor(
         return this
     }
 
-    internal fun placeInfoState(shown: Boolean) {
+    internal fun placeInfoState(
+        shown: Boolean,
+        mapController: MapController
+    ) {
 
+        val placeInfo = placeInfoMap[mapController]
         placeInfo?.apply {
 
+            val markerId = getId(mapController) ?: 0
+
             if (shown) {
-                setBitmap(getBitmapFromVectorDrawable(context, R.drawable.ic_marker_dot))
+                setBitmap(
+                    getBitmapFromVectorDrawable(context, R.drawable.ic_marker_dot),
+                    mapController,
+                    markerId
+                )
+                markerOptions.placeInfoShown(shown, markerId, mapController)
+
             } else {
-                if (getVisible())
-                    previousIcon?.let { setBitmap(previousIcon!!) }
+
+                if (getVisible(mapController)) {
+                    setBitmap(iconChangedWhenPlaceInfo ?: previousIcon!!, mapController, markerId)
+                    markerOptions.placeInfoShown(shown, markerId, mapController)
+                    placeInfoMap.remove(mapController)
+                    iconChangedWhenPlaceInfo?.let {
+                        previousIcon = it
+                        iconChangedWhenPlaceInfo = null
+                    }
+                }
             }
         }
-        markerOptions.placeInfoShown(shown)
-
-
     }
 
     private fun setDrawOder(index: Int) {
-        mapController.setMarkerDrawOrder(markerId, index)
+        mapBindings.forEach {
+            it.key.setMarkerDrawOrder(it.value, index)
+        }
     }
 
     override fun getId(): Long = markerId
+
+    private fun getId(mapController: MapController): Long? = mapBindings[mapController]
 
     private fun setData(data: Any): Marker {
         this.data = data
         return this
     }
 
-    private fun setBitmap(bitmap: Bitmap): Boolean {
-        previousIcon = if (previousIcon == null) bitmap else icon
-        icon = bitmap
+    private fun setBitmap(
+        bitmap: Bitmap,
+        mapController: MapController,
+        markerId: Long = 0
+    ) {
 
         val density = context.resources.displayMetrics.densityDpi
         val width = bitmap.getScaledWidth(density)
@@ -222,21 +268,54 @@ class Marker internal constructor(
             abgr[flippedIndex] = pix1
         }
 
+        if (markerId != 0L) {
+            mapController.setMarkerBitmap(markerId, width, height, abgr)
+        } else {
 
-        return mapController.setMarkerBitmap(markerId, width, height, abgr)
+            mapBindings.forEach {
+
+                val activePlaceInfoMarkerId =
+                    placeInfoMap[it.key]?.marker?.mapBindings?.get(it.key) ?: 0L
+
+                if (it.value != activePlaceInfoMarkerId) {
+                    it.key.setMarkerBitmap(it.value, width, height, abgr)
+                    previousIcon = if (previousIcon == null) bitmap else icon
+                    icon = bitmap
+                } else {
+//                    previousIcon = bitmap
+                    iconChangedWhenPlaceInfo = bitmap
+                }
+            }
+        }
     }
 
     override fun setVisible(visible: Boolean) {
-        val success = mapController.setMarkerVisible(markerId, visible)
-        if (success) {
-            isVisible = visible
+        mapBindings.forEach {
+            val success = it.key.setMarkerVisible(it.value, visible)
+            if (success) {
+                isVisible = visible
+            }
         }
     }
 
     private fun getVisible(): Boolean = isVisible
 
-    override fun remove(): Boolean = mapController.removeMarker(this)
+    override fun remove() {
+        mapBindings.forEach {
+            it.key.removeMarker(it.value)
+        }
+    }
 
-    internal fun getScreenPosition() = mapController.lngLatToScreenPosition(position)
+    internal fun getScreenPosition(mapController: MapController): PointF {
+        var screenPosition = PointF()
+        mapBindings.filter { it.key == mapController }.keys.forEach {
+            screenPosition = it.lngLatToScreenPosition(position)
+        }
+        return screenPosition
+    }
+
+
+    internal fun hasPlaceInfoFields(): Boolean =
+        title.isNotBlank() && subtitle1.isNotBlank() && subtitle2.isNotBlank()
 
 }

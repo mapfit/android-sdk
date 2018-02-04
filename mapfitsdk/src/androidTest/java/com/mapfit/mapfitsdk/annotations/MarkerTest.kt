@@ -190,7 +190,7 @@ class MarkerTest {
     }
 
     private fun clickOnMarker(marker: Marker) {
-        val screenPosition = marker.getScreenPosition()
+        val screenPosition = marker.getScreenPosition(marker.getId())
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
             .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt()))
         Thread.sleep(1500)

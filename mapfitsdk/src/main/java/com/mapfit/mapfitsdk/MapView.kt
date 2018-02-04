@@ -276,6 +276,7 @@ class MapView(
                 )
             )
             setZoomOnDoubleTap(x, y)
+            activePlaceInfo?.updatePositionDelayed()
             true
         }
     }
@@ -296,9 +297,7 @@ class MapView(
                         when (it) {
                             is Marker -> {
                                 markerClickListener?.onMarkerClicked(it)
-                                showPlaceInfo(it)
-                            }
-                            is Polyline -> {
+                                showPlaceInfo(it, mapController)
                             }
                             else -> {
                             }
@@ -480,15 +479,18 @@ class MapView(
         }
 
         override fun addLayer(layer: Layer) {
-//            layer.bindTo(mapController)
             layers.add(layer)
+            annotationLayer.annotations.addAll(layer.annotations)
+            layer.addMap(mapController)
         }
 
         override fun removeLayer(layer: Layer) {
+            annotationLayer.annotations.removeAll(layer.annotations)
             layers.remove(layer)
         }
 
-        override fun removeMarker(marker: Marker): Boolean = mapController.removeMarker(marker)
+        override fun removeMarker(marker: Marker): Boolean =
+            mapController.removeMarker(marker.getId())
 
         override fun removePolygon(polygon: Polygon) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -524,54 +526,56 @@ class MapView(
 
     private var activePlaceInfo: PlaceInfo? = null
 
-    private fun showPlaceInfo(marker: Marker) {
-        if (activePlaceInfo != null
-            && activePlaceInfo?.marker == marker
-            && activePlaceInfo?.getVisible()!!) {
-            return
-        }
+    private fun showPlaceInfo(
+        marker: Marker,
+        mapController: MapController
+    ) {
+        if (marker.hasPlaceInfoFields()) {
 
-        if (activePlaceInfo != null && activePlaceInfo?.marker != marker) {
-            activePlaceInfo?.dispose()
-        }
-
-//        if (activePlaceInfo == null || activePlaceInfo?.marker != marker
-//        ) {
-
-        val view = if (isCustomPlaceInfo()) {
-            val view = placeInfoAdapter?.getPlaceInfoView(marker)
-
-            view?.setOnClickListener {
-                onPlaceInfoClickListener?.onPlaceInfoClicked(marker)
+            if (activePlaceInfo != null
+                && activePlaceInfo?.marker == marker
+                && activePlaceInfo?.getVisible()!!) {
+                return
             }
 
-            if (view?.parent != null) {
-                (view.parent as ViewGroup).removeView(view)
+            if (activePlaceInfo != null && activePlaceInfo?.marker != marker) {
+                activePlaceInfo?.dispose()
             }
 
-            view?.let { placeInfoFrame.addView(view) }
-            view
+            val view = if (isCustomPlaceInfo()) {
+                val view = placeInfoAdapter?.getPlaceInfoView(marker)
 
-        } else {
-            val view =
-                LayoutInflater.from(context).inflate(R.layout.widget_place_info, placeInfoFrame)
-
-            val child = (view as FrameLayout).getChildAt(0)
-            child.tag = "default"
-            child.findViewById<View>(R.id.container)
-                .setOnClickListener {
+                view?.setOnClickListener {
                     onPlaceInfoClickListener?.onPlaceInfoClicked(marker)
                 }
-            child
-        }
 
-        view?.let {
-            it.visibility = View.GONE
-            activePlaceInfo = PlaceInfo(it, marker)
-            marker.placeInfo = activePlaceInfo
-            activePlaceInfo?.show()
+                if (view?.parent != null) {
+                    (view.parent as ViewGroup).removeView(view)
+                }
+
+                view?.let { placeInfoFrame.addView(view) }
+                view
+
+            } else {
+                val view =
+                    LayoutInflater.from(context).inflate(R.layout.widget_place_info, placeInfoFrame)
+
+                val child = (view as FrameLayout).getChildAt(0)
+                child.tag = "default"
+                child.findViewById<View>(R.id.container)
+                    .setOnClickListener {
+                        onPlaceInfoClickListener?.onPlaceInfoClicked(marker)
+                    }
+                child
+            }
+
+            view?.let {
+                it.visibility = View.GONE
+                activePlaceInfo = PlaceInfo(it, marker, mapController)
+                marker.placeInfoMap[mapController] = activePlaceInfo
+                activePlaceInfo?.show()
+            }
         }
-//        }
     }
 
     private fun isCustomPlaceInfo() = placeInfoAdapter != null
@@ -595,13 +599,7 @@ class MapView(
     }
 
     private fun disposeMap() {
-
-        if (mapController != null) {
-            // MapController has been initialized, so we'll dispose it now.
-            mapController.dispose()
-        }
-//        mapController = null
-
+        mapController.dispose()
     }
 
     /**

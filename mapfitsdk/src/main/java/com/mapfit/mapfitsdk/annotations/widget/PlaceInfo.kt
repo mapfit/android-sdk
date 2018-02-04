@@ -3,6 +3,7 @@ package com.mapfit.mapfitsdk.annotations.widget
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import com.mapfit.mapfitsdk.MapController
 import com.mapfit.mapfitsdk.R
 import com.mapfit.mapfitsdk.annotations.Marker
 import kotlinx.coroutines.experimental.*
@@ -12,7 +13,8 @@ import kotlinx.coroutines.experimental.*
  */
 class PlaceInfo internal constructor(
     internal var infoView: View,
-    internal val marker: Marker
+    internal val marker: Marker,
+    internal val mapController: MapController
 ) {
 
     private lateinit var titleView: TextView
@@ -53,13 +55,12 @@ class PlaceInfo internal constructor(
     }
 
     fun show() {
-
         infoView.visibility = View.INVISIBLE
         updatePositionDelayed()
         infoView.alpha = 0f
         infoView.visibility = View.VISIBLE
 
-        marker.placeInfoState(true)
+        marker.placeInfoState(true, mapController)
 
         infoView.animate()
             .alpha(1f)
@@ -82,7 +83,7 @@ class PlaceInfo internal constructor(
     }
 
     fun hide() {
-        marker.placeInfoState(false)
+        marker.placeInfoState(false, mapController)
         infoView.visibility = View.GONE
     }
 
@@ -90,18 +91,23 @@ class PlaceInfo internal constructor(
         return infoView.visibility == View.VISIBLE
     }
 
+    fun getVisible(mapController: MapController): Boolean {
+        return infoView.visibility == View.VISIBLE && this.mapController == mapController
+    }
+
     internal fun dispose() {
         if (infoView.parent != null) {
             (infoView.parent as ViewGroup).removeView(infoView)
         }
-        marker.placeInfoState(false)
+        marker.placeInfoState(false, mapController)
         infoView.visibility = View.GONE
     }
 
 
     internal fun onPositionChanged() {
         if (infoView.visibility != View.GONE) {
-            val point = marker.getScreenPosition()
+//            val point = marker.getScreenPosition(marker.getId())
+            val point = marker.getScreenPosition(mapController)
             infoView.post {
                 infoView.x = point.x - (viewWidth?.div(2) ?: 0)
                 infoView.y = (point.y - (viewHeight ?: 0))

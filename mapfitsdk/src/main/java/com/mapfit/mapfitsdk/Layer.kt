@@ -9,7 +9,7 @@ class Layer {
 
     val annotations = mutableListOf<Annotation>()
 
-    private val bindings = HashMap<MapController, List<Annotation>>()
+    private val maps = mutableListOf<MapController>()
 
     var isVisible = true
         set(value) {
@@ -19,9 +19,24 @@ class Layer {
             }
         }
 
+    /**
+     * Adding the given annotation to te layer. The annotation will be added to the maps that
+     * has the layer.
+     */
     fun add(annotation: Annotation) {
         annotations.add(annotation)
+
+        maps.forEach { mapController ->
+            annotation.addToMap(mapController)
+        }
     }
+
+
+    internal fun addMap(mapController: MapController) {
+        maps.takeIf { !maps.contains(mapController) }?.add(mapController)
+        annotations.forEach { it.addToMap(mapController) }
+    }
+
 
     fun remove(vararg annotation: Annotation) {
         annotation.forEach {
