@@ -35,6 +35,7 @@ import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
 import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.LatLngBounds
+import com.mapfit.mapfitsdk.utils.decodePolyline
 import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*
@@ -133,9 +134,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
             val callback = object : DirectionsCallback {
                 override fun onSuccess(route: Route) {
-                    if (route != null) {
-
-                    }
+                    drawRoute(route)
                 }
 
                 override fun onError(message: String, e: Exception) {
@@ -144,11 +143,12 @@ class CoffeeShopActivity : AppCompatActivity() {
             }
 
             DirectionsApi().getDirections(
-                originAddress = "119 W 24th St",
-                destinationAddress = "107 Sacred Heart Ln",
+                originAddress = "119 W 24th St new york",
+                destinationAddress = "107 Sacred Heart Ln baltimore",
                 callback = callback
             )
 
+            drawerLayout.closeDrawer(GravityCompat.END)
         }
 
         override fun onSpinnerItemSelected(filterType: FilterType, string: String) {
@@ -182,6 +182,19 @@ class CoffeeShopActivity : AppCompatActivity() {
         }
     }
 
+    private fun drawRoute(route: Route) {
+        val destinationLocation = LatLng(route.destinationLocation[1], route.destinationLocation[0])
+        val originLocation = LatLng(route.sourceLocation[1], route.sourceLocation[0])
+        mapfitMap2.addMarker(destinationLocation).setIcon(MapfitMarker.LIGHT_COOKING)
+        mapfitMap2.addMarker(originLocation).setIcon(MapfitMarker.DARK_BAR)
+
+        route.trip.legs.forEach {
+            val line = decodePolyline(it.shape)
+            val polyline = mapfitMap2.addPolyline(line)
+        }
+
+    }
+
     private fun initFilterDrawer() {
 
         drawerLayout = drawer_layout
@@ -205,7 +218,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap.apply {
             setCenter(LatLng(40.700798, -74.0050177), 500)
-            setZoom(13f, 500)
+            setZoom(8f, 500)
 
 //            boundaryBuilder()
 //            addMapfitOfficeWithGeocoder()
@@ -245,8 +258,11 @@ class CoffeeShopActivity : AppCompatActivity() {
 //            })
 
 
-        }
+//
 
+        }
+        val polyline = mapfitMap.addPolyline(repository.getLowerManhattanPolyline())
+        alwaysOpenShopLayer.add(polyline)
     }
 
     private fun boundaryBuilder() {

@@ -11,6 +11,8 @@ abstract class Annotation {
 
     internal val mapBindings = HashMap<MapController, Long>()
 
+    private var isVisible: Boolean = true
+
     internal fun addToMap(mapController: MapController) {
         if (!mapBindings.containsKey(mapController)) {
             val id = mapController.addAnnotation(this)
@@ -30,7 +32,14 @@ abstract class Annotation {
             it.key.setMarkerDrawOrder(it.value, drawIndex)
         }
 
-    abstract fun setVisible(visible: Boolean)
+    fun setVisible(visible: Boolean) {
+        mapBindings.forEach {
+            it.key.setMarkerVisible(it.value, visible)
+        }
+        isVisible = visible
+    }
+
+    fun getVisible() = isVisible
 
     abstract fun getId(): Long
 

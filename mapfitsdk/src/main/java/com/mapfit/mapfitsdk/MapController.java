@@ -11,6 +11,7 @@ import android.util.DisplayMetrics;
 
 import com.mapfit.mapfitsdk.annotations.Annotation;
 import com.mapfit.mapfitsdk.annotations.Marker;
+import com.mapfit.mapfitsdk.annotations.Polyline;
 import com.mapfit.mapfitsdk.geometry.LatLng;
 import com.mapfit.mapfitsdk.geometry.LatLngBounds;
 import com.mapfit.tangram.FontFileParser;
@@ -1038,6 +1039,46 @@ public class MapController implements Renderer {
         return marker;
     }
 
+    public Polyline addPolyline(List<LatLng> line) {
+        checkPointer(mapPointer);
+        long polylineId = nativeMarkerAdd(mapPointer);
+
+//        double[] coordinates = new double[line.size() * 2];
+//
+//        for (int i = 0; i < line.size(); i++) {
+//            coordinates[i * 2] = line.get(i).getLon();
+//            coordinates[i * 2 + 1] = line.get(i).getLat();
+//        }
+//
+//        boolean drawn = nativeMarkerSetPolyline(mapPointer, polylineId, coordinates, coordinates.length);
+
+        Polyline polyline = new Polyline(mapView.getContext(), polylineId, this, line);
+        polylines.put(polylineId, polyline);
+        return polyline;
+    }
+
+    public boolean fillPolyline(long id, List<LatLng> line) {
+        checkPointer(mapPointer);
+
+        double[] coordinates = new double[line.size() * 2];
+
+        for (int i = 0; i < line.size(); i++) {
+            coordinates[i * 2] = line.get(i).getLon();
+            coordinates[i * 2 + 1] = line.get(i).getLat();
+        }
+
+        return nativeMarkerSetPolyline(mapPointer, id, coordinates, coordinates.length / 2);
+    }
+
+    private static double[] toPrimitive(Double[] array) {
+        if (array == null) {
+            return null;
+        }
+        final double[] result = new double[array.length];
+        for (int i = 0; i < array.length; i++) result[i] = array[i];
+        return result;
+    }
+
     public long addAnnotation(Annotation annotation) {
         checkPointer(mapPointer);
         long markerId = nativeMarkerAdd(mapPointer);
@@ -1408,6 +1449,7 @@ public class MapController implements Renderer {
     private boolean frameCaptureAwaitCompleteView;
     private Map<String, MapData> clientTileSources = new HashMap<>();
     private Map<Long, Marker> markers = new HashMap<>();
+    private Map<Long, Polyline> polylines = new HashMap<>();
     private Handler uiThreadHandler;
     TouchInput touchInput;
     private LatLng lastCenter = null;

@@ -367,6 +367,12 @@ class MapView(
             return marker
         }
 
+        override fun addPolyline(line: List<LatLng>): Polyline {
+            val polyline = mapController.addPolyline(line)
+            annotationLayer.add(polyline)
+            return polyline
+        }
+
         override fun getLayers(): List<Layer> {
             return layers
         }
@@ -447,9 +453,6 @@ class MapView(
             return Polygon(tMarker)
         }
 
-        override fun addPolyline(): Polyline {
-            return Polyline()
-        }
 
         override fun getZoom(): Float {
             return mapController.zoom

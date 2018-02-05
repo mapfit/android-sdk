@@ -95,7 +95,7 @@ abstract class MapfitMap {
      *
      * @return polyline
      */
-    protected abstract fun addPolyline(): Polyline
+    abstract fun addPolyline(line: List<LatLng>): Polyline
 
     /**
      * Removes given [Polyline] from the [MapView].

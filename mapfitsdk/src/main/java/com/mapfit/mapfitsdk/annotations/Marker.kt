@@ -32,8 +32,6 @@ class Marker internal constructor(
 
     private var isFlat: Boolean = false
 
-    private var isVisible: Boolean = true
-
     val markerOptions = MarkerOptions(this, mutableListOf(mapController))
 
     private var data: Any? = null
@@ -288,17 +286,6 @@ class Marker internal constructor(
             }
         }
     }
-
-    override fun setVisible(visible: Boolean) {
-        mapBindings.forEach {
-            val success = it.key.setMarkerVisible(it.value, visible)
-            if (success) {
-                isVisible = visible
-            }
-        }
-    }
-
-    private fun getVisible(): Boolean = isVisible
 
     override fun remove() {
         placeInfoMap.forEach {
