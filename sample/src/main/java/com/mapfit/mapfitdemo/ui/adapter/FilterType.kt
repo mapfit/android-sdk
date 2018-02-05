@@ -16,5 +16,6 @@ enum class FilterType {
     TILT_GESTURE,
     COMPASS,
     RECENTER,
-    COFFEE_SHOPS
+    COFFEE_SHOPS,
+    DRAW_ROUTE
 }

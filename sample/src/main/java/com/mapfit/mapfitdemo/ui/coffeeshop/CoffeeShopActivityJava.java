@@ -22,6 +22,7 @@ import com.mapfit.mapfitsdk.MapView;
 import com.mapfit.mapfitsdk.MapfitMap;
 import com.mapfit.mapfitsdk.OnMapReadyCallback;
 import com.mapfit.mapfitsdk.annotations.Marker;
+import com.mapfit.mapfitsdk.directions.DirectionsApi;
 import com.mapfit.mapfitsdk.geometry.LatLng;
 
 import org.jetbrains.annotations.NotNull;
@@ -79,11 +80,18 @@ class CoffeeShopActivityJava extends AppCompatActivity {
 //                mapfitMap.addPolyline()
 //
 //                mapfitMap.getMapOptions().setMaxZoom(55.0f)
+
         });
+
     }
 
 
     private OnFilterCheckedListener onFilterCheckedListener = new OnFilterCheckedListener() {
+        @Override
+        public void onDrawRouteClicked() {
+
+        }
+
         @Override
         public void onSpinnerItemSelected(@NotNull FilterType filterType, @NotNull String string) {
 

@@ -9,6 +9,8 @@ interface OnFilterCheckedListener {
 
     fun onClearMarkersClicked()
 
+    fun onDrawRouteClicked()
+
     fun onSpinnerItemSelected(filterType: FilterType, string: String)
 
 }

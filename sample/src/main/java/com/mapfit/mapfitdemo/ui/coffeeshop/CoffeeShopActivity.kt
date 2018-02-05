@@ -27,7 +27,10 @@ import com.mapfit.mapfitsdk.annotations.MapfitMarker
 import com.mapfit.mapfitsdk.annotations.Marker
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
-import com.mapfit.mapfitsdk.geocoder.Geocoder
+import com.mapfit.mapfitsdk.directions.DirectionsApi
+import com.mapfit.mapfitsdk.directions.DirectionsCallback
+import com.mapfit.mapfitsdk.directions.model.Route
+import com.mapfit.mapfitsdk.geocoder.GeocoderApi
 import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
 import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
@@ -125,6 +128,29 @@ class CoffeeShopActivity : AppCompatActivity() {
     }
 
     private val onFilterCheckedListener = object : OnFilterCheckedListener {
+
+        override fun onDrawRouteClicked() {
+
+            val callback = object : DirectionsCallback {
+                override fun onSuccess(route: Route) {
+                    if (route != null) {
+
+                    }
+                }
+
+                override fun onError(message: String, e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            DirectionsApi().getDirections(
+                originAddress = "119 W 24th St",
+                destinationAddress = "107 Sacred Heart Ln",
+                callback = callback
+            )
+
+        }
+
         override fun onSpinnerItemSelected(filterType: FilterType, string: String) {
             when (filterType) {
                 FilterType.MAP_THEME -> {
@@ -394,7 +420,7 @@ class CoffeeShopActivity : AppCompatActivity() {
     }
 
     private fun addMapfitOfficeWithGeocoder() {
-        Geocoder().geocodeAddress("119w 24th st new york ny",
+        GeocoderApi().geocodeAddress("119w 24th st new york ny",
             object : GeocoderCallback {
 
                 override fun onError(message: String, e: Exception) {

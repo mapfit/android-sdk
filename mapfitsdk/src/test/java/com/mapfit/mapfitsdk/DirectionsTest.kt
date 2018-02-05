@@ -1,8 +1,8 @@
 package com.mapfit.mapfitsdk
 
+import com.mapfit.mapfitsdk.directions.DirectionsApi
+import com.mapfit.mapfitsdk.directions.DirectionsCallback
 import com.mapfit.mapfitsdk.exceptions.MapfitConfigurationException
-import com.mapfit.mapfitsdk.geocoder.GeocoderApi
-import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Before
@@ -17,12 +17,12 @@ import java.lang.Exception
 
 
 /**
- * Created by dogangulcan on 1/22/18.
+ * Created by dogangulcan on 2/4/18.
  */
-class GeocodeTest {
+class DirectionsTest {
 
     @Mock
-    lateinit var geocoderCallback: GeocoderCallback
+    lateinit var directionsCallback: DirectionsCallback
 
     @Before
     fun init() {
@@ -31,7 +31,11 @@ class GeocodeTest {
 
     @Test(expected = MapfitConfigurationException::class)
     fun testMapfitConfiguration() {
-        GeocoderApi().geocodeAddress("119 w 24th st new york ny 10011", geocoderCallback)
+        DirectionsApi().getDirections(
+            originAddress = "119 W 24th St",
+            destinationAddress = "107 Sacred Heart Ln",
+            callback = directionsCallback
+        )
     }
 
     @Test
@@ -40,27 +44,27 @@ class GeocodeTest {
         Mapfit.getInstance(apiKey = "abc")
 
         val server = MockWebServer()
-        server.url("api.mapfit.com/v2/geocode")
+        server.url("api.mapfit.com/v2/directions")
 
         server.enqueue(MockResponse().setBody(mockResponse))
 //        server.start()
 
-        val geocoder = GeocoderApi()
-        geocoder.geocodeAddress("119 w 24th st new york ny 10011", geocoderCallback)
-
+        DirectionsApi().getDirections(
+            originAddress = "119 W 24th St",
+            destinationAddress = "107 Sacred Heart Ln",
+            callback = directionsCallback
+        )
 
         Thread.sleep(1000)
-        verify(geocoderCallback, times(1))
+
+        verify(directionsCallback, times(1))
             .onError(
                 ArgumentMatchers.anyString(),
                 Mockito.any(Exception::class.java) ?: Exception()
             )
 
-
         server.shutdown()
     }
 
-    private val mockResponse =
-        "[{ \"locality\": \"New York\", \"postal_code\": \"10011\", \"admin_1\": \"NY\", \"country\" : \"USA\", \"neighborhood\": \"chelsea\", \"response_type\": 1, \"building\": { \"type\": \"Polygon\", \"coordinates\": [[[-73.992953, 40.744257], [-73.993265, 40.744389], [-73.993448, 40.744138], [-73.993136, 40.744006], [-73.992953, 40.744257]]] }, \"street_address\": \"119 W 24th St\", \"entrances\": [{ \"lon\": -73.99324, \"lat\": 40.74405, \"entrance_type\": \"pedestrian-primary\" }] }]"
-
+    private val mockResponse = ""
 }

@@ -86,6 +86,8 @@ dependencies {
     api 'com.squareup.okhttp3:okhttp:3.9.1'
     api 'com.squareup.okhttp3:logging-interceptor:3.9.1'
 
+    api 'com.squareup.moshi:moshi-kotlin:1.5.0'
+
     testImplementation 'junit:junit:4.12'
     testCompile "org.json:json:20140107"
     testCompile "org.mockito:mockito-core:2.13.0"

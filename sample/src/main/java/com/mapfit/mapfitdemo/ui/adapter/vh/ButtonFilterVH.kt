@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import com.mapfit.mapfitdemo.R
 import com.mapfit.mapfitdemo.data.model.Filter
+import com.mapfit.mapfitdemo.ui.adapter.FilterType
 import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener
 
 /**
@@ -13,7 +14,8 @@ import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener
  *
  * Created by dogangulcan on 12/27/17.
  */
-class ButtonFilterVH(view: View, val onFilterChecked: OnFilterCheckedListener) : RecyclerView.ViewHolder(view) {
+class ButtonFilterVH(view: View, private val onFilterChecked: OnFilterCheckedListener) :
+    RecyclerView.ViewHolder(view) {
 
     val button = view.findViewById<Button>(R.id.filterButton)
 
@@ -21,7 +23,10 @@ class ButtonFilterVH(view: View, val onFilterChecked: OnFilterCheckedListener) :
 
         button.text = filter.title
         button.setOnClickListener {
-            onFilterChecked.onClearMarkersClicked()
+            when (filter.filterType) {
+                FilterType.DRAW_ROUTE -> onFilterChecked.onDrawRouteClicked()
+                FilterType.CLEAR_MARKERS -> onFilterChecked.onClearMarkersClicked()
+            }
         }
 
     }
