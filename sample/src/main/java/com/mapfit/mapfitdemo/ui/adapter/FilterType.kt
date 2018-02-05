@@ -15,5 +15,6 @@ enum class FilterType {
     PINCH_GESTURE,
     TILT_GESTURE,
     COMPASS,
-    RECENTER
+    RECENTER,
+    COFFEE_SHOPS
 }

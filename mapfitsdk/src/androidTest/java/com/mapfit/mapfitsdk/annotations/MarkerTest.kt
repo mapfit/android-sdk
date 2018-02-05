@@ -10,6 +10,7 @@ import android.support.test.runner.AndroidJUnit4
 import com.mapfit.mapfitsdk.*
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
+import com.mapfit.mapfitsdk.annotations.widget.PlaceInfo
 import com.mapfit.mapfitsdk.geometry.LatLng
 import junit.framework.Assert
 import org.junit.Before
@@ -158,8 +159,11 @@ class MarkerTest {
 
         clickOnMarker(marker)
 
-        Assert.assertNotNull(marker.placeInfo)
-        Assert.assertTrue(marker.placeInfo!!.getVisible())
+        Assert.assertEquals(1, marker.placeInfoMap.size)
+
+        val placeInfo = marker.placeInfoMap.values.first()
+
+        Assert.assertTrue(placeInfo!!.getVisible())
     }
 
     @Test
@@ -190,14 +194,15 @@ class MarkerTest {
     }
 
     private fun clickOnMarker(marker: Marker) {
-        val screenPosition = marker.getScreenPosition()
+        val map = marker.mapBindings.keys.first()
+        val screenPosition = marker.getScreenPosition(map)
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
             .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt()))
         Thread.sleep(1500)
     }
 
     private fun clickOnPlaceInfo(marker: Marker) {
-        val screenPosition = marker.getScreenPosition()
+        val screenPosition = marker.getScreenPosition(marker.mapBindings.keys.first())
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
             .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt() - 250))
         Thread.sleep(1500)

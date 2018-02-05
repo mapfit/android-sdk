@@ -35,8 +35,9 @@ import com.mapfit.mapfitsdk.geometry.LatLngBounds
 import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*
-import kotlinx.android.synthetic.main.widget_custom_place_info.view.*
 import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 
 
 /**
@@ -47,6 +48,7 @@ import kotlinx.coroutines.experimental.Job
 class CoffeeShopActivity : AppCompatActivity() {
 
     private lateinit var mapfitMap: MapfitMap
+    private lateinit var mapfitMap2: MapfitMap
     private val repository = Repository(this)
     private val coffeeShops: List<CoffeeShop>? by lazy { repository.getCoffeeShops() }
     private var markers: MutableList<Marker> = mutableListOf()
@@ -82,16 +84,44 @@ class CoffeeShopActivity : AppCompatActivity() {
     private fun initMap() {
         map.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
-
                 setupMap(mapfitMap)
-
-
 //                mapfitMap.addPolygon(repository.getLowerManhattanPoly())
 //                mapfitMap.addPolyline()
-//
 //                mapfitMap.getMapOptions().setMaxZoom(55.0f)
             }
         })
+
+        map2.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
+            override fun onMapReady(mapfitMap: MapfitMap) {
+                setupMap2(mapfitMap)
+
+            }
+        })
+    }
+
+    private fun setupMap2(mapfitMap: MapfitMap) {
+        this.mapfitMap2 = mapfitMap
+        mapfitMap2.addLayer(alwaysOpenShopLayer)
+
+        mapfitMap2.apply {
+            setCenter(LatLng(40.700798, -74.0050177), 500)
+            setZoom(13f, 500)
+        }
+
+
+        mapfitMap2.setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
+            override fun onPlaceInfoClicked(marker: Marker) {
+//                marker.setIcon("https://darley-cpl.netdna-ssl.com/sites/default/files/styles/stallion_thumbnail/public/drupal-media/stallion-images/Australia-2016/exceed-and-excel/square-Exceed_And_Excel_0001_Thoroughbred_stallion.jpg?itok=ByfQuwCC")
+
+//                alwaysOpenShopLayer.remove(marker) // marker will be removed from everywhere that layer has //WORKS
+//                mapfitMap.removeMarker(marker) // marker is removed from map, will exist on others //WORKS
+//                marker.remove() // marker will be removed from everywhere //WORKS
+//                this@CoffeeShopActivity.mapfitMap.removeLayer(alwaysOpenShopLayer) // WORKS
+//                alwaysOpenShopLayer.clear() // WORKS
+
+            }
+        })
+
     }
 
     private val onFilterCheckedListener = object : OnFilterCheckedListener {
@@ -114,7 +144,8 @@ class CoffeeShopActivity : AppCompatActivity() {
                 FilterType.ZOOM_CONTROLS -> mapfitMap.getMapOptions().zoomControlsEnabled =
                         isChecked
                 FilterType.COMPASS -> mapfitMap.getMapOptions().compassButtonEnabled = isChecked
-                FilterType.RECENTER -> mapfitMap.getMapOptions().recenterButtonEnabled = isChecked
+                FilterType.RECENTER -> mapfitMap.getMapOptions().recenterButtonEnabled =
+                        isChecked
                 FilterType.PAN_GESTURE -> mapfitMap.getMapOptions().panEnabled = isChecked
                 FilterType.ROTATE_GESTURE -> mapfitMap.getMapOptions().rotateEnabled = isChecked
                 FilterType.PINCH_GESTURE -> mapfitMap.getMapOptions().pinchEnabled = isChecked
@@ -153,7 +184,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 //            boundaryBuilder()
 //            addMapfitOfficeWithGeocoder()
             setupMarkerWithAddressInput()
-            coffeeShops?.let { addMarkersFromCoffeeShops(it) }
+            coffeeShops?.let { addMarkersFromCoffeeShops(mapfitMap, it) }
 //            setMapBoundsToColorado()
 //            setMapBoundsToUtah()
             setOnMarkerClickListener(onMarkerClickListener)
@@ -171,7 +202,11 @@ class CoffeeShopActivity : AppCompatActivity() {
 
             // calling inflate without a root ignores layout params
             val customView = LayoutInflater.from(this@CoffeeShopActivity)
-                .inflate(R.layout.widget_custom_place_info, findViewById(R.id.drawer_layout), false)
+                .inflate(
+                    R.layout.widget_custom_place_info,
+                    findViewById(R.id.drawer_layout),
+                    false
+                )
 
 //            setPlaceInfoAdapter(object : MapfitMap.PlaceInfoAdapter {
 //                override fun getPlaceInfoView(marker: Marker): View {
@@ -315,12 +350,25 @@ class CoffeeShopActivity : AppCompatActivity() {
         }
     }
 
-    private fun addMarkersFromCoffeeShops(coffeeShops: List<CoffeeShop>) {
+    private fun addMarkersFromCoffeeShops(mapfitMap: MapfitMap, coffeeShops: List<CoffeeShop>) {
 
         coffeeShops.forEach { shop ->
 
             val marker = mapfitMap.addMarker(LatLng(shop.lat, shop.lon))
 //            marker.invalidate()
+
+            val markerIcon = when (shop.id) {
+                "vendor0001" -> MapfitMarker.DARK_COMMUNITY
+                "vendor0002" -> MapfitMarker.DARK_ARTS
+                "vendor0003" -> MapfitMarker.DARK_COOKING
+                "vendor0004" -> MapfitMarker.DARK_SPORTS
+                "vendor0005" -> MapfitMarker.LIGHT_HOMEGARDEN
+                "vendor0006" -> MapfitMarker.LIGHT_HOTEL
+                "vendor0007" -> MapfitMarker.DARK_MEDICAL
+                else -> MapfitMarker.LIGHT_DEFAULT
+            }
+
+            marker.setIcon(markerIcon)
 
             marker.title = shop.title
             marker.subtitle1 = shop.address
@@ -334,6 +382,14 @@ class CoffeeShopActivity : AppCompatActivity() {
             }
 
         }
+
+        val westFortGreen = LatLng(40.689837, -73.982629)
+        launch {
+            delay(20000)
+//            markers[1].setIcon("https://darley-cpl.netdna-ssl.com/sites/default/files/styles/stallion_thumbnail/public/drupal-media/stallion-images/Australia-2016/exceed-and-excel/square-Exceed_And_Excel_0001_Thoroughbred_stallion.jpg?itok=ByfQuwCC")
+//            markers[1].setPosition(westFortGreen)
+        }
+
 
     }
 
@@ -349,7 +405,14 @@ class CoffeeShopActivity : AppCompatActivity() {
                     addressList.forEach { address ->
                         if (address.entrances.isNotEmpty()) {
                             address.entrances.forEach {
-                                markers.add(mapfitMap.addMarker(LatLng(it.latitude, it.longitude)))
+                                markers.add(
+                                    mapfitMap.addMarker(
+                                        LatLng(
+                                            it.latitude,
+                                            it.longitude
+                                        )
+                                    )
+                                )
                             }
                         } else {
                             markers.add(

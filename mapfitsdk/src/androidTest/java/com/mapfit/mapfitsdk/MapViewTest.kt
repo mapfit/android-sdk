@@ -250,10 +250,4 @@ class MapViewTest {
         }
     }
 
-//    developer can enable a map click listener
-//    developer can enable a marker click listener
-//    developer can enable map pan listener (returns new map centroid or map bounds)
-//    developer can enable map zoom lister (returns new zoom level)
-
-
 }

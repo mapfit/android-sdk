@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.support.annotation.Keep;
 import android.util.DisplayMetrics;
 
+import com.mapfit.mapfitsdk.annotations.Annotation;
 import com.mapfit.mapfitsdk.annotations.Marker;
 import com.mapfit.mapfitsdk.geometry.LatLng;
 import com.mapfit.mapfitsdk.geometry.LatLngBounds;
@@ -1037,17 +1038,28 @@ public class MapController implements Renderer {
         return marker;
     }
 
+    public long addAnnotation(Annotation annotation) {
+        checkPointer(mapPointer);
+        long markerId = nativeMarkerAdd(mapPointer);
+
+        if (annotation instanceof Marker) {
+            markers.put(markerId, (Marker) annotation);
+        }
+
+        return markerId;
+    }
+
     /**
      * Removes the passed in {@link Marker} from the map.
      *
-     * @param marker to remove from the map.
+     * @param markerId of the marker
      * @return whether or not the marker was removed
      */
-    public boolean removeMarker(Marker marker) {
+    public boolean removeMarker(long markerId) {
         checkPointer(mapPointer);
-        checkId(marker.getId());
-        markers.remove(marker.getId());
-        return nativeMarkerRemove(mapPointer, marker.getId());
+        checkId(markerId);
+        markers.remove(markerId);
+        return nativeMarkerRemove(mapPointer, markerId);
     }
 
     /**

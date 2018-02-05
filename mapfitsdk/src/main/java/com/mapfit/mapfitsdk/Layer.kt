@@ -7,25 +7,62 @@ import com.mapfit.mapfitsdk.annotations.Annotation
  */
 class Layer {
 
-    internal val annotations = mutableListOf<Annotation>()
+    val annotations = mutableListOf<Annotation>()
+
     private val maps = mutableListOf<MapController>()
 
-    val isVisible = true
-//    internal var pointer: Long = 0
+    private var drawOrder = -1
 
+    var isVisible = true
+        set(value) {
+            if (field != value) {
+                annotations.forEach { it.setVisible(value) }
+                field = value
+            }
+        }
+
+    /**
+     * Adding the given annotation to te layer. The annotation will be added to the maps that
+     * has the layer.
+     * Draw order of the annotation will be overridden by the layers draw order.
+     *
+     * @param annotation e.g. marker, polyline, polygon, etc.
+     */
     fun add(annotation: Annotation) {
         annotations.add(annotation)
+        if (drawOrder > 0) {
+            annotation.setDrawOrder(drawOrder)
+        }
+        maps.forEach { mapController ->
+            annotation.addToMap(mapController)
+        }
     }
 
-//    private fun setVisible(boolean: Boolean) {
-//        annotations.forEach { it.setVisible(boolean) }
-//    }
+    fun setDrawOrder(orderIndex: Int) {
+        annotations.forEach { it.setDrawOrder(orderIndex) }
+        drawOrder = orderIndex
+    }
 
-//    internal fun getAnnotations(): List<Annotation> = annotations
-//
-//    internal fun bindTo(map: MapController) {
-//        maps.add(map)
-//    }
+    /**
+     * @return draw order of the layer. Will return -1 if not set.
+     */
+    fun getDrawOrder() = drawOrder
+
+    internal fun addMap(mapController: MapController) {
+        maps.takeIf { !maps.contains(mapController) }?.add(mapController)
+        annotations.forEach { it.addToMap(mapController) }
+    }
+
+    /**
+     * Removes the given annotation from the layer and the maps the layer is on.
+     */
+    fun remove(vararg annotation: Annotation) {
+        annotation.forEach { it.remove() }
+    }
+
+    fun clear() {
+        annotations.forEach { it.remove() }
+    }
 
 
 }

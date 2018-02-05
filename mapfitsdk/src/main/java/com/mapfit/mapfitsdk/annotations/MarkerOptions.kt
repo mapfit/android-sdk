@@ -1,7 +1,6 @@
 package com.mapfit.mapfitsdk.annotations
 
 import com.mapfit.mapfitsdk.MapController
-import com.mapfit.mapfitsdk.utils.toPx
 
 /**
  * Defines marker options for [Marker]
@@ -10,7 +9,7 @@ import com.mapfit.mapfitsdk.utils.toPx
  */
 class MarkerOptions internal constructor(
     private var marker: Marker,
-    private val mapController: MapController
+    internal val mapController: MutableList<MapController>
 ) {
 
     private val markerDotSide by lazy {
@@ -48,10 +47,8 @@ class MarkerOptions internal constructor(
             updateStyle()
         }
 
-
     private val placeInfoMarkerStyle =
         "{ style: 'points', anchor: top,color: $color, size: [${markerDotSide}px, ${markerDotSide}px], order: $drawOrder, interactive: true, collide: false }"
-
 
     internal var style =
         "{ style: 'points', anchor: top, color: $color, size: [${height}px, ${width}px], order: $drawOrder, interactive: true, collide: false }"
@@ -64,15 +61,22 @@ class MarkerOptions internal constructor(
         updateStyle()
     }
 
-    private fun updateStyle() {
-        mapController.setMarkerStylingFromString(marker.getId(), style)
+    internal fun updateStyle() {
+        marker.mapBindings.forEach { it.key.setMarkerStylingFromString(it.value, style) }
     }
 
-    internal fun placeInfoShown(isShown: Boolean) {
+    internal fun placeInfoShown(
+        isShown: Boolean,
+        markerId: Long,
+        mapController: MapController
+    ) {
         if (isShown) {
-            mapController.setMarkerStylingFromString(marker.getId(), placeInfoMarkerStyle)
+            mapController.setMarkerStylingFromString(markerId, placeInfoMarkerStyle)
+
         } else {
-            updateStyle()
+            mapController.setMarkerStylingFromString(markerId, style)
+
+//            updateStyle()
         }
     }
 

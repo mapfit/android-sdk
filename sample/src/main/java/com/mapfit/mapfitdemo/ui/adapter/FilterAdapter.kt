@@ -13,7 +13,8 @@ import com.mapfit.mapfitdemo.ui.adapter.vh.SwitchFilterVH
 /**
  * Created by dogangulcan on 12/27/17.
  */
-class FilterAdapter(private val onFilterChecked: OnFilterCheckedListener) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class FilterAdapter(private val onFilterChecked: OnFilterCheckedListener) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val filters = mutableListOf<Filter<*>>()
 
@@ -25,36 +26,38 @@ class FilterAdapter(private val onFilterChecked: OnFilterCheckedListener) : Recy
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder? {
+    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder? =
 
-        return when (FilterType.values()[viewType]) {
+        when (FilterType.values()[viewType]) {
             FilterType.PAN_GESTURE,
             FilterType.ROTATE_GESTURE,
             FilterType.PINCH_GESTURE,
             FilterType.TILT_GESTURE,
             FilterType.ZOOM_CONTROLS,
+            FilterType.COFFEE_SHOPS,
             FilterType.RECENTER,
             FilterType.COMPASS,
             FilterType.ALL_MARKERS,
             FilterType.ALWAYS_OPEN -> {
-                val itemView = LayoutInflater.from(parent?.context).inflate(R.layout.list_item_filter_switch, parent, false)
-                return SwitchFilterVH(itemView, onFilterChecked)
+                val itemView = LayoutInflater.from(parent?.context)
+                    .inflate(R.layout.list_item_filter_switch, parent, false)
+                SwitchFilterVH(itemView, onFilterChecked)
             }
             FilterType.CLEAR_MARKERS -> {
-                val itemView = LayoutInflater.from(parent?.context).inflate(R.layout.list_item_filter_button, parent, false)
-                return ButtonFilterVH(itemView, onFilterChecked)
+                val itemView = LayoutInflater.from(parent?.context)
+                    .inflate(R.layout.list_item_filter_button, parent, false)
+                ButtonFilterVH(itemView, onFilterChecked)
             }
             FilterType.MAP_THEME -> {
-                val itemView = LayoutInflater.from(parent?.context).inflate(R.layout.list_item_filter_spinner, parent, false)
-                return SpinnerFilterVH(itemView, onFilterChecked)
+                val itemView = LayoutInflater.from(parent?.context)
+                    .inflate(R.layout.list_item_filter_spinner, parent, false)
+                SpinnerFilterVH(itemView, onFilterChecked)
             }
 
             else -> {
-                return null
+                null
             }
         }
-
-    }
 
     override fun getItemViewType(position: Int): Int {
         return filters[position].filterType.ordinal
