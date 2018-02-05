@@ -35,7 +35,7 @@ class PolylineOptions internal constructor(
         }
 
     internal var style =
-        "{ style: 'lines', color: orange,width: ${lineWidth}px, order: $drawOrder, interactive: true, collide: false }"
+        "{ style: 'lines', color: orange,width: ${lineWidth}px,stroke order: $drawOrder, interactive: true, collide: false }"
         set(value) {
             field = value
             updateStyle()

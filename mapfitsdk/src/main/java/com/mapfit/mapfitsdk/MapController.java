@@ -1043,15 +1043,6 @@ public class MapController implements Renderer {
         checkPointer(mapPointer);
         long polylineId = nativeMarkerAdd(mapPointer);
 
-//        double[] coordinates = new double[line.size() * 2];
-//
-//        for (int i = 0; i < line.size(); i++) {
-//            coordinates[i * 2] = line.get(i).getLon();
-//            coordinates[i * 2 + 1] = line.get(i).getLat();
-//        }
-//
-//        boolean drawn = nativeMarkerSetPolyline(mapPointer, polylineId, coordinates, coordinates.length);
-
         Polyline polyline = new Polyline(mapView.getContext(), polylineId, this, line);
         polylines.put(polylineId, polyline);
         return polyline;
@@ -1067,17 +1058,11 @@ public class MapController implements Renderer {
             coordinates[i * 2 + 1] = line.get(i).getLat();
         }
 
+//        nativeAddFeature(mapPointer, mapPointer, coordinates, new int[0], null);
+//        return true;
         return nativeMarkerSetPolyline(mapPointer, id, coordinates, coordinates.length / 2);
     }
 
-    private static double[] toPrimitive(Double[] array) {
-        if (array == null) {
-            return null;
-        }
-        final double[] result = new double[array.length];
-        for (int i = 0; i < array.length; i++) result[i] = array[i];
-        return result;
-    }
 
     public long addAnnotation(Annotation annotation) {
         checkPointer(mapPointer);

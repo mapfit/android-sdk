@@ -209,7 +209,7 @@ abstract class MapfitMap {
      */
     abstract fun getMapOptions(): MapOptions
 
-    protected abstract fun getDirectionsOptions(): DirectionsOptions
+    abstract fun getDirectionsOptions(): DirectionsOptions
 
     protected abstract fun setTilt(angle: Float)
 

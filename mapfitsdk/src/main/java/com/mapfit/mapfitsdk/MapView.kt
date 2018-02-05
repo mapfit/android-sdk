@@ -55,6 +55,7 @@ class MapView(
 
     private lateinit var mapController: MapController
     private lateinit var mapOptions: MapOptions
+    private lateinit var directionsOptions: DirectionsOptions
     private val geocoder by lazy { GeocoderApi() }
 
     // Views
@@ -175,6 +176,7 @@ class MapView(
 
     private fun initMapController(mapTheme: MapTheme, onMapReadyCallback: OnMapReadyCallback) {
         mapController = MapController(getGLSurfaceView())
+
         mapController.apply {
             init()
 
@@ -192,6 +194,7 @@ class MapView(
             })
 
             mapOptions = MapOptions(this@MapView, this)
+            directionsOptions = DirectionsOptions(this)
             mapOptions.theme = mapTheme
 
         }
@@ -415,9 +418,8 @@ class MapView(
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun getDirectionsOptions(): DirectionsOptions {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
+        override fun getDirectionsOptions(): DirectionsOptions = directionsOptions
+
 
         override fun setTilt(angle: Float) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.

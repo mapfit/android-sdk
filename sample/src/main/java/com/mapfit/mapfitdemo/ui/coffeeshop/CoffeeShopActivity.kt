@@ -29,6 +29,7 @@ import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
 import com.mapfit.mapfitsdk.directions.DirectionsApi
 import com.mapfit.mapfitsdk.directions.DirectionsCallback
+import com.mapfit.mapfitsdk.directions.DirectionsType
 import com.mapfit.mapfitsdk.directions.model.Route
 import com.mapfit.mapfitsdk.geocoder.GeocoderApi
 import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
@@ -128,9 +129,33 @@ class CoffeeShopActivity : AppCompatActivity() {
 
     }
 
+
+    private fun drawRouteWithMapView() {
+
+
+        mapfitMap.getDirectionsOptions()
+            .setDestination(LatLng(40.744255, -73.993774))
+            .setOrigin(LatLng(40.575534, -73.961857))
+            .setType(DirectionsType.DRIVING)
+            .showDirections(object : DirectionsOptions.RouteDrawCallback {
+                override fun onRouteDrawn(route: Route) {
+                    Toast.makeText(
+                        this@CoffeeShopActivity,
+                        "Route is drawn!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                override fun onError(message: String, e: Exception) {
+                    e.printStackTrace()
+                }
+            })
+    }
+
     private val onFilterCheckedListener = object : OnFilterCheckedListener {
 
         override fun onDrawRouteClicked() {
+//            drawRouteWithMapView()
 
             val callback = object : DirectionsCallback {
                 override fun onSuccess(route: Route) {
@@ -488,9 +513,6 @@ class CoffeeShopActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
-//            R.id.action_clear_markers -> {
-//                markers.forEach { it.remove() }
-//            }
             R.id.action_filter -> {
                 drawerLayout.openDrawer(GravityCompat.END)
             }
