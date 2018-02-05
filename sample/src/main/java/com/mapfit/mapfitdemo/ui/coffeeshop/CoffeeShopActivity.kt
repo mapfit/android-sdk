@@ -111,7 +111,14 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap2.setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
             override fun onPlaceInfoClicked(marker: Marker) {
-                marker.setIcon("https://darley-cpl.netdna-ssl.com/sites/default/files/styles/stallion_thumbnail/public/drupal-media/stallion-images/Australia-2016/exceed-and-excel/square-Exceed_And_Excel_0001_Thoroughbred_stallion.jpg?itok=ByfQuwCC")
+//                marker.setIcon("https://darley-cpl.netdna-ssl.com/sites/default/files/styles/stallion_thumbnail/public/drupal-media/stallion-images/Australia-2016/exceed-and-excel/square-Exceed_And_Excel_0001_Thoroughbred_stallion.jpg?itok=ByfQuwCC")
+
+//                alwaysOpenShopLayer.remove(marker) // marker will be removed from everywhere that layer has //WORKS
+//                mapfitMap.removeMarker(marker) // marker is removed from map, will exist on others //WORKS
+//                marker.remove() // marker will be removed from everywhere //WORKS
+//                this@CoffeeShopActivity.mapfitMap.removeLayer(alwaysOpenShopLayer) // WORKS
+//                alwaysOpenShopLayer.clear() // WORKS
+
             }
         })
 

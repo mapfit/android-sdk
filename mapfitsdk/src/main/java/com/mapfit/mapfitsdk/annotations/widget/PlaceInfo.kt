@@ -7,6 +7,7 @@ import com.mapfit.mapfitsdk.MapController
 import com.mapfit.mapfitsdk.R
 import com.mapfit.mapfitsdk.annotations.Marker
 import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.experimental.android.UI
 
 /**
  * Created by dogangulcan on 1/30/18.
@@ -95,14 +96,17 @@ class PlaceInfo internal constructor(
         return infoView.visibility == View.VISIBLE && this.mapController == mapController
     }
 
-    internal fun dispose() {
-        if (infoView.parent != null) {
-            (infoView.parent as ViewGroup).removeView(infoView)
+    internal fun dispose(removed: Boolean = false) {
+        async(UI) {
+            if (infoView.parent != null) {
+                (infoView.parent as ViewGroup).removeView(infoView)
+            }
+            if (!removed) {
+                marker.placeInfoState(false, mapController)
+            }
+            infoView.visibility = View.GONE
         }
-        marker.placeInfoState(false, mapController)
-        infoView.visibility = View.GONE
     }
-
 
     internal fun onPositionChanged() {
         if (infoView.visibility != View.GONE) {

@@ -485,12 +485,21 @@ class MapView(
         }
 
         override fun removeLayer(layer: Layer) {
+            layer.annotations.forEach {
+                it.mapBindings[mapController]?.let { id ->
+
+                    if (it is Marker && activePlaceInfo?.marker == it) {
+                        activePlaceInfo?.dispose(true)
+                    }
+                    mapController.removeMarker(id)
+                }
+            }
+
             annotationLayer.annotations.removeAll(layer.annotations)
             layers.remove(layer)
         }
 
-        override fun removeMarker(marker: Marker): Boolean =
-            mapController.removeMarker(marker.getId())
+        override fun removeMarker(marker: Marker): Boolean = marker.remove(mapController)
 
         override fun removePolygon(polygon: Polygon) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -603,8 +612,7 @@ class MapView(
     }
 
     /**
-     * You must call this method from the parent Activity/Fragment's corresponding method.
-     * Any access to MapView.mapController is illegal after this call.
+     * You must call this method from the parent Activity or Fragment's corresponding method.
      */
     fun onDestroy() {
         disposeMap()

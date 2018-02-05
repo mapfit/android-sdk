@@ -67,7 +67,7 @@ class Marker internal constructor(
         }
 
     private fun updatePlaceInfoFields() {
-        placeInfoMap?.values?.forEach {
+        placeInfoMap.values.forEach {
             it?.updatePlaceInfo()
         }
     }
@@ -301,9 +301,18 @@ class Marker internal constructor(
     private fun getVisible(): Boolean = isVisible
 
     override fun remove() {
+        placeInfoMap.forEach {
+            it.value?.dispose(true)
+        }
+
         mapBindings.forEach {
             it.key.removeMarker(it.value)
         }
+    }
+
+    internal fun remove(mapController: MapController): Boolean {
+        placeInfoMap[mapController]?.dispose()
+        return mapBindings[mapController]?.let { mapController.removeMarker(it) } ?: false
     }
 
     internal fun getScreenPosition(mapController: MapController): PointF {

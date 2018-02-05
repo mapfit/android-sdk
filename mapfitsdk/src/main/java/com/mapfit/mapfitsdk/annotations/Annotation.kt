@@ -4,6 +4,7 @@ import com.mapfit.mapfitsdk.Layer
 import com.mapfit.mapfitsdk.MapController
 
 /**
+ *
  * Created by dogangulcan on 12/22/17.
  */
 abstract class Annotation {
@@ -23,6 +24,11 @@ abstract class Annotation {
     }
 
     fun boundTo(mapController: MapController) = mapBindings.containsKey(mapController)
+
+    fun setDrawOrder(drawIndex: Int) =
+        mapBindings.forEach {
+            it.key.setMarkerDrawOrder(it.value, drawIndex)
+        }
 
     abstract fun setVisible(visible: Boolean)
 

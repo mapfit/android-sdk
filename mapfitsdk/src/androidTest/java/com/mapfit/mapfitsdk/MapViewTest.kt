@@ -1,6 +1,5 @@
 package com.mapfit.mapfitsdk
 
-import android.support.test.InstrumentationRegistry
 import android.support.test.annotation.UiThreadTest
 import android.support.test.espresso.Espresso.onView
 import android.support.test.espresso.action.ViewActions.*

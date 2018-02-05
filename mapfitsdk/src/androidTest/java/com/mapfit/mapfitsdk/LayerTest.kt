@@ -3,6 +3,7 @@ package com.mapfit.mapfitsdk
 import android.support.test.InstrumentationRegistry
 import android.support.test.annotation.UiThreadTest
 import android.support.test.runner.AndroidJUnit4
+import com.mapfit.mapfitsdk.annotations.Marker
 import com.mapfit.mapfitsdk.geometry.LatLng
 import junit.framework.Assert
 import org.junit.Before
@@ -53,36 +54,77 @@ class LayerTest {
 
     @Test
     @UiThreadTest
-    fun testAdding() {
+    fun testAddingMarkerToLayer() {
+        val (marker, layer) = addLayerWithMarkerToMaps()
 
-        // create marker, add to a layer, add layer to another map
-
-        val marker = mapfitMap.addMarker(latLng)
-        val layer = Layer()
         layer.add(marker)
-        mapfitMap2.addLayer(layer)
+        Assert.assertEquals(2, marker.mapBindings.size)
+    }
 
+    @Test
+    @UiThreadTest
+    fun testAddingLayerToSecondMap() {
+        val (marker, layer) = addLayerWithMarkerToMaps()
+
+        // marker should have id's from 2 maps now
+        Assert.assertEquals(2, marker.mapBindings.size)
+        Assert.assertEquals(1, layer.annotations.size)
+    }
+
+    @Test
+    @UiThreadTest
+    fun testRemovingMarkerFromLayer() {
+        val (marker, layer) = addLayerWithMarkerToMaps()
+
+        layer.remove(marker)
+
+        Assert.assertEquals(0, marker.mapBindings.size)
+        Assert.assertEquals(0, layer.annotations.size)
+    }
+
+    @Test
+    @UiThreadTest
+    fun testRemovingMarker() {
+        val (marker, layer) = addLayerWithMarkerToMaps()
+
+        marker.remove()
+
+        Assert.assertEquals(0, marker.mapBindings.size)
+        Assert.assertEquals(0, layer.annotations.size)
     }
 
 
     @Test
     @UiThreadTest
     fun testRemovingLayerFromAMap() {
-        // all markers on the map that are in layer should be removed from the map
+        val (marker, layer) = addLayerWithMarkerToMaps()
+
+        Assert.assertEquals(2, marker.mapBindings.size)
+
+        mapfitMap.removeLayer(layer)
+        Assert.assertEquals(1, marker.mapBindings.size)
     }
 
     @Test
     @UiThreadTest
     fun testDisposingLayer() {
-        // all markers should be removed from all maps that layer is attached to
-    }
+        val (marker, layer) = addLayerWithMarkerToMaps()
 
-    @Test
-    @UiThreadTest
-    fun testDuplicates() {
-        // adding layer to a map has same marker should not duplicate
+        layer.clear()
+        Assert.assertEquals(0, marker.mapBindings.size)
 
     }
+
+    private fun addLayerWithMarkerToMaps(): Pair<Marker, Layer> {
+        val marker = createMarker()
+        val layer = Layer()
+
+        layer.add(marker)
+        mapfitMap.addLayer(layer)
+        mapfitMap2.addLayer(layer)
+        return Pair(marker, layer)
+    }
+
 
     @Test
     @UiThreadTest
@@ -100,6 +142,8 @@ class LayerTest {
         layer.clear()
         Assert.assertTrue(layer.annotations.size == 0)
     }
+
+    private fun createMarker() = mapfitMap.addMarker(latLng)
 
 
 }
