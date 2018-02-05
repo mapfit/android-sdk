@@ -62,6 +62,7 @@ class Repository(private val context: Context) {
         filters.add(Filter(FilterType.ROTATE_GESTURE, "Rotate Gesture", true, null))
         filters.add(Filter(FilterType.PINCH_GESTURE, "Pinch Gesture", true, null))
         filters.add(Filter(FilterType.TILT_GESTURE, "Tilt Gesture", true, null))
+        filters.add(Filter(FilterType.DRAW_ROUTE, "Draw Route", true, null))
 
 
         filters.add(

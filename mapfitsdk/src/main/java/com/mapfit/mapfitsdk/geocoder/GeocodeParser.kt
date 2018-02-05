@@ -1,6 +1,5 @@
 package com.mapfit.mapfitsdk.geocoder
 
-import com.mapfit.mapfitsdk.BuildConfig
 import com.mapfit.mapfitsdk.exceptions.MapfitAuthorizationException
 import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geocoder.model.Entrance
@@ -56,7 +55,7 @@ internal class GeocodeParser internal constructor() {
 
                 val statusCode: LocationStatus? = if (addressJson.has("response_type")) {
                     LocationStatus.values()
-                            .find { status -> status.code == addressJson.getInt("response_type") }
+                        .find { status -> status.code == addressJson.getInt("response_type") }
                 } else {
                     LocationStatus.ERROR
                 }
@@ -74,16 +73,16 @@ internal class GeocodeParser internal constructor() {
                 }
 
                 val address = Address(
-                        locality = locality,
-                        postalCode = postalCode,
-                        adminArea = adminArea,
-                        neighborhood = neighborhood,
-                        country = country,
-                        status = statusCode,
-                        streetAddress = streetAddress,
-                        entrances = entrances ?: emptyList(),
-                        latitude = lat,
-                        longitude = lon
+                    locality = locality,
+                    postalCode = postalCode,
+                    adminArea = adminArea,
+                    neighborhood = neighborhood,
+                    country = country,
+                    status = statusCode,
+                    streetAddress = streetAddress,
+                    entrances = entrances ?: emptyList(),
+                    latitude = lat,
+                    longitude = lon
                 )
 
                 addressList.add(address)
@@ -98,21 +97,21 @@ internal class GeocodeParser internal constructor() {
     }
 
     private fun JSONObject.getSafeString(name: String): String =
-            if (has(name)) {
-                getString(name)
-            } else {
-                ""
-            }
+        if (has(name)) {
+            getString(name)
+        } else {
+            ""
+        }
 
     private fun parseLocation(jsonObject: JSONObject?): Pair<Double, Double> =
-            try {
-                val latitude = jsonObject?.getDouble("lat")
-                val longitude = jsonObject?.getDouble("lon")
-                Pair(latitude ?: 0.0, longitude ?: 0.0)
-            } catch (e: JSONException) {
-                DebugUtils.logException(e)
-                Pair(0.0, 0.0)
-            }
+        try {
+            val latitude = jsonObject?.getDouble("lat")
+            val longitude = jsonObject?.getDouble("lon")
+            Pair(latitude ?: 0.0, longitude ?: 0.0)
+        } catch (e: JSONException) {
+            DebugUtils.logException(e)
+            Pair(0.0, 0.0)
+        }
 
     private fun parseEntrances(jArray: JSONArray): List<Entrance> {
         val entrances = mutableListOf<Entrance>()
@@ -124,10 +123,10 @@ internal class GeocodeParser internal constructor() {
                 val lat = entranceJson.getDouble("lat")
                 val lon = entranceJson.getDouble("lon")
                 val entranceType = EntranceType.values()
-                        .find { status ->
-                            status.sourceName
-                                    .contentEquals(entranceJson.getString("entrance_type"))
-                        }
+                    .find { status ->
+                        status.sourceName
+                            .contentEquals(entranceJson.getString("entrance_type"))
+                    }
 
                 val entrance = Entrance(lat, lon, entranceType)
                 entrances.add(entrance)

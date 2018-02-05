@@ -43,6 +43,7 @@ class FilterAdapter(private val onFilterChecked: OnFilterCheckedListener) :
                     .inflate(R.layout.list_item_filter_switch, parent, false)
                 SwitchFilterVH(itemView, onFilterChecked)
             }
+            FilterType.DRAW_ROUTE,
             FilterType.CLEAR_MARKERS -> {
                 val itemView = LayoutInflater.from(parent?.context)
                     .inflate(R.layout.list_item_filter_button, parent, false)

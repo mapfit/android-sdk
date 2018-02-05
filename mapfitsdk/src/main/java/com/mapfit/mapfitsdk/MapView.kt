@@ -22,7 +22,7 @@ import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener
 import com.mapfit.mapfitsdk.annotations.widget.PlaceInfo
-import com.mapfit.mapfitsdk.geocoder.Geocoder
+import com.mapfit.mapfitsdk.geocoder.GeocoderApi
 import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
 import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
@@ -55,7 +55,7 @@ class MapView(
 
     private lateinit var mapController: MapController
     private lateinit var mapOptions: MapOptions
-    private val geocoder by lazy { Geocoder() }
+    private val geocoder by lazy { GeocoderApi() }
 
     // Views
     private val controlsView: View by lazy {

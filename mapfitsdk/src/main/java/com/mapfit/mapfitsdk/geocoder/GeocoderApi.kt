@@ -2,8 +2,8 @@ package com.mapfit.mapfitsdk.geocoder
 
 import com.mapfit.mapfitsdk.BuildConfig
 import com.mapfit.mapfitsdk.Mapfit
-import com.mapfit.mapfitsdk.geocoder.Geocoder.HttpHandler.geocodeParser
-import com.mapfit.mapfitsdk.geocoder.Geocoder.HttpHandler.httpClient
+import com.mapfit.mapfitsdk.geocoder.GeocoderApi.HttpHandler.geocodeParser
+import com.mapfit.mapfitsdk.geocoder.GeocoderApi.HttpHandler.httpClient
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import okhttp3.*
@@ -19,7 +19,7 @@ import java.io.IOException
  *
  * Created by dogangulcan on 1/18/18.
  */
-class Geocoder {
+class GeocoderApi {
 
     object HttpHandler {
         private val logging = HttpLoggingInterceptor()
@@ -31,8 +31,8 @@ class Geocoder {
         }
 
         internal val httpClient = OkHttpClient.Builder()
-                .addInterceptor(logging)
-                .build()
+            .addInterceptor(logging)
+            .build()
 
         internal val geocodeParser = GeocodeParser()
     }
@@ -45,8 +45,8 @@ class Geocoder {
      */
     fun geocodeAddress(address: String, callback: GeocoderCallback) {
         val request = Request.Builder()
-                .url(createRequestUrl(address))
-                .build()
+            .url(createRequestUrl(address))
+            .build()
 
         httpClient.newCall(request).enqueue(object : Callback {
             override fun onResponse(call: Call?, response: Response?) {
@@ -54,13 +54,11 @@ class Geocoder {
                 if (response != null && response.isSuccessful) {
 
                     async(UI) {
-
-                        val addressList =
-                                bg {
-                                    response.body()?.string()?.let {
-                                        geocodeParser.parseGeocodeResponse(it)
-                                    }
-                                }
+                        val addressList = bg {
+                            response.body()?.string()?.let {
+                                geocodeParser.parseGeocodeResponse(it)
+                            }
+                        }
                         addressList.await()?.let { callback.onSuccess(it) }
                     }
                 } else {
@@ -76,9 +74,9 @@ class Geocoder {
     }
 
     private fun createRequestUrl(address: String): String =
-            "https://api.mapfit.com/v2/geocode?" +
-                    "street_address=$address" +
-                    "&building=false" +
-                    "&api_key=${Mapfit.getApiKey()}"
+        "https://api.mapfit.com/v2/geocode?" +
+                "street_address=$address" +
+                "&building=false" +
+                "&api_key=${Mapfit.getApiKey()}"
 
 }
