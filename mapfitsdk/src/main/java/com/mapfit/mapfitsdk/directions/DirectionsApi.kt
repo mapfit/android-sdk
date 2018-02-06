@@ -19,7 +19,8 @@ import java.io.IOException
 
 
 /**
- * A class for obtaining directions for an origin and destination points.
+ * A wrapper for Mapfit Directions API. Used to obtain directions for an origin and destination
+ * location or address.
  *
  * Created by dogangulcan on 1/18/18.
  */
@@ -41,6 +42,17 @@ class DirectionsApi {
         internal val directionsParser = DirectionsParser()
     }
 
+    /**
+     * Returns directions for given origin and destination. To have reliable results, you should
+     * provide an origin and destination
+     *
+     * @param originAddress street address for the origin location
+     * @param originLocation coordinates as [LatLng] for the origin location
+     * @param destinationAddress street address for the destination location
+     * @param destinationLocation coordinates as [LatLng] for the destination location
+     * @param directionsType type for the directions. Default value is driving
+     * @param callback will be called when [Route] is obtained
+     */
     @JvmOverloads
     fun getDirections(
         originAddress: String = "",

@@ -12,20 +12,43 @@ import com.mapfit.mapfitsdk.utils.decodePolyline
  */
 class DirectionsOptions(private val mapController: MapController) {
 
-    var originLocation = LatLng()
-    var destinationLocation = LatLng()
+    private var originLocation = LatLng()
+    private var destinationLocation = LatLng()
+    private var originLocationString = ""
+    private var destinationLocationString = ""
     var type: DirectionsType = DirectionsType.DRIVING
 
     internal var routeDrawn = false
 
-
+    /**
+     * @param latLng coordinates for origin
+     */
     fun setOrigin(latLng: LatLng): DirectionsOptions {
         this.originLocation = latLng
         return this
     }
 
+    /**
+     * @param latLng coordinates for destination
+     */
     fun setDestination(latLng: LatLng): DirectionsOptions {
         this.destinationLocation = latLng
+        return this
+    }
+
+    /**
+     * @param address street address for origin
+     */
+    fun setOrigin(address: String): DirectionsOptions {
+        this.originLocationString = address
+        return this
+    }
+
+    /**
+     * @param address street address for destination
+     */
+    fun setDestination(address: String): DirectionsOptions {
+        this.destinationLocationString = address
         return this
     }
 
@@ -34,6 +57,11 @@ class DirectionsOptions(private val mapController: MapController) {
         return this
     }
 
+    /**
+     * Displays the route as polyline on the map and returns
+     *
+     * @param callback will be called when the route is drawn on the map as polyline
+     */
     fun showDirections(callback: RouteDrawCallback) {
 
         val directionsCallback = object : DirectionsCallback {

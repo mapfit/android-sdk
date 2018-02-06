@@ -1,6 +1,7 @@
 package com.mapfit.mapfitsdk
 
 import android.view.View
+import com.mapfit.mapfitsdk.annotations.Annotation
 import com.mapfit.mapfitsdk.annotations.Marker
 import com.mapfit.mapfitsdk.annotations.Polygon
 import com.mapfit.mapfitsdk.annotations.Polyline
@@ -10,6 +11,7 @@ import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener
 import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.LatLngBounds
+import org.jetbrains.annotations.TestOnly
 
 
 /**
@@ -46,7 +48,7 @@ abstract class MapfitMap {
     )
 
     /**
-     * Adds the given layer to the map.
+     * Adds the given layer to the map. All annotations in the layer will be added to the map.
      *
      * @param layer to add to the map
      */
@@ -101,7 +103,7 @@ abstract class MapfitMap {
      * Removes given [Polyline] from the [MapView].
      * @param polyline to be removed
      */
-    protected abstract fun removePolyline(polyline: Polyline)
+    abstract fun removePolyline(polyline: Polyline)
 
     /**
      * Adds a polygon to default layer.
@@ -123,6 +125,13 @@ abstract class MapfitMap {
      * @param layer to be removed
      */
     abstract fun removeLayer(layer: Layer)
+
+    /**
+     * Sets zoom level of the map.
+     *
+     * @param zoomLevel Zoom level for the view
+     */
+    abstract fun setZoom(zoomLevel: Float)
 
     /**
      * Sets zoom level of the map.
@@ -209,6 +218,9 @@ abstract class MapfitMap {
      */
     abstract fun getMapOptions(): MapOptions
 
+    /**
+     * @return DirectionsOptions instance
+     */
     abstract fun getDirectionsOptions(): DirectionsOptions
 
     protected abstract fun setTilt(angle: Float)
@@ -223,6 +235,9 @@ abstract class MapfitMap {
      * Will reCenter the map.
      */
     abstract fun reCenter()
+
+    @TestOnly
+    internal abstract fun has(annotation: Annotation): Boolean
 
     interface PlaceInfoAdapter {
 

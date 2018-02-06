@@ -11,8 +11,8 @@ public class Point extends Geometry {
 
     public Point(LatLng point, Map<String, String> properties) {
         this.coordinates = new double[2];
-        coordinates[0] = point.getLon();
-        coordinates[1] = point.getLat();
+        coordinates[1] = point.getLon();
+        coordinates[0] = point.getLat();
         if (properties != null) {
             this.properties = getStringMapAsArray(properties);
         }

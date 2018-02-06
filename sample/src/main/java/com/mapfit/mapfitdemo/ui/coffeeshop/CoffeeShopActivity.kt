@@ -41,6 +41,8 @@ import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*
 import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 
@@ -116,11 +118,12 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap2.setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
             override fun onPlaceInfoClicked(marker: Marker) {
+
 //                marker.setIcon("https://darley-cpl.netdna-ssl.com/sites/default/files/styles/stallion_thumbnail/public/drupal-media/stallion-images/Australia-2016/exceed-and-excel/square-Exceed_And_Excel_0001_Thoroughbred_stallion.jpg?itok=ByfQuwCC")
 
 //                alwaysOpenShopLayer.remove(marker) // marker will be removed from everywhere that layer has //WORKS
 //                mapfitMap.removeMarker(marker) // marker is removed from map, will exist on others //WORKS
-//                marker.remove() // marker will be removed from everywhere //WORKS
+                marker.remove() // marker will be removed from everywhere //WORKS
 //                this@CoffeeShopActivity.mapfitMap.removeLayer(alwaysOpenShopLayer) // WORKS
 //                alwaysOpenShopLayer.clear() // WORKS
 
@@ -160,6 +163,7 @@ class CoffeeShopActivity : AppCompatActivity() {
             val callback = object : DirectionsCallback {
                 override fun onSuccess(route: Route) {
                     drawRoute(route)
+
                 }
 
                 override fun onError(message: String, e: Exception) {
@@ -208,14 +212,20 @@ class CoffeeShopActivity : AppCompatActivity() {
     }
 
     private fun drawRoute(route: Route) {
-        val destinationLocation = LatLng(route.destinationLocation[1], route.destinationLocation[0])
-        val originLocation = LatLng(route.sourceLocation[1], route.sourceLocation[0])
-        mapfitMap2.addMarker(destinationLocation).setIcon(MapfitMarker.LIGHT_COOKING)
-        mapfitMap2.addMarker(originLocation).setIcon(MapfitMarker.DARK_BAR)
+        async {
+            val destinationLocation =
+                LatLng(route.destinationLocation[1], route.destinationLocation[0])
+            val originLocation = LatLng(route.sourceLocation[1], route.sourceLocation[0])
+            val startMarker =
+                mapfitMap2.addMarker(destinationLocation).setIcon(MapfitMarker.LIGHT_COOKING)
+            val endMarker=mapfitMap2.addMarker(originLocation).setIcon(MapfitMarker.DARK_BAR)
 
-        route.trip.legs.forEach {
-            val line = decodePolyline(it.shape)
-            val polyline = mapfitMap2.addPolyline(line)
+            mapfitMap2.setCenter(originLocation, 200)
+
+            route.trip.legs.forEach {
+                val line = decodePolyline(it.shape)
+                mapfitMap2.addPolyline(line)
+            }
         }
 
     }
@@ -243,7 +253,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap.apply {
             setCenter(LatLng(40.700798, -74.0050177), 500)
-            setZoom(8f, 500)
+            setZoom(13f, 500)
 
 //            boundaryBuilder()
 //            addMapfitOfficeWithGeocoder()

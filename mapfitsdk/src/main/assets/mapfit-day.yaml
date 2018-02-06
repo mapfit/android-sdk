@@ -782,6 +782,7 @@ layers:
                 sprite: ux-search-active
                 size: [36px,54px]
                 collide: false
+                order: 2000
                 anchor: top
                 transition: { show: { time: 0s }, hide: { time: 0s } }
     mz_default_shield:
@@ -896,8 +897,17 @@ layers:
         draw:
             sdk-line-overlay:
                 interactive: global.sdk_interactive
-                color: black
-                order: 503
+                color: blue
+                order: 100
+                width: 5px
+
+    mz_default_polyline:
+        data: { source: mz_default_polyline }
+        draw:
+            sdk-line-overlay:
+                interactive: global.sdk_interactive
+                color: '#dc3983'
+                order: 1
                 width: 3px
     mz_default_polygon:
         data: { source: mz_default_polygon }

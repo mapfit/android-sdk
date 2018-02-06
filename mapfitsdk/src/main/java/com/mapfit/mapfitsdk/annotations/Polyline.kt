@@ -26,17 +26,40 @@ class Polyline(
     override fun initAnnotation(mapController: MapController, id: Long) {
         mapBindings[mapController] = polylineId
         polylineOptions.updateStyle()
-        mapController.fillPolyline(id, points)
     }
 
+    /**
+     * Removes the polyline from the map(s) it is added to.
+     */
     override fun remove() {
         mapBindings.forEach {
             it.key.removeMarker(it.value)
         }
+        layers.forEach { it.remove(this) }
     }
 
-    fun addPoint(vararg line: LatLng) {
+    internal fun remove(mapController: MapController) {
+        mapBindings[mapController]?.let { mapController.removePolyline(it) }
+    }
+
+    /**
+     * Adds [LatLng] point(s) to the polyline.
+     */
+    private fun addPoint(vararg line: LatLng) {
         points.addAll(line)
+        mapBindings.forEach {
+            TODO() //re-add
+        }
+    }
+
+    fun getCoordinates(): DoubleArray {
+        val coordinates = DoubleArray(points.size * 2)
+        var i = 0
+        for (point in points) {
+            coordinates[i++] = point.lon
+            coordinates[i++] = point.lat
+        }
+        return coordinates
     }
 
 }

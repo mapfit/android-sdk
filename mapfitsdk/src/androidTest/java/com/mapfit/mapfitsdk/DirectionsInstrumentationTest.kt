@@ -31,8 +31,6 @@ class DirectionsInstrumentationTest {
     lateinit var route: Route
 
     private val context = InstrumentationRegistry.getContext()
-    private val latLng = LatLng(40.693825, -73.998691)
-
 
     @Before
     @UiThreadTest

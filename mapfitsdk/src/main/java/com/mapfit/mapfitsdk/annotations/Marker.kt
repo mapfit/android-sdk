@@ -30,17 +30,20 @@ class Marker internal constructor(
 
     private var position: LatLng = LatLng(0.0, 0.0)
 
-    private var isFlat: Boolean = false
-
     val markerOptions = MarkerOptions(this, mutableListOf(mapController))
 
     private var data: Any? = null
     internal var usingDefaultIcon: Boolean = true
 
-    //    internal var placeInfo: PlaceInfo? = null
     internal var placeInfoMap = HashMap<MapController, PlaceInfo?>()
 
     internal var address: Address? = null
+        set(value) {
+            field = value
+            if (title.isBlank() && value != null) {
+                title = value.streetAddress
+            }
+        }
 
     private var icon: Bitmap? = null
     private var previousIcon: Bitmap? = null
@@ -295,7 +298,10 @@ class Marker internal constructor(
         mapBindings.forEach {
             it.key.removeMarker(it.value)
         }
+
+        layers.forEach { it.remove(this) }
     }
+
 
     internal fun remove(mapController: MapController): Boolean {
         placeInfoMap[mapController]?.dispose()
@@ -312,6 +318,6 @@ class Marker internal constructor(
 
 
     internal fun hasPlaceInfoFields(): Boolean =
-        title.isNotBlank() && subtitle1.isNotBlank() && subtitle2.isNotBlank()
+        title.isNotBlank() || subtitle1.isNotBlank() || subtitle2.isNotBlank()
 
 }

@@ -267,17 +267,19 @@ public class MapController implements Renderer {
         displayMetrics = mapView.getContext().getResources().getDisplayMetrics();
         assetManager = mapView.getContext().getAssets();
 
-//        fontFileParser = new FontFileParser();
+        fontFileParser = new FontFileParser();
 
         // Parse font file description
-//        fontFileParser.parse();
+        fontFileParser.parse();
 
         mapPointer = nativeInit(this, assetManager);
         if (mapPointer <= 0) {
             throw new RuntimeException("Unable to create a native Map object! There may be insufficient memory available.");
         }
 
-
+        // base layers
+        MapData mapData = addDataLayer("mz_default_line");
+        MapData pointLayer = addDataLayer("mz_default_point");
     }
 
     void dispose() {
@@ -733,8 +735,8 @@ public class MapController implements Renderer {
     void removeDataLayer(MapData mapData) {
         clientTileSources.remove(mapData.name);
         checkPointer(mapPointer);
-        checkPointer(mapData.pointer);
-        nativeRemoveTileSource(mapPointer, mapData.pointer);
+        checkPointer(mapData.id);
+        nativeRemoveTileSource(mapPointer, mapData.id);
     }
 
     /**
@@ -1031,48 +1033,69 @@ public class MapController implements Renderer {
      *
      * @return Newly created {@link Marker} object.
      */
+//    public Marker addMarker() {
+//        checkPointer(mapPointer);
+//        long markerId = nativeMarkerAdd(mapPointer);
+//        Marker marker = new Marker(mapView.getContext(), markerId, this);
+//        marker.setPolyline()
+//        markers.put(markerId, marker);
+//        return marker;
+//    }
     public Marker addMarker() {
         checkPointer(mapPointer);
         long markerId = nativeMarkerAdd(mapPointer);
         Marker marker = new Marker(mapView.getContext(), markerId, this);
+
         markers.put(markerId, marker);
+        return marker;
+    }
+
+    public Marker addMarkerAsFeature(LatLng latLng) {
+        checkPointer(mapPointer);
+
+        MapData pointData = addDataLayer("mz_default_point");
+        Marker marker = new Marker(mapView.getContext(), pointData.id, this);
+        marker.setPosition(latLng);
+        pointData.addPoint(marker);
+
+        markers.put(pointData.id, marker);
         return marker;
     }
 
     public Polyline addPolyline(List<LatLng> line) {
         checkPointer(mapPointer);
-        long polylineId = nativeMarkerAdd(mapPointer);
+        MapData polylineData = addDataLayer("mz_default_polyline");
 
-        Polyline polyline = new Polyline(mapView.getContext(), polylineId, this, line);
-        polylines.put(polylineId, polyline);
+        Polyline polyline = new Polyline(
+                mapView.getContext(),
+                polylineData.id,
+                this,
+                line);
+
+        polylineData.addPolyline(polyline);
+
+        polylines.put(polylineData.id, polyline);
+
         return polyline;
     }
 
-    public boolean fillPolyline(long id, List<LatLng> line) {
-        checkPointer(mapPointer);
-
-        double[] coordinates = new double[line.size() * 2];
-
-        for (int i = 0; i < line.size(); i++) {
-            coordinates[i * 2] = line.get(i).getLon();
-            coordinates[i * 2 + 1] = line.get(i).getLat();
-        }
-
-//        nativeAddFeature(mapPointer, mapPointer, coordinates, new int[0], null);
-//        return true;
-        return nativeMarkerSetPolyline(mapPointer, id, coordinates, coordinates.length / 2);
-    }
-
-
     public long addAnnotation(Annotation annotation) {
         checkPointer(mapPointer);
-        long markerId = nativeMarkerAdd(mapPointer);
 
         if (annotation instanceof Marker) {
+            long markerId = nativeMarkerAdd(mapPointer);
             markers.put(markerId, (Marker) annotation);
+            return markerId;
+
+        } else if (annotation instanceof Polyline) {
+            MapData polylineData = addDataLayer("mz_default_polyline");
+            polylineData.addPolyline((Polyline) annotation);
+            polylines.put(polylineData.id, (Polyline) annotation);
+            return polylineData.id;
+        } else {
+            return 0;
         }
 
-        return markerId;
     }
 
     /**
@@ -1088,17 +1111,19 @@ public class MapController implements Renderer {
         return nativeMarkerRemove(mapPointer, markerId);
     }
 
+    public void removePolyline(long polylineId) {
+        checkPointer(mapPointer);
+        checkId(polylineId);
+        polylines.remove(polylineId);
+        nativeRemoveTileSource(mapPointer, polylineId);
+    }
+
     /**
      * Remove all the {@link Marker} objects from the map.
      */
     public void removeAllMarkers() {
         checkPointer(mapPointer);
         nativeMarkerRemoveAll(mapPointer);
-
-        // Invalidate all markers so their ids are unusable
-//        for (Marker marker : markers.values()) {
-//        }
-
         markers.clear();
     }
 
@@ -1197,7 +1222,7 @@ public class MapController implements Renderer {
 
     void checkPointer(long ptr) {
         if (ptr <= 0) {
-            throw new RuntimeException("Tried to perform an operation on an invalid pointer! This means you may have used an object that has been disposed and is no longer valid.");
+            throw new RuntimeException("Tried to perform an operation on an invalid id! This means you may have used an object that has been disposed and is no longer valid.");
         }
     }
 
@@ -1254,13 +1279,13 @@ public class MapController implements Renderer {
         return nativeMarkerSetPointEased(mapPointer, markerId, lng, lat, seconds, ease.ordinal());
     }
 
-    boolean setMarkerPolyline(long markerId, double[] coordinates, int count) {
+    public boolean setMarkerPolyline(long markerId, double[] coordinates, int count) {
         checkPointer(mapPointer);
         checkId(markerId);
         return nativeMarkerSetPolyline(mapPointer, markerId, coordinates, count);
     }
 
-    boolean setMarkerPolygon(long markerId, double[] coordinates, int[] rings, int count) {
+    public boolean setMarkerPolygon(long markerId, double[] coordinates, int[] rings, int count) {
         checkPointer(mapPointer);
         checkId(markerId);
         return nativeMarkerSetPolygon(mapPointer, markerId, coordinates, rings, count);
@@ -1556,16 +1581,16 @@ public class MapController implements Renderer {
     @Keep
     String getFontFilePath(String key) {
 
-//        return fontFileParser.getFontFile(key);
-        return "";
+        return fontFileParser.getFontFile(key);
+//        return "";
 
     }
 
     @Keep
     String getFontFallbackFilePath(int importance, int weightHint) {
 
-//        return fontFileParser.getFontFallback(importance, weightHint);
-        return "";
+        return fontFileParser.getFontFallback(importance, weightHint);
+//        return "";
     }
 
 }

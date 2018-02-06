@@ -10,7 +10,7 @@ import com.mapfit.mapfitsdk.MapController
 abstract class Annotation {
 
     internal val mapBindings = HashMap<MapController, Long>()
-
+    internal val layers = mutableListOf<Layer>()
     private var isVisible: Boolean = true
 
     internal fun addToMap(mapController: MapController) {
@@ -22,10 +22,8 @@ abstract class Annotation {
     }
 
     fun bindToLayer(layer: Layer) {
-
+        if (!layers.contains(layer)) layers.add(layer)
     }
-
-    fun boundTo(mapController: MapController) = mapBindings.containsKey(mapController)
 
     fun setDrawOrder(drawIndex: Int) =
         mapBindings.forEach {
@@ -46,5 +44,11 @@ abstract class Annotation {
     abstract fun initAnnotation(mapController: MapController, id: Long)
 
     abstract fun remove()
+
+    internal fun remove(maps: MutableList<MapController>) {
+        mapBindings.filter { maps.contains(it.key) }
+            .forEach { it.key.removeMarker(it.value) }
+    }
+
 
 }
