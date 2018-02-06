@@ -5,6 +5,7 @@ import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geocoder.model.Entrance
 import com.mapfit.mapfitsdk.geocoder.model.EntranceType
 import com.mapfit.mapfitsdk.geocoder.model.LocationStatus
+import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.utils.DebugUtils
 import okhttp3.Response
 import org.json.JSONArray
@@ -53,6 +54,12 @@ internal class GeocodeParser internal constructor() {
                 val neighborhood = addressJson.getSafeString("neighborhood")
                 val streetAddress = addressJson.getSafeString("street_address")
 
+                val buildingPolygon: List<LatLng> = if (addressJson.has("building")) {
+                    parseBuildingPolygon(addressJson.getJSONObject("building"))
+                } else {
+                    emptyList()
+                }
+
                 val statusCode: LocationStatus? = if (addressJson.has("response_type")) {
                     LocationStatus.values()
                         .find { status -> status.code == addressJson.getInt("response_type") }
@@ -78,6 +85,7 @@ internal class GeocodeParser internal constructor() {
                     adminArea = adminArea,
                     neighborhood = neighborhood,
                     country = country,
+                    buildingPolygon = buildingPolygon,
                     status = statusCode,
                     streetAddress = streetAddress,
                     entrances = entrances ?: emptyList(),
@@ -94,6 +102,18 @@ internal class GeocodeParser internal constructor() {
         }
 
         return addressList
+    }
+
+    private fun parseBuildingPolygon(jsonObject: JSONObject): List<LatLng> {
+        val latLngList = mutableListOf<LatLng>()
+        val coordinates = jsonObject.getJSONArray("coordinates").getJSONArray(0)
+
+        (0 until coordinates.length())
+            .map { coordinates.getJSONArray(it) }
+            .map { LatLng(it[1] as Double, it[0] as Double) }
+            .forEach { latLngList.add(it) }
+
+        return latLngList
     }
 
     private fun JSONObject.getSafeString(name: String): String =

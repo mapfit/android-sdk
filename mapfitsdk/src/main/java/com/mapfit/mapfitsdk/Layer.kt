@@ -30,6 +30,7 @@ class Layer {
      */
     fun add(annotation: Annotation) {
         annotations.add(annotation)
+        annotation.bindToLayer(this)
         if (drawOrder > 0) {
             annotation.setDrawOrder(drawOrder)
         }
@@ -54,15 +55,18 @@ class Layer {
     }
 
     /**
-     * Removes the given annotation from the layer and the maps the layer is on.
+     * Removes the given annotation from the layer and the maps the layer is added to.
      */
     fun remove(vararg annotation: Annotation) {
-        annotation.forEach { it.remove() }
+        annotation.forEach { it.remove(maps) }
     }
 
+    /**
+     * Removes every annotation from the layer and the maps the layer is added to.
+     */
     fun clear() {
-        annotations.forEach { it.remove() }
+        annotations.forEach { it.remove(maps) }
+        annotations.clear()
     }
-
 
 }

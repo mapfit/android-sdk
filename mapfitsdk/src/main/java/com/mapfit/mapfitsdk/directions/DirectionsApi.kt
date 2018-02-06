@@ -7,33 +7,24 @@ import com.mapfit.mapfitsdk.directions.model.Route
 import com.mapfit.mapfitsdk.geocoder.GeocoderApi.HttpHandler.httpClient
 import com.mapfit.mapfitsdk.geocoder.model.EntranceType
 import com.mapfit.mapfitsdk.geometry.LatLng
+import com.mapfit.mapfitsdk.geometry.isEmpty
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import org.jetbrains.anko.coroutines.experimental.bg
-import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
 
 
 /**
- * A class for obtaining directions for an origin and destination points.
+ * A wrapper for Mapfit Directions API. Used to obtain directions for an origin and destination
+ * location or address.
  *
  * Created by dogangulcan on 1/18/18.
  */
 class DirectionsApi {
-
-    enum class TYPE(private val type: String) {
-        DRIVING("driving"),
-        WALKING("walking"),
-        CYCLING("cycling");
-
-        fun getName(): String {
-            return type
-        }
-    }
 
     object HttpHandler {
         private val logging = HttpLoggingInterceptor()
@@ -51,13 +42,24 @@ class DirectionsApi {
         internal val directionsParser = DirectionsParser()
     }
 
+    /**
+     * Returns directions for given origin and destination. To have reliable results, you should
+     * provide an origin and destination
+     *
+     * @param originAddress street address for the origin location
+     * @param originLocation coordinates as [LatLng] for the origin location
+     * @param destinationAddress street address for the destination location
+     * @param destinationLocation coordinates as [LatLng] for the destination location
+     * @param directionsType type for the directions. Default value is driving
+     * @param callback will be called when [Route] is obtained
+     */
     @JvmOverloads
     fun getDirections(
         originAddress: String = "",
         originLocation: LatLng = LatLng(),
         destinationAddress: String = "",
         destinationLocation: LatLng = LatLng(),
-        directionsType: TYPE = TYPE.DRIVING,
+        directionsType: DirectionsType = DirectionsType.DRIVING,
         callback: DirectionsCallback
     ) {
 
@@ -107,35 +109,48 @@ class DirectionsApi {
         originLocation: LatLng,
         destinationAddress: String,
         destinationLocation: LatLng,
-        directionsType: TYPE
+        directionsType: DirectionsType
     ): RequestBody? {
-        val sourceBody = JSONObject()
-        try {
-            sourceBody.put("street_address", originAddress)
-            sourceBody.put("lat", originLocation.lat)
-            sourceBody.put("lon", originLocation.lon)
-        } catch (ignored: JSONException) {
+
+        val srcAddress = when {
+            !originAddress.isBlank() -> JSONObject()
+                .put("street_address", originAddress)
+                .put("entrance_type", EntranceType.ALL_PEDESTRIAN)
+            else -> null
         }
 
-        val destinationBody = JSONObject()
-        try {
-            destinationBody.put("street_address", destinationAddress)
-            destinationBody.put("lat", destinationLocation.lat)
-            destinationBody.put("lon", destinationLocation.lon)
-            destinationBody.put("entrance_type", EntranceType.ALL_PEDESTRIAN)
-        } catch (ignored: JSONException) {
+        val srcLocation = when {
+            !originLocation.isEmpty() -> JSONObject()
+                .put("lat", originLocation.lat)
+                .put("lon", originLocation.lon)
+            else -> null
+        }
+
+        val destAddress = when {
+            !destinationAddress.isBlank() -> JSONObject()
+                .put("street_address", destinationAddress)
+                .put("entrance_type", EntranceType.ALL_PEDESTRIAN)
+            else -> null
+        }
+
+        val destLocation = when {
+            !destinationLocation.isEmpty() -> JSONObject()
+                .put("lat", destinationLocation.lat)
+                .put("lon", destinationLocation.lon)
+            else -> null
         }
 
         val requestBody = JSONObject()
-        requestBody.put("source-address", sourceBody)
-        requestBody.put("destination-address", destinationBody)
+        srcAddress?.let { requestBody.put("source-address", it) }
+        srcLocation?.let { requestBody.put("source-location", it) }
+        destAddress?.let { requestBody.put("destination-address", it) }
+        destLocation?.let { requestBody.put("destination-location", it) }
         requestBody.put("type", directionsType.getName())
 
-        val body = RequestBody.create(
+        return RequestBody.create(
             MediaType.parse("application/json; charset=utf-8"),
             requestBody.toString()
         )
-        return body
     }
 
 

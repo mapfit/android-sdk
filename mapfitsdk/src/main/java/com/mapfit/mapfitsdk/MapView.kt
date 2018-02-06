@@ -14,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.RelativeLayout
+import com.mapfit.mapfitsdk.annotations.Annotation
 import com.mapfit.mapfitsdk.annotations.Marker
 import com.mapfit.mapfitsdk.annotations.Polygon
 import com.mapfit.mapfitsdk.annotations.Polyline
@@ -55,6 +56,7 @@ class MapView(
 
     private lateinit var mapController: MapController
     private lateinit var mapOptions: MapOptions
+    private lateinit var directionsOptions: DirectionsOptions
     private val geocoder by lazy { GeocoderApi() }
 
     // Views
@@ -103,6 +105,8 @@ class MapView(
 
 
     init {
+        Mapfit.getApiKey()
+
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
         post {
             viewHeight = height
@@ -175,6 +179,7 @@ class MapView(
 
     private fun initMapController(mapTheme: MapTheme, onMapReadyCallback: OnMapReadyCallback) {
         mapController = MapController(getGLSurfaceView())
+
         mapController.apply {
             init()
 
@@ -192,6 +197,7 @@ class MapView(
             })
 
             mapOptions = MapOptions(this@MapView, this)
+            directionsOptions = DirectionsOptions(this)
             mapOptions.theme = mapTheme
 
         }
@@ -203,14 +209,13 @@ class MapView(
     }
 
     private fun scaleResponder() = TouchInput.ScaleResponder { x, y, scale, velocity ->
-        var consumed = false
+        var consumed = true //consumed
         mapPinchListener?.let {
             it.onMapPinch()
             consumed = true
         }
         updatePlaceInfoPosition(false)
-
-        consumed
+        false
     }
 
     private fun panResponder() = object : TouchInput.PanResponder {
@@ -222,7 +227,7 @@ class MapView(
             }
 
             updatePlaceInfoPosition(false)
-            return consumed
+            return false
         }
 
         override fun onFling(
@@ -297,7 +302,7 @@ class MapView(
                         when (it) {
                             is Marker -> {
                                 markerClickListener?.onMarkerClicked(it)
-                                showPlaceInfo(it, mapController)
+                                showPlaceInfo(it)
                             }
                             else -> {
                             }
@@ -316,6 +321,14 @@ class MapView(
     }
 
     private val mapfitMap = object : MapfitMap() {
+        override fun has(annotation: Annotation): Boolean =
+            annotationLayer.annotations.contains(annotation)
+
+
+        override fun setZoom(zoomLevel: Float) {
+            setZoom(zoomLevel, 0)
+        }
+
         override fun setOnPlaceInfoClickListener(listener: OnPlaceInfoClickListener) {
             this@MapView.onPlaceInfoClickListener = listener
         }
@@ -348,8 +361,11 @@ class MapView(
                         onMarkerAddedCallback.onError(IOException("No coordinates found for given address."))
                     } else {
                         val marker = mapController.addMarker().setPosition(latLng)
+//
                         marker.address = addressList[0]
                         annotationLayer.add(marker)
+//                        val polyline = mapController.addPolyline(marker.address!!.buildingPolygon)
+
                         onMarkerAddedCallback.onMarkerAdded(marker)
                     }
                 }
@@ -365,6 +381,12 @@ class MapView(
             marker.setPosition(latLng)
             annotationLayer.add(marker)
             return marker
+        }
+
+        override fun addPolyline(line: List<LatLng>): Polyline {
+            val polyline = mapController.addPolyline(line)
+            annotationLayer.add(polyline)
+            return polyline
         }
 
         override fun getLayers(): List<Layer> {
@@ -409,9 +431,8 @@ class MapView(
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun getDirectionsOptions(): DirectionsOptions {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
+        override fun getDirectionsOptions(): DirectionsOptions = directionsOptions
+
 
         override fun setTilt(angle: Float) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
@@ -434,22 +455,9 @@ class MapView(
         }
 
         override fun addPolygon(polygon: List<List<LatLng>>): Polygon {
-
-            val poly = polygon.map {
-                it.map {
-                    LatLng(it.lat, it.lon)
-                }
-            }
-
-            val tMarker = mapController.addMarker()
-//            tMarker.setPolygon(com.mapfit.tangram.geometry.Polygon(poly, null))
-
-            return Polygon(tMarker)
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun addPolyline(): Polyline {
-            return Polyline()
-        }
 
         override fun getZoom(): Float {
             return mapController.zoom
@@ -479,9 +487,13 @@ class MapView(
         }
 
         override fun addLayer(layer: Layer) {
-            layers.add(layer)
-            annotationLayer.annotations.addAll(layer.annotations)
-            layer.addMap(mapController)
+            if (!layers.contains(layer)) {
+                layers.add(layer)
+                layer.annotations
+                    .filter { !annotationLayer.annotations.contains(it) }
+                    .forEach { annotationLayer.annotations.add(it) }
+                layer.addMap(mapController)
+            }
         }
 
         override fun removeLayer(layer: Layer) {
@@ -502,11 +514,11 @@ class MapView(
         override fun removeMarker(marker: Marker): Boolean = marker.remove(mapController)
 
         override fun removePolygon(polygon: Polygon) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
         override fun removePolyline(polyline: Polyline) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            annotationLayer.annotations.remove(polyline)
+            polyline.remove(mapController)
         }
 
         override fun getMapOptions(): MapOptions {
@@ -535,10 +547,7 @@ class MapView(
 
     private var activePlaceInfo: PlaceInfo? = null
 
-    private fun showPlaceInfo(
-        marker: Marker,
-        mapController: MapController
-    ) {
+    private fun showPlaceInfo(marker: Marker) {
         if (marker.hasPlaceInfoFields()) {
 
             if (activePlaceInfo != null

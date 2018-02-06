@@ -10,8 +10,8 @@ import kotlinx.android.synthetic.main.overlay_map_controls.view.*
  * Created by dogangulcan on 12/21/17.
  */
 class MapOptions internal constructor(
-        private val mapView: com.mapfit.mapfitsdk.MapView,
-        private val mapController: MapController
+    private val mapView: com.mapfit.mapfitsdk.MapView,
+    private val mapController: MapController
 ) {
 
     companion object {
@@ -35,13 +35,34 @@ class MapOptions internal constructor(
         mapController.loadSceneFile(value.toString())
         val attributionImage = when (value) {
             MapTheme.MAPFIT_DAY -> {
-                mapView.btnLegal?.setTextColor(ContextCompat.getColor(mapView.context, R.color.dark_text))
-                mapView.btnBuildYourMap?.setTextColor(ContextCompat.getColor(mapView.context, R.color.dark_text))
+                mapView.btnLegal?.setTextColor(
+                    ContextCompat.getColor(
+                        mapView.context,
+                        R.color.dark_text
+                    )
+                )
+                mapView.btnBuildYourMap?.setTextColor(
+                    ContextCompat.getColor(
+                        mapView.context,
+                        R.color.dark_text
+                    )
+                )
                 R.drawable.ic_watermark_light
             }
+
             MapTheme.MAPFIT_NIGHT -> {
-                mapView.btnLegal?.setTextColor(ContextCompat.getColor(mapView.context, R.color.light_text))
-                mapView.btnBuildYourMap?.setTextColor(ContextCompat.getColor(mapView.context, R.color.light_text))
+                mapView.btnLegal?.setTextColor(
+                    ContextCompat.getColor(
+                        mapView.context,
+                        R.color.light_text
+                    )
+                )
+                mapView.btnBuildYourMap?.setTextColor(
+                    ContextCompat.getColor(
+                        mapView.context,
+                        R.color.light_text
+                    )
+                )
                 R.drawable.ic_watermark_dark
             }
         }

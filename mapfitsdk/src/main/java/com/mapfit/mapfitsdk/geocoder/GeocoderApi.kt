@@ -76,7 +76,7 @@ class GeocoderApi {
     private fun createRequestUrl(address: String): String =
         "https://api.mapfit.com/v2/geocode?" +
                 "street_address=$address" +
-                "&building=false" +
+                "&building=true" +
                 "&api_key=${Mapfit.getApiKey()}"
 
 }

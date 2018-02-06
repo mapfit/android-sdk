@@ -97,15 +97,13 @@ class PlaceInfo internal constructor(
     }
 
     internal fun dispose(removed: Boolean = false) {
-        async(UI) {
-            if (infoView.parent != null) {
-                (infoView.parent as ViewGroup).removeView(infoView)
-            }
-            if (!removed) {
-                marker.placeInfoState(false, mapController)
-            }
-            infoView.visibility = View.GONE
+        if (infoView.parent != null) {
+            (infoView.parent as ViewGroup).removeView(infoView)
         }
+        if (!removed) {
+            marker.placeInfoState(false, mapController)
+        }
+        infoView.visibility = View.GONE
     }
 
     internal fun onPositionChanged() {

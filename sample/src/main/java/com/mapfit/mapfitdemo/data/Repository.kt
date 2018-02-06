@@ -99,4 +99,17 @@ class Repository(private val context: Context) {
         return list
     }
 
+    fun getLowerManhattanPolyline(): List<LatLng> {
+
+        val list = mutableListOf<LatLng>()
+
+        list.add(LatLng(40.693825, -73.998691))
+        list.add(LatLng(40.6902223, -73.9770368))
+        list.add(LatLng(40.6930532, -73.9860919))
+        list.add(LatLng(40.7061326, -74.000769))
+
+
+        return list
+    }
+
 }

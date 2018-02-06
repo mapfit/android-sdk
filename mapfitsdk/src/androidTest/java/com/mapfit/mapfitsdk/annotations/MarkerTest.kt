@@ -10,7 +10,6 @@ import android.support.test.runner.AndroidJUnit4
 import com.mapfit.mapfitsdk.*
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
-import com.mapfit.mapfitsdk.annotations.widget.PlaceInfo
 import com.mapfit.mapfitsdk.geometry.LatLng
 import junit.framework.Assert
 import org.junit.Before
@@ -47,7 +46,7 @@ class MarkerTest {
     @Mock
     private lateinit var placeInfoAdapter: MapfitMap.PlaceInfoAdapter
 
-    val latLng = LatLng(40.693825, -73.998691)
+    private val latLng = LatLng(40.693825, -73.998691)
 
     @Rule
     @JvmField
@@ -62,8 +61,7 @@ class MarkerTest {
     fun init() {
         MockitoAnnotations.initMocks(this)
 
-        Mapfit.getInstance(mMockContext, "591dccc4e499ca0001a4c6a41a2ed1be54804856508265221862231b")
-//        val mapView = MapView(mMockContext)
+        Mapfit.getInstance(mMockContext, mMockContext.getString(R.string.api_key))
         val mapView: MapView = activityRule.activity.findViewById(R.id.mapView)
 
         mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {

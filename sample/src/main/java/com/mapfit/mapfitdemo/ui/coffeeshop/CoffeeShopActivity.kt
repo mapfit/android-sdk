@@ -29,16 +29,20 @@ import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
 import com.mapfit.mapfitsdk.directions.DirectionsApi
 import com.mapfit.mapfitsdk.directions.DirectionsCallback
+import com.mapfit.mapfitsdk.directions.DirectionsType
 import com.mapfit.mapfitsdk.directions.model.Route
 import com.mapfit.mapfitsdk.geocoder.GeocoderApi
 import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
 import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.LatLngBounds
+import com.mapfit.mapfitsdk.utils.decodePolyline
 import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*
 import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 
@@ -114,11 +118,12 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap2.setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
             override fun onPlaceInfoClicked(marker: Marker) {
+
 //                marker.setIcon("https://darley-cpl.netdna-ssl.com/sites/default/files/styles/stallion_thumbnail/public/drupal-media/stallion-images/Australia-2016/exceed-and-excel/square-Exceed_And_Excel_0001_Thoroughbred_stallion.jpg?itok=ByfQuwCC")
 
 //                alwaysOpenShopLayer.remove(marker) // marker will be removed from everywhere that layer has //WORKS
 //                mapfitMap.removeMarker(marker) // marker is removed from map, will exist on others //WORKS
-//                marker.remove() // marker will be removed from everywhere //WORKS
+                marker.remove() // marker will be removed from everywhere //WORKS
 //                this@CoffeeShopActivity.mapfitMap.removeLayer(alwaysOpenShopLayer) // WORKS
 //                alwaysOpenShopLayer.clear() // WORKS
 
@@ -127,15 +132,38 @@ class CoffeeShopActivity : AppCompatActivity() {
 
     }
 
+
+    private fun drawRouteWithMapView() {
+
+
+        mapfitMap.getDirectionsOptions()
+            .setDestination(LatLng(40.744255, -73.993774))
+            .setOrigin(LatLng(40.575534, -73.961857))
+            .setType(DirectionsType.DRIVING)
+            .showDirections(object : DirectionsOptions.RouteDrawCallback {
+                override fun onRouteDrawn(route: Route) {
+                    Toast.makeText(
+                        this@CoffeeShopActivity,
+                        "Route is drawn!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+
+                override fun onError(message: String, e: Exception) {
+                    e.printStackTrace()
+                }
+            })
+    }
+
     private val onFilterCheckedListener = object : OnFilterCheckedListener {
 
         override fun onDrawRouteClicked() {
+//            drawRouteWithMapView()
 
             val callback = object : DirectionsCallback {
                 override fun onSuccess(route: Route) {
-                    if (route != null) {
+                    drawRoute(route)
 
-                    }
                 }
 
                 override fun onError(message: String, e: Exception) {
@@ -144,11 +172,12 @@ class CoffeeShopActivity : AppCompatActivity() {
             }
 
             DirectionsApi().getDirections(
-                originAddress = "119 W 24th St",
-                destinationAddress = "107 Sacred Heart Ln",
+                originAddress = "119 W 24th St new york",
+                destinationAddress = "107 Sacred Heart Ln baltimore",
                 callback = callback
             )
 
+            drawerLayout.closeDrawer(GravityCompat.END)
         }
 
         override fun onSpinnerItemSelected(filterType: FilterType, string: String) {
@@ -180,6 +209,25 @@ class CoffeeShopActivity : AppCompatActivity() {
 
             drawerLayout.closeDrawer(GravityCompat.END)
         }
+    }
+
+    private fun drawRoute(route: Route) {
+        async {
+            val destinationLocation =
+                LatLng(route.destinationLocation[1], route.destinationLocation[0])
+            val originLocation = LatLng(route.sourceLocation[1], route.sourceLocation[0])
+            val startMarker =
+                mapfitMap2.addMarker(destinationLocation).setIcon(MapfitMarker.LIGHT_COOKING)
+            val endMarker=mapfitMap2.addMarker(originLocation).setIcon(MapfitMarker.DARK_BAR)
+
+            mapfitMap2.setCenter(originLocation, 200)
+
+            route.trip.legs.forEach {
+                val line = decodePolyline(it.shape)
+                mapfitMap2.addPolyline(line)
+            }
+        }
+
     }
 
     private fun initFilterDrawer() {
@@ -245,8 +293,11 @@ class CoffeeShopActivity : AppCompatActivity() {
 //            })
 
 
-        }
+//
 
+        }
+        val polyline = mapfitMap.addPolyline(repository.getLowerManhattanPolyline())
+        alwaysOpenShopLayer.add(polyline)
     }
 
     private fun boundaryBuilder() {
@@ -472,9 +523,6 @@ class CoffeeShopActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
-//            R.id.action_clear_markers -> {
-//                markers.forEach { it.remove() }
-//            }
             R.id.action_filter -> {
                 drawerLayout.openDrawer(GravityCompat.END)
             }
