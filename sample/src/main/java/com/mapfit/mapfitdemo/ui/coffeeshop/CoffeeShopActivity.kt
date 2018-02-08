@@ -92,6 +92,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         map.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
                 setupMap(mapfitMap)
+
 //                mapfitMap.addPolygon(repository.getLowerManhattanPoly())
 //                mapfitMap.addPolyline()
 //                mapfitMap.getMapOptions().setMaxZoom(55.0f)
@@ -471,6 +472,8 @@ class CoffeeShopActivity : AppCompatActivity() {
     }
 
     private fun addMapfitOfficeWithGeocoder() {
+
+
         GeocoderApi().geocodeAddress("119w 24th st new york ny",
             object : GeocoderCallback {
 
@@ -480,6 +483,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
                 override fun onSuccess(addressList: List<Address>) {
                     addressList.forEach { address ->
+
                         if (address.entrances.isNotEmpty()) {
                             address.entrances.forEach {
                                 markers.add(

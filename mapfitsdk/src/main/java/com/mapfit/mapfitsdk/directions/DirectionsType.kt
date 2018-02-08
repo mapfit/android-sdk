@@ -1,6 +1,8 @@
 package com.mapfit.mapfitsdk.directions
 
 /**
+ * Directions types available for Mapfit Directions API.
+ *
  * Created by dogangulcan on 2/5/18.
  */
 enum class DirectionsType(private val type: String) {
@@ -8,7 +10,7 @@ enum class DirectionsType(private val type: String) {
     WALKING("walking"),
     CYCLING("cycling");
 
-    fun getName(): String {
+    internal fun getName(): String {
         return type
     }
 }

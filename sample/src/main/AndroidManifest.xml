@@ -18,7 +18,7 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".ui.coffeeshop.CoffeeShopActivity"
+            android:name=".ui.coffeeshop.CoffeeShopActivityJava"
             android:windowSoftInputMode="stateHidden|adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

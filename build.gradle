@@ -1,22 +1,19 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
-
-
 buildscript {
     ext.kotlin_version = '1.2.21'
-
+    ext.dokka_version = '0.9.16-eap-2'
     ext.gradleBuildToolsVersion = '3.0.1'
 
     repositories {
         google()
         jcenter()
+        maven { url "https://dl.bintray.com/kotlin/kotlin-eap/" }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$gradleBuildToolsVersion"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+        classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:${dokka_version}"
     }
+
 }
 
 allprojects {
@@ -24,9 +21,57 @@ allprojects {
         google()
         jcenter()
         mavenCentral()
+        flatDir {
+            dirs 'libs'
+        }
     }
 }
 
+
+apply plugin: 'org.jetbrains.dokka-android'
+
 task clean(type: Delete) {
     delete rootProject.buildDir
+}
+
+
+
+dokka {
+    moduleName = 'mapfitsdk'
+    outputFormat = 'html'
+    outputDirectory = "$buildDir/javadoc"
+
+    sourceDirs = files('mapfitsdk/src/main/java/com')
+
+
+    skipEmptyPackages = true
+    reportNotDocumented = true
+
+    linkMapping {
+        // Source directory
+        dir = "mapfitsdk/src/main/java/com"
+
+        // URL showing where the source code can be accessed through the web browser
+        url = "https://github.com/mapfit/android-sdk"
+
+        // Suffix which is used to append the line number to the URL. Use #L for GitHub
+        suffix = "#L"
+    }
+
+    packageOptions {
+        prefix = "kotlin" // will match kotlin and all sub-packages of it
+        // All options are optional, default values are below:
+        skipDeprecated = false
+        reportUndocumented = true // Emit warnings about not documented members
+        includeNonPublic = false
+    }
+
+}
+
+task deleteUnusedDokkaAssets(type: Delete) {
+    file("$rootDir/docs").listFiles().each {
+        if (it.name.contains("android.R")) project.delete it
+        if (it.name.contains("android.support")) project.delete it
+        if (it.name.contains("com.google")) project.delete it
+    }
 }

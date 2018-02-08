@@ -33,11 +33,11 @@ import java.util.List;
 /**
  * Created by dogangulcan on 1/17/18.
  */
-class CoffeeShopActivityJava extends AppCompatActivity {
+public class CoffeeShopActivityJava extends AppCompatActivity {
 
     private MapfitMap mapfitMap;
-    private Repository repository = new Repository(this);
-    private List<CoffeeShop> coffeeShops = repository.getCoffeeShops();
+    private Repository repository;
+    private List<CoffeeShop> coffeeShops;
     private List<Marker> markers = new ArrayList<>();
     private Layer alwaysOpenShopLayer = new Layer();
     private BottomSheetBehavior<View> bottomSheetBehavior;
@@ -56,6 +56,7 @@ class CoffeeShopActivityJava extends AppCompatActivity {
 
     private void init() {
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        repository = new Repository(this);
 
         FilterAdapter filterAdapter = new FilterAdapter(onFilterCheckedListener);
         filterAdapter.addItems(repository.getFilters());
@@ -65,6 +66,7 @@ class CoffeeShopActivityJava extends AppCompatActivity {
         recyclerView.setAdapter(filterAdapter);
 
         bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.bottom_sheet));
+        coffeeShops = repository.getCoffeeShops();
 
     }
 

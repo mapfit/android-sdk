@@ -8,9 +8,11 @@ import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.utils.decodePolyline
 
 /**
+ * Used to obtain route and draw directions on map from an origin to a destination.
+ *
  * Created by dogangulcan on 1/4/18.
  */
-class DirectionsOptions(private val mapController: MapController) {
+class DirectionsOptions internal constructor(private val mapController: MapController) {
 
     private var originLocation = LatLng()
     private var destinationLocation = LatLng()
@@ -21,6 +23,8 @@ class DirectionsOptions(private val mapController: MapController) {
     internal var routeDrawn = false
 
     /**
+     * Sets origin for the directions to the given [LatLng] coordinates.
+     *
      * @param latLng coordinates for origin
      */
     fun setOrigin(latLng: LatLng): DirectionsOptions {
@@ -29,6 +33,8 @@ class DirectionsOptions(private val mapController: MapController) {
     }
 
     /**
+     * Sets destination for the directions to the given [LatLng] coordinates.
+     *
      * @param latLng coordinates for destination
      */
     fun setDestination(latLng: LatLng): DirectionsOptions {
@@ -37,6 +43,8 @@ class DirectionsOptions(private val mapController: MapController) {
     }
 
     /**
+     * Sets origin for the directions to the given street address.
+     *
      * @param address street address for origin
      */
     fun setOrigin(address: String): DirectionsOptions {
@@ -45,6 +53,8 @@ class DirectionsOptions(private val mapController: MapController) {
     }
 
     /**
+     * Sets destination for the directions to the given street address.
+     *
      * @param address street address for destination
      */
     fun setDestination(address: String): DirectionsOptions {
@@ -52,13 +62,18 @@ class DirectionsOptions(private val mapController: MapController) {
         return this
     }
 
+    /**
+     * Sets type for the directions. See [DirectionsType].
+     *
+     * @param type of directions
+     */
     fun setType(type: DirectionsType): DirectionsOptions {
         this.type = type
         return this
     }
 
     /**
-     * Displays the route as polyline on the map and returns
+     * Draws the route as polyline on the map and returns the route details to [RouteDrawCallback].
      *
      * @param callback will be called when the route is drawn on the map as polyline
      */
@@ -82,10 +97,17 @@ class DirectionsOptions(private val mapController: MapController) {
         )
     }
 
+    /**
+     * Callback to be invoked when the route is drawn or there is an error.
+     */
     interface RouteDrawCallback {
 
         fun onRouteDrawn(route: Route)
 
+        /**
+         * Called when route is not drawn and an error has occurred.
+         *
+         */
         fun onError(message: String, e: Exception)
 
     }
