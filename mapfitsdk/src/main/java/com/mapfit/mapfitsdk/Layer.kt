@@ -3,6 +3,8 @@ package com.mapfit.mapfitsdk
 import com.mapfit.mapfitsdk.annotations.Annotation
 
 /**
+ * Layer structure enables
+ *
  * Created by dogangulcan on 12/21/17.
  */
 class Layer {

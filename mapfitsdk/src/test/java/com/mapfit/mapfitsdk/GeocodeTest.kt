@@ -31,7 +31,11 @@ class GeocodeTest {
 
     @Test(expected = MapfitConfigurationException::class)
     fun testMapfitConfiguration() {
-        GeocoderApi().geocodeAddress("119 w 24th st new york ny 10011", geocoderCallback)
+        GeocoderApi().geocodeAddress(
+            "119 w 24th st new york ny 10011",
+            true,
+            geocoderCallback
+        )
     }
 
     @Test
@@ -46,8 +50,11 @@ class GeocodeTest {
 //        server.start()
 
         val geocoder = GeocoderApi()
-        geocoder.geocodeAddress("119 w 24th st new york ny 10011", geocoderCallback)
-
+        geocoder.geocodeAddress(
+            "119 w 24th st new york ny 10011",
+            true,
+            geocoderCallback
+        )
 
         Thread.sleep(1000)
         verify(geocoderCallback, times(1))

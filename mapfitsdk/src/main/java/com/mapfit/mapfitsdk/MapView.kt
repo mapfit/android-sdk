@@ -42,7 +42,7 @@ import java.io.IOException
 
 
 /**
- * The view map is drawn onto.
+ * The view map is drawn to.
  *
  * Created by dogangulcan on 12/18/17.
  */
@@ -57,12 +57,11 @@ class MapView(
     private lateinit var mapController: MapController
     private lateinit var mapOptions: MapOptions
     private lateinit var directionsOptions: DirectionsOptions
-    private val geocoder by lazy { GeocoderApi() }
+    private val geocoder = GeocoderApi()
 
     // Views
     private val controlsView: View by lazy {
-        LayoutInflater.from(context)
-            .inflate(R.layout.overlay_map_controls, this, false)
+        LayoutInflater.from(context).inflate(R.layout.overlay_map_controls, this, false)
     }
 
     private val placeInfoFrame = FrameLayout(context)
@@ -90,6 +89,7 @@ class MapView(
 
     // Click Listeners
     private var markerClickListener: OnMarkerClickListener? = null
+    private var polylineClickListener: OnPolylineClickListener? = null
     private var mapClickListener: OnMapClickListener? = null
     private var mapDoubleClickListener: OnMapDoubleClickListener? = null
     private var mapLongClickListener: OnMapLongClickListener? = null
@@ -108,6 +108,7 @@ class MapView(
         Mapfit.getApiKey()
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+
         post {
             viewHeight = height
             viewWidth = width

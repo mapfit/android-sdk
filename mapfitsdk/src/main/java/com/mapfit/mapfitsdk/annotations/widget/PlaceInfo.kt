@@ -7,15 +7,14 @@ import com.mapfit.mapfitsdk.MapController
 import com.mapfit.mapfitsdk.R
 import com.mapfit.mapfitsdk.annotations.Marker
 import kotlinx.coroutines.experimental.*
-import kotlinx.coroutines.experimental.android.UI
 
 /**
  * Created by dogangulcan on 1/30/18.
  */
 class PlaceInfo internal constructor(
-    internal var infoView: View,
+    private var infoView: View,
     internal val marker: Marker,
-    internal val mapController: MapController
+    private val mapController: MapController
 ) {
 
     private lateinit var titleView: TextView
@@ -88,13 +87,12 @@ class PlaceInfo internal constructor(
         infoView.visibility = View.GONE
     }
 
-    fun getVisible(): Boolean {
-        return infoView.visibility == View.VISIBLE
-    }
+    fun getVisible(): Boolean = infoView.visibility == View.VISIBLE
 
-    fun getVisible(mapController: MapController): Boolean {
-        return infoView.visibility == View.VISIBLE && this.mapController == mapController
-    }
+
+    fun getVisible(mapController: MapController): Boolean =
+        infoView.visibility == View.VISIBLE && this.mapController == mapController
+
 
     internal fun dispose(removed: Boolean = false) {
         if (infoView.parent != null) {
@@ -108,7 +106,6 @@ class PlaceInfo internal constructor(
 
     internal fun onPositionChanged() {
         if (infoView.visibility != View.GONE) {
-//            val point = marker.getScreenPosition(marker.getId())
             val point = marker.getScreenPosition(mapController)
             infoView.post {
                 infoView.x = point.x - (viewWidth?.div(2) ?: 0)

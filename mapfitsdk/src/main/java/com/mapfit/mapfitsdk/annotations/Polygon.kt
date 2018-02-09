@@ -1,6 +1,5 @@
 package com.mapfit.mapfitsdk.annotations
 
-import com.mapfit.mapfitsdk.annotations.base.AnnotationStyle
 
 /**
  * Created by dogangulcan on 12/22/17.

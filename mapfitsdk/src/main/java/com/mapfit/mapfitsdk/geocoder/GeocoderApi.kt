@@ -43,9 +43,11 @@ class GeocoderApi {
      * @param address an address such as "119w 24th st NY" venue names are shouldn't be given
      * @param callback for response and errors
      */
-    fun geocodeAddress(address: String, callback: GeocoderCallback) {
+    @JvmOverloads
+    fun geocodeAddress(address: String, withBuilding: Boolean = false, callback: GeocoderCallback) {
+
         val request = Request.Builder()
-            .url(createRequestUrl(address))
+            .url(createRequestUrl(address, withBuilding))
             .build()
 
         httpClient.newCall(request).enqueue(object : Callback {
@@ -73,10 +75,10 @@ class GeocoderApi {
         })
     }
 
-    private fun createRequestUrl(address: String): String =
+    private fun createRequestUrl(address: String, withBuilding: Boolean): String =
         "https://api.mapfit.com/v2/geocode?" +
                 "street_address=$address" +
-                "&building=true" +
+                "&building=$withBuilding" +
                 "&api_key=${Mapfit.getApiKey()}"
 
 }

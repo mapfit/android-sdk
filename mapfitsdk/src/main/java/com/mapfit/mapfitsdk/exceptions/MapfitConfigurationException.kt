@@ -6,5 +6,5 @@ package com.mapfit.mapfitsdk.exceptions
 class MapfitConfigurationException : RuntimeException(
         "\nUsing MapView requires setting a valid access token. Use Mapfit.getInstance(context, apiKey)" +
                 " to setup Mapfit." +
-                "\nIf you don't have an api key, you can get from https://mapfit.com/getakey.\n"
+                "\nIf you don't have an api key, you can get from https://mapfit.com/getstarted.\n"
 )

@@ -54,7 +54,7 @@ internal class GeocodeParser internal constructor() {
                 val neighborhood = addressJson.getSafeString("neighborhood")
                 val streetAddress = addressJson.getSafeString("street_address")
 
-                val buildingPolygon: List<LatLng> = if (addressJson.has("building")) {
+                val buildingPolygon: List<List<LatLng>> = if (addressJson.has("building")) {
                     parseBuildingPolygon(addressJson.getJSONObject("building"))
                 } else {
                     emptyList()
@@ -104,12 +104,22 @@ internal class GeocodeParser internal constructor() {
         return addressList
     }
 
-    private fun parseBuildingPolygon(jsonObject: JSONObject): List<LatLng> {
-        val latLngList = mutableListOf<LatLng>()
+    private fun parseBuildingPolygon(jsonObject: JSONObject): List<List<LatLng>> {
+        val polygon = mutableListOf<List<LatLng>>()
         val coordinates = jsonObject.getJSONArray("coordinates").getJSONArray(0)
 
         (0 until coordinates.length())
-            .map { coordinates.getJSONArray(it) }
+            .forEach { polygon.add(parseCoordinates(coordinates.getJSONArray(0))) }
+
+
+        return polygon
+    }
+
+    private fun parseCoordinates(jsonArray: JSONArray): List<LatLng> {
+        val latLngList = mutableListOf<LatLng>()
+
+        (0 until jsonArray.length())
+            .map { jsonArray.getJSONArray(it) }
             .map { LatLng(it[1] as Double, it[0] as Double) }
             .forEach { latLngList.add(it) }
 

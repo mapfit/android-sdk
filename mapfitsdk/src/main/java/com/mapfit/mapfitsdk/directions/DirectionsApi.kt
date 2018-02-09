@@ -42,6 +42,51 @@ class DirectionsApi {
         internal val directionsParser = DirectionsParser()
     }
 
+
+    /**
+     * Returns directions for given origin and destination. To have reliable results, you should
+     * provide an origin and destination
+     *
+     * @param originLocation coordinates as [LatLng] for the origin location
+     * @param destinationLocation coordinates as [LatLng] for the destination location
+     * @param directionsType type for the directions. Default value is driving
+     * @param callback will be called when [Route] is obtained
+     */
+    fun getDirections(
+        originLocation: LatLng = LatLng(),
+        destinationLocation: LatLng = LatLng(),
+        directionsType: DirectionsType = DirectionsType.DRIVING,
+        callback: DirectionsCallback
+    ) {
+        getDirections(
+            originLocation = originLocation,
+            destinationLocation = destinationLocation,
+            directionsType = directionsType,
+            callback = callback
+        )
+    }
+
+    /**
+     * Returns directions for given origin and destination. To have reliable results, you should
+     * provide an origin and destination
+     *
+     * @param originLocation coordinates as [LatLng] for the origin location
+     * @param destinationLocation coordinates as [LatLng] for the destination location
+     * @param directionsType type for the directions. Default value is driving
+     * @param callback will be called when [Route] is obtained
+     */
+    fun getDirections(
+        originLocation: LatLng = LatLng(),
+        destinationLocation: LatLng = LatLng(),
+        callback: DirectionsCallback
+    ) {
+        getDirections(
+            originLocation = originLocation,
+            destinationLocation = destinationLocation,
+            callback = callback
+        )
+    }
+
     /**
      * Returns directions for given origin and destination. To have reliable results, you should
      * provide an origin and destination
@@ -56,8 +101,8 @@ class DirectionsApi {
     @JvmOverloads
     fun getDirections(
         originAddress: String = "",
-        originLocation: LatLng = LatLng(),
         destinationAddress: String = "",
+        originLocation: LatLng = LatLng(),
         destinationLocation: LatLng = LatLng(),
         directionsType: DirectionsType = DirectionsType.DRIVING,
         callback: DirectionsCallback

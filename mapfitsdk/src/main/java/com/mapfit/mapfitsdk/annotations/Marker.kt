@@ -49,23 +49,31 @@ class Marker internal constructor(
     private var previousIcon: Bitmap? = null
     private var iconChangedWhenPlaceInfo: Bitmap? = null
 
-    var title: String = ""
-        set(value) {
-            field = value
-            updatePlaceInfoFields()
-        }
+    private var title: String = ""
+    private var subtitle1: String = ""
+    private var subtitle2: String = ""
 
-    var subtitle1: String = ""
-        set(value) {
-            field = value
-            updatePlaceInfoFields()
-        }
+    fun getTitle() = title
+    fun getSubtitle1() = subtitle1
+    fun getSubtitle2() = subtitle2
 
-    var subtitle2: String = ""
-        set(value) {
-            field = value
-            updatePlaceInfoFields()
-        }
+    fun setTitle(title: String): Marker {
+        this.title = title
+        updatePlaceInfoFields()
+        return this
+    }
+
+    fun setSubtitle1(subtitle1: String): Marker {
+        this.subtitle1 = subtitle1
+        updatePlaceInfoFields()
+        return this
+    }
+
+    fun setSubtitle2(subtitle2: String): Marker {
+        this.subtitle2 = subtitle2
+        updatePlaceInfoFields()
+        return this
+    }
 
     private fun updatePlaceInfoFields() {
         placeInfoMap.values.forEach {

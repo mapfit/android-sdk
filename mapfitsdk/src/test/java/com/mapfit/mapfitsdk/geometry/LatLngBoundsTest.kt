@@ -14,12 +14,13 @@ class LatLngBoundsTest {
     @Before
     fun init() {
         val latLngList = listOf(
-                LatLng(37.198504, -83.272133),
-                LatLng(29.652243, -29.042111),
-                LatLng(38.246623, -82.737144),
-                LatLng(36.691771, -110.030517),
-                LatLng(37.940202, -107.461721),
-                LatLng(39.400789, -80.243273))
+            LatLng(37.198504, -83.272133),
+            LatLng(29.652243, -29.042111),
+            LatLng(38.246623, -82.737144),
+            LatLng(36.691771, -110.030517),
+            LatLng(37.940202, -107.461721),
+            LatLng(39.400789, -80.243273)
+        )
 
         val boundsBuilder = LatLngBounds.Builder()
 
@@ -42,14 +43,16 @@ class LatLngBoundsTest {
     @Test
     fun testZoomLevelAndCenter() {
         val expectedCenter = LatLng(42.09842441252814, -72.40426108071209)
-        val expectedZoomLevel = 2.7180634f
+        val expectedZoomLevel = 3.6440628f
 
         val viewWidth = 1440
         val viewHeight = 2194
 
-        val (center, zoomLevel) = bounds.getVisibleBounds(viewWidth, viewHeight,1f)
+        val (center, zoomLevel) = bounds.getVisibleBounds(viewWidth, viewHeight, 1f)
 
-        Assert.assertEquals(expectedCenter, center)
+
+        Assert.assertEquals(expectedCenter.lat, center.lat, 0.00001)
+        Assert.assertEquals(expectedCenter.lon, center.lon, 0.00001)
         Assert.assertEquals(expectedZoomLevel, zoomLevel)
     }
 

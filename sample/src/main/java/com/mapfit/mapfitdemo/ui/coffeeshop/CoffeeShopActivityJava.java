@@ -1,5 +1,6 @@
 package com.mapfit.mapfitdemo.ui.coffeeshop;
 
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.view.GravityCompat;
@@ -10,6 +11,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.TextView;
 
 import com.mapfit.mapfitdemo.R;
 import com.mapfit.mapfitdemo.data.model.CoffeeShop;
@@ -17,12 +19,29 @@ import com.mapfit.mapfitdemo.module.coffeeshop.data.Repository;
 import com.mapfit.mapfitdemo.ui.adapter.FilterAdapter;
 import com.mapfit.mapfitdemo.ui.adapter.FilterType;
 import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener;
+import com.mapfit.mapfitsdk.DirectionsOptions;
 import com.mapfit.mapfitsdk.Layer;
 import com.mapfit.mapfitsdk.MapView;
 import com.mapfit.mapfitsdk.MapfitMap;
+import com.mapfit.mapfitsdk.OnMapClickListener;
+import com.mapfit.mapfitsdk.OnMapDoubleClickListener;
+import com.mapfit.mapfitsdk.OnMapLongClickListener;
+import com.mapfit.mapfitsdk.OnMapPanListener;
+import com.mapfit.mapfitsdk.OnMapPinchListener;
 import com.mapfit.mapfitsdk.OnMapReadyCallback;
 import com.mapfit.mapfitsdk.annotations.Marker;
+import com.mapfit.mapfitsdk.annotations.Polygon;
+import com.mapfit.mapfitsdk.annotations.Polyline;
+import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener;
+import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener;
+import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener;
 import com.mapfit.mapfitsdk.directions.DirectionsApi;
+import com.mapfit.mapfitsdk.directions.DirectionsCallback;
+import com.mapfit.mapfitsdk.directions.DirectionsType;
+import com.mapfit.mapfitsdk.directions.model.Route;
+import com.mapfit.mapfitsdk.geocoder.GeocoderApi;
+import com.mapfit.mapfitsdk.geocoder.GeocoderCallback;
+import com.mapfit.mapfitsdk.geocoder.model.Address;
 import com.mapfit.mapfitsdk.geometry.LatLng;
 
 import org.jetbrains.annotations.NotNull;
@@ -33,11 +52,11 @@ import java.util.List;
 /**
  * Created by dogangulcan on 1/17/18.
  */
-class CoffeeShopActivityJava extends AppCompatActivity {
+public class CoffeeShopActivityJava extends AppCompatActivity {
 
     private MapfitMap mapfitMap;
-    private Repository repository = new Repository(this);
-    private List<CoffeeShop> coffeeShops = repository.getCoffeeShops();
+    private Repository repository;
+    private List<CoffeeShop> coffeeShops;
     private List<Marker> markers = new ArrayList<>();
     private Layer alwaysOpenShopLayer = new Layer();
     private BottomSheetBehavior<View> bottomSheetBehavior;
@@ -56,6 +75,7 @@ class CoffeeShopActivityJava extends AppCompatActivity {
 
     private void init() {
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        repository = new Repository(this);
 
         FilterAdapter filterAdapter = new FilterAdapter(onFilterCheckedListener);
         filterAdapter.addItems(repository.getFilters());
@@ -65,6 +85,7 @@ class CoffeeShopActivityJava extends AppCompatActivity {
         recyclerView.setAdapter(filterAdapter);
 
         bottomSheetBehavior = BottomSheetBehavior.from(findViewById(R.id.bottom_sheet));
+        coffeeShops = repository.getCoffeeShops();
 
     }
 
@@ -81,6 +102,18 @@ class CoffeeShopActivityJava extends AppCompatActivity {
 //
 //                mapfitMap.getMapOptions().setMaxZoom(55.0f)
 
+        });
+
+        new GeocoderApi().geocodeAddress("119w 24th st new york ny", new GeocoderCallback() {
+            @Override
+            public void onError(@NotNull String message, @NotNull Exception e) {
+
+            }
+
+            @Override
+            public void onSuccess(@NotNull List<Address> addressList) {
+
+            }
         });
 
     }
@@ -121,6 +154,110 @@ class CoffeeShopActivityJava extends AppCompatActivity {
 
         }
     };
+
+
+    private void directions() {
+        DirectionsCallback callback = new DirectionsCallback() {
+
+            @Override
+            public void onSuccess(@NotNull Route route) {
+                // you can draw and show the route now!
+            }
+
+            @Override
+            public void onError(@NotNull String message, @NotNull Exception e) {
+                // handle the error
+            }
+
+        };
+
+        new DirectionsApi().getDirections(
+                "119 W 24th St new york",
+                "1000 5th Ave, New York, NY 10028",
+                callback);
+
+        new DirectionsApi().getDirections(
+                new LatLng(40.744043, -73.993209),
+                new LatLng(40.7794406, -73.9654327),
+                DirectionsType.CYCLING,
+                callback);
+
+        mapfitMap.getDirectionsOptions()
+                .setDestination(new LatLng(40.744043, -73.993209))
+                .setOrigin(new LatLng(40.7794406, -73.9654327))
+                .setType(DirectionsType.CYCLING)
+                .showDirections(new DirectionsOptions.RouteDrawCallback() {
+
+                    @Override
+                    public void onRouteDrawn(Route route, List<Polyline> legs) {
+                        // at this point, the route is drawn on map
+                    }
+
+                    @Override
+                    public void onError(@NotNull String message, @NotNull Exception e) {
+                        // handle the error
+                    }
+
+                });
+
+
+        mapfitMap.setOnMapClickListener(new OnMapClickListener() {
+            @Override
+            public void onMapClicked(@NotNull LatLng latLng) {
+
+            }
+        });
+
+        mapfitMap.setOnMapDoubleClickListener(new OnMapDoubleClickListener() {
+            @Override
+            public void onMapDoubleClicked(@NotNull LatLng latLng) {
+
+            }
+        });
+
+        mapfitMap.setOnMapLongClickListener(new OnMapLongClickListener() {
+            @Override
+            public void onMapLongClicked(@NotNull LatLng latLng) {
+
+            }
+        });
+
+        mapfitMap.setOnMapPanListener(new OnMapPanListener() {
+            @Override
+            public void onMapPan() {
+
+            }
+        });
+
+        mapfitMap.setOnMapPinchListener(new OnMapPinchListener() {
+            @Override
+            public void onMapPinch() {
+
+            }
+        });
+
+        mapfitMap.setOnMarkerClickListener(new OnMarkerClickListener() {
+            @Override
+            public void onMarkerClicked(@NotNull Marker marker) {
+
+            }
+        });
+
+        mapfitMap.setOnPolylineClickListener(new OnPolylineClickListener() {
+            @Override
+            public void onPolylineClicked(@NotNull Polyline polyline) {
+
+            }
+        });
+
+        mapfitMap.setOnPolygonClickListener(new OnPolygonClickListener() {
+            @Override
+            public void onPolygonClicked(@NotNull Polygon polygon) {
+
+            }
+        });
+
+    }
 
     private void initFilterDrawer() {
 
