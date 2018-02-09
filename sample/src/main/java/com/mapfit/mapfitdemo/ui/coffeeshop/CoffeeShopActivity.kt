@@ -25,8 +25,12 @@ import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener
 import com.mapfit.mapfitsdk.*
 import com.mapfit.mapfitsdk.annotations.MapfitMarker
 import com.mapfit.mapfitsdk.annotations.Marker
+import com.mapfit.mapfitsdk.annotations.Polygon
+import com.mapfit.mapfitsdk.annotations.Polyline
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
+import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
+import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener
 import com.mapfit.mapfitsdk.directions.DirectionsApi
 import com.mapfit.mapfitsdk.directions.DirectionsCallback
 import com.mapfit.mapfitsdk.directions.DirectionsType
@@ -41,7 +45,6 @@ import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
@@ -67,6 +70,7 @@ class CoffeeShopActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_coffee_shops)
+
 
         init()
         initFilterDrawer()
@@ -131,27 +135,29 @@ class CoffeeShopActivity : AppCompatActivity() {
             }
         })
 
+
+        mapfitMap.setOnMarkerClickListener(object : OnMarkerClickListener {
+            override fun onMarkerClicked(marker: Marker) {
+
+            }
+        })
+
     }
 
 
     private fun drawRouteWithMapView() {
 
-
         mapfitMap.getDirectionsOptions()
-            .setDestination(LatLng(40.744255, -73.993774))
-            .setOrigin(LatLng(40.575534, -73.961857))
-            .setType(DirectionsType.DRIVING)
+            .setDestination(LatLng(40.744043, -73.993209))
+            .setOrigin(LatLng(40.7794406, -73.9654327))
+            .setType(DirectionsType.CYCLING)
             .showDirections(object : DirectionsOptions.RouteDrawCallback {
-                override fun onRouteDrawn(route: Route) {
-                    Toast.makeText(
-                        this@CoffeeShopActivity,
-                        "Route is drawn!",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                override fun onRouteDrawn(route: Route, legs: List<Polyline>) {
+                    // at this point, the route is drawn on map
                 }
 
                 override fun onError(message: String, e: Exception) {
-                    e.printStackTrace()
+                    // handle the error
                 }
             })
     }
@@ -163,18 +169,24 @@ class CoffeeShopActivity : AppCompatActivity() {
 
             val callback = object : DirectionsCallback {
                 override fun onSuccess(route: Route) {
-                    drawRoute(route)
-
+                    // you can draw and show the route now!
                 }
 
                 override fun onError(message: String, e: Exception) {
-                    e.printStackTrace()
+                    // handle the error
                 }
             }
 
             DirectionsApi().getDirections(
                 originAddress = "119 W 24th St new york",
-                destinationAddress = "107 Sacred Heart Ln baltimore",
+                destinationAddress = "1000 5th Ave, New York, NY 10028",
+                directionsType = DirectionsType.CYCLING,
+                callback = callback
+            )
+
+            DirectionsApi().getDirections(
+                originLocation = LatLng(40.744043, -73.993209),
+                destinationLocation = LatLng(40.7794406, -73.9654327),
                 callback = callback
             )
 
@@ -219,7 +231,7 @@ class CoffeeShopActivity : AppCompatActivity() {
             val originLocation = LatLng(route.sourceLocation[1], route.sourceLocation[0])
             val startMarker =
                 mapfitMap2.addMarker(destinationLocation).setIcon(MapfitMarker.LIGHT_COOKING)
-            val endMarker=mapfitMap2.addMarker(originLocation).setIcon(MapfitMarker.DARK_BAR)
+            val endMarker = mapfitMap2.addMarker(originLocation).setIcon(MapfitMarker.DARK_BAR)
 
             mapfitMap2.setCenter(originLocation, 200)
 
@@ -283,13 +295,13 @@ class CoffeeShopActivity : AppCompatActivity() {
                     false
                 )
 
-//            setPlaceInfoAdapter(object : MapfitMap.PlaceInfoAdapter {
+//            mapfitMap.setPlaceInfoAdapter(object : MapfitMap.PlaceInfoAdapter {
 //                override fun getPlaceInfoView(marker: Marker): View {
 //
-//                    customView.img.setImageResource(R.drawable.ic_watermark_light)
-//                    customView.txtTitle.text = marker.title
+//                    val textView = TextView(context)
+//                    textView.text = "Here I am!"
 //
-//                    return customView
+//                    return textView
 //                }
 //            })
 
@@ -447,10 +459,21 @@ class CoffeeShopActivity : AppCompatActivity() {
             }
 
             marker.setIcon(markerIcon)
+                .setTitle(shop.title)
+                .setSubtitle1(shop.address)
+                .setSubtitle2(shop.id)
+            val position = LatLng(40.744023, -73.993150)
 
-            marker.title = shop.title
-            marker.subtitle1 = shop.address
-            marker.subtitle2 = shop.id
+//            marker.icon(markerIcon)
+//                .title(shop.title)
+//                .subtitle1(shop.address)
+//                .subtitle2(shop.id)
+//
+//
+//            marker.icon = markerIcon
+//            marker.title = shop.title
+//            marker.subtitle1 = shop.address
+//            marker.subtitle2 = shop.id
 
             markers.add(marker)
 
@@ -458,7 +481,6 @@ class CoffeeShopActivity : AppCompatActivity() {
             if (shop.open24Hours) {
                 alwaysOpenShopLayer.add(marker)
             }
-
         }
 
         val westFortGreen = LatLng(40.689837, -73.982629)
@@ -467,7 +489,10 @@ class CoffeeShopActivity : AppCompatActivity() {
 //            markers[1].setIcon("https://darley-cpl.netdna-ssl.com/sites/default/files/styles/stallion_thumbnail/public/drupal-media/stallion-images/Australia-2016/exceed-and-excel/square-Exceed_And_Excel_0001_Thoroughbred_stallion.jpg?itok=ByfQuwCC")
 //            markers[1].setPosition(westFortGreen)
         }
-
+        mapfitMap.setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
+            override fun onPlaceInfoClicked(marker: Marker) {
+            }
+        })
 
     }
 
@@ -475,6 +500,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
 
         GeocoderApi().geocodeAddress("119w 24th st new york ny",
+            true,
             object : GeocoderCallback {
 
                 override fun onError(message: String, e: Exception) {
@@ -508,6 +534,58 @@ class CoffeeShopActivity : AppCompatActivity() {
                     }
                 }
             })
+
+
+
+        mapfitMap.setOnMapClickListener(object : OnMapClickListener {
+            override fun onMapClicked(latLng: LatLng) {
+
+            }
+        })
+
+        mapfitMap.setOnMapDoubleClickListener(object : OnMapDoubleClickListener {
+            override fun onMapDoubleClicked(latLng: LatLng) {
+
+            }
+        })
+
+        mapfitMap.setOnMapLongClickListener(object : OnMapLongClickListener {
+            override fun onMapLongClicked(latLng: LatLng) {
+
+            }
+        })
+
+        mapfitMap.setOnMapPanListener(object : OnMapPanListener {
+            override fun onMapPan() {
+
+            }
+        })
+
+        mapfitMap.setOnMapPinchListener(object : OnMapPinchListener {
+            override fun onMapPinch() {
+
+            }
+        })
+
+        mapfitMap.setOnMarkerClickListener(object : OnMarkerClickListener {
+            override fun onMarkerClicked(marker: Marker) {
+
+            }
+        })
+
+        mapfitMap.setOnPolylineClickListener(object : OnPolylineClickListener {
+            override fun onPolylineClicked(polyline: Polyline) {
+
+            }
+        })
+
+        mapfitMap.setOnPolygonClickListener(object : OnPolygonClickListener {
+            override fun onPolygonClicked(polygon: Polygon) {
+
+            }
+        })
+
+
     }
 
     override fun onDestroy() {

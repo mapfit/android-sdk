@@ -89,6 +89,7 @@ class MapView(
 
     // Click Listeners
     private var markerClickListener: OnMarkerClickListener? = null
+    private var polylineClickListener: OnPolylineClickListener? = null
     private var mapClickListener: OnMapClickListener? = null
     private var mapDoubleClickListener: OnMapDoubleClickListener? = null
     private var mapLongClickListener: OnMapLongClickListener? = null

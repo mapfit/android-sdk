@@ -1,6 +1,8 @@
 package com.mapfit.mapfitsdk.geocoder.model
 
 /**
+ * Entrance types of a place.
+ *
  * Created by dogangulcan on 1/18/18.
  */
 enum class EntranceType(val sourceName: String) {

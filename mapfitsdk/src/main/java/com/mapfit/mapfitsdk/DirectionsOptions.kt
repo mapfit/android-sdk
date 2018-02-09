@@ -1,5 +1,6 @@
 package com.mapfit.mapfitsdk
 
+import com.mapfit.mapfitsdk.annotations.Polyline
 import com.mapfit.mapfitsdk.directions.DirectionsApi
 import com.mapfit.mapfitsdk.directions.DirectionsCallback
 import com.mapfit.mapfitsdk.directions.DirectionsType
@@ -18,7 +19,7 @@ class DirectionsOptions internal constructor(private val mapController: MapContr
     private var destinationLocation = LatLng()
     private var originLocationString = ""
     private var destinationLocationString = ""
-    var type: DirectionsType = DirectionsType.DRIVING
+    private var type: DirectionsType = DirectionsType.DRIVING
 
     internal var routeDrawn = false
 
@@ -73,6 +74,12 @@ class DirectionsOptions internal constructor(private val mapController: MapContr
     }
 
     /**
+     * Returns the current [DirectionsType].
+     * @return directions type
+     */
+    fun getType() = type
+
+    /**
      * Draws the route as polyline on the map and returns the route details to [RouteDrawCallback].
      *
      * @param callback will be called when the route is drawn on the map as polyline
@@ -81,8 +88,8 @@ class DirectionsOptions internal constructor(private val mapController: MapContr
 
         val directionsCallback = object : DirectionsCallback {
             override fun onSuccess(route: Route) {
-                drawRoute(route)
-                callback.onRouteDrawn(route)
+                val legs = drawRoute(route)
+                callback.onRouteDrawn(route, legs)
             }
 
             override fun onError(message: String, e: Exception) {
@@ -102,22 +109,24 @@ class DirectionsOptions internal constructor(private val mapController: MapContr
      */
     interface RouteDrawCallback {
 
-        fun onRouteDrawn(route: Route)
+        fun onRouteDrawn(route: Route, legs: List<Polyline>)
 
         /**
          * Called when route is not drawn and an error has occurred.
-         *
          */
         fun onError(message: String, e: Exception)
 
     }
 
-    private fun drawRoute(route: Route) {
+    private fun drawRoute(route: Route): List<Polyline> {
+        val legs = mutableListOf<Polyline>()
         route.trip.legs.forEach {
             val line = decodePolyline(it.shape)
-            mapController.addPolyline(line)
+            val polyline = mapController.addPolyline(line)
+            legs.add(polyline)
             routeDrawn = true
         }
+        return legs
     }
 
 }
