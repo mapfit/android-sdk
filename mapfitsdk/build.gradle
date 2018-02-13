@@ -128,7 +128,7 @@ kotlin {
 apply plugin: 'maven-publish'
 group = 'com.mapfit'
 archivesBaseName = 'mapfit-sdk'
-version = '1'
+version = '1.0.0'
 
 publishing {
 

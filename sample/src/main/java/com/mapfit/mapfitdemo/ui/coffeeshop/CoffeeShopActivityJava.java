@@ -182,6 +182,15 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
                 DirectionsType.CYCLING,
                 callback);
 
+        List<LatLng> line = new ArrayList<>();
+
+        line.add(new LatLng(40.693825, -73.998691));
+        line.add(new LatLng(40.6902223, -73.9770368));
+        line.add(new LatLng(40.6930532, -73.9860919));
+        line.add(new LatLng(40.7061326, -74.000769));
+
+        mapfitMap.addPolyline(line);
+
         mapfitMap.getDirectionsOptions()
                 .setDestination(new LatLng(40.744043, -73.993209))
                 .setOrigin(new LatLng(40.7794406, -73.9654327))

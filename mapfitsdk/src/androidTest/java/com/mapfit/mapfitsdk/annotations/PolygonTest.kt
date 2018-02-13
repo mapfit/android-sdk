@@ -21,19 +21,22 @@ import org.mockito.MockitoAnnotations
  * Created by dogangulcan on 1/17/18.
  */
 @RunWith(AndroidJUnit4::class)
-class PolylineTest {
+class PolygonTest {
 
     private val mMockContext: Context = InstrumentationRegistry.getContext()
 
     private lateinit var mapfitMap: MapfitMap
 
     private val line by lazy {
-        val list = mutableListOf<LatLng>()
+        val list = mutableListOf<List<LatLng>>()
+        val subList = mutableListOf<LatLng>()
 
-        list.add(LatLng(40.693825, -73.998691))
-        list.add(LatLng(40.6902223, -73.9770368))
-        list.add(LatLng(40.6930532, -73.9860919))
-        list.add(LatLng(40.7061326, -74.000769))
+        subList.add(LatLng(40.693825, -73.998691))
+        subList.add(LatLng(40.6902223, -73.9770368))
+        subList.add(LatLng(40.6930532, -73.9860919))
+        subList.add(LatLng(40.7061326, -74.000769))
+        subList.add(LatLng(40.693825, -73.998691))
+        list.add(subList)
         list
     }
 
@@ -54,22 +57,22 @@ class PolylineTest {
         val mapView: MapView = activityRule.activity.findViewById(R.id.mapView)
         mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
-                this@PolylineTest.mapfitMap = mapfitMap
+                this@PolygonTest.mapfitMap = mapfitMap
             }
         })
     }
 
     @Test
     @UiThreadTest
-    fun testAddRemovePolyline() {
-        val polyline = mapfitMap.addPolyline(line)
+    fun testAddRemovePolygon() {
+        val polygon = mapfitMap.addPolygon(line)
 
-        assertNotNull(polyline)
-        assertTrue(mapfitMap.has(polyline))
-//        assertEquals(4, polyline.points.size)
+        assertNotNull(polygon)
+        assertTrue(mapfitMap.has(polygon))
+        assertEquals(1, polygon.rings.size)
 
-        mapfitMap.removePolyline(polyline)
-        assertFalse(mapfitMap.has(polyline))
+        mapfitMap.removePolygon(polygon)
+        assertFalse(mapfitMap.has(polygon))
     }
 
 

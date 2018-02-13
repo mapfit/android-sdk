@@ -1,6 +1,7 @@
 package com.mapfit.mapfitsdk;
 
 import com.mapfit.mapfitsdk.annotations.Marker;
+import com.mapfit.mapfitsdk.annotations.Polygon;
 import com.mapfit.mapfitsdk.annotations.Polyline;
 import com.mapfit.mapfitsdk.geometry.LatLng;
 import com.mapfit.tangram.geometry.Geometry;
@@ -15,7 +16,7 @@ public class MapData {
 
     String name;
     long id = 0;
-    MapController map;
+    private MapController map;
 
     /**
      * For package-internal use only; create a new {@code MapData}
@@ -64,10 +65,8 @@ public class MapData {
 
     /**
      * Add a point feature to this collection.
+     * the scene file used by the map; may be null.
      *
-     * @param point      The coordinates of the feature.
-     * @param properties The properties of the feature, used for filtering and styling according to
-     *                   the scene file used by the map; may be null.
      * @return This object, for chaining.
      */
     public MapData addPoint(Marker marker) {
@@ -95,16 +94,17 @@ public class MapData {
     /**
      * Add a polygon feature to this collection.
      *
-     * @param polygon    A list of rings describing the shape of the feature. Each
-     *                   ring is a list of coordinates in which the first point is the same as the last point. The
-     *                   first ring is taken as the "exterior" of the polygon and rings with opposite winding are
-     *                   considered "holes".
-     * @param properties The properties of the feature, used for filtering and styling according to
-     *                   the scene file used by the map; may be null.
+     * @param polygon A list of rings describing the shape of the feature. Each
+     *                ring is a list of coordinates in which the first point is the same as the last point. The
+     *                first ring is taken as the "exterior" of the polygon and rings with opposite winding are
+     *                considered "holes".
      * @return This object, for chaining.
      */
-    public MapData addPolygon(List<List<LatLng>> polygon, Map<String, String> properties) {
-//        addFeature(new Polygon(polygon, properties));
+    public MapData addPolygon(Polygon polygon) {
+        map.addFeature(id,
+                polygon.getCoordinates(),
+                polygon.rings,
+                polygon.getProperties());
         return this;
     }
 

@@ -35,9 +35,6 @@ class MarkerTest {
     private lateinit var mapfitMap: MapfitMap
 
     @Mock
-    private lateinit var onMarkerAddedCallback: OnMarkerAddedCallback
-
-    @Mock
     private lateinit var onMarkerClickListener: OnMarkerClickListener
 
     @Mock
@@ -110,15 +107,18 @@ class MarkerTest {
 
         var actualMarker: Marker? = null
 
-        mapfitMap.addMarker("119 w 24th st new york ny 10011", object : OnMarkerAddedCallback {
-            override fun onMarkerAdded(marker: Marker) {
-                actualMarker = marker
-            }
+        mapfitMap.addMarker(
+            "119 w 24th st new york ny 10011",
+            true,
+            object : OnMarkerAddedCallback {
+                override fun onMarkerAdded(marker: Marker) {
+                    actualMarker = marker
+                }
 
-            override fun onError(exception: Exception) {
+                override fun onError(exception: Exception) {
 
-            }
-        })
+                }
+            })
 
         Thread.sleep(500)
         Assert.assertEquals(

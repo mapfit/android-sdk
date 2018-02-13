@@ -290,7 +290,7 @@ global:
     #
     #label styling
 
-    text_fill:          white            # WHITE
+    text_fill:          '#73839B'            # WHITE
     text_fill2:         '#73839B'             # WHITE
     text_fill_road_e:   '#73839B'             # WHITE
     text_fill_exits:    '#D16768'          # motorway junctions, highway_casing1
@@ -907,19 +907,22 @@ layers:
             sdk-line-overlay:
                 interactive: global.sdk_interactive
                 color: '#dc3983'
-                order: 1
+                order: 100
                 width: 3px
     mz_default_polygon:
         data: { source: mz_default_polygon }
         draw:
             sdk-polygon-overlay:
                 interactive: global.sdk_interactive
-                color: [0.,0.,0.,0.4]  #'#06b1e2'
-                order: 501
+                color: '#20dc3983'
+                order: 500
+
             sdk-line-overlay:
-                color: black
-                order: 502
-                width: 0px
+                color: '#dc3983'
+                cap: round
+                order: 501
+                width: 3px
+
     water:
         data: { source: mapfit, layer: water }
         ocean-water:

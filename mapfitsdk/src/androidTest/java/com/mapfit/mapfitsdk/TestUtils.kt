@@ -152,10 +152,10 @@ private fun performPinch(
      * Events sequence of zoom gesture:
      *
      * 1. Send ACTION_DOWN event of one start point
-     * 2. Send ACTION_POINTER_DOWN of two start points
-     * 3. Send ACTION_MOVE of two middle points
-     * 4. Repeat step 3 with updated middle points (x,y), until reach the end points
-     * 5. Send ACTION_POINTER_UP of two end points
+     * 2. Send ACTION_POINTER_DOWN of two start rings
+     * 3. Send ACTION_MOVE of two middle rings
+     * 4. Repeat step 3 with updated middle rings (x,y), until reach the end rings
+     * 5. Send ACTION_POINTER_UP of two end rings
      * 6. Send ACTION_UP of one end point
      */
 

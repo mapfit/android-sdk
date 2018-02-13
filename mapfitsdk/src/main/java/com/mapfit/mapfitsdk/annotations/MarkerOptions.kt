@@ -4,7 +4,7 @@ import com.mapfit.mapfitsdk.MapController
 import java.util.HashMap
 
 /**
- * Defines marker options for [Marker]
+ * Defines options for [Marker].
  *
  * Created by dogangulcan on 1/3/18.
  */
@@ -38,9 +38,9 @@ class MarkerOptions internal constructor(
     }
 
     /**
-     * Height of the marker in pixels.
+     * Height of the marker icon in pixels.
      */
-    var height = 50
+    var height = 59
         set(value) {
             if (marker.usingDefaultIcon) {
                 field = value
@@ -48,7 +48,7 @@ class MarkerOptions internal constructor(
             }
         }
 
-    var width = 50
+    var width = 55
         set(value) {
             if (marker.usingDefaultIcon) {
                 field = value
@@ -56,7 +56,7 @@ class MarkerOptions internal constructor(
             }
         }
 
-    var drawOrder = 1
+    var drawOrder = 2000
         set(value) {
             field = value
             updateStyle()
@@ -72,7 +72,7 @@ class MarkerOptions internal constructor(
         "{ style: 'points', anchor: top,color: $color, size: [${markerDotSide}px, ${markerDotSide}px], order: $drawOrder, interactive: true, collide: false }"
 
     internal var style =
-        "{ style: 'points', anchor: top, color: $color, size: [${height}px, ${width}px], order: $drawOrder, interactive: true, collide: false }"
+        "{ style: 'points', anchor: top, color: $color, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
         set(value) {
             field = value
             updateStyle()

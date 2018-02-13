@@ -60,7 +60,10 @@ class Layer {
      * Removes the given annotation from the layer and the maps the layer is added to.
      */
     fun remove(vararg annotation: Annotation) {
-        annotation.forEach { it.remove(maps) }
+        annotation.forEach {
+            it.subAnnotation?.remove(maps)
+            it.remove(maps)
+        }
     }
 
     /**

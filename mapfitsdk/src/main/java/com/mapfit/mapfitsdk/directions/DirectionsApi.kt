@@ -9,6 +9,7 @@ import com.mapfit.mapfitsdk.geocoder.model.EntranceType
 import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.isEmpty
 import com.squareup.moshi.Moshi
+import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import okhttp3.*
@@ -59,6 +60,7 @@ class DirectionsApi {
         callback: DirectionsCallback
     ) {
         getDirections(
+            originAddress = "",
             originLocation = originLocation,
             destinationLocation = destinationLocation,
             directionsType = directionsType,
@@ -81,6 +83,7 @@ class DirectionsApi {
         callback: DirectionsCallback
     ) {
         getDirections(
+            originAddress = "",
             originLocation = originLocation,
             destinationLocation = destinationLocation,
             callback = callback
@@ -127,14 +130,7 @@ class DirectionsApi {
                 if (response != null && response.isSuccessful) {
 
                     async(UI) {
-                        val route = bg {
-                            response.body()?.string()?.let {
-                                val moshi = Moshi.Builder().build()
-                                val jsonAdapter = moshi.adapter<Route>(Route::class.java)
-
-                                jsonAdapter.fromJson(it) as Route
-                            }
-                        }
+                        val route = parseRoute(response)
                         route.await()?.let { callback.onSuccess(it) }
                     }
                 } else {
@@ -147,6 +143,27 @@ class DirectionsApi {
                 e.let { callback.onError("An unexpected error has occurred", it) }
             }
         })
+    }
+
+    private fun parseRoute(response: Response): Deferred<Route?> = bg {
+        response.body()?.string()?.let {
+            val moshi = Moshi.Builder().build()
+            val jsonAdapter = moshi.adapter<Route>(Route::class.java)
+
+            val route = jsonAdapter.fromJson(it) as Route
+            route.destinationLocation =
+                    listOf(
+                        route.destinationLocation[1],
+                        route.destinationLocation[0]
+                    )
+            route.sourceLocation =
+                    listOf(
+                        route.sourceLocation[1],
+                        route.sourceLocation[0]
+                    )
+
+            route
+        }
     }
 
     private fun createRequestBody(

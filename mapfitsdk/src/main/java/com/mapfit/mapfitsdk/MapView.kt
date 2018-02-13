@@ -14,10 +14,8 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.RelativeLayout
+import com.mapfit.mapfitsdk.annotations.*
 import com.mapfit.mapfitsdk.annotations.Annotation
-import com.mapfit.mapfitsdk.annotations.Marker
-import com.mapfit.mapfitsdk.annotations.Polygon
-import com.mapfit.mapfitsdk.annotations.Polyline
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
@@ -83,9 +81,8 @@ class MapView(
         controlsView.findViewById<View>(R.id.btnCompass)
     }
 
-    private val annotationLayer = Layer()
 
-    private val layers = mutableListOf(annotationLayer)
+    private val layers = mutableListOf<Layer>()
 
     // Click Listeners
     private var markerClickListener: OnMarkerClickListener? = null
@@ -191,7 +188,7 @@ class MapView(
             setScaleResponder(scaleResponder())
             setShoveResponder(shoveResponder())
 
-            setMarkerPickListener(markerPickListener())
+            setMarkerPickListener(onAnnotationClickListener)
 
             setSceneLoadListener({ _, _ ->
                 onMapReadyCallback.onMapReady(mapfitMap)
@@ -202,6 +199,27 @@ class MapView(
             mapOptions.theme = mapTheme
 
         }
+    }
+
+    val onAnnotationClickListener = object : OnAnnotationClickListener {
+        override fun onAnnotationClicked(annotation: Annotation) {
+            annotation?.let {
+
+                if (placeInfoRemoveJob.isActive) placeInfoRemoveJob.cancel()
+
+                when (it) {
+                    is Marker -> {
+                        markerClickListener?.onMarkerClicked(it)
+                        showPlaceInfo(it)
+                    }
+                    is Polyline -> polylineClickListener?.onPolylineClicked(it)
+                    else -> {
+                    }
+                }
+
+            }
+        }
+
     }
 
     private fun shoveResponder() = TouchInput.ShoveResponder {
@@ -287,33 +305,35 @@ class MapView(
         }
     }
 
-    private fun markerPickListener(): (MarkerPickResult?, Float, Float) -> Unit {
-        return { markerPickResult, _, _ ->
-
-            runBlocking {
-                markerPickResult?.let {
-                    val annotation = annotationLayer.annotations.find {
-                        it.getId() == markerPickResult.marker.getId()
-                    }
-
-                    annotation?.let {
-
-                        if (placeInfoRemoveJob.isActive) placeInfoRemoveJob.cancel()
-
-                        when (it) {
-                            is Marker -> {
-                                markerClickListener?.onMarkerClicked(it)
-                                showPlaceInfo(it)
-                            }
-                            else -> {
-                            }
-                        }
-
-                    }
-                }
-            }
-        }
-    }
+//    private fun markerPickListener(): (MarkerPickResult?, Float, Float) -> Unit {
+//        return { markerPickResult, _, _ ->
+//
+//            runBlocking {
+//                markerPickResult?.let {
+//
+//                    val annotation = annotationLayer.annotations.find {
+//                        it.getId() == markerPickResult.marker.mapBindings[mapController]
+//                    }
+//
+//                    annotation?.let {
+//
+//                        if (placeInfoRemoveJob.isActive) placeInfoRemoveJob.cancel()
+//
+//                        when (it) {
+//                            is Marker -> {
+//                                markerClickListener?.onMarkerClicked(it)
+//                                showPlaceInfo(it)
+//                            }
+//                            is Polyline -> polylineClickListener?.onPolylineClicked(it)
+//                            else -> {
+//                            }
+//                        }
+//
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     private fun setZoomOnDoubleTap(x: Float, y: Float) {
         val lngLat = mapController.screenPositionToLatLng(PointF(x, y))
@@ -323,7 +343,7 @@ class MapView(
 
     private val mapfitMap = object : MapfitMap() {
         override fun has(annotation: Annotation): Boolean =
-            annotationLayer.annotations.contains(annotation)
+            mapController.contains(annotation)
 
 
         override fun setZoom(zoomLevel: Float) {
@@ -342,52 +362,61 @@ class MapView(
             mapPinchListener = listener
         }
 
-        override fun addMarker(address: String, onMarkerAddedCallback: OnMarkerAddedCallback) {
-            geocoder.geocodeAddress(address, object : GeocoderCallback {
-                override fun onSuccess(addressList: List<Address>) {
+        override fun addMarker(
+            address: String,
+            withBuilding: Boolean,
+            onMarkerAddedCallback: OnMarkerAddedCallback
+        ) {
+            geocoder.geocodeAddress(address,
+                withBuilding,
+                object : GeocoderCallback {
+                    override fun onSuccess(addressList: List<Address>) {
 
-                    var latLng = LatLng()
-                    addressList.forEach { address ->
-                        latLng = if (address.entrances.isNotEmpty()) {
-                            LatLng(
-                                address.entrances.first().latitude,
-                                address.entrances.first().longitude
-                            )
+                        var latLng = LatLng()
+                        addressList.forEach { address ->
+                            latLng = address.getPrimaryEntrance()
+                        }
+
+                        if (latLng.isEmpty()) {
+                            onMarkerAddedCallback.onError(IOException("No coordinates found for given address."))
                         } else {
-                            LatLng(address.latitude, address.longitude)
+                            val marker = mapController.addMarker().setPosition(latLng)
+//
+                            marker.address = addressList[0]
+//                            annotationLayer.add(marker)
+                            if (withBuilding) {
+                                val polygon =
+                                    mapController.addPolygon(addressList[0].buildingPolygon)
+                                marker.setPolygon(polygon)
+                            }
+
+                            onMarkerAddedCallback.onMarkerAdded(marker)
                         }
                     }
 
-                    if (latLng.isEmpty()) {
-                        onMarkerAddedCallback.onError(IOException("No coordinates found for given address."))
-                    } else {
-                        val marker = mapController.addMarker().setPosition(latLng)
-//
-                        marker.address = addressList[0]
-                        annotationLayer.add(marker)
-//                        val polyline = mapController.addPolyline(marker.address!!.buildingPolygon)
-
-                        onMarkerAddedCallback.onMarkerAdded(marker)
+                    override fun onError(message: String, e: Exception) {
+                        onMarkerAddedCallback.onError(e)
                     }
-                }
-
-                override fun onError(message: String, e: Exception) {
-                    onMarkerAddedCallback.onError(e)
-                }
-            })
+                })
         }
 
         override fun addMarker(latLng: LatLng): Marker {
             val marker = mapController.addMarker()
             marker.setPosition(latLng)
-            annotationLayer.add(marker)
+//            annotationLayer.add(marker)
             return marker
         }
 
         override fun addPolyline(line: List<LatLng>): Polyline {
             val polyline = mapController.addPolyline(line)
-            annotationLayer.add(polyline)
+//            annotationLayer.add(polyline)
             return polyline
+        }
+
+        override fun addPolygon(polygon: List<List<LatLng>>): Polygon {
+            val poly = mapController.addPolygon(polygon)
+//            annotationLayer.add(poly)
+            return poly
         }
 
         override fun getLayers(): List<Layer> {
@@ -405,7 +434,7 @@ class MapView(
         override fun getBounds(): LatLngBounds {
             val sw = mapController.screenPositionToLatLng(PointF(0f, viewHeight?.toFloat() ?: 0f))
             val ne = mapController.screenPositionToLatLng(PointF(viewWidth?.toFloat() ?: 0f, 0f))
-            return LatLngBounds(ne, sw)
+            return LatLngBounds(ne ?: LatLng(), sw ?: LatLng())
         }
 
         override fun setOnMapClickListener(listener: OnMapClickListener) {
@@ -435,30 +464,9 @@ class MapView(
         override fun getDirectionsOptions(): DirectionsOptions = directionsOptions
 
 
-        override fun setTilt(angle: Float) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-
-        override fun getTilt(): Float {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-
-        override fun setRotation(angle: Float) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-
-        override fun getRotation(): Float {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-
         override fun setOnMarkerClickListener(listener: OnMarkerClickListener) {
             this@MapView.markerClickListener = listener
         }
-
-        override fun addPolygon(polygon: List<List<LatLng>>): Polygon {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-        }
-
 
         override fun getZoom(): Float {
             return mapController.zoom
@@ -490,9 +498,9 @@ class MapView(
         override fun addLayer(layer: Layer) {
             if (!layers.contains(layer)) {
                 layers.add(layer)
-                layer.annotations
-                    .filter { !annotationLayer.annotations.contains(it) }
-                    .forEach { annotationLayer.annotations.add(it) }
+//                layer.annotations
+//                    .filter { !annotationLayer.annotations.contains(it) }
+//                    .forEach { annotationLayer.annotations.add(it) }
                 layer.addMap(mapController)
             }
         }
@@ -508,17 +516,22 @@ class MapView(
                 }
             }
 
-            annotationLayer.annotations.removeAll(layer.annotations)
+//            annotationLayer.annotations.removeAll(layer.annotations)
             layers.remove(layer)
         }
 
-        override fun removeMarker(marker: Marker): Boolean = marker.remove(mapController)
+        override fun removeMarker(marker: Marker): Boolean {
+//            annotationLayer.annotations.remove(marker)
+            return marker.remove(mapController)
+        }
 
         override fun removePolygon(polygon: Polygon) {
+//            annotationLayer.annotations.remove(polygon)
+            polygon.remove(mapController)
         }
 
         override fun removePolyline(polyline: Polyline) {
-            annotationLayer.annotations.remove(polyline)
+//            annotationLayer.annotations.remove(polyline)
             polyline.remove(mapController)
         }
 
