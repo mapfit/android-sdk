@@ -9,6 +9,8 @@ import com.mapfit.mapfitsdk.annotations.Marker
 import kotlinx.coroutines.experimental.*
 
 /**
+ * Place Info of to be shown when a [Marker] is clicked.
+ *
  * Created by dogangulcan on 1/30/18.
  */
 class PlaceInfo internal constructor(
@@ -45,13 +47,13 @@ class PlaceInfo internal constructor(
 
     internal fun updatePlaceInfo() {
         titleView.text =
-                if (marker.title.isBlank()) {
-                    marker.address?.streetAddress ?: marker.title
+                if (marker.getTitle().isBlank()) {
+                    marker.address?.streetAddress ?: marker.getTitle()
                 } else {
-                    marker.title
+                    marker.getTitle()
                 }
-        subtitle1View.text = marker.subtitle1
-        subtitle2View.text = marker.subtitle2
+        subtitle1View.text = marker.getSubtitle1()
+        subtitle2View.text = marker.getSubtitle2()
     }
 
     fun show() {

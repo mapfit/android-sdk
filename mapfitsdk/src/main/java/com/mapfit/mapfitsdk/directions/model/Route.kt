@@ -1,10 +1,12 @@
 package com.mapfit.mapfitsdk.directions.model
 
 /**
+ * Route of a trip from the origin to the destination.
+ *
  * Created by dogangulcan on 2/4/18.
  */
 data class Route(
-		val trip: Trip,
-		val destinationLocation: List<Double>,
-		val sourceLocation: List<Double>
+    val trip: Trip,
+    var destinationLocation: List<Double>,
+    var sourceLocation: List<Double>
 )

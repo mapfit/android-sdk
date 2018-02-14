@@ -913,12 +913,12 @@ layers:
         draw:
             sdk-polygon-overlay:
                 interactive: global.sdk_interactive
-                color: [0.,0.,0.,0.4]  #'#06b1e2'
+                fill: [0.,0.,0.,0.4]  #'#06b1e2'
                 order: 501
             sdk-line-overlay:
                 color: black
                 order: 502
-                width: 0px
+                width: 1px
     water:
         data: { source: mapfit, layer: water }
         ocean-water:

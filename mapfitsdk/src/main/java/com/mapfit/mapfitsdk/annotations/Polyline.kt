@@ -5,6 +5,8 @@ import com.mapfit.mapfitsdk.MapController
 import com.mapfit.mapfitsdk.geometry.LatLng
 
 /**
+ * Polyline represent a list of consecutive points that can be drawn as a line.
+ *
  * Created by dogangulcan on 12/22/17.
  */
 class Polyline(
@@ -12,12 +14,20 @@ class Polyline(
     private val polylineId: Long,
     mapController: MapController,
     line: MutableList<LatLng>
-) : Annotation() {
+) : Annotation(polylineId, mapController) {
 
-    var points = line
+    private var points = line
     val polylineOptions = PolylineOptions(this)
+    val coordinates by lazy {
+        val coordinates = DoubleArray(points.size * 2)
+        var i = 0
+        for (point in points) {
+            coordinates[i++] = point.lon
+            coordinates[i++] = point.lat
+        }
+        coordinates
+    }
 
-    override fun getId() = polylineId
 
     init {
         initAnnotation(mapController, polylineId)
@@ -42,25 +52,15 @@ class Polyline(
         mapBindings[mapController]?.let { mapController.removePolyline(it) }
     }
 
-    /**
-     * Adds [LatLng] point(s) to the polyline.
-     */
-    private fun addPoint(vararg line: LatLng) {
-        points.addAll(line)
-        mapBindings.forEach {
-            TODO() //re-add
-        }
-    }
-
-    fun getCoordinates(): DoubleArray {
-        val coordinates = DoubleArray(points.size * 2)
-        var i = 0
-        for (point in points) {
-            coordinates[i++] = point.lon
-            coordinates[i++] = point.lat
-        }
-        return coordinates
-    }
+//    fun getCoordinates(): DoubleArray {
+//        val coordinates = DoubleArray(points.size * 2)
+//        var i = 0
+//        for (point in points) {
+//            coordinates[i++] = point.lon
+//            coordinates[i++] = point.lat
+//        }
+//        return coordinates
+//    }
 
 }
 

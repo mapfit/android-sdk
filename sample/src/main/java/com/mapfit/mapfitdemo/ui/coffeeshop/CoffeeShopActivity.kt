@@ -31,8 +31,6 @@ import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener
-import com.mapfit.mapfitsdk.directions.DirectionsApi
-import com.mapfit.mapfitsdk.directions.DirectionsCallback
 import com.mapfit.mapfitsdk.directions.DirectionsType
 import com.mapfit.mapfitsdk.directions.model.Route
 import com.mapfit.mapfitsdk.geocoder.GeocoderApi
@@ -144,7 +142,6 @@ class CoffeeShopActivity : AppCompatActivity() {
 
     }
 
-
     private fun drawRouteWithMapView() {
 
         mapfitMap.getDirectionsOptions()
@@ -153,7 +150,13 @@ class CoffeeShopActivity : AppCompatActivity() {
             .setType(DirectionsType.CYCLING)
             .showDirections(object : DirectionsOptions.RouteDrawCallback {
                 override fun onRouteDrawn(route: Route, legs: List<Polyline>) {
-                    // at this point, the route is drawn on map
+                    val destination =
+                        LatLng(route.destinationLocation[0], route.destinationLocation[1])
+                    val origin = LatLng(route.sourceLocation[0], route.sourceLocation[1])
+
+                    mapfitMap.addMarker(origin)
+                    mapfitMap.addMarker(destination)
+
                 }
 
                 override fun onError(message: String, e: Exception) {
@@ -165,30 +168,30 @@ class CoffeeShopActivity : AppCompatActivity() {
     private val onFilterCheckedListener = object : OnFilterCheckedListener {
 
         override fun onDrawRouteClicked() {
-//            drawRouteWithMapView()
-
-            val callback = object : DirectionsCallback {
-                override fun onSuccess(route: Route) {
-                    // you can draw and show the route now!
-                }
-
-                override fun onError(message: String, e: Exception) {
-                    // handle the error
-                }
-            }
-
-            DirectionsApi().getDirections(
-                originAddress = "119 W 24th St new york",
-                destinationAddress = "1000 5th Ave, New York, NY 10028",
-                directionsType = DirectionsType.CYCLING,
-                callback = callback
-            )
-
-            DirectionsApi().getDirections(
-                originLocation = LatLng(40.744043, -73.993209),
-                destinationLocation = LatLng(40.7794406, -73.9654327),
-                callback = callback
-            )
+            drawRouteWithMapView()
+//
+//            val callback = object : DirectionsCallback {
+//                override fun onSuccess(route: Route) {
+//                    // you can draw and show the route now!
+//                }
+//
+//                override fun onError(message: String, e: Exception) {
+//                    // handle the error
+//                }
+//            }
+//
+//            DirectionsApi().getDirections(
+//                originAddress = "119 W 24th St new york",
+//                destinationAddress = "1000 5th Ave, New York, NY 10028",
+//                directionsType = DirectionsType.CYCLING,
+//                callback = callback
+//            )
+//
+//            DirectionsApi().getDirections(
+//                originLocation = LatLng(40.744043, -73.993209),
+//                destinationLocation = LatLng(40.7794406, -73.9654327),
+//                callback = callback
+//            )
 
             drawerLayout.closeDrawer(GravityCompat.END)
         }
@@ -230,8 +233,8 @@ class CoffeeShopActivity : AppCompatActivity() {
                 LatLng(route.destinationLocation[1], route.destinationLocation[0])
             val originLocation = LatLng(route.sourceLocation[1], route.sourceLocation[0])
             val startMarker =
-                mapfitMap2.addMarker(destinationLocation).setIcon(MapfitMarker.LIGHT_COOKING)
-            val endMarker = mapfitMap2.addMarker(originLocation).setIcon(MapfitMarker.DARK_BAR)
+                mapfitMap2.addMarker(destinationLocation).setIcon(MapfitMarker.COOKING)
+            val endMarker = mapfitMap2.addMarker(originLocation).setIcon(MapfitMarker.BAR)
 
             mapfitMap2.setCenter(originLocation, 200)
 
@@ -311,6 +314,12 @@ class CoffeeShopActivity : AppCompatActivity() {
         }
         val polyline = mapfitMap.addPolyline(repository.getLowerManhattanPolyline())
         alwaysOpenShopLayer.add(polyline)
+
+        addMarkerWithAddress("119 w 24th street, new york, ny")
+        addMarkerWithAddress("135 w 23th street, new york, ny")
+        addMarkerWithAddress("100 w 23th street, new york, ny")
+        addMarkerWithAddress("149 w 24th street, new york, ny")
+
     }
 
     private fun boundaryBuilder() {
@@ -332,8 +341,8 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         val bounds = boundsBuilder.build()
         mapfitMap.setBounds(bounds, .8f)
-        mapfitMap.addMarker(bounds.southWest).setIcon(MapfitMarker.DARK_BAR)
-        mapfitMap.addMarker(bounds.northEast).setIcon(MapfitMarker.DARK_AIRPORT)
+        mapfitMap.addMarker(bounds.southWest).setIcon(MapfitMarker.BAR)
+        mapfitMap.addMarker(bounds.northEast).setIcon(MapfitMarker.AIRPORT)
 
     }
 
@@ -396,20 +405,22 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         edtAddress.setOnEditorActionListener(TextView.OnEditorActionListener { v, actionId, event ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                addMarkerWithAddress()
+                val address = edtAddress.text.toString()
+                addMarkerWithAddress(address)
                 return@OnEditorActionListener true
             }
             false
         })
 
         btnAddMarker.setOnClickListener {
-            addMarkerWithAddress()
+            val address = edtAddress.text.toString()
+            addMarkerWithAddress(address)
         }
     }
 
-    private fun addMarkerWithAddress() {
+    private fun addMarkerWithAddress(address: String) {
 
-        val address = edtAddress.text.toString()
+
         if (address.isBlank()) {
 
         } else {
@@ -417,26 +428,31 @@ class CoffeeShopActivity : AppCompatActivity() {
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(toolbar.windowToken, 0)
 
-            mapfitMap.addMarker(address, object : OnMarkerAddedCallback {
+//            mapfitMap.addPolyline()
+            mapfitMap.addMarker(address,
+                true,
+                object : OnMarkerAddedCallback {
 
-                override fun onMarkerAdded(marker: Marker) {
-                    mapfitMap.setCenter(marker.getPosition(), 300)
-                    mapfitMap.setZoom(17f, 300)
-                    edtAddress.setText("")
-                    markers.add(marker)
+                    override fun onMarkerAdded(marker: Marker) {
+                        mapfitMap.setCenter(marker.getPosition(), 300)
+                        mapfitMap.setZoom(17f, 300)
+                        edtAddress.setText("")
+                        markers.add(marker)
 
-                }
+                        alwaysOpenShopLayer.add(marker)
 
-                override fun onError(exception: Exception) {
-                    Toast.makeText(
-                        this@CoffeeShopActivity,
-                        "Couldn't find a valid location for given address",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    }
 
-                }
+                    override fun onError(exception: Exception) {
+                        Toast.makeText(
+                            this@CoffeeShopActivity,
+                            "Couldn't find a valid location for given address",
+                            Toast.LENGTH_LONG
+                        ).show()
 
-            })
+                    }
+
+                })
         }
     }
 
@@ -448,14 +464,14 @@ class CoffeeShopActivity : AppCompatActivity() {
 //            marker.invalidate()
 
             val markerIcon = when (shop.id) {
-                "vendor0001" -> MapfitMarker.DARK_COMMUNITY
-                "vendor0002" -> MapfitMarker.DARK_ARTS
-                "vendor0003" -> MapfitMarker.DARK_COOKING
-                "vendor0004" -> MapfitMarker.DARK_SPORTS
-                "vendor0005" -> MapfitMarker.LIGHT_HOMEGARDEN
-                "vendor0006" -> MapfitMarker.LIGHT_HOTEL
-                "vendor0007" -> MapfitMarker.DARK_MEDICAL
-                else -> MapfitMarker.LIGHT_DEFAULT
+                "vendor0001" -> MapfitMarker.COMMUNITY
+                "vendor0002" -> MapfitMarker.ARTS
+                "vendor0003" -> MapfitMarker.COOKING
+                "vendor0004" -> MapfitMarker.SPORTS
+                "vendor0005" -> MapfitMarker.HOMEGARDEN
+                "vendor0006" -> MapfitMarker.HOTEL
+                "vendor0007" -> MapfitMarker.MEDICAL
+                else -> MapfitMarker.DEFAULT
             }
 
             marker.setIcon(markerIcon)

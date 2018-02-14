@@ -13,22 +13,27 @@ import org.json.JSONException
 import org.json.JSONObject
 
 /**
+ * Geocoder API response parser.
+ *
  * Created by dogangulcan on 1/18/18.
  */
 internal class GeocodeParser internal constructor() {
 
-    fun parseError(response: Response?): Pair<String, Exception> {
+    internal fun parseError(response: Response?): Pair<String, Exception> {
 
         val exception = when (response?.code()) {
+            401,
             403 -> MapfitAuthorizationException()
+            404,
+            500 -> Exception("Can not reach to GeocoderAPI.")
             else -> {
                 Exception("An error has occurred")
             }
         }
 
-        val jsonObject = JSONObject(response?.body()?.string())
 
         return try {
+            val jsonObject = JSONObject(response?.body()?.string())
             val message = jsonObject.getString("error")
             Pair(message, exception)
         } catch (e: Exception) {
@@ -37,7 +42,7 @@ internal class GeocodeParser internal constructor() {
         }
     }
 
-    fun parseGeocodeResponse(string: String): List<Address> {
+    internal fun parseGeocodeResponse(string: String): List<Address> {
         val jArray = JSONArray(string)
 
         val addressList = mutableListOf<Address>()
@@ -105,19 +110,34 @@ internal class GeocodeParser internal constructor() {
     }
 
     private fun parseBuildingPolygon(jsonObject: JSONObject): List<List<LatLng>> {
-        val polygon = mutableListOf<List<LatLng>>()
-        val coordinates = jsonObject.getJSONArray("coordinates").getJSONArray(0)
+        val coordinates = jsonObject.getJSONArray("coordinates")
+        val type = jsonObject.getSafeString("type")
 
-        (0 until coordinates.length())
-            .forEach { polygon.add(parseCoordinates(coordinates.getJSONArray(0))) }
+        return when (type) {
+            "Polygon" -> parsePolygon(coordinates)
+            "MultiPolygon" -> parseMultiPolygon(coordinates)[0]
+            else -> listOf()
+        }
+    }
 
+    private fun parseMultiPolygon(jsonArray: JSONArray): List<List<List<LatLng>>> {
+        val multiPolygon = mutableListOf<List<List<LatLng>>>()
+        (0 until jsonArray.length())
+            .map { jsonArray.getJSONArray(it) }
+            .forEach { multiPolygon.add(parsePolygon(it)) }
 
-        return polygon
+        return multiPolygon
+    }
+
+    private fun parsePolygon(coordinates: JSONArray): List<List<LatLng>> {
+        return (0 until coordinates.length())
+            .mapNotNull { coordinates.optJSONArray(it) }
+            .map { parseCoordinates(it) }
     }
 
     private fun parseCoordinates(jsonArray: JSONArray): List<LatLng> {
         val latLngList = mutableListOf<LatLng>()
-
+        // extra array
         (0 until jsonArray.length())
             .map { jsonArray.getJSONArray(it) }
             .map { LatLng(it[1] as Double, it[0] as Double) }
@@ -125,6 +145,7 @@ internal class GeocodeParser internal constructor() {
 
         return latLngList
     }
+
 
     private fun JSONObject.getSafeString(name: String): String =
         if (has(name)) {

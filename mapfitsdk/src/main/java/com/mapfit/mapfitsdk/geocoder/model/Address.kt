@@ -19,4 +19,13 @@ data class Address(
     val longitude: Double = 0.0,
     val status: LocationStatus?,
     val entrances: List<Entrance> = mutableListOf()
-)
+) {
+
+    internal fun getPrimaryEntrance(): LatLng =
+        if (entrances.isNotEmpty()) {
+            LatLng(entrances.first().latitude, entrances.first().longitude)
+        } else {
+            LatLng(latitude, longitude)
+        }
+
+}

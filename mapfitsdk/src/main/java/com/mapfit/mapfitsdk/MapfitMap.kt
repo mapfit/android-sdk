@@ -80,9 +80,14 @@ abstract class MapfitMap {
      * information for given address, marker will be placed to the most accurate coordinates.
      *
      * @param address an address such as "119w 24th st NY" venue names are shouldn't be given
+     * @param withBuilding flag for building polygon
      * @param onMarkerAddedCallback for response and errors
      */
-    abstract fun addMarker(address: String, onMarkerAddedCallback: OnMarkerAddedCallback)
+    abstract fun addMarker(
+        address: String,
+        withBuilding: Boolean = true,
+        onMarkerAddedCallback: OnMarkerAddedCallback
+    )
 
     /**
      * Removes the given marker from the map.
@@ -110,14 +115,14 @@ abstract class MapfitMap {
      *
      * @return polygon
      */
-    protected abstract fun addPolygon(polygon: List<List<LatLng>>): Polygon
+    abstract fun addPolygon(polygon: List<List<LatLng>>): Polygon
 
     /**
      * Removes given [Polygon] from the [MapView].
      *
      * @param polygon to be removed
      */
-    protected abstract fun removePolygon(polygon: Polygon)
+    abstract fun removePolygon(polygon: Polygon)
 
     /**
      * Removes given [Layer] from the [MapView].
@@ -229,22 +234,14 @@ abstract class MapfitMap {
      */
     abstract fun getDirectionsOptions(): DirectionsOptions
 
-    protected abstract fun setTilt(angle: Float)
-
-    protected abstract fun getTilt(): Float
-
-    protected abstract fun setRotation(angle: Float)
-
-    protected abstract fun getRotation(): Float
-
     /**
-     * Will reCenter the map.
+     * Will re-center the map to the last position it is centered.
      */
     abstract fun reCenter()
 
-    @TestOnly
-    internal abstract fun has(annotation: Annotation): Boolean
-
+    /**
+     * Interface to be used to set custom view for Place Info.
+     */
     interface PlaceInfoAdapter {
 
         /**
@@ -257,6 +254,9 @@ abstract class MapfitMap {
         fun getPlaceInfoView(marker: Marker): View
     }
 
+    /**
+     * Listener for capturing Place Info click events.
+     */
     interface OnPlaceInfoClickListener {
 
         /**
@@ -266,5 +266,8 @@ abstract class MapfitMap {
          */
         fun onPlaceInfoClicked(marker: Marker)
     }
+
+    @TestOnly
+    internal abstract fun has(annotation: Annotation): Boolean
 
 }

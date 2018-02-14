@@ -38,7 +38,7 @@ class GeocoderApi {
     }
 
     /**
-     * Returns a list of addresses with entrance points.
+     * Returns a list of addresses with entrance rings.
      *
      * @param address an address such as "119w 24th st NY" venue names are shouldn't be given
      * @param callback for response and errors

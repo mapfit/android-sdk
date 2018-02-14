@@ -20,19 +20,20 @@ import com.mapfit.mapfitsdk.utils.loadImageFromUrl
 import kotlinx.coroutines.experimental.launch
 
 /**
+ * Markers are icons placed on a particular location on the map.
+ *
  * Created by dogangulcan on 12/19/17.
  */
 class Marker internal constructor(
     private val context: Context,
-    private var markerId: Long,
+    markerId: Long,
     private val mapController: MapController
-) : Annotation() {
+) : Annotation(markerId, mapController) {
 
     private var position: LatLng = LatLng(0.0, 0.0)
 
     val markerOptions = MarkerOptions(this, mutableListOf(mapController))
 
-    private var data: Any? = null
     internal var usingDefaultIcon: Boolean = true
 
     internal var placeInfoMap = HashMap<MapController, PlaceInfo?>()
@@ -57,18 +58,33 @@ class Marker internal constructor(
     fun getSubtitle1() = subtitle1
     fun getSubtitle2() = subtitle2
 
+    /**
+     * Sets the title to be shown on place info.
+     *
+     * @param title
+     */
     fun setTitle(title: String): Marker {
         this.title = title
         updatePlaceInfoFields()
         return this
     }
 
+    /**
+     * Sets the first subtitle to be shown on place info.
+     *
+     * @param subtitle1
+     */
     fun setSubtitle1(subtitle1: String): Marker {
         this.subtitle1 = subtitle1
         updatePlaceInfoFields()
         return this
     }
 
+    /**
+     * Sets the second subtitle to be shown on place info.
+     *
+     * @param subtitle2
+     */
     fun setSubtitle2(subtitle2: String): Marker {
         this.subtitle2 = subtitle2
         updatePlaceInfoFields()
@@ -82,8 +98,7 @@ class Marker internal constructor(
     }
 
     init {
-        setIcon(MapfitMarker.LIGHT_DEFAULT)
-        mapBindings[mapController] = markerId
+        setIcon(MapfitMarker.DEFAULT)
         initAnnotation(mapController, markerId)
     }
 
@@ -94,8 +109,16 @@ class Marker internal constructor(
         setPosition(position)
     }
 
+    /**
+     * @return current position of the marker
+     */
     fun getPosition(): LatLng = position
 
+    /**
+     * Sets the position of marker to the given [LatLng].
+     *
+     * @param latLng
+     */
     fun setPosition(latLng: LatLng): Marker {
         if (latLng.isValid()) {
 
@@ -179,7 +202,7 @@ class Marker internal constructor(
      * @param mapfitMarker
      */
     fun setIcon(@NonNull mapfitMarker: MapfitMarker): Marker {
-        setIcon(mapfitMarker.getMarkerUrl())
+        setIcon(mapfitMarker.getUrl())
         markerOptions.height = 50
         markerOptions.width = 50
         usingDefaultIcon = true
@@ -241,15 +264,6 @@ class Marker internal constructor(
         }
     }
 
-    override fun getId(): Long = markerId
-
-    private fun getId(mapController: MapController): Long? = mapBindings[mapController]
-
-    private fun setData(data: Any): Marker {
-        this.data = data
-        return this
-    }
-
     private fun setBitmap(
         bitmap: Bitmap,
         mapController: MapController,
@@ -298,7 +312,12 @@ class Marker internal constructor(
         }
     }
 
+    /**
+     * Removes the marker from every [Layer] and [MapView] it is added to.
+     */
     override fun remove() {
+
+
         placeInfoMap.forEach {
             it.value?.dispose(true)
         }
@@ -308,10 +327,15 @@ class Marker internal constructor(
         }
 
         layers.forEach { it.remove(this) }
+
+        subAnnotation?.remove()
+
     }
 
 
     internal fun remove(mapController: MapController): Boolean {
+        subAnnotation?.remove(listOf(mapController))
+
         placeInfoMap[mapController]?.dispose()
         return mapBindings[mapController]?.let { mapController.removeMarker(it) } ?: false
     }
@@ -324,6 +348,9 @@ class Marker internal constructor(
         return screenPosition
     }
 
+    internal fun setPolygon(polygon: Polygon) {
+        subAnnotation = polygon
+    }
 
     internal fun hasPlaceInfoFields(): Boolean =
         title.isNotBlank() || subtitle1.isNotBlank() || subtitle2.isNotBlank()

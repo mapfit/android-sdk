@@ -8,9 +8,12 @@ import android.opengl.GLSurfaceView.Renderer;
 import android.os.Handler;
 import android.support.annotation.Keep;
 import android.util.DisplayMetrics;
+import android.util.Log;
 
 import com.mapfit.mapfitsdk.annotations.Annotation;
 import com.mapfit.mapfitsdk.annotations.Marker;
+import com.mapfit.mapfitsdk.annotations.OnAnnotationClickListener;
+import com.mapfit.mapfitsdk.annotations.Polygon;
 import com.mapfit.mapfitsdk.annotations.Polyline;
 import com.mapfit.mapfitsdk.geometry.LatLng;
 import com.mapfit.mapfitsdk.geometry.LatLngBounds;
@@ -22,6 +25,8 @@ import com.mapfit.tangram.SceneError;
 import com.mapfit.tangram.SceneUpdate;
 import com.mapfit.tangram.TouchInput;
 import com.mapfit.tangram.TouchInput.Gestures;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -44,6 +49,12 @@ public class MapController implements Renderer {
     public void reCenter() {
         if (lastCenter != null)
             setPositionEased(lastCenter, 200);
+    }
+
+    public boolean contains(@NotNull Annotation annotation) {
+        return annotation instanceof Marker && markers.containsValue(annotation) ||
+                annotation instanceof Polyline && polylines.containsValue(annotation) ||
+                annotation instanceof Polygon && polygons.containsValue(annotation);
     }
 
     /**
@@ -277,9 +288,10 @@ public class MapController implements Renderer {
             throw new RuntimeException("Unable to create a native Map object! There may be insufficient memory available.");
         }
 
-        // base layers
-        MapData mapData = addDataLayer("mz_default_line");
-        MapData pointLayer = addDataLayer("mz_default_point");
+        // base geometry layers
+        polylineLayer = addDataLayer("mz_default_line");
+        polygonLayer = addDataLayer("mz_default_polygon");
+
     }
 
     void dispose() {
@@ -714,9 +726,9 @@ public class MapController implements Renderer {
      */
     public MapData addDataLayer(String name, boolean generateCentroid) {
         MapData mapData = clientTileSources.get(name);
-        if (mapData != null) {
-            return mapData;
-        }
+//        if (mapData != null) {
+//            return mapData;
+//        }
         checkPointer(mapPointer);
         long pointer = nativeAddTileSource(mapPointer, name, generateCentroid);
         if (pointer <= 0) {
@@ -986,6 +998,43 @@ public class MapController implements Renderer {
     }
 
     /**
+     * Set a listener for marker pick events
+     *
+     * @param listener The {@link MarkerPickListener} to call
+     */
+    public void setMarkerPickListener(final OnAnnotationClickListener listener) {
+        markerPickListener = (listener == null) ? null : new MarkerPickListener() {
+            @Override
+            public void onMarkerPick(final MarkerPickResult markerPickResult, final float positionX, final float positionY) {
+                if (markerPickResult == null) {
+                    return;
+                }
+
+                Marker pickedMarker = null;
+                long id = markerPickResult.getMarker().getId(MapController.this);
+                for (Marker marker : markers.values()) {
+                    if (marker.getId(MapController.this) == id) {
+                        pickedMarker = marker;
+                        break;
+                    }
+                }
+
+                final Marker finalPickedMarker = pickedMarker;
+                uiThreadHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        if (finalPickedMarker != null) {
+                            listener.onAnnotationClicked(finalPickedMarker);
+                        }
+
+                    }
+                });
+            }
+        };
+    }
+
+    /**
      * Query the map for geometry features at the given screen coordinates; results will be returned
      * in a callback to the object set by {@link #setFeaturePickListener(FeaturePickListener)}
      *
@@ -1028,7 +1077,7 @@ public class MapController implements Renderer {
     }
 
     /**
-     * Adds a {@link Marker} to the map which can be used to dynamically add points and polylines
+     * Adds a {@link Marker} to the map which can be used to dynamically add rings and polylines
      * to the map.
      *
      * @return Newly created {@link Marker} object.
@@ -1079,6 +1128,23 @@ public class MapController implements Renderer {
         return polyline;
     }
 
+    public Polygon addPolygon(List<List<LatLng>> polygon) {
+        checkPointer(mapPointer);
+        MapData polygonLayer = addDataLayer("mz_default_polygon");
+
+        Polygon poly = new Polygon(
+                mapView.getContext(),
+                polygonLayer.id,
+                this,
+                polygon);
+
+        polygonLayer.addPolygon(poly);
+
+        polygons.put(polygonLayer.id, poly);
+//        requestRender();
+        return poly;
+    }
+
     public long addAnnotation(Annotation annotation) {
         checkPointer(mapPointer);
 
@@ -1088,13 +1154,21 @@ public class MapController implements Renderer {
             return markerId;
 
         } else if (annotation instanceof Polyline) {
-            MapData polylineData = addDataLayer("mz_default_polyline");
-            polylineData.addPolyline((Polyline) annotation);
-            polylines.put(polylineData.id, (Polyline) annotation);
-            return polylineData.id;
+            MapData dataLayer = addDataLayer("mz_default_polyline");
+            dataLayer.addPolyline((Polyline) annotation);
+            polylines.put(dataLayer.id, (Polyline) annotation);
+            return dataLayer.id;
+
+        } else if (annotation instanceof Polygon) {
+            MapData polygonLayer = addDataLayer("mz_default_polygon");
+            polygonLayer.addPolygon((Polygon) annotation);
+            polygons.put(polygonLayer.id, (Polygon) annotation);
+            return polygonLayer.id;
+
         } else {
             return 0;
         }
+
 
     }
 
@@ -1116,6 +1190,15 @@ public class MapController implements Renderer {
         checkId(polylineId);
         polylines.remove(polylineId);
         nativeRemoveTileSource(mapPointer, polylineId);
+        requestRender();
+    }
+
+    public void removePolygon(long polygonId) {
+        checkPointer(mapPointer);
+        checkId(polygonId);
+        polygons.remove(polygonId);
+        nativeRemoveTileSource(mapPointer, polygonId);
+        requestRender();
     }
 
     /**
@@ -1209,6 +1292,7 @@ public class MapController implements Renderer {
     }
 
     void addFeature(long sourcePtr, double[] coordinates, int[] rings, String[] properties) {
+        Log.i("ADD FEATURE", "Source Pointer: " + sourcePtr + "\nMap Pointer: " + mapPointer);
         checkPointer(mapPointer);
         checkPointer(sourcePtr);
         nativeAddFeature(mapPointer, sourcePtr, coordinates, rings, properties);
@@ -1460,6 +1544,10 @@ public class MapController implements Renderer {
     private Map<String, MapData> clientTileSources = new HashMap<>();
     private Map<Long, Marker> markers = new HashMap<>();
     private Map<Long, Polyline> polylines = new HashMap<>();
+    private Map<Long, Polygon> polygons = new HashMap<>();
+
+    private MapData polylineLayer;
+    private MapData polygonLayer;
     private Handler uiThreadHandler;
     TouchInput touchInput;
     private LatLng lastCenter = null;
