@@ -29,6 +29,7 @@ abstract class Annotation {
     fun bindToLayer(layer: Layer) {
         if (!layers.contains(layer)) {
             layers.add(layer)
+
             subAnnotation?.bindToLayer(layer)
         }
     }

@@ -24,10 +24,10 @@ class Polygon(
 
     val properties by lazy {
         val props = HashMap<String, String>()
-        props["type"] = "polygon"
-        props["order"] = "1"
-        props["fill"] = "blue"
-        props["width"] = "2px"
+        props["type"] = "polygons"
+        props["order"] = "500"
+//        props["fill"] = "blue"
+//        props["width"] = "2px"
         props["color"] = "yellow"
 
         val out = arrayOfNulls<String>(props.size * 2)

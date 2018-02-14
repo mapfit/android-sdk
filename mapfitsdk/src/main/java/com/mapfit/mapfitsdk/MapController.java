@@ -726,9 +726,9 @@ public class MapController implements Renderer {
      */
     public MapData addDataLayer(String name, boolean generateCentroid) {
         MapData mapData = clientTileSources.get(name);
-        if (mapData != null) {
-            return mapData;
-        }
+//        if (mapData != null) {
+//            return mapData;
+//        }
         checkPointer(mapPointer);
         long pointer = nativeAddTileSource(mapPointer, name, generateCentroid);
         if (pointer <= 0) {
@@ -1130,19 +1130,17 @@ public class MapController implements Renderer {
 
     public Polygon addPolygon(List<List<LatLng>> polygon) {
         checkPointer(mapPointer);
-        MapData dataLayer = addDataLayer("mz_default_polygon");
+        MapData polygonLayer = addDataLayer("mz_default_polygon");
 
         Polygon poly = new Polygon(
                 mapView.getContext(),
-                dataLayer.id,
+                polygonLayer.id,
                 this,
                 polygon);
 
-        dataLayer.addPolygon(poly);
+        polygonLayer.addPolygon(poly);
 
-        Log.i("ADD POLYGON", "DataLayerId: " + dataLayer.id + "\nMap Pointer: " + mapPointer);
-
-        polygons.put(dataLayer.id, poly);
+        polygons.put(polygonLayer.id, poly);
 //        requestRender();
         return poly;
     }
@@ -1162,16 +1160,16 @@ public class MapController implements Renderer {
             return dataLayer.id;
 
         } else if (annotation instanceof Polygon) {
-            MapData dataLayer = addDataLayer("mz_default_polygon");
-            dataLayer.addPolygon((Polygon) annotation);
-            polygons.put(dataLayer.id, (Polygon) annotation);
-            Log.i("ADD POLYGON FROM ANNOTATION", "DataLayerId: " + dataLayer.id + "\nMap Pointer: " + mapPointer);
+            MapData polygonLayer = addDataLayer("mz_default_polygon");
+            polygonLayer.addPolygon((Polygon) annotation);
+            polygons.put(polygonLayer.id, (Polygon) annotation);
 
-            return dataLayer.id;
+            return polygonLayer.id;
 
         } else {
             return 0;
         }
+
 
     }
 

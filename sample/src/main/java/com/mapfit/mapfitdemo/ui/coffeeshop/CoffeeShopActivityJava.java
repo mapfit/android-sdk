@@ -48,6 +48,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by dogangulcan on 1/17/18.
@@ -294,8 +295,26 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
         mapfitMap.setCenter(new LatLng(40.700798, -74.0050177));
 
 
-    }
+        new SomeInterface() {
 
+            @Override
+            public void onTaskComplete(Map<Integer, List> results) {
+                results.get(5);
+            }
+        };
+
+        List<LatLng> poly = new ArrayList<>();
+
+        poly.add(new LatLng(40.693825, -73.998691));
+        poly.add(new LatLng(40.6902223, -73.9770368));
+        poly.add(new LatLng(40.6930532, -73.9860919));
+        poly.add(new LatLng(40.7061326, -74.000769));
+        poly.add(new LatLng(40.693825, -73.998691));
+
+        List<List<LatLng>> polygon = new ArrayList();
+        polygon.add(poly);
+        mapfitMap.addPolygon(polygon);
+    }
 
     private void addMarkersFromCoffeeShops(List<CoffeeShop> coffeeShops) {
 
