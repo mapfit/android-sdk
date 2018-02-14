@@ -290,9 +290,12 @@ public class MapController implements Renderer {
 
         // base geometry layers
         polylineLayer = addDataLayer("mz_default_line");
-        polygonLayer = addDataLayer("mz_default_polygon");
+        polygonLayer = addDataLayer(POLYGON_LAYER_NAME);
 
     }
+
+    private static final String POLYGON_LAYER_NAME = "mz_default_polygon";
+
 
     void dispose() {
         // Disposing native resources involves GL calls, so we need to run on the GL thread.
@@ -1130,7 +1133,7 @@ public class MapController implements Renderer {
 
     public Polygon addPolygon(List<List<LatLng>> polygon) {
         checkPointer(mapPointer);
-        MapData polygonLayer = addDataLayer("mz_default_polygon");
+        MapData polygonLayer = addDataLayer(POLYGON_LAYER_NAME);
 
         Polygon poly = new Polygon(
                 mapView.getContext(),
@@ -1160,7 +1163,7 @@ public class MapController implements Renderer {
             return dataLayer.id;
 
         } else if (annotation instanceof Polygon) {
-            MapData polygonLayer = addDataLayer("mz_default_polygon");
+            MapData polygonLayer = addDataLayer(POLYGON_LAYER_NAME);
             polygonLayer.addPolygon((Polygon) annotation);
             polygons.put(polygonLayer.id, (Polygon) annotation);
             return polygonLayer.id;

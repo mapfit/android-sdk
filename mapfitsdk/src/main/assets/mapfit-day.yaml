@@ -600,7 +600,7 @@ styles:
     icons:
         base: points
         texture: pois
-        blend_order: 1
+        blend_order: 4
     text-blend-order:
         base: text
         blend_order: 1
@@ -640,11 +640,11 @@ styles:
     sdk-line-overlay:
         base: lines
         blend: overlay
-        blend_order: 0
+        blend_order: 2
     sdk-polygon-overlay:
         base: polygons
-        blend: overlay
-        blend_order: 0
+        blend: inlay
+        blend_order: 2
 
 fonts:
     Open Sans:

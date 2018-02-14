@@ -69,10 +69,10 @@ class MarkerOptions internal constructor(
         }
 
     private val placeInfoMarkerStyle =
-        "{ style: 'points', anchor: top,color: $color, size: [${markerDotSide}px, ${markerDotSide}px], order: $drawOrder, interactive: true, collide: false }"
+        "{ style: 'icons', anchor: top,color: $color, size: [${markerDotSide}px, ${markerDotSide}px], order: $drawOrder, interactive: true, collide: false }"
 
     internal var style =
-        "{ style: 'points', anchor: top, color: $color, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
+        "{ style: 'icons', anchor: top, color: $color, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
         set(value) {
             field = value
             updateStyle()
