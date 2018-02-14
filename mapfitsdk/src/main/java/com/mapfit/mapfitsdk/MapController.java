@@ -1011,9 +1011,9 @@ public class MapController implements Renderer {
                 }
 
                 Marker pickedMarker = null;
-                long id = markerPickResult.getMarker().getId();
+                long id = markerPickResult.getMarker().getId(MapController.this);
                 for (Marker marker : markers.values()) {
-                    if (marker.getId() == id) {
+                    if (marker.getId(MapController.this) == id) {
                         pickedMarker = marker;
                         break;
                     }
@@ -1163,7 +1163,6 @@ public class MapController implements Renderer {
             MapData polygonLayer = addDataLayer("mz_default_polygon");
             polygonLayer.addPolygon((Polygon) annotation);
             polygons.put(polygonLayer.id, (Polygon) annotation);
-
             return polygonLayer.id;
 
         } else {
@@ -1191,15 +1190,15 @@ public class MapController implements Renderer {
         checkId(polylineId);
         polylines.remove(polylineId);
         nativeRemoveTileSource(mapPointer, polylineId);
+        requestRender();
     }
 
     public void removePolygon(long polygonId) {
         checkPointer(mapPointer);
         checkId(polygonId);
         polygons.remove(polygonId);
-        Log.i("REMOVE POLYGON", "polygonId: " + polygonId + "\nMap Pointer: " + mapPointer);
-
         nativeRemoveTileSource(mapPointer, polygonId);
+        requestRender();
     }
 
     /**

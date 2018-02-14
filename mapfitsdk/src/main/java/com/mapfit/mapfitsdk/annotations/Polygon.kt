@@ -14,10 +14,10 @@ import java.util.*
  */
 class Polygon(
     internal val context: Context,
-    private val polygonId: Long,
+    polygonId: Long,
     mapController: MapController,
     polygon: MutableList<List<LatLng>>
-) : Annotation() {
+) : Annotation(polygonId, mapController) {
 
     lateinit var coordinates: DoubleArray
     lateinit var rings: IntArray
@@ -64,7 +64,7 @@ class Polygon(
     }
 
     override fun initAnnotation(mapController: MapController, id: Long) {
-        mapBindings[mapController] = polygonId
+        mapBindings[mapController] = id
     }
 
     /**
@@ -81,7 +81,6 @@ class Polygon(
         mapBindings[mapController]?.let { mapController.removePolyline(it) }
     }
 
-    override fun getId() = polygonId
 
 }
 

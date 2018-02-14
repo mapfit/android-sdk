@@ -26,12 +26,11 @@ import kotlinx.coroutines.experimental.launch
  */
 class Marker internal constructor(
     private val context: Context,
-    private var markerId: Long,
+    markerId: Long,
     private val mapController: MapController
-) : Annotation() {
+) : Annotation(markerId, mapController) {
 
     private var position: LatLng = LatLng(0.0, 0.0)
-
 
     val markerOptions = MarkerOptions(this, mutableListOf(mapController))
 
@@ -100,7 +99,6 @@ class Marker internal constructor(
 
     init {
         setIcon(MapfitMarker.DEFAULT)
-        mapBindings[mapController] = markerId
         initAnnotation(mapController, markerId)
     }
 
@@ -265,10 +263,6 @@ class Marker internal constructor(
             it.key.setMarkerDrawOrder(it.value, index)
         }
     }
-
-    override fun getId(): Long = markerId
-
-    private fun getId(mapController: MapController): Long? = mapBindings[mapController]
 
     private fun setBitmap(
         bitmap: Bitmap,

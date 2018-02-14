@@ -14,7 +14,7 @@ class Polyline(
     private val polylineId: Long,
     mapController: MapController,
     line: MutableList<LatLng>
-) : Annotation() {
+) : Annotation(polylineId, mapController) {
 
     private var points = line
     val polylineOptions = PolylineOptions(this)
@@ -28,7 +28,6 @@ class Polyline(
         coordinates
     }
 
-    override fun getId() = polylineId
 
     init {
         initAnnotation(mapController, polylineId)

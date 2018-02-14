@@ -8,7 +8,10 @@ import com.mapfit.mapfitsdk.MapController
  *
  * Created by dogangulcan on 12/22/17.
  */
-abstract class Annotation {
+abstract class Annotation(
+    id: Long,
+    mapController: MapController
+) {
 
     internal val mapBindings = HashMap<MapController, Long>()
     internal val layers = mutableListOf<Layer>()
@@ -16,11 +19,16 @@ abstract class Annotation {
 
     internal var subAnnotation: Annotation? = null
 
+
+    init {
+        mapBindings[mapController] = id
+    }
+
     internal fun addToMap(mapController: MapController) {
         if (!mapBindings.containsKey(mapController)) {
-            val id = mapController.addAnnotation(this)
-            mapBindings[mapController] = id
-            initAnnotation(mapController, id)
+            val newId = mapController.addAnnotation(this)
+            mapBindings[mapController] = newId
+            initAnnotation(mapController, newId)
 
             subAnnotation?.addToMap(mapController)
         }
@@ -53,7 +61,7 @@ abstract class Annotation {
 
     fun getVisible() = isVisible
 
-    abstract fun getId(): Long
+    fun getId(mapController: MapController): Long? = mapBindings[mapController]
 
     abstract fun initAnnotation(mapController: MapController, id: Long)
 

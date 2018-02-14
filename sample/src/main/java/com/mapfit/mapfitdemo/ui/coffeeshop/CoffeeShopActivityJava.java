@@ -295,13 +295,6 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
         mapfitMap.setCenter(new LatLng(40.700798, -74.0050177));
 
 
-        new SomeInterface() {
-
-            @Override
-            public void onTaskComplete(Map<Integer, List> results) {
-                results.get(5);
-            }
-        };
 
         List<LatLng> poly = new ArrayList<>();
 
@@ -314,6 +307,8 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
         List<List<LatLng>> polygon = new ArrayList();
         polygon.add(poly);
         mapfitMap.addPolygon(polygon);
+
+//        mapfitMap.setBounds();
     }
 
     private void addMarkersFromCoffeeShops(List<CoffeeShop> coffeeShops) {
