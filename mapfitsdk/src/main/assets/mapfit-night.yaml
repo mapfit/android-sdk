@@ -909,7 +909,7 @@ layers:
                 order: 503
                 width: 3px
     mz_default_polygon:
-        data: { source: mz_default_polygon }
+        data: { source: sdk-polygon-overlay }
         draw:
             sdk-polygon-overlay:
                 interactive: global.sdk_interactive

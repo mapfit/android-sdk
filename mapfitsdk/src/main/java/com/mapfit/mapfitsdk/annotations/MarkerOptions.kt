@@ -34,7 +34,7 @@ class MarkerOptions internal constructor(
 
 
     private val markerDotSide by lazy {
-        10
+        11
     }
 
     /**
@@ -69,10 +69,10 @@ class MarkerOptions internal constructor(
         }
 
     private val placeInfoMarkerStyle =
-        "{ style: 'icons', anchor: top,color: $color, size: [${markerDotSide}px, ${markerDotSide}px], order: $drawOrder, interactive: true, collide: false }"
+        "{ style: 'sdk-point-overlay', anchor: top,color: $color, size: [${markerDotSide}px, ${markerDotSide}px], order: $drawOrder, interactive: true, collide: false }"
 
     internal var style =
-        "{ style: 'icons', anchor: top, color: $color, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
+        "{ style: 'sdk-point-overlay', anchor: top, color: $color, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
         set(value) {
             field = value
             updateStyle()

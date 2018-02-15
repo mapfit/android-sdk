@@ -15,7 +15,7 @@
         android:clickable="true"
         android:contentDescription="@string/content_desc_place_info"
         android:orientation="vertical"
-        android:paddingBottom="18dp"
+        android:paddingBottom="12dp"
         android:paddingLeft="28dp"
         android:paddingRight="28dp"
         android:paddingTop="18dp">
