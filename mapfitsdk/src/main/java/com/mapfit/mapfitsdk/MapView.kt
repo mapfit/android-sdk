@@ -89,6 +89,7 @@ class MapView(
     // Click Listeners
     private var markerClickListener: OnMarkerClickListener? = null
     private var polylineClickListener: OnPolylineClickListener? = null
+    private var polygonClickListener: OnPolygonClickListener? = null
     private var mapClickListener: OnMapClickListener? = null
     private var mapDoubleClickListener: OnMapDoubleClickListener? = null
     private var mapLongClickListener: OnMapLongClickListener? = null
@@ -173,16 +174,15 @@ class MapView(
             mapController.setRotationEased(0f, ANIMATION_DURATION, MapController.EaseType.CUBIC)
         }
 
-//        zoomControls.setBackgroundResource(R.drawable.zoom_buttons_bg)
-
     }
 
     private fun onReCenterStateChanged(recenter: Boolean) {
-        if (recenter) {
-            mapfitMap.reCenter()
-            btnRecenter.setImageResource(R.drawable.re_center)
-        } else {
-            btnRecenter.setImageResource(R.drawable.re_center_off)
+        when {
+            recenter -> {
+                mapfitMap.reCenter()
+                btnRecenter.setImageResource(R.drawable.re_center)
+            }
+            else -> btnRecenter.setImageResource(R.drawable.re_center_off)
         }
 
         reCentered = recenter
@@ -226,8 +226,8 @@ class MapView(
                         showPlaceInfo(it)
                     }
                     is Polyline -> polylineClickListener?.onPolylineClicked(it)
-                    else -> {
-                    }
+                    is Polygon -> polygonClickListener?.onPolygonClicked(it)
+                    else -> Unit
                 }
 
             }
@@ -404,13 +404,16 @@ class MapView(
                                     mapController.addPolygon(addressList[0].buildingPolygon)
                                 marker.setPolygon(polygon)
                             }
-
-                            onMarkerAddedCallback.onMarkerAdded(marker)
+                            async(UI) {
+                                onMarkerAddedCallback.onMarkerAdded(marker)
+                            }
                         }
                     }
 
                     override fun onError(message: String, e: Exception) {
-                        onMarkerAddedCallback.onError(e)
+                        async(UI) {
+                            onMarkerAddedCallback.onError(e)
+                        }
                     }
                 })
         }
