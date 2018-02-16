@@ -111,7 +111,8 @@ class PlaceInfo internal constructor(
             val point = marker.getScreenPosition(mapController)
             infoView.post {
                 infoView.x = point.x - (viewWidth?.div(2) ?: 0)
-                infoView.y = (point.y - (viewHeight ?: 0))
+                infoView.y =
+                        (point.y - (viewHeight ?: 0) + 15/* adjustment for the shadow padding*/)
             }
         }
     }
