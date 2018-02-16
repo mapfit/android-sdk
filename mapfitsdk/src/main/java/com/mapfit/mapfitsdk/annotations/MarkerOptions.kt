@@ -34,7 +34,7 @@ class MarkerOptions internal constructor(
 
 
     private val markerDotSide by lazy {
-        10
+        11
     }
 
     /**
@@ -42,7 +42,7 @@ class MarkerOptions internal constructor(
      */
     var height = 59
         set(value) {
-            if (marker.usingDefaultIcon) {
+            if (!marker.usingDefaultIcon) {
                 field = value
                 updateStyle()
             }
@@ -50,7 +50,7 @@ class MarkerOptions internal constructor(
 
     var width = 55
         set(value) {
-            if (marker.usingDefaultIcon) {
+            if (!marker.usingDefaultIcon) {
                 field = value
                 updateStyle()
             }
@@ -68,22 +68,34 @@ class MarkerOptions internal constructor(
             updateStyle()
         }
 
+    internal fun setDefaultMarkerSize() {
+        marker.usingDefaultIcon = false
+        height = 59
+        width = 55
+        marker.usingDefaultIcon = true
+    }
+
     private val placeInfoMarkerStyle =
         "{ style: 'icons', anchor: top,color: $color, size: [${markerDotSide}px, ${markerDotSide}px], order: $drawOrder, interactive: true, collide: false }"
 
-    internal var style =
-        "{ style: 'icons', anchor: top, color: $color, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
-        set(value) {
-            field = value
-            updateStyle()
-        }
+//    internal var style =
+//        "{ style: 'icons', anchor: top, color: $color, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
+//        set(value) {
+//            field = value
+//            updateStyle()
+//        }
 
     init {
         updateStyle()
     }
 
+    private fun getStyleString() =
+        "{ style: 'icons', anchor: top, color: $color, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
+
     internal fun updateStyle() {
-        marker.mapBindings.forEach { it.key.setMarkerStylingFromString(it.value, style) }
+        marker.mapBindings.forEach {
+            it.key.setMarkerStylingFromString(it.value, getStyleString())
+        }
     }
 
     internal fun placeInfoShown(
@@ -95,9 +107,7 @@ class MarkerOptions internal constructor(
             mapController.setMarkerStylingFromString(markerId, placeInfoMarkerStyle)
 
         } else {
-            mapController.setMarkerStylingFromString(markerId, style)
-
-//            updateStyle()
+            mapController.setMarkerStylingFromString(markerId, getStyleString())
         }
     }
 

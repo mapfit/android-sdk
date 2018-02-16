@@ -203,9 +203,7 @@ class Marker internal constructor(
      */
     fun setIcon(@NonNull mapfitMarker: MapfitMarker): Marker {
         setIcon(mapfitMarker.getUrl())
-        markerOptions.height = 50
-        markerOptions.width = 50
-        usingDefaultIcon = true
+        markerOptions.setDefaultMarkerSize()
         return this
     }
 

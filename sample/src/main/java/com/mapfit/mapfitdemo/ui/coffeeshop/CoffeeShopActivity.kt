@@ -457,7 +457,7 @@ class CoffeeShopActivity : AppCompatActivity() {
     }
 
     private fun addMarkersFromCoffeeShops(mapfitMap: MapfitMap, coffeeShops: List<CoffeeShop>) {
-
+        var i = 100
         coffeeShops.forEach { shop ->
 
             val marker = mapfitMap.addMarker(LatLng(shop.lat, shop.lon))
@@ -473,6 +473,15 @@ class CoffeeShopActivity : AppCompatActivity() {
                 "vendor0007" -> MapfitMarker.MEDICAL
                 else -> MapfitMarker.DEFAULT
             }
+
+//            i += 1300
+//            launch {
+//                delay(15800 + i)
+//                marker.setIcon("https://fthmb.tqn.com/d7HzCU0Al_KrpBh9TL_7bhsjadA=/3865x2576/filters:fill(auto,1)/horse-galloping-in-grass-688899769-587673275f9b584db3a44cdf.jpg")
+//                marker.markerOptions.height = 1000
+//                marker.markerOptions.width = 50
+//
+//            }
 
             marker.setIcon(markerIcon)
                 .setTitle(shop.title)
