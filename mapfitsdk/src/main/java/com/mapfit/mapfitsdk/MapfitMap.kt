@@ -216,12 +216,12 @@ abstract class MapfitMap {
     /**
      * Sets [OnPolylineClickListener] for [MapView] that polyline click events will be passed to.
      */
-    abstract fun setOnPolylineClickListener(listener: OnPolylineClickListener)
+    internal abstract fun setOnPolylineClickListener(listener: OnPolylineClickListener)
 
     /**
      * Sets [OnPolygonClickListener] for [MapView] that polygon click events will be passed to.
      */
-    abstract fun setOnPolygonClickListener(listener: OnPolygonClickListener)
+    internal abstract fun setOnPolygonClickListener(listener: OnPolygonClickListener)
 
     /**
      * MapOptions can be used to changing options for the map. For instance, setting maximum zoom

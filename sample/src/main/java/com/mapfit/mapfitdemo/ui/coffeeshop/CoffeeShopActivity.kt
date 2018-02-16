@@ -90,10 +90,15 @@ class CoffeeShopActivity : AppCompatActivity() {
 
     }
 
+    var alreadyLoaded = false
     private fun initMap() {
         map.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
-                setupMap(mapfitMap)
+
+                if (!alreadyLoaded) {
+                    setupMap(mapfitMap)
+                    alreadyLoaded = true
+                }
 
 //                mapfitMap.addPolygon(repository.getLowerManhattanPoly())
 //                mapfitMap.addPolyline()
@@ -621,17 +626,17 @@ class CoffeeShopActivity : AppCompatActivity() {
             }
         })
 
-        mapfitMap.setOnPolylineClickListener(object : OnPolylineClickListener {
-            override fun onPolylineClicked(polyline: Polyline) {
-
-            }
-        })
-
-        mapfitMap.setOnPolygonClickListener(object : OnPolygonClickListener {
-            override fun onPolygonClicked(polygon: Polygon) {
-
-            }
-        })
+//        mapfitMap.setOnPolylineClickListener(object : OnPolylineClickListener {
+//            override fun onPolylineClicked(polyline: Polyline) {
+//
+//            }
+//        })
+//
+//        mapfitMap.setOnPolygonClickListener(object : OnPolygonClickListener {
+//            override fun onPolygonClicked(polygon: Polygon) {
+//
+//            }
+//        })
 
 
     }

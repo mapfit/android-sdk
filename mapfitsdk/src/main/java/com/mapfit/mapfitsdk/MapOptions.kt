@@ -35,6 +35,10 @@ class MapOptions internal constructor(
 
     private fun updateScene(value: MapTheme) {
         mapController.loadSceneFile(value.toString())
+        updateAttributionImage(value)
+    }
+
+    private fun updateAttributionImage(value: MapTheme) {
         val attributionImage = when (value) {
             MapTheme.MAPFIT_DAY -> {
                 mapView.btnLegal?.setTextColor(
@@ -68,6 +72,7 @@ class MapOptions internal constructor(
                 R.drawable.ic_watermark_dark
             }
         }
+
         mapView.getAttributionImage().setImageResource(attributionImage)
     }
 
@@ -128,6 +133,9 @@ class MapOptions internal constructor(
         }
     }
 
+    /**
+     * @param zoomLevel desired minimum zoom level
+     */
     internal fun setMinZoom(@FloatRange(from = MAP_MIN_ZOOM, to = MAP_MAX_ZOOM) zoomLevel: Float) {
         if (isValidZoomLevel(zoomLevel)) {
             minZoom = zoomLevel

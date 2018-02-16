@@ -1208,9 +1208,9 @@ public class MapController implements Renderer {
      * Remove all the {@link Marker} objects from the map.
      */
     public void removeAllMarkers() {
-        checkPointer(mapPointer);
-        nativeMarkerRemoveAll(mapPointer);
-        markers.clear();
+//        checkPointer(mapPointer);
+//        nativeMarkerRemoveAll(mapPointer);
+//        markers.clear();
     }
 
     /**

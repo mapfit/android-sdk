@@ -253,19 +253,19 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
             }
         });
 
-        mapfitMap.setOnPolylineClickListener(new OnPolylineClickListener() {
-            @Override
-            public void onPolylineClicked(@NotNull Polyline polyline) {
-
-            }
-        });
-
-        mapfitMap.setOnPolygonClickListener(new OnPolygonClickListener() {
-            @Override
-            public void onPolygonClicked(@NotNull Polygon polygon) {
-
-            }
-        });
+//        mapfitMap.setOnPolylineClickListener(new OnPolylineClickListener() {
+//            @Override
+//            public void onPolylineClicked(@NotNull Polyline polyline) {
+//
+//            }
+//        });
+//
+//        mapfitMap.setOnPolygonClickListener(new OnPolygonClickListener() {
+//            @Override
+//            public void onPolygonClicked(@NotNull Polygon polygon) {
+//
+//            }
+//        });
 
     }
 

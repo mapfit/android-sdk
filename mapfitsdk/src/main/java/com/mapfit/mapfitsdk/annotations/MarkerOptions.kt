@@ -76,21 +76,14 @@ class MarkerOptions internal constructor(
     }
 
     private val placeInfoMarkerStyle =
-        "{ style: 'icons', anchor: top,color: $color, size: [${markerDotSide}px, ${markerDotSide}px], order: $drawOrder, interactive: true, collide: false }"
-
-//    internal var style =
-//        "{ style: 'icons', anchor: top, color: $color, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
-//        set(value) {
-//            field = value
-//            updateStyle()
-//        }
+        "{ style: 'sdk-point-overlay', anchor: top,color: $color, size: [${markerDotSide}px, ${markerDotSide}px], order: $drawOrder, interactive: true, collide: false }"
 
     init {
         updateStyle()
     }
 
     private fun getStyleString() =
-        "{ style: 'icons', anchor: top, color: $color, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
+        "{ style: 'sdk-point-overlay', anchor: top, color: $color, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
 
     internal fun updateStyle() {
         marker.mapBindings.forEach {
