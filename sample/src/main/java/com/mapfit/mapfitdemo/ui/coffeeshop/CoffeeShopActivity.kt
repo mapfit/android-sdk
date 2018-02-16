@@ -418,7 +418,21 @@ class CoffeeShopActivity : AppCompatActivity() {
         }
     }
 
+    var i = 0
     private fun addMarkerWithAddress(address: String) {
+
+
+//        mapfitMap.addMarker("119 w 24th street new york",
+//            true,
+//            object : OnMarkerAddedCallback {
+//                override fun onMarkerAdded(marker: Marker) {
+//
+//                }
+//
+//                override fun onError(exception: Exception) {
+//
+//                }
+//            })
 
 
         if (address.isBlank()) {
@@ -427,6 +441,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(toolbar.windowToken, 0)
+
 
 //            mapfitMap.addPolyline()
             mapfitMap.addMarker(address,
@@ -439,6 +454,14 @@ class CoffeeShopActivity : AppCompatActivity() {
                         edtAddress.setText("")
                         markers.add(marker)
 
+                        when (i) {
+                            0 -> marker.setIcon(MapfitMarker.PHARMACY)
+                            1 -> marker.setIcon(MapfitMarker.COMMERCIAL)
+                            2 -> marker.setIcon(MapfitMarker.DEFAULT)
+                            3 -> marker.setIcon(MapfitMarker.HOTEL)
+                            else -> marker.setIcon(MapfitMarker.DEFAULT)
+                        }
+                     i=   i.inc()
                         alwaysOpenShopLayer.add(marker)
 
                     }

@@ -7,6 +7,8 @@ import com.mapfit.mapfitsdk.utils.isValidZoomLevel
 import kotlinx.android.synthetic.main.overlay_map_controls.view.*
 
 /**
+ * Map settings and options are manipulated trough this class.
+ *
  * Created by dogangulcan on 12/21/17.
  */
 class MapOptions internal constructor(
@@ -117,11 +119,6 @@ class MapOptions internal constructor(
             field = value
         }
 
-    private var is3dBuildingsEnabled = true
-        set(value) {
-            TODO()
-        }
-
     /**
      * @param zoomLevel desired maximum zoom level
      */
@@ -131,13 +128,13 @@ class MapOptions internal constructor(
         }
     }
 
-    internal fun getMaxZoom() = maxZoom
-
     internal fun setMinZoom(@FloatRange(from = MAP_MIN_ZOOM, to = MAP_MAX_ZOOM) zoomLevel: Float) {
         if (isValidZoomLevel(zoomLevel)) {
             minZoom = zoomLevel
         }
     }
+
+    internal fun getMaxZoom() = maxZoom
 
     private enum class CameraType {
         PERSPECTIVE,

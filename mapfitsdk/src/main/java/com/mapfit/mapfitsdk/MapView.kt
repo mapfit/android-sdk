@@ -30,11 +30,13 @@ import com.mapfit.mapfitsdk.geometry.isEmpty
 import com.mapfit.mapfitsdk.utils.isValidZoomLevel
 import com.mapfit.mapfitsdk.utils.startActivitySafe
 import com.mapfit.tangram.ConfigChooser
-import com.mapfit.tangram.MarkerPickResult
 import com.mapfit.tangram.TouchInput
 import kotlinx.android.synthetic.main.overlay_map_controls.view.*
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 import org.jetbrains.annotations.NotNull
 import java.io.IOException
 
@@ -73,8 +75,8 @@ class MapView(
         controlsView.findViewById<RelativeLayout>(R.id.zoomControls)
     }
 
-    internal val btnRecenter: View by lazy {
-        controlsView.findViewById<View>(R.id.btnRecenter)
+    internal val btnRecenter: ImageView by lazy {
+        controlsView.findViewById<ImageView>(R.id.btnRecenter)
     }
 
     internal val btnCompass: View by lazy {
@@ -87,6 +89,7 @@ class MapView(
     // Click Listeners
     private var markerClickListener: OnMarkerClickListener? = null
     private var polylineClickListener: OnPolylineClickListener? = null
+    private var polygonClickListener: OnPolygonClickListener? = null
     private var mapClickListener: OnMapClickListener? = null
     private var mapDoubleClickListener: OnMapDoubleClickListener? = null
     private var mapLongClickListener: OnMapLongClickListener? = null
@@ -99,7 +102,7 @@ class MapView(
     private var viewWidth: Int? = null
 
     private var placeInfoRemoveJob = Job()
-
+    private var reCentered = false
 
     init {
         Mapfit.getApiKey()
@@ -164,15 +167,25 @@ class MapView(
         }
 
         btnRecenter.setOnClickListener {
-            mapfitMap.reCenter()
+            onReCenterStateChanged(true)
         }
 
         btnCompass.setOnClickListener {
             mapController.setRotationEased(0f, ANIMATION_DURATION, MapController.EaseType.CUBIC)
         }
 
-//        zoomControls.setBackgroundResource(R.drawable.zoom_buttons_bg)
+    }
 
+    private fun onReCenterStateChanged(recenter: Boolean) {
+        when {
+            recenter -> {
+                mapfitMap.reCenter()
+                btnRecenter.setImageResource(R.drawable.re_center)
+            }
+            else -> btnRecenter.setImageResource(R.drawable.re_center_off)
+        }
+
+        reCentered = recenter
     }
 
     private fun initMapController(mapTheme: MapTheme, onMapReadyCallback: OnMapReadyCallback) {
@@ -201,9 +214,9 @@ class MapView(
         }
     }
 
-    val onAnnotationClickListener = object : OnAnnotationClickListener {
+    private val onAnnotationClickListener = object : OnAnnotationClickListener {
         override fun onAnnotationClicked(annotation: Annotation) {
-            annotation?.let {
+            annotation.let {
 
                 if (placeInfoRemoveJob.isActive) placeInfoRemoveJob.cancel()
 
@@ -213,8 +226,8 @@ class MapView(
                         showPlaceInfo(it)
                     }
                     is Polyline -> polylineClickListener?.onPolylineClicked(it)
-                    else -> {
-                    }
+                    is Polygon -> polygonClickListener?.onPolygonClicked(it)
+                    else -> Unit
                 }
 
             }
@@ -244,6 +257,8 @@ class MapView(
                 it.onMapPan()
                 consumed = true
             }
+
+            if (startX != endX && startY != endY) onReCenterStateChanged(false)
 
             updatePlaceInfoPosition(false)
             return false
@@ -389,13 +404,16 @@ class MapView(
                                     mapController.addPolygon(addressList[0].buildingPolygon)
                                 marker.setPolygon(polygon)
                             }
-
-                            onMarkerAddedCallback.onMarkerAdded(marker)
+                            async(UI) {
+                                onMarkerAddedCallback.onMarkerAdded(marker)
+                            }
                         }
                     }
 
                     override fun onError(message: String, e: Exception) {
-                        onMarkerAddedCallback.onError(e)
+                        async(UI) {
+                            onMarkerAddedCallback.onError(e)
+                        }
                     }
                 })
         }
@@ -498,9 +516,6 @@ class MapView(
         override fun addLayer(layer: Layer) {
             if (!layers.contains(layer)) {
                 layers.add(layer)
-//                layer.annotations
-//                    .filter { !annotationLayer.annotations.contains(it) }
-//                    .forEach { annotationLayer.annotations.add(it) }
                 layer.addMap(mapController)
             }
         }
