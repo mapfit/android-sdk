@@ -2,9 +2,9 @@ package com.mapfit.mapfitsdk.directions
 
 import com.mapfit.mapfitsdk.BuildConfig
 import com.mapfit.mapfitsdk.Mapfit
-import com.mapfit.mapfitsdk.directions.DirectionsApi.HttpHandler.directionsParser
+import com.mapfit.mapfitsdk.directions.Directions.HttpHandler.directionsParser
 import com.mapfit.mapfitsdk.directions.model.Route
-import com.mapfit.mapfitsdk.geocoder.GeocoderApi.HttpHandler.httpClient
+import com.mapfit.mapfitsdk.geocoder.Geocoder.HttpHandler.httpClient
 import com.mapfit.mapfitsdk.geocoder.model.EntranceType
 import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.isEmpty
@@ -25,9 +25,9 @@ import java.io.IOException
  *
  * Created by dogangulcan on 1/18/18.
  */
-class DirectionsApi {
+class Directions {
 
-    object HttpHandler {
+    internal object HttpHandler {
         private val logging = HttpLoggingInterceptor()
 
         init {
@@ -43,7 +43,6 @@ class DirectionsApi {
         internal val directionsParser = DirectionsParser()
     }
 
-
     /**
      * Returns directions for given origin and destination. To have reliable results, you should
      * provide an origin and destination
@@ -53,13 +52,14 @@ class DirectionsApi {
      * @param directionsType type for the directions. Default value is driving
      * @param callback will be called when [Route] is obtained
      */
-    fun getDirections(
+    fun route(
+
         originLocation: LatLng = LatLng(),
         destinationLocation: LatLng = LatLng(),
         directionsType: DirectionsType = DirectionsType.DRIVING,
         callback: DirectionsCallback
     ) {
-        getDirections(
+        getRoute(
             originAddress = "",
             originLocation = originLocation,
             destinationLocation = destinationLocation,
@@ -77,12 +77,12 @@ class DirectionsApi {
      * @param directionsType type for the directions. Default value is driving
      * @param callback will be called when [Route] is obtained
      */
-    fun getDirections(
+    fun route(
         originLocation: LatLng = LatLng(),
         destinationLocation: LatLng = LatLng(),
         callback: DirectionsCallback
     ) {
-        getDirections(
+        getRoute(
             originAddress = "",
             originLocation = originLocation,
             destinationLocation = destinationLocation,
@@ -102,7 +102,7 @@ class DirectionsApi {
      * @param callback will be called when [Route] is obtained
      */
     @JvmOverloads
-    fun getDirections(
+    fun getRoute(
         originAddress: String = "",
         destinationAddress: String = "",
         originLocation: LatLng = LatLng(),

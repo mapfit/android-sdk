@@ -103,7 +103,10 @@ class Marker internal constructor(
     }
 
     override fun initAnnotation(mapController: MapController, id: Long) {
-        markerOptions.mapController.add(mapController)
+        if (!markerOptions.mapController.contains(mapController)) {
+            markerOptions.mapController.add(mapController)
+        }
+        mapBindings[mapController] = id
         markerOptions.updateStyle()
         icon?.let { setBitmap(it, mapController, id) }
         setPosition(position)

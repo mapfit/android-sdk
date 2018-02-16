@@ -909,15 +909,17 @@ layers:
                 order: 503
                 width: 3px
     mz_default_polygon:
-        data: { source: sdk-polygon-overlay }
+        data: { source: mz_default_polygon }
         draw:
             sdk-polygon-overlay:
                 interactive: global.sdk_interactive
-                fill: white
-                order: 501
+                color: '#20dc3983'
+                order: 500
+
             sdk-line-overlay:
-                color: white
-                order: 502
+                color: '#dc3983'
+                cap: round
+                order: 501
                 width: 3px
     water:
         data: { source: mapfit, layer: water }

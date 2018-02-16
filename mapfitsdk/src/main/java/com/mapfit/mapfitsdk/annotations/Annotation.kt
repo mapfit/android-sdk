@@ -19,7 +19,6 @@ abstract class Annotation(
 
     internal var subAnnotation: Annotation? = null
 
-
     init {
         mapBindings[mapController] = id
     }

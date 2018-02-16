@@ -1,7 +1,7 @@
 package com.mapfit.mapfitsdk
 
 import com.mapfit.mapfitsdk.exceptions.MapfitConfigurationException
-import com.mapfit.mapfitsdk.geocoder.GeocoderApi
+import com.mapfit.mapfitsdk.geocoder.Geocoder
 import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -31,7 +31,7 @@ class GeocodeTest {
 
     @Test(expected = MapfitConfigurationException::class)
     fun testMapfitConfiguration() {
-        GeocoderApi().geocodeAddress(
+        Geocoder().geocode(
             "119 w 24th st new york ny 10011",
             true,
             geocoderCallback
@@ -49,8 +49,8 @@ class GeocodeTest {
         server.enqueue(MockResponse().setBody(mockResponse))
 //        server.start()
 
-        val geocoder = GeocoderApi()
-        geocoder.geocodeAddress(
+        val geocoder = Geocoder()
+        geocoder.geocode(
             "119 w 24th st new york ny 10011",
             true,
             geocoderCallback

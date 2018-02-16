@@ -3,7 +3,7 @@ package com.mapfit.mapfitsdk.geocoder
 import com.mapfit.mapfitsdk.geocoder.model.Address
 
 /**
- * Callback used to get responses and errors from [GeocoderApi].
+ * Callback used to get responses and errors from [Geocoder].
  *
  * Created by dogangulcan on 1/18/18.
  */

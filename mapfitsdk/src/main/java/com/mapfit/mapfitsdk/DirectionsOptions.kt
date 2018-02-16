@@ -1,7 +1,7 @@
 package com.mapfit.mapfitsdk
 
 import com.mapfit.mapfitsdk.annotations.Polyline
-import com.mapfit.mapfitsdk.directions.DirectionsApi
+import com.mapfit.mapfitsdk.directions.Directions
 import com.mapfit.mapfitsdk.directions.DirectionsCallback
 import com.mapfit.mapfitsdk.directions.DirectionsType
 import com.mapfit.mapfitsdk.directions.model.Route
@@ -96,7 +96,7 @@ class DirectionsOptions internal constructor(private val mapController: MapContr
                 callback.onError("", e)
             }
         }
-        DirectionsApi().getDirections(
+        Directions().getRoute(
             originLocation = originLocation,
             destinationLocation = destinationLocation,
             directionsType = type,

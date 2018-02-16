@@ -57,6 +57,7 @@ public class MapController implements Renderer {
                 annotation instanceof Polygon && polygons.containsValue(annotation);
     }
 
+
     /**
      * Options for interpolating map parameters
      */
@@ -144,7 +145,6 @@ public class MapController implements Renderer {
     /**
      * Interface for a callback to receive the picked {@link Marker}
      * Triggered after a call of {@link #pickMarker(float, float)}
-     * Listener should be set with {@link #setMarkerPickListener(MarkerPickListener)}
      * The callback will be run on the main (UI) thread.
      */
     @Keep
@@ -981,24 +981,6 @@ public class MapController implements Renderer {
         };
     }
 
-    /**
-     * Set a listener for marker pick events
-     *
-     * @param listener The {@link MarkerPickListener} to call
-     */
-    public void setMarkerPickListener(final MarkerPickListener listener) {
-        markerPickListener = (listener == null) ? null : new MarkerPickListener() {
-            @Override
-            public void onMarkerPick(final MarkerPickResult markerPickResult, final float positionX, final float positionY) {
-                uiThreadHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.onMarkerPick(markerPickResult, positionX, positionY);
-                    }
-                });
-            }
-        };
-    }
 
     /**
      * Set a listener for marker pick events
@@ -1067,12 +1049,11 @@ public class MapController implements Renderer {
 
     /**
      * Query the map for a {@link Marker} at the given screen coordinates; results will be returned
-     * in a callback to the object set by {@link #setMarkerPickListener(MarkerPickListener)}
      *
      * @param posX The horizontal screen coordinate
      * @param posY The vertical screen coordinate
      */
-    public void pickMarker(float posX, float posY) {
+    void pickMarker(float posX, float posY) {
         if (markerPickListener != null) {
             checkPointer(mapPointer);
             nativePickMarker(this, mapPointer, posX, posY, markerPickListener);
@@ -1085,14 +1066,6 @@ public class MapController implements Renderer {
      *
      * @return Newly created {@link Marker} object.
      */
-//    public Marker addMarker() {
-//        checkPointer(mapPointer);
-//        long markerId = nativeMarkerAdd(mapPointer);
-//        Marker marker = new Marker(mapView.getContext(), markerId, this);
-//        marker.setPolyline()
-//        markers.put(markerId, marker);
-//        return marker;
-//    }
     public Marker addMarker() {
         checkPointer(mapPointer);
         long markerId = nativeMarkerAdd(mapPointer);
@@ -1207,10 +1180,22 @@ public class MapController implements Renderer {
     /**
      * Remove all the {@link Marker} objects from the map.
      */
-    public void removeAllMarkers() {
-//        checkPointer(mapPointer);
-//        nativeMarkerRemoveAll(mapPointer);
-//        markers.clear();
+    private void removeAllMarkers() {
+        checkPointer(mapPointer);
+        nativeMarkerRemoveAll(mapPointer);
+    }
+
+
+    protected void reAddMarkers() {
+
+        HashMap<Long, Marker> tempMarkers = new HashMap<>();
+        for (Marker marker : markers.values()) {
+            long markerId = nativeMarkerAdd(mapPointer);
+            marker.initAnnotation(this, markerId);
+            tempMarkers.put(markerId, marker);
+        }
+        markers = tempMarkers;
+
     }
 
     /**

@@ -21,7 +21,7 @@ import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
 import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener
 import com.mapfit.mapfitsdk.annotations.widget.PlaceInfo
-import com.mapfit.mapfitsdk.geocoder.GeocoderApi
+import com.mapfit.mapfitsdk.geocoder.Geocoder
 import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
 import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
@@ -57,7 +57,7 @@ class MapView(
     private lateinit var mapController: MapController
     private lateinit var mapOptions: MapOptions
     private lateinit var directionsOptions: DirectionsOptions
-    private val geocoder = GeocoderApi()
+    private val geocoder = Geocoder()
 
     // Views
     private val controlsView: View by lazy {
@@ -67,9 +67,6 @@ class MapView(
     private val placeInfoFrame = FrameLayout(context)
 
     private val attributionImage: ImageView = controlsView.findViewById(R.id.imgAttribution)
-
-    @JvmSynthetic
-    internal fun getAttributionImage(): ImageView = attributionImage
 
     internal val zoomControlsView: RelativeLayout by lazy {
         controlsView.findViewById<RelativeLayout>(R.id.zoomControls)
@@ -83,10 +80,12 @@ class MapView(
         controlsView.findViewById<View>(R.id.btnCompass)
     }
 
+    @JvmSynthetic
+    internal fun getAttributionImage(): ImageView = attributionImage
 
     private val layers = mutableListOf<Layer>()
 
-    // Click Listeners
+    // event listeners
     private var markerClickListener: OnMarkerClickListener? = null
     private var polylineClickListener: OnPolylineClickListener? = null
     private var polygonClickListener: OnPolygonClickListener? = null
@@ -117,14 +116,12 @@ class MapView(
 
     @JvmOverloads
     fun getMapAsync(mapTheme: MapTheme = MapTheme.MAPFIT_DAY, @NotNull onMapReadyCallback: OnMapReadyCallback) {
-
         if (::mapController.isInitialized) {
             onMapReadyCallback.onMapReady(mapfitMap)
         }
 
         initMapController(mapTheme, onMapReadyCallback)
         initUiControls()
-
     }
 
     private fun initUiControls() {
@@ -204,6 +201,7 @@ class MapView(
             setMarkerPickListener(onAnnotationClickListener)
 
             setSceneLoadListener({ _, _ ->
+                mapController.reAddMarkers()
                 onMapReadyCallback.onMapReady(mapfitMap)
             })
 
@@ -252,11 +250,7 @@ class MapView(
 
     private fun panResponder() = object : TouchInput.PanResponder {
         override fun onPan(startX: Float, startY: Float, endX: Float, endY: Float): Boolean {
-            var consumed = false
-            mapPanListener?.let {
-                it.onMapPan()
-                consumed = true
-            }
+            mapPanListener?.onMapPan()
 
             if (startX != endX && startY != endY) onReCenterStateChanged(false)
 
@@ -382,7 +376,7 @@ class MapView(
             withBuilding: Boolean,
             onMarkerAddedCallback: OnMarkerAddedCallback
         ) {
-            geocoder.geocodeAddress(address,
+            geocoder.geocode(address,
                 withBuilding,
                 object : GeocoderCallback {
                     override fun onSuccess(addressList: List<Address>) {

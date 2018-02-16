@@ -1,6 +1,5 @@
 package com.mapfit.mapfitdemo.ui.coffeeshop;
 
-import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.view.GravityCompat;
@@ -11,7 +10,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.TextView;
 
 import com.mapfit.mapfitdemo.R;
 import com.mapfit.mapfitdemo.data.model.CoffeeShop;
@@ -30,16 +28,13 @@ import com.mapfit.mapfitsdk.OnMapPanListener;
 import com.mapfit.mapfitsdk.OnMapPinchListener;
 import com.mapfit.mapfitsdk.OnMapReadyCallback;
 import com.mapfit.mapfitsdk.annotations.Marker;
-import com.mapfit.mapfitsdk.annotations.Polygon;
 import com.mapfit.mapfitsdk.annotations.Polyline;
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener;
-import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener;
-import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener;
-import com.mapfit.mapfitsdk.directions.DirectionsApi;
+import com.mapfit.mapfitsdk.directions.Directions;
 import com.mapfit.mapfitsdk.directions.DirectionsCallback;
 import com.mapfit.mapfitsdk.directions.DirectionsType;
 import com.mapfit.mapfitsdk.directions.model.Route;
-import com.mapfit.mapfitsdk.geocoder.GeocoderApi;
+import com.mapfit.mapfitsdk.geocoder.Geocoder;
 import com.mapfit.mapfitsdk.geocoder.GeocoderCallback;
 import com.mapfit.mapfitsdk.geocoder.model.Address;
 import com.mapfit.mapfitsdk.geometry.LatLng;
@@ -48,7 +43,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by dogangulcan on 1/17/18.
@@ -105,7 +99,7 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
 
         });
 
-        new GeocoderApi().geocodeAddress("119w 24th st new york ny", new GeocoderCallback() {
+        new Geocoder().geocode("119w 24th st new york ny", new GeocoderCallback() {
             @Override
             public void onError(@NotNull String message, @NotNull Exception e) {
 
@@ -172,12 +166,12 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
 
         };
 
-        new DirectionsApi().getDirections(
+        new Directions().getRoute(
                 "119 W 24th St new york",
                 "1000 5th Ave, New York, NY 10028",
                 callback);
 
-        new DirectionsApi().getDirections(
+        new Directions().route(
                 new LatLng(40.744043, -73.993209),
                 new LatLng(40.7794406, -73.9654327),
                 DirectionsType.CYCLING,

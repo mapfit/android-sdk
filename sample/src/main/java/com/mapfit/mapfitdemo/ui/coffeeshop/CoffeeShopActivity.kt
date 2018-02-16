@@ -25,15 +25,12 @@ import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener
 import com.mapfit.mapfitsdk.*
 import com.mapfit.mapfitsdk.annotations.MapfitMarker
 import com.mapfit.mapfitsdk.annotations.Marker
-import com.mapfit.mapfitsdk.annotations.Polygon
 import com.mapfit.mapfitsdk.annotations.Polyline
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
-import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
-import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener
 import com.mapfit.mapfitsdk.directions.DirectionsType
 import com.mapfit.mapfitsdk.directions.model.Route
-import com.mapfit.mapfitsdk.geocoder.GeocoderApi
+import com.mapfit.mapfitsdk.geocoder.Geocoder
 import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
 import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
@@ -185,14 +182,14 @@ class CoffeeShopActivity : AppCompatActivity() {
 //                }
 //            }
 //
-//            DirectionsApi().getDirections(
+//            Directions().getRoute(
 //                originAddress = "119 W 24th St new york",
 //                destinationAddress = "1000 5th Ave, New York, NY 10028",
 //                directionsType = DirectionsType.CYCLING,
 //                callback = callback
 //            )
 //
-//            DirectionsApi().getDirections(
+//            Directions().getRoute(
 //                originLocation = LatLng(40.744043, -73.993209),
 //                destinationLocation = LatLng(40.7794406, -73.9654327),
 //                callback = callback
@@ -552,7 +549,7 @@ class CoffeeShopActivity : AppCompatActivity() {
     private fun addMapfitOfficeWithGeocoder() {
 
 
-        GeocoderApi().geocodeAddress("119w 24th st new york ny",
+        Geocoder().geocode("119w 24th st new york ny",
             true,
             object : GeocoderCallback {
 

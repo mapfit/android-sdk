@@ -2,8 +2,8 @@ package com.mapfit.mapfitsdk.geocoder
 
 import com.mapfit.mapfitsdk.BuildConfig
 import com.mapfit.mapfitsdk.Mapfit
-import com.mapfit.mapfitsdk.geocoder.GeocoderApi.HttpHandler.geocodeParser
-import com.mapfit.mapfitsdk.geocoder.GeocoderApi.HttpHandler.httpClient
+import com.mapfit.mapfitsdk.geocoder.Geocoder.HttpHandler.geocodeParser
+import com.mapfit.mapfitsdk.geocoder.Geocoder.HttpHandler.httpClient
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import okhttp3.*
@@ -19,7 +19,7 @@ import java.io.IOException
  *
  * Created by dogangulcan on 1/18/18.
  */
-class GeocoderApi {
+class Geocoder {
 
     object HttpHandler {
         private val logging = HttpLoggingInterceptor()
@@ -44,7 +44,7 @@ class GeocoderApi {
      * @param callback for response and errors
      */
     @JvmOverloads
-    fun geocodeAddress(address: String, withBuilding: Boolean = false, callback: GeocoderCallback) {
+    fun geocode(address: String, withBuilding: Boolean = false, callback: GeocoderCallback) {
 
         val request = Request.Builder()
             .url(createRequestUrl(address, withBuilding))

@@ -1,6 +1,6 @@
 package com.mapfit.mapfitsdk
 
-import com.mapfit.mapfitsdk.directions.DirectionsApi
+import com.mapfit.mapfitsdk.directions.Directions
 import com.mapfit.mapfitsdk.directions.DirectionsCallback
 import com.mapfit.mapfitsdk.exceptions.MapfitConfigurationException
 import okhttp3.mockwebserver.MockResponse
@@ -31,7 +31,7 @@ class DirectionsTest {
 
     @Test(expected = MapfitConfigurationException::class)
     fun testMapfitConfiguration() {
-        DirectionsApi().getDirections(
+        Directions().getRoute(
             originAddress = "119 W 24th St",
             destinationAddress = "107 Sacred Heart Ln",
             callback = directionsCallback
@@ -49,7 +49,7 @@ class DirectionsTest {
         server.enqueue(MockResponse().setBody(mockResponse))
 //        server.start()
 
-        DirectionsApi().getDirections(
+        Directions().getRoute(
             originAddress = "119 W 24th St",
             destinationAddress = "107 Sacred Heart Ln",
             callback = directionsCallback
