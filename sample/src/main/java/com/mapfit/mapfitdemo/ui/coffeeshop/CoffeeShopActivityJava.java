@@ -27,6 +27,7 @@ import com.mapfit.mapfitsdk.OnMapLongClickListener;
 import com.mapfit.mapfitsdk.OnMapPanListener;
 import com.mapfit.mapfitsdk.OnMapPinchListener;
 import com.mapfit.mapfitsdk.OnMapReadyCallback;
+import com.mapfit.mapfitsdk.annotations.Annotation;
 import com.mapfit.mapfitsdk.annotations.Marker;
 import com.mapfit.mapfitsdk.annotations.Polyline;
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener;
@@ -171,6 +172,12 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
                 "1000 5th Ave, New York, NY 10028",
                 callback);
 
+        Layer layer = new Layer();
+        List<Annotation> annotationList = layer.getAnnotations();
+        layer.setVisible(false);
+        boolean isLayerVisible = layer.isVisible();
+
+
         new Directions().route(
                 new LatLng(40.744043, -73.993209),
                 new LatLng(40.7794406, -73.9654327),
@@ -289,7 +296,6 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
         mapfitMap.setCenter(new LatLng(40.700798, -74.0050177));
 
 
-
         List<LatLng> poly = new ArrayList<>();
 
         poly.add(new LatLng(40.693825, -73.998691));
@@ -302,7 +308,7 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
         polygon.add(poly);
         mapfitMap.addPolygon(polygon);
 
-//        mapfitMap.setBounds();
+//        mapfitMap.setLatLngBounds();
     }
 
     private void addMarkersFromCoffeeShops(List<CoffeeShop> coffeeShops) {

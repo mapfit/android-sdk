@@ -42,7 +42,7 @@ import java.io.IOException
 
 
 /**
- * The view map is drawn to.
+ * The view map is drawn on to.
  *
  * Created by dogangulcan on 12/18/17.
  */
@@ -439,11 +439,11 @@ class MapView(
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun setBounds(bounds: LatLngBounds, padding: Float) {
+        override fun setLatLngBounds(bounds: LatLngBounds, padding: Float) {
             mapController.setLatlngBounds(bounds, padding)
         }
 
-        override fun getBounds(): LatLngBounds {
+        override fun getLatLngBounds(): LatLngBounds {
             val sw = mapController.screenPositionToLatLng(PointF(0f, viewHeight?.toFloat() ?: 0f))
             val ne = mapController.screenPositionToLatLng(PointF(viewWidth?.toFloat() ?: 0f, 0f))
             return LatLngBounds(ne ?: LatLng(), sw ?: LatLng())

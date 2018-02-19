@@ -16,7 +16,7 @@ class Polygon(
     internal val context: Context,
     polygonId: Long,
     mapController: MapController,
-    polygon: MutableList<List<LatLng>>
+    internal val polygon: MutableList<List<LatLng>>
 ) : Annotation(polygonId, mapController) {
 
     lateinit var coordinates: DoubleArray

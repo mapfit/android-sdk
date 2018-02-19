@@ -1,5 +1,6 @@
 package com.mapfit.mapfitsdk
 
+import android.support.annotation.FloatRange
 import android.view.View
 import com.mapfit.mapfitsdk.annotations.Annotation
 import com.mapfit.mapfitsdk.annotations.Marker
@@ -58,12 +59,14 @@ abstract class MapfitMap {
     /**
      * Returns the layers of the map.
      *
-     * @return layer list
+     * @return layers on the map as list
      */
     abstract fun getLayers(): List<Layer>
 
     /**
-     * @return center of the visible map
+     * Returns the center of the visible map.
+     *
+     * @return [LatLng]
      */
     abstract fun getCenter(): LatLng
 
@@ -106,6 +109,7 @@ abstract class MapfitMap {
 
     /**
      * Removes given [Polyline] from the [MapView].
+     *
      * @param polyline to be removed
      */
     abstract fun removePolyline(polyline: Polyline)
@@ -158,12 +162,17 @@ abstract class MapfitMap {
      * @param bounds
      * @param padding between map and bounds as percentage. For 10% padding, you can pass 0.1f.
      */
-    abstract fun setBounds(bounds: LatLngBounds, padding: Float)
+    abstract fun setLatLngBounds(
+        bounds: LatLngBounds, @FloatRange(
+            from = 0.0,
+            to = 1.0
+        ) padding: Float
+    )
 
     /**
      * @return latLngBounds for currently visible [MapView]
      */
-    abstract fun getBounds(): LatLngBounds
+    abstract fun getLatLngBounds(): LatLngBounds
 
     /**
      * Sets [OnMapClickListener] for [MapView] that single click events will be passed to.
@@ -193,7 +202,7 @@ abstract class MapfitMap {
     /**
      * Sets [OnMapPinchListener] for [MapView] that pan events will be passed to.x
 
-     * @param listener
+     * @param listener pinch events will be passed to
      */
     abstract fun setOnMapPinchListener(listener: OnMapPinchListener)
 
@@ -230,6 +239,8 @@ abstract class MapfitMap {
     abstract fun getMapOptions(): MapOptions
 
     /**
+     * Returns [DirectionsOptions] to interact with DirectionsAPI and drawing directions.
+     *
      * @return DirectionsOptions instance
      */
     abstract fun getDirectionsOptions(): DirectionsOptions

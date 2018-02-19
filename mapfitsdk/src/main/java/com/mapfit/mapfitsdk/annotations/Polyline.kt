@@ -16,7 +16,7 @@ class Polyline(
     line: MutableList<LatLng>
 ) : Annotation(polylineId, mapController) {
 
-    private var points = line
+    internal var points = line
     val polylineOptions = PolylineOptions(this)
     val coordinates by lazy {
         val coordinates = DoubleArray(points.size * 2)

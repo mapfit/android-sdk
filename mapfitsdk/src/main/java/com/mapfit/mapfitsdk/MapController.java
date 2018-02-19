@@ -1187,7 +1187,6 @@ public class MapController implements Renderer {
 
 
     protected void reAddMarkers() {
-
         HashMap<Long, Marker> tempMarkers = new HashMap<>();
         for (Marker marker : markers.values()) {
             long markerId = nativeMarkerAdd(mapPointer);
@@ -1195,7 +1194,6 @@ public class MapController implements Renderer {
             tempMarkers.put(markerId, marker);
         }
         markers = tempMarkers;
-
     }
 
     /**

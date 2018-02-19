@@ -58,6 +58,7 @@ class CoffeeShopActivity : AppCompatActivity() {
     private val coffeeShops: List<CoffeeShop>? by lazy { repository.getCoffeeShops() }
     private var markers: MutableList<Marker> = mutableListOf()
     private var alwaysOpenShopLayer = Layer()
+    private var buildingLayer = Layer()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private lateinit var drawerLayout: DrawerLayout
     private var bottomSheetHideJob = Job()
@@ -111,9 +112,61 @@ class CoffeeShopActivity : AppCompatActivity() {
         })
     }
 
+
+    private fun setupMap(mapfitMap: MapfitMap) {
+        this.mapfitMap = mapfitMap
+//        drawDummyMarkers()
+        launch {
+            delay(5000)
+//setMapBoundsToColorado()
+
+            mapfitMap.addMarker(buildingLayer.getLatLngBounds().southWest).setIcon("http://www.ashs.com.au/images/New_Buttons-2017-03-24/StudBook3.png")
+            mapfitMap.addMarker(buildingLayer.getLatLngBounds().northEast).setIcon("http://www.ashs.com.au/images/New_Buttons-2017-03-24/StudBook3.png")
+            mapfitMap.setLatLngBounds(buildingLayer.getLatLngBounds(), 1f)
+        }
+        mapfitMap.apply {
+            setCenter(LatLng(40.700798, -74.0050177), 500)
+            setZoom(13f, 500)
+
+//            boundaryBuilder()
+//            addMapfitOfficeWithGeocoder()
+            setupMarkerWithAddressInput()
+            coffeeShops?.let { addMarkersFromCoffeeShops(mapfitMap, it) }
+//            setMapBoundsToColorado()
+//            setMapBoundsToUtah()
+            setOnMarkerClickListener(onMarkerClickListener)
+            setOnMapLongClickListener(onMapLongClickListener)
+
+            setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
+                override fun onPlaceInfoClicked(marker: Marker) {
+                    Toast.makeText(
+                        this@CoffeeShopActivity,
+                        "Place info is clicked!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            })
+
+        }
+        val polyline = mapfitMap.addPolyline(repository.getLowerManhattanPolyline())
+        alwaysOpenShopLayer.add(polyline)
+
+        addMarkerWithAddress("119 w 24th street, new york, ny")
+        addMarkerWithAddress("135 w 23th street, new york, ny")
+        addMarkerWithAddress("100 w 23th street, new york, ny")
+        addMarkerWithAddress("149 w 24th street, new york, ny")
+
+    }
+
     private fun setupMap2(mapfitMap: MapfitMap) {
         this.mapfitMap2 = mapfitMap
         mapfitMap2.addLayer(alwaysOpenShopLayer)
+
+        launch {
+            delay(5000)
+//setMapBoundsToColorado()
+//            mapfitMap.setLatLngBounds(alwaysOpenShopLayer.getLatLngBounds(), 0.9f)
+        }
 
         mapfitMap2.apply {
             setCenter(LatLng(40.700798, -74.0050177), 500)
@@ -144,6 +197,43 @@ class CoffeeShopActivity : AppCompatActivity() {
 
     }
 
+    private fun drawDummyMarkers() {
+        val list = mutableListOf<LatLng>()
+
+        list.add(LatLng(lat = 40.742887, lon = -73.993148))
+        list.add(LatLng(lat = 40.742846, lon = -73.993052))
+        list.add(LatLng(lat = 40.742927, lon = -73.993244))
+        list.add(LatLng(lat = 40.742863, lon = -73.993291))
+        list.add(LatLng(lat = 40.742782, lon = -73.993099))
+        list.add(LatLng(lat = 40.742846, lon = -73.993052))
+        list.add(LatLng(lat = 40.744488, lon = -73.99428))
+        list.add(LatLng(lat = 40.744674, lon = -73.994089))
+        list.add(LatLng(lat = 40.744784, lon = -73.99435))
+        list.add(LatLng(lat = 40.74458, lon = -73.994498))
+        list.add(LatLng(lat = 40.74447, lon = -73.994237))
+        list.add(LatLng(lat = 40.744674, lon = -73.994089))
+        list.add(LatLng(lat = 40.74405, lon = -73.99324))
+        list.add(LatLng(lat = 40.744257, lon = -73.992954))
+        list.add(LatLng(lat = 40.744006, lon = -73.993136))
+        list.add(LatLng(lat = 40.744138, lon = -73.993448))
+        list.add(LatLng(lat = 40.744349, lon = -73.993294))
+        list.add(LatLng(lat = 40.744281, lon = -73.993133))
+        list.add(LatLng(lat = 40.744321, lon = -73.993104))
+        list.add(LatLng(lat = 40.744257, lon = -73.992954))
+        list.add(LatLng(lat = 40.743663, lon = -73.994243))
+        list.add(LatLng(lat = 40.743806, lon = -73.994583))
+        list.add(LatLng(lat = 40.744044, lon = -73.994409))
+        list.add(LatLng(lat = 40.743895, lon = -73.994055))
+        list.add(LatLng(lat = 40.743797, lon = -73.994126))
+        list.add(LatLng(lat = 40.74366, lon = -73.9938))
+        list.add(LatLng(lat = 40.743519, lon = -73.993903))
+        list.add(LatLng(lat = 40.743806, lon = -73.994583))
+        list.forEach {
+            mapfitMap.addMarker(it)
+        }
+
+    }
+
     private fun drawRouteWithMapView() {
 
         mapfitMap.getDirectionsOptions()
@@ -171,30 +261,6 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         override fun onDrawRouteClicked() {
             drawRouteWithMapView()
-//
-//            val callback = object : DirectionsCallback {
-//                override fun onSuccess(route: Route) {
-//                    // you can draw and show the route now!
-//                }
-//
-//                override fun onError(message: String, e: Exception) {
-//                    // handle the error
-//                }
-//            }
-//
-//            Directions().getRoute(
-//                originAddress = "119 W 24th St new york",
-//                destinationAddress = "1000 5th Ave, New York, NY 10028",
-//                directionsType = DirectionsType.CYCLING,
-//                callback = callback
-//            )
-//
-//            Directions().getRoute(
-//                originLocation = LatLng(40.744043, -73.993209),
-//                destinationLocation = LatLng(40.7794406, -73.9654327),
-//                callback = callback
-//            )
-
             drawerLayout.closeDrawer(GravityCompat.END)
         }
 
@@ -266,64 +332,6 @@ class CoffeeShopActivity : AppCompatActivity() {
 //        nav_view.setNavigationItemSelectedListener(filterClickListener)
     }
 
-    private fun setupMap(mapfitMap: MapfitMap) {
-        this.mapfitMap = mapfitMap
-
-        mapfitMap.apply {
-            setCenter(LatLng(40.700798, -74.0050177), 500)
-            setZoom(13f, 500)
-
-//            boundaryBuilder()
-//            addMapfitOfficeWithGeocoder()
-            setupMarkerWithAddressInput()
-            coffeeShops?.let { addMarkersFromCoffeeShops(mapfitMap, it) }
-//            setMapBoundsToColorado()
-//            setMapBoundsToUtah()
-            setOnMarkerClickListener(onMarkerClickListener)
-            setOnMapLongClickListener(onMapLongClickListener)
-
-            setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
-                override fun onPlaceInfoClicked(marker: Marker) {
-                    Toast.makeText(
-                        this@CoffeeShopActivity,
-                        "Place info is clicked!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            })
-
-            // calling inflate without a root ignores layout params
-            val customView = LayoutInflater.from(this@CoffeeShopActivity)
-                .inflate(
-                    R.layout.widget_custom_place_info,
-                    findViewById(R.id.drawer_layout),
-                    false
-                )
-
-//            mapfitMap.setPlaceInfoAdapter(object : MapfitMap.PlaceInfoAdapter {
-//                override fun getPlaceInfoView(marker: Marker): View {
-//
-//                    val textView = TextView(context)
-//                    textView.text = "Here I am!"
-//
-//                    return textView
-//                }
-//            })
-
-
-//
-
-        }
-        val polyline = mapfitMap.addPolyline(repository.getLowerManhattanPolyline())
-        alwaysOpenShopLayer.add(polyline)
-
-        addMarkerWithAddress("119 w 24th street, new york, ny")
-        addMarkerWithAddress("135 w 23th street, new york, ny")
-        addMarkerWithAddress("100 w 23th street, new york, ny")
-        addMarkerWithAddress("149 w 24th street, new york, ny")
-
-    }
-
     private fun boundaryBuilder() {
         val latLngList = listOf(
             LatLng(37.198504, -83.272133),
@@ -342,7 +350,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         }
 
         val bounds = boundsBuilder.build()
-        mapfitMap.setBounds(bounds, .8f)
+        mapfitMap.setLatLngBounds(bounds, .8f)
         mapfitMap.addMarker(bounds.southWest).setIcon(MapfitMarker.BAR)
         mapfitMap.addMarker(bounds.northEast).setIcon(MapfitMarker.AIRPORT)
 
@@ -355,13 +363,13 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap.addMarker(ne)
         mapfitMap.addMarker(sw)
-        mapfitMap.setBounds(bounds, 1f)
+        mapfitMap.setLatLngBounds(bounds, 0.1f)
 
 //        launch {
 //            delay(2000)
-//            val afterBounds = mapfitMap.getBounds()
+//            val afterBounds = mapfitMap.getLatLngBounds()
 //            delay(5000)
-//            mapfitMap.setBounds(afterBounds)
+//            mapfitMap.setLatLngBounds(afterBounds)
 //        }
 
     }
@@ -373,7 +381,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap.addMarker(ne)
         mapfitMap.addMarker(sw)
-        mapfitMap.setBounds(bounds, 1f)
+        mapfitMap.setLatLngBounds(bounds, 1f)
 
     }
 
@@ -386,7 +394,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         override fun onMarkerClicked(marker: Marker) {
 //            marker.setIcon(MapfitMarker.DARK_AUTO)
             mapfitMap.setCenter(marker.getPosition(), 300)
-            mapfitMap.getBounds().center
+            mapfitMap.getLatLngBounds().center
 
 //            marker.data?.let {
 //                bottom_sheet.txtTitle.text = (it as CoffeeShop).title
@@ -423,20 +431,6 @@ class CoffeeShopActivity : AppCompatActivity() {
     var i = 0
     private fun addMarkerWithAddress(address: String) {
 
-
-//        mapfitMap.addMarker("119 w 24th street new york",
-//            true,
-//            object : OnMarkerAddedCallback {
-//                override fun onMarkerAdded(marker: Marker) {
-//
-//                }
-//
-//                override fun onError(exception: Exception) {
-//
-//                }
-//            })
-
-
         if (address.isBlank()) {
 
         } else {
@@ -463,8 +457,8 @@ class CoffeeShopActivity : AppCompatActivity() {
                             3 -> marker.setIcon(MapfitMarker.HOTEL)
                             else -> marker.setIcon(MapfitMarker.DEFAULT)
                         }
-                     i=   i.inc()
-                        alwaysOpenShopLayer.add(marker)
+                        i = i.inc()
+                        buildingLayer.add(marker)
 
                     }
 
