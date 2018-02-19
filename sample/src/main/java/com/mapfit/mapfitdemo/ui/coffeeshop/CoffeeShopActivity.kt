@@ -8,7 +8,6 @@ import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -120,8 +119,10 @@ class CoffeeShopActivity : AppCompatActivity() {
             delay(5000)
 //setMapBoundsToColorado()
 
-            mapfitMap.addMarker(buildingLayer.getLatLngBounds().southWest).setIcon("http://www.ashs.com.au/images/New_Buttons-2017-03-24/StudBook3.png")
-            mapfitMap.addMarker(buildingLayer.getLatLngBounds().northEast).setIcon("http://www.ashs.com.au/images/New_Buttons-2017-03-24/StudBook3.png")
+            mapfitMap.addMarker(buildingLayer.getLatLngBounds().southWest)
+                .setIcon("http://www.ashs.com.au/images/New_Buttons-2017-03-24/StudBook3.png")
+            mapfitMap.addMarker(buildingLayer.getLatLngBounds().northEast)
+                .setIcon("http://www.ashs.com.au/images/New_Buttons-2017-03-24/StudBook3.png")
             mapfitMap.setLatLngBounds(buildingLayer.getLatLngBounds(), 1f)
         }
         mapfitMap.apply {
@@ -136,6 +137,7 @@ class CoffeeShopActivity : AppCompatActivity() {
 //            setMapBoundsToUtah()
             setOnMarkerClickListener(onMarkerClickListener)
             setOnMapLongClickListener(onMapLongClickListener)
+//            setOnPolylineClickListener()
 
             setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
                 override fun onPlaceInfoClicked(marker: Marker) {
@@ -150,6 +152,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         }
         val polyline = mapfitMap.addPolyline(repository.getLowerManhattanPolyline())
         alwaysOpenShopLayer.add(polyline)
+
 
         addMarkerWithAddress("119 w 24th street, new york, ny")
         addMarkerWithAddress("135 w 23th street, new york, ny")
@@ -176,6 +179,8 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         mapfitMap2.setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
             override fun onPlaceInfoClicked(marker: Marker) {
+//                marker.placeInfo
+
 
 //                marker.setIcon("https://darley-cpl.netdna-ssl.com/sites/default/files/styles/stallion_thumbnail/public/drupal-media/stallion-images/Australia-2016/exceed-and-excel/square-Exceed_And_Excel_0001_Thoroughbred_stallion.jpg?itok=ByfQuwCC")
 
@@ -188,6 +193,7 @@ class CoffeeShopActivity : AppCompatActivity() {
             }
         })
 
+        markers.first().drawOder
 
         mapfitMap.setOnMarkerClickListener(object : OnMarkerClickListener {
             override fun onMarkerClicked(marker: Marker) {
@@ -199,6 +205,22 @@ class CoffeeShopActivity : AppCompatActivity() {
 
     private fun drawDummyMarkers() {
         val list = mutableListOf<LatLng>()
+
+//        buildingLayer.visible =false
+        mapfitMap
+            .getDirectionsOptions()
+            .setDestination(LatLng(40.742887, -73.993148))
+            .setOrigin(LatLng(40.744488, -73.99428))
+            .setType(DirectionsType.DRIVING)
+            .showDirections(object : DirectionsOptions.RouteDrawCallback {
+                override fun onRouteDrawn(route: Route, legs: List<Polyline>) {
+
+                }
+
+                override fun onError(message: String, e: Exception) {
+
+                }
+            })
 
         list.add(LatLng(lat = 40.742887, lon = -73.993148))
         list.add(LatLng(lat = 40.742846, lon = -73.993052))
@@ -228,6 +250,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         list.add(LatLng(lat = 40.74366, lon = -73.9938))
         list.add(LatLng(lat = 40.743519, lon = -73.993903))
         list.add(LatLng(lat = 40.743806, lon = -73.994583))
+
         list.forEach {
             mapfitMap.addMarker(it)
         }

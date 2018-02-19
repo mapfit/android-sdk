@@ -53,6 +53,7 @@ class MapView(
 
     private val ANIMATION_DURATION = 200
     private val ZOOM_STEP_LEVEL = 1
+    private val DEFAULT_EASE = MapController.EaseType.CUBIC
 
     private lateinit var mapController: MapController
     private lateinit var mapOptions: MapOptions
@@ -168,7 +169,7 @@ class MapView(
         }
 
         btnCompass.setOnClickListener {
-            mapController.setRotationEased(0f, ANIMATION_DURATION, MapController.EaseType.CUBIC)
+            mapController.setRotationEased(0f, ANIMATION_DURATION, DEFAULT_EASE)
         }
 
     }
@@ -351,9 +352,28 @@ class MapView(
     }
 
     private val mapfitMap = object : MapfitMap() {
-        override fun has(annotation: Annotation): Boolean =
-            mapController.contains(annotation)
+        override fun getTilt(): Float = mapController.tilt
 
+        override fun setTilt(angle: Float, duration: Long) {
+            mapController.setTiltEased(angle, duration, DEFAULT_EASE)
+        }
+
+        override fun setTilt(angle: Float) {
+            mapController.tilt = angle
+        }
+
+        override fun setRotation(rotation: Float, duration: Int) {
+            mapController.setRotationEased(rotation, duration, DEFAULT_EASE)
+        }
+
+        override fun setRotation(rotation: Float) {
+            mapController.rotation = rotation
+        }
+
+        override fun getRotation(): Float = mapController.rotation
+
+
+        override fun has(annotation: Annotation): Boolean = mapController.contains(annotation)
 
         override fun setZoom(zoomLevel: Float) {
             setZoom(zoomLevel, 0)
@@ -421,13 +441,11 @@ class MapView(
 
         override fun addPolyline(line: List<LatLng>): Polyline {
             val polyline = mapController.addPolyline(line)
-//            annotationLayer.add(polyline)
             return polyline
         }
 
         override fun addPolygon(polygon: List<List<LatLng>>): Polygon {
             val poly = mapController.addPolygon(polygon)
-//            annotationLayer.add(poly)
             return poly
         }
 
@@ -435,8 +453,8 @@ class MapView(
             return layers
         }
 
-        override fun setCenterWithLayer(layer: Layer, duration: Long, paddingPercentage: Float) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        override fun setCenterWithLayer(layer: Layer) {
+            mapController.position = layer.getLatLngBounds().center
         }
 
         override fun setLatLngBounds(bounds: LatLngBounds, padding: Float) {
@@ -466,11 +484,11 @@ class MapView(
         }
 
         override fun setOnPolylineClickListener(listener: OnPolylineClickListener) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            polylineClickListener = listener
         }
 
         override fun setOnPolygonClickListener(listener: OnPolygonClickListener) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            polygonClickListener = listener
         }
 
         override fun getDirectionsOptions(): DirectionsOptions = directionsOptions
@@ -496,7 +514,7 @@ class MapView(
                 mapController.setPositionEased(
                     latLng,
                     duration.toInt(),
-                    MapController.EaseType.CUBIC
+                    DEFAULT_EASE
                 )
             }
         }
@@ -525,22 +543,18 @@ class MapView(
                 }
             }
 
-//            annotationLayer.annotations.removeAll(layer.annotations)
             layers.remove(layer)
         }
 
-        override fun removeMarker(marker: Marker): Boolean {
-//            annotationLayer.annotations.remove(marker)
-            return marker.remove(mapController)
+        override fun removeMarker(marker: Marker) {
+            marker.remove(mapController)
         }
 
         override fun removePolygon(polygon: Polygon) {
-//            annotationLayer.annotations.remove(polygon)
             polygon.remove(mapController)
         }
 
         override fun removePolyline(polyline: Polyline) {
-//            annotationLayer.annotations.remove(polyline)
             polyline.remove(mapController)
         }
 

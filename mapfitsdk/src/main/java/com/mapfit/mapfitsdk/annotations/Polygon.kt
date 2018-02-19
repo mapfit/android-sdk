@@ -3,6 +3,7 @@ package com.mapfit.mapfitsdk.annotations
 import android.content.Context
 import com.mapfit.mapfitsdk.MapController
 import com.mapfit.mapfitsdk.geometry.LatLng
+import com.mapfit.mapfitsdk.geometry.LatLngBounds
 import java.util.*
 
 
@@ -19,25 +20,16 @@ class Polygon(
     internal val polygon: MutableList<List<LatLng>>
 ) : Annotation(polygonId, mapController) {
 
+    override fun getLatLngBounds(): LatLngBounds {
+        val builder = LatLngBounds.Builder()
+        polygon.forEach { it.forEach { builder.include(it) } }
+        return builder.build()
+    }
+
+    val points = polygon
     lateinit var coordinates: DoubleArray
     lateinit var rings: IntArray
 
-    val properties by lazy {
-        val props = HashMap<String, String>()
-        props["type"] = "polygons"
-        props["order"] = "500"
-//        props["fill"] = "blue"
-//        props["width"] = "2px"
-        props["color"] = "yellow"
-
-        val out = arrayOfNulls<String>(props.size * 2)
-        var i = 0
-        for ((key, value) in props) {
-            out[i++] = key
-            out[i++] = value
-        }
-        out
-    }
 
     init {
         initAnnotation(mapController, polygonId)
@@ -77,7 +69,7 @@ class Polygon(
         layers.forEach { it.remove(this) }
     }
 
-    internal fun remove(mapController: MapController) {
+    override fun remove(mapController: MapController) {
         mapBindings[mapController]?.let { mapController.removePolyline(it) }
     }
 

@@ -14,6 +14,7 @@ import com.mapfit.mapfitsdk.R
 import com.mapfit.mapfitsdk.annotations.widget.PlaceInfo
 import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
+import com.mapfit.mapfitsdk.geometry.LatLngBounds
 import com.mapfit.mapfitsdk.geometry.isValid
 import com.mapfit.mapfitsdk.utils.getBitmapFromVectorDrawable
 import com.mapfit.mapfitsdk.utils.loadImageFromUrl
@@ -31,13 +32,9 @@ class Marker internal constructor(
 ) : Annotation(markerId, mapController) {
 
     private var position: LatLng = LatLng(0.0, 0.0)
-
     val markerOptions = MarkerOptions(this, mutableListOf(mapController))
-
     internal var usingDefaultIcon: Boolean = true
-
     internal var placeInfoMap = HashMap<MapController, PlaceInfo?>()
-
     internal var address: Address? = null
         set(value) {
             field = value
@@ -66,6 +63,7 @@ class Marker internal constructor(
     fun setTitle(title: String): Marker {
         this.title = title
         updatePlaceInfoFields()
+
         return this
     }
 
@@ -124,7 +122,6 @@ class Marker internal constructor(
      */
     fun setPosition(latLng: LatLng): Marker {
         if (latLng.isValid()) {
-
             mapBindings.forEach {
                 val markerPositionSet = it.key.setMarkerPointEased(
                     it.value,
@@ -136,8 +133,8 @@ class Marker internal constructor(
 
                 updatePosition(markerPositionSet, latLng)
             }
-
         }
+
         return this
     }
 
@@ -234,7 +231,7 @@ class Marker internal constructor(
         val placeInfo = placeInfoMap[mapController]
         placeInfo?.apply {
 
-            val markerId = getId(mapController) ?: 0
+            val markerId = getIdForMap(mapController) ?: 0
 
             if (shown) {
                 setBitmap(
@@ -256,12 +253,6 @@ class Marker internal constructor(
                     }
                 }
             }
-        }
-    }
-
-    private fun setDrawOder(index: Int) {
-        mapBindings.forEach {
-            it.key.setMarkerDrawOrder(it.value, index)
         }
     }
 
@@ -317,8 +308,6 @@ class Marker internal constructor(
      * Removes the marker from every [Layer] and [MapView] it is added to.
      */
     override fun remove() {
-
-
         placeInfoMap.forEach {
             it.value?.dispose(true)
         }
@@ -330,15 +319,24 @@ class Marker internal constructor(
         layers.forEach { it.remove(this) }
 
         subAnnotation?.remove()
-
     }
 
+    override fun getLatLngBounds(): LatLngBounds {
+        val boundsBuilder = LatLngBounds.Builder()
 
-    internal fun remove(mapController: MapController): Boolean {
+        boundsBuilder.include(position)
+
+        subAnnotation
+            ?.takeIf { it is Polygon }
+            .let { (it as Polygon).points.forEach { it.forEach { boundsBuilder.include(it) } } }
+
+        return boundsBuilder.build()
+    }
+
+    override fun remove(mapController: MapController) {
         subAnnotation?.remove(listOf(mapController))
-
         placeInfoMap[mapController]?.dispose()
-        return mapBindings[mapController]?.let { mapController.removeMarker(it) } ?: false
+        mapBindings[mapController]?.let { mapController.removeMarker(it) }
     }
 
     internal fun getScreenPosition(mapController: MapController): PointF {

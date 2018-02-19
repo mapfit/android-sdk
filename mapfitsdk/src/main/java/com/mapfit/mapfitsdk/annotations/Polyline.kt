@@ -3,6 +3,7 @@ package com.mapfit.mapfitsdk.annotations
 import android.content.Context
 import com.mapfit.mapfitsdk.MapController
 import com.mapfit.mapfitsdk.geometry.LatLng
+import com.mapfit.mapfitsdk.geometry.LatLngBounds
 
 /**
  * Polyline represent a list of consecutive points that can be drawn as a line.
@@ -13,11 +14,11 @@ class Polyline(
     internal val context: Context,
     private val polylineId: Long,
     mapController: MapController,
-    line: MutableList<LatLng>
+    private val line: MutableList<LatLng>
 ) : Annotation(polylineId, mapController) {
 
-    internal var points = line
-    val polylineOptions = PolylineOptions(this)
+    val points = line
+    private val polylineOptions = PolylineOptions(this)
     val coordinates by lazy {
         val coordinates = DoubleArray(points.size * 2)
         var i = 0
@@ -27,7 +28,6 @@ class Polyline(
         }
         coordinates
     }
-
 
     init {
         initAnnotation(mapController, polylineId)
@@ -48,19 +48,15 @@ class Polyline(
         layers.forEach { it.remove(this) }
     }
 
-    internal fun remove(mapController: MapController) {
+    override fun remove(mapController: MapController) {
         mapBindings[mapController]?.let { mapController.removePolyline(it) }
     }
 
-//    fun getCoordinates(): DoubleArray {
-//        val coordinates = DoubleArray(points.size * 2)
-//        var i = 0
-//        for (point in points) {
-//            coordinates[i++] = point.lon
-//            coordinates[i++] = point.lat
-//        }
-//        return coordinates
-//    }
+    override fun getLatLngBounds(): LatLngBounds {
+        val builder = LatLngBounds.Builder()
+        line.forEach { builder.include(it) }
+        return builder.build()
+    }
 
 }
 

@@ -1,25 +1,24 @@
 package com.mapfit.mapfitsdk.utils
 
 import android.content.Context
+import android.content.res.Resources
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.graphics.drawable.Drawable
+import android.net.ConnectivityManager
+import android.os.Build
+import android.support.v4.content.ContextCompat
+import android.support.v4.graphics.drawable.DrawableCompat
 import android.util.Log
 import com.mapfit.mapfitsdk.MapOptions.Companion.MAP_MAX_ZOOM
 import com.mapfit.mapfitsdk.MapOptions.Companion.MAP_MIN_ZOOM
+import com.mapfit.mapfitsdk.Mapfit
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
+import java.math.BigInteger
 import java.net.URL
-import android.net.NetworkInfo
-import android.content.Context.CONNECTIVITY_SERVICE
-import android.content.res.Resources
-import android.net.ConnectivityManager
-import com.mapfit.mapfitsdk.Mapfit
-import android.opengl.ETC1.getHeight
-import android.opengl.ETC1.getWidth
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.support.v4.graphics.drawable.DrawableCompat
-import android.os.Build
-import android.support.v4.content.ContextCompat
+import java.nio.ByteBuffer
+import java.util.*
 
 
 /**
@@ -87,3 +86,16 @@ internal val Int.toPx: Int
 
 internal val Int.toDp: Int
     get() = (this / Resources.getSystem().displayMetrics.density).toInt()
+
+internal fun generateUniqueId(): Long {
+    var id: Long
+    do {
+        val uid = UUID.randomUUID()
+        val buffer = ByteBuffer.wrap(ByteArray(16))
+        buffer.putLong(uid.leastSignificantBits)
+        buffer.putLong(uid.mostSignificantBits)
+        id = BigInteger(buffer.array()).toLong()
+    } while (id < 0)
+
+    return id
+}

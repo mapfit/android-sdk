@@ -65,7 +65,7 @@ class LatLngBounds(
         val lngZoom = zoom((viewWidth * padding).toInt(), 256.toPx, lngFraction)
 
         val result = Math.min(latZoom, lngZoom)
-//
+
         return Pair(center, result.toFloat())
     }
 

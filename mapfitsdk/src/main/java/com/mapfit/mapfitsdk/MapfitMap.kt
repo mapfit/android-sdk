@@ -23,33 +23,29 @@ import org.jetbrains.annotations.TestOnly
 abstract class MapfitMap {
 
     /**
-     * Sets the center of the map.
+     * Sets the map center to the input coordinate values.
      *
      * @param latLng coordinates
      */
     abstract fun setCenter(latLng: LatLng)
 
     /**
-     * Sets the center of the map.
+     * Sets the map center to the input coordinate values and the duration of the entering animation
      *
      * @param latLng coordinates
-     * @param duration optional, the camera will move with ease.
+     * @param duration for centering animation
      */
     abstract fun setCenter(latLng: LatLng, duration: Long = 0)
 
     /**
-     * Sets the center of the map accordingly to the layer.
+     * Sets the map center to the input layer's coordinate values.
      *
      * @param layer the map will center accordingly to
      */
-    protected abstract fun setCenterWithLayer(
-        layer: Layer,
-        duration: Long = 0,
-        paddingPercentage: Float
-    )
+    protected abstract fun setCenterWithLayer(layer: Layer)
 
     /**
-     * Adds the given layer to the map. All annotations in the layer will be added to the map.
+     * Add the specified input layer to the map. All annotations in the layer will be added to the map.
      *
      * @param layer to add to the map
      */
@@ -57,30 +53,30 @@ abstract class MapfitMap {
 
 
     /**
-     * Returns the layers of the map.
+     * Returns the list of layers bound to the map view.
      *
      * @return layers on the map as list
      */
     abstract fun getLayers(): List<Layer>
 
     /**
-     * Returns the center of the visible map.
+     * Returns the center coordinates of the map.
      *
      * @return [LatLng]
      */
     abstract fun getCenter(): LatLng
 
     /**
-     * Adds a marker on the default layer to the given coordinates.
+     * Adds the marker to the map at the input coordinate position. Returns marker for styling and
+     * place info customization.
      *
-     * @return marker
+     * @return marker that is added to the given coordinates
      */
     abstract fun addMarker(latLng: LatLng): Marker
 
     /**
-     * Adds a marker on the default layer for the given address. Marker will be placed at the
-     * coordinates of main entrance if the address belongs to a building. If there are no entrance
-     * information for given address, marker will be placed to the most accurate coordinates.
+     * Adds the marker to the map at the coordinate position returned by geocoding the input
+     * address. Returns marker for styling and place info customization.
      *
      * @param address an address such as "119w 24th st NY" venue names are shouldn't be given
      * @param withBuilding flag for building polygon
@@ -93,15 +89,15 @@ abstract class MapfitMap {
     )
 
     /**
-     * Removes the given marker from the map.
+     * Removes the marker from the map.
      *
      * @param marker to be removed
      * @return isRemoved
      */
-    abstract fun removeMarker(marker: Marker): Boolean
+    abstract fun removeMarker(marker: Marker)
 
     /**
-     * Adds a polyline to default layer.
+     * Adds the polyline to the map. Returns polyline for styling.
      *
      * @return polyline
      */
@@ -115,35 +111,35 @@ abstract class MapfitMap {
     abstract fun removePolyline(polyline: Polyline)
 
     /**
-     * Adds a polygon to default layer.
+     * Removes the polyline from the map.
      *
      * @return polygon
      */
     abstract fun addPolygon(polygon: List<List<LatLng>>): Polygon
 
     /**
-     * Removes given [Polygon] from the [MapView].
+     * Removes the polygon from the map.
      *
      * @param polygon to be removed
      */
     abstract fun removePolygon(polygon: Polygon)
 
     /**
-     * Removes given [Layer] from the [MapView].
+     * Removes the specified input layer from the map.
      *
      * @param layer to be removed
      */
     abstract fun removeLayer(layer: Layer)
 
     /**
-     * Sets zoom level of the map.
+     * Sets the current zoom level of the map.
      *
      * @param zoomLevel Zoom level for the view
      */
     abstract fun setZoom(zoomLevel: Float)
 
     /**
-     * Sets zoom level of the map.
+     * Sets the current zoom level of the map and the duration of the zoom animation.
      *
      * @param zoomLevel Zoom level for the view
      * @param duration optional duration for zooming in milliseconds
@@ -151,13 +147,15 @@ abstract class MapfitMap {
     abstract fun setZoom(zoomLevel: Float, duration: Int = 0)
 
     /**
+     * Returns the current zoom level of the map.
+     *
      * @return current zoom level of the map
      */
     abstract fun getZoom(): Float
 
     /**
-     * Sets the visible map bounds to given [LatLngBounds]. Zoom level and center will be set from
-     * given [LatLngBounds].
+     * Sets the map bounds using the [LatLngBounds] - the southwest and northeast corners of the
+     * bounding box.
      *
      * @param bounds
      * @param padding between map and bounds as percentage. For 10% padding, you can pass 0.1f.
@@ -170,7 +168,9 @@ abstract class MapfitMap {
     )
 
     /**
-     * @return latLngBounds for currently visible [MapView]
+     * Returns the bounding coordinates for the map.
+     *
+     * @return latLngBounds
      */
     abstract fun getLatLngBounds(): LatLngBounds
 
@@ -207,8 +207,7 @@ abstract class MapfitMap {
     abstract fun setOnMapPinchListener(listener: OnMapPinchListener)
 
     /**
-     * Used to set custom views for place info.
-     * When the callback is invoked, you can return the view you want to be shown as place info.
+     * Enables customization of the place info view, which is displayed when a marker is tapped.
      *
      * @param adapter the callback to be invoked to obtain your custom place info.
      */
@@ -225,12 +224,12 @@ abstract class MapfitMap {
     /**
      * Sets [OnPolylineClickListener] for [MapView] that polyline click events will be passed to.
      */
-    internal abstract fun setOnPolylineClickListener(listener: OnPolylineClickListener)
+    abstract fun setOnPolylineClickListener(listener: OnPolylineClickListener)
 
     /**
      * Sets [OnPolygonClickListener] for [MapView] that polygon click events will be passed to.
      */
-    internal abstract fun setOnPolygonClickListener(listener: OnPolygonClickListener)
+    abstract fun setOnPolygonClickListener(listener: OnPolygonClickListener)
 
     /**
      * MapOptions can be used to changing options for the map. For instance, setting maximum zoom
@@ -239,14 +238,61 @@ abstract class MapfitMap {
     abstract fun getMapOptions(): MapOptions
 
     /**
-     * Returns [DirectionsOptions] to interact with DirectionsAPI and drawing directions.
+     * Returns [DirectionsOptions] to interact with DirectionsAPI to drawing directions.
      *
-     * @return DirectionsOptions instance
+     * @return [DirectionsOptions]
      */
     abstract fun getDirectionsOptions(): DirectionsOptions
 
+
     /**
-     * Will re-center the map to the last position it is centered.
+     * Returns the current rotation of the map.
+     *
+     *@return counter-clockwise rotation in radians. North is 0
+     */
+    abstract fun getRotation(): Float
+
+    /**
+     * Sets the current rotation level of the map.
+     *
+     * @param rotation in radians
+     */
+    abstract fun setRotation(rotation: Float)
+
+    /**
+     * Sets the current rotation level of the map and the duration of the rotation animation.
+     *
+     * @param rotation in radians
+     * @param duration duration of the rotation in milliseconds
+     */
+    abstract fun setRotation(rotation: Float, duration: Int = 0)
+
+
+    /**
+     * Sets the current tilt level of the map.
+     *
+     * @param angle in radians; 0 is straight down
+     */
+    abstract fun setTilt(angle: Float)
+
+
+    /**
+     * Sets the current tilt level of the map and the duration of the tilt animation.
+     *
+     * @param angle in radians, 0 is straight down
+     * @param duration duration of the tilting in milliseconds
+     */
+    abstract fun setTilt(angle: Float, duration: Long)
+
+    /**
+     * Returns the current tilt level of the map.
+     *
+     * @return tilt angle in radians, 0 is to straight down
+     */
+    abstract fun getTilt(): Float
+
+    /**
+     * Map will be re-centered to the last position it is centered.
      */
     abstract fun reCenter()
 

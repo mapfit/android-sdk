@@ -1,7 +1,9 @@
 package com.mapfit.mapfitsdk.annotations.widget
 
+import android.animation.Animator
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.Animation
 import android.widget.TextView
 import com.mapfit.mapfitsdk.MapController
 import com.mapfit.mapfitsdk.R
@@ -86,7 +88,32 @@ class PlaceInfo internal constructor(
 
     fun hide() {
         marker.placeInfoState(false, mapController)
-        infoView.visibility = View.GONE
+        infoView.animate()
+            .alpha(0f)
+            .setDuration(75)
+            .setListener(object : Animation.AnimationListener, Animator.AnimatorListener {
+                override fun onAnimationEnd(animation: Animator?) {
+                }
+
+                override fun onAnimationRepeat(animation: Animation?) {
+                }
+
+                override fun onAnimationRepeat(animation: Animator?) {
+                }
+
+                override fun onAnimationStart(animation: Animation?) {
+                }
+
+                override fun onAnimationStart(animation: Animator?) {
+                }
+
+                override fun onAnimationCancel(animation: Animator?) {
+                }
+
+                override fun onAnimationEnd(animation: Animation?) {
+                    infoView?.visibility = View.GONE
+                }
+            })
     }
 
     fun getVisible(): Boolean = infoView.visibility == View.VISIBLE

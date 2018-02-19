@@ -46,18 +46,6 @@ import okhttp3.Response;
  */
 public class MapController implements Renderer {
 
-    public void reCenter() {
-        if (lastCenter != null)
-            setPositionEased(lastCenter, 200);
-    }
-
-    public boolean contains(@NotNull Annotation annotation) {
-        return annotation instanceof Marker && markers.containsValue(annotation) ||
-                annotation instanceof Polyline && polylines.containsValue(annotation) ||
-                annotation instanceof Polygon && polygons.containsValue(annotation);
-    }
-
-
     /**
      * Options for interpolating map parameters
      */
@@ -89,7 +77,7 @@ public class MapController implements Renderer {
         NO_VALID_SCENE,
     }
 
-    protected static EaseType DEFAULT_EASE_TYPE = EaseType.CUBIC;
+    private static EaseType DEFAULT_EASE_TYPE = EaseType.CUBIC;
 
     /**
      * Options for enabling debug rendering features
@@ -104,6 +92,12 @@ public class MapController implements Renderer {
         DRAW_ALL_LABELS,
         TANGRAM_STATS,
         SELECTION_BUFFER,
+    }
+
+    public boolean contains(@NotNull Annotation annotation) {
+        return annotation instanceof Marker && markers.containsValue(annotation) ||
+                annotation instanceof Polyline && polylines.containsValue(annotation) ||
+                annotation instanceof Polygon && polygons.containsValue(annotation);
     }
 
     /**
@@ -287,14 +281,10 @@ public class MapController implements Renderer {
         if (mapPointer <= 0) {
             throw new RuntimeException("Unable to create a native Map object! There may be insufficient memory available.");
         }
-
-        // base geometry layers
-        polylineLayer = addDataLayer("mz_default_line");
-        polygonLayer = addDataLayer(POLYGON_LAYER_NAME);
-
     }
 
     private static final String POLYGON_LAYER_NAME = "mz_default_polygon";
+    private static final String POLYLINE_LAYER_NAME = "mz_default_line";
 
 
     void dispose() {
@@ -636,7 +626,7 @@ public class MapController implements Renderer {
      * @param duration Time in milliseconds to ease to the given tilt
      * @param ease     Type of easing to use
      */
-    public void setTiltEased(float tilt, int duration, EaseType ease) {
+    public void setTiltEased(float tilt, long duration, EaseType ease) {
         float seconds = duration / 1000.f;
         checkPointer(mapPointer);
         nativeSetTiltEased(mapPointer, tilt, seconds, ease.ordinal());
@@ -996,9 +986,9 @@ public class MapController implements Renderer {
                 }
 
                 Marker pickedMarker = null;
-                long id = markerPickResult.getMarker().getId(MapController.this);
+                long id = markerPickResult.getMarker().getIdForMap(MapController.this);
                 for (Marker marker : markers.values()) {
-                    if (marker.getId(MapController.this) == id) {
+                    if (marker.getIdForMap(MapController.this) == id) {
                         pickedMarker = marker;
                         break;
                     }
@@ -1089,7 +1079,7 @@ public class MapController implements Renderer {
 
     public Polyline addPolyline(List<LatLng> line) {
         checkPointer(mapPointer);
-        MapData polylineData = addDataLayer("mz_default_polyline");
+        MapData polylineData = addDataLayer(POLYLINE_LAYER_NAME);
 
         Polyline polyline = new Polyline(
                 mapView.getContext(),
@@ -1107,6 +1097,7 @@ public class MapController implements Renderer {
     public Polygon addPolygon(List<List<LatLng>> polygon) {
         checkPointer(mapPointer);
         MapData polygonLayer = addDataLayer(POLYGON_LAYER_NAME);
+
 
         Polygon poly = new Polygon(
                 mapView.getContext(),
@@ -1130,7 +1121,7 @@ public class MapController implements Renderer {
             return markerId;
 
         } else if (annotation instanceof Polyline) {
-            MapData dataLayer = addDataLayer("mz_default_polyline");
+            MapData dataLayer = addDataLayer(POLYLINE_LAYER_NAME);
             dataLayer.addPolyline((Polyline) annotation);
             polylines.put(dataLayer.id, (Polyline) annotation);
             return dataLayer.id;
@@ -1161,12 +1152,33 @@ public class MapController implements Renderer {
         return nativeMarkerRemove(mapPointer, markerId);
     }
 
+
     public void removePolyline(long polylineId) {
         checkPointer(mapPointer);
         checkId(polylineId);
         polylines.remove(polylineId);
         nativeRemoveTileSource(mapPointer, polylineId);
         requestRender();
+    }
+
+    private void hideTileSource(long polylineId) {
+        nativeRemoveTileSource(mapPointer, polylineId);
+    }
+
+    private void showPolyline(long polylineId) {
+        Polyline polyline = polylines.get(polylineId);
+        MapData polylineData = addDataLayer(POLYLINE_LAYER_NAME);
+        polylineData.addPolyline(polyline);
+        polylines.remove(polylineId);
+        polylines.put(polylineData.id, polyline);
+    }
+
+    private void showPolygon(long polygonId) {
+        Polygon polygon = polygons.get(polygonId);
+        MapData polygonData = addDataLayer(POLYGON_LAYER_NAME);
+        polygonData.addPolygon(polygon);
+        polygons.remove(polygonId);
+        polygons.put(polygonData.id, polygon);
     }
 
     public void removePolygon(long polygonId) {
@@ -1255,6 +1267,11 @@ public class MapController implements Renderer {
     public void setDefaultBackgroundColor(float red, float green, float blue) {
         checkPointer(mapPointer);
         nativeSetDefaultBackgroundColor(mapPointer, red, green, blue);
+    }
+
+    public void reCenter() {
+        if (lastCenter != null)
+            setPositionEased(lastCenter, 200);
     }
 
     // Package private methods
@@ -1359,6 +1376,28 @@ public class MapController implements Renderer {
         checkPointer(mapPointer);
         checkId(markerId);
         return nativeMarkerSetPolygon(mapPointer, markerId, coordinates, rings, count);
+    }
+
+    public void changeAnnotationVisibility(long id, boolean visibile) {
+        checkPointer(mapPointer);
+        checkId(id);
+
+        if (markers.containsKey(id)) {
+            setMarkerVisible(id, visibile);
+
+        } else if (polylines.containsKey(id)) {
+            if (!visibile) {
+                hideTileSource(id);
+            } else {
+                showPolyline(id);
+            }
+        } else if (polygons.containsKey(id)) {
+            if (!visibile) {
+                hideTileSource(id);
+            } else {
+                showPolygon(id);
+            }
+        }
     }
 
     public boolean setMarkerVisible(long markerId, boolean visible) {
@@ -1532,8 +1571,6 @@ public class MapController implements Renderer {
     private Map<Long, Polyline> polylines = new HashMap<>();
     private Map<Long, Polygon> polygons = new HashMap<>();
 
-    private MapData polylineLayer;
-    private MapData polygonLayer;
     private Handler uiThreadHandler;
     TouchInput touchInput;
     private LatLng lastCenter = null;
@@ -1638,7 +1675,6 @@ public class MapController implements Renderer {
     // Called from JNI on worker or render-thread.
     @Keep
     public void sceneReadyCallback(final int sceneId, final SceneError error) {
-
         final SceneLoadListener cb = sceneLoadListener;
         if (cb != null) {
             uiThreadHandler.post(new Runnable() {
@@ -1654,17 +1690,12 @@ public class MapController implements Renderer {
     // =============
     @Keep
     String getFontFilePath(String key) {
-
         return fontFileParser.getFontFile(key);
-//        return "";
-
     }
 
     @Keep
     String getFontFallbackFilePath(int importance, int weightHint) {
-
         return fontFileParser.getFontFallback(importance, weightHint);
-//        return "";
     }
 
 }

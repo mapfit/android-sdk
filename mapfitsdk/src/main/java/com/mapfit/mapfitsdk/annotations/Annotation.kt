@@ -2,6 +2,9 @@ package com.mapfit.mapfitsdk.annotations
 
 import com.mapfit.mapfitsdk.Layer
 import com.mapfit.mapfitsdk.MapController
+import com.mapfit.mapfitsdk.geometry.LatLngBounds
+import com.mapfit.mapfitsdk.utils.generateUniqueId
+import java.util.*
 
 /**
  * Base class for [Marker], [Polyline] and [Polygon].
@@ -17,7 +20,28 @@ abstract class Annotation(
     internal val layers = mutableListOf<Layer>()
     private var isVisible: Boolean = true
 
+    var visibility: Boolean = true
+        set(value) {
+            mapBindings.forEach {
+                it.key.changeAnnotationVisibility(it.value, value)
+            }
+            subAnnotation?.visibility = value
+            field = value
+        }
+
+    var drawOder: Int = 0
+        set(value) {
+            mapBindings.forEach {
+                it.key.setMarkerDrawOrder(it.value, value)
+            }
+            subAnnotation?.drawOder = value
+            field = value
+        }
+
+
     internal var subAnnotation: Annotation? = null
+
+    val id: Long by lazy { generateUniqueId() }
 
     init {
         mapBindings[mapController] = id
@@ -33,7 +57,7 @@ abstract class Annotation(
         }
     }
 
-    fun bindToLayer(layer: Layer) {
+    internal fun bindToLayer(layer: Layer) {
         if (!layers.contains(layer)) {
             layers.add(layer)
 
@@ -41,30 +65,21 @@ abstract class Annotation(
         }
     }
 
-    fun setDrawOrder(drawIndex: Int) {
-        mapBindings.forEach {
-            it.key.setMarkerDrawOrder(it.value, drawIndex)
-        }
-        subAnnotation?.setDrawOrder(drawIndex)
-    }
+    /**
+     * Do not use this method. It is for internal usage.
+     */
+    fun getIdForMap(mapController: MapController): Long? = mapBindings[mapController]
 
-    fun setVisible(visible: Boolean) {
-        mapBindings.forEach {
-            it.key.setMarkerVisible(it.value, visible)
-        }
-
-        subAnnotation?.setVisible(visible)
-
-        isVisible = visible
-    }
-
-    fun getVisible() = isVisible
-
-    fun getId(mapController: MapController): Long? = mapBindings[mapController]
-
+    /**
+     * Do not use this method. It is for internal usage.
+     */
     abstract fun initAnnotation(mapController: MapController, id: Long)
 
+    abstract fun getLatLngBounds(): LatLngBounds
+
     abstract fun remove()
+
+    internal abstract fun remove(mapController: MapController)
 
     internal fun remove(maps: List<MapController>) {
         mapBindings.filter { maps.contains(it.key) }
@@ -74,7 +89,6 @@ abstract class Annotation(
                     is Polygon -> it.key.removePolygon(it.value)
                     is Polyline -> it.key.removePolyline(it.value)
                 }
-
             }
     }
 

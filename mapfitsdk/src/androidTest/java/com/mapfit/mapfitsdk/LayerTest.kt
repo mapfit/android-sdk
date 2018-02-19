@@ -49,7 +49,7 @@ class LayerTest {
     @UiThreadTest
     fun testLayerDefaults() {
         val layer = Layer()
-        Assert.assertTrue(layer.isVisible)
+        Assert.assertTrue(layer.visible)
     }
 
     @Test

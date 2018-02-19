@@ -174,8 +174,8 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
 
         Layer layer = new Layer();
         List<Annotation> annotationList = layer.getAnnotations();
-        layer.setVisible(false);
-        boolean isLayerVisible = layer.isVisible();
+        layer.setVisibility(false);
+        boolean isLayerVisible = layer.getVisibility();
 
 
         new Directions().route(
@@ -191,7 +191,8 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
         line.add(new LatLng(40.6930532, -73.9860919));
         line.add(new LatLng(40.7061326, -74.000769));
 
-        mapfitMap.addPolyline(line);
+
+        Polyline pol = mapfitMap.addPolyline(line);
 
         mapfitMap.getDirectionsOptions()
                 .setDestination(new LatLng(40.744043, -73.993209))

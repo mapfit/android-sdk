@@ -19,18 +19,16 @@ class Layer {
 
     private var drawOrder = -1
 
-    var isVisible = true
+    var visibility = true
         set(value) {
             if (field != value) {
-                annotations.forEach { it.setVisible(value) }
+                annotations.forEach { it.visibility = value }
                 field = value
             }
         }
 
     /**
-     * Adding the given annotation to te layer. The annotation will be added to the maps that
-     * has the layer.
-     * Draw order of the annotation will be overridden by the layers draw order.
+     * Adds the input annotation to the layer.
      *
      * @param annotation e.g. marker, polyline, polygon, etc.
      */
@@ -38,7 +36,7 @@ class Layer {
         annotations.add(annotation)
         annotation.bindToLayer(this)
         if (drawOrder > 0) {
-            annotation.setDrawOrder(drawOrder)
+            annotation.drawOder = drawOrder
         }
         maps.forEach { mapController ->
             annotation.addToMap(mapController)
@@ -46,7 +44,7 @@ class Layer {
     }
 
     fun setDrawOrder(orderIndex: Int) {
-        annotations.forEach { it.setDrawOrder(orderIndex) }
+        annotations.forEach { it.drawOder = orderIndex }
         drawOrder = orderIndex
     }
 
