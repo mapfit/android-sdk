@@ -17,7 +17,6 @@ class Layer {
 
     private val maps = mutableListOf<MapController>()
 
-    private var drawOrder = -1
 
     var visibility = true
         set(value) {
@@ -35,36 +34,17 @@ class Layer {
     fun add(annotation: Annotation) {
         annotations.add(annotation)
         annotation.bindToLayer(this)
-        if (drawOrder > 0) {
-            if (annotation is Marker) {
-                annotation.markerOptions.drawOrder = drawOrder
-            }
 
-        }
         maps.forEach { mapController ->
             annotation.addToMap(mapController)
         }
     }
 
-    fun setDrawOrder(orderIndex: Int) {
-        annotations.forEach {
-            if (it is Marker) {
-                it.markerOptions.drawOrder = orderIndex
-            }
-        }
-        drawOrder = orderIndex
-    }
-
-    /**
-     * Returns the draw order index for the layer.
-     *
-     * @return draw order of the layer. Will return -1 if not set.
-     */
-    fun getDrawOrder() = drawOrder
-
     internal fun addMap(mapController: MapController) {
         maps.takeIf { !maps.contains(mapController) }?.add(mapController)
-        annotations.forEach { it.addToMap(mapController) }
+        annotations.forEach {
+            it.addToMap(mapController)
+        }
     }
 
     /**
