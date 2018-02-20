@@ -118,7 +118,6 @@ class PlaceInfo internal constructor(
 
     fun getVisible(): Boolean = infoView.visibility == View.VISIBLE
 
-
     fun getVisible(mapController: MapController): Boolean =
         infoView.visibility == View.VISIBLE && this.mapController == mapController
 
@@ -136,10 +135,10 @@ class PlaceInfo internal constructor(
     internal fun onPositionChanged() {
         if (infoView.visibility != View.GONE) {
             val point = marker.getScreenPosition(mapController)
+
             infoView.post {
                 infoView.x = point.x - (viewWidth?.div(2) ?: 0)
-                infoView.y =
-                        (point.y - (viewHeight ?: 0) + 15/* adjustment for the shadow padding*/)
+                infoView.y = point.y - (viewHeight ?: 0) + 15/* adjustment for the shadow*/
             }
         }
     }

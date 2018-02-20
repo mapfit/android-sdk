@@ -18,7 +18,6 @@ class Polyline(
 ) : Annotation(polylineId, mapController) {
 
     val points = line
-     val polylineOptions = PolylineOptions(this)
     val coordinates by lazy {
         val coordinates = DoubleArray(points.size * 2)
         var i = 0
@@ -35,7 +34,6 @@ class Polyline(
 
     override fun initAnnotation(mapController: MapController, id: Long) {
         mapBindings[mapController] = polylineId
-        polylineOptions.updateStyle()
     }
 
     /**

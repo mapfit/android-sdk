@@ -25,7 +25,6 @@ import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.LatLngBounds
 import com.mapfit.mapfitsdk.geometry.isEmpty
-import com.mapfit.mapfitsdk.utils.isValidZoomLevel
 import com.mapfit.mapfitsdk.utils.startActivitySafe
 import com.mapfit.tangram.ConfigChooser
 import com.mapfit.tangram.TouchInput
@@ -230,7 +229,6 @@ class MapView(
 
             }
         }
-
     }
 
     private fun shoveResponder() = TouchInput.ShoveResponder {
@@ -238,14 +236,30 @@ class MapView(
         false
     }
 
+    private var scaledMax = false
+    private var scaledMin = false
+    private var max = false
+    private var min = false
     private fun scaleResponder() = TouchInput.ScaleResponder { x, y, scale, velocity ->
-        var consumed = true //consumed
-        mapPinchListener?.let {
-            it.onMapPinch()
+        var consumed = false
+
+        scaledMax = mapController.zoom * scale > mapOptions.getMaxZoom() // will exceed
+        scaledMin = mapController.zoom * scale < mapOptions.getMinZoom() // will exceed
+        max = mapController.zoom >= mapOptions.getMaxZoom() // currently exceeding
+        min = mapController.zoom <= mapOptions.getMinZoom() // currently exceeding
+
+        if (scaledMax && max || scaledMin && min) {
             consumed = true
+            mapfitMap.setZoom(mapController.zoom, 125)
         }
-        updatePlaceInfoPosition(false)
-        false
+
+        if (!consumed) {
+            mapPinchListener?.onMapPinch()
+        } else {
+            updatePlaceInfoPosition(false)
+        }
+
+        consumed
     }
 
     private fun panResponder() = object : TouchInput.PanResponder {
@@ -317,7 +331,7 @@ class MapView(
     private fun setZoomOnDoubleTap(x: Float, y: Float) {
         val lngLat = mapController.screenPositionToLatLng(PointF(x, y))
         mapController.setPositionEased(lngLat, ANIMATION_DURATION)
-        mapController.setZoomEased(mapController.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION)
+        mapfitMap.setZoom(mapController.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION)
     }
 
     private val mapfitMap = object : MapfitMap() {
@@ -343,10 +357,6 @@ class MapView(
 
 
         override fun has(annotation: Annotation): Boolean = mapController.contains(annotation)
-
-        override fun setZoom(zoomLevel: Float) {
-            setZoom(zoomLevel, 0)
-        }
 
         override fun setOnPlaceInfoClickListener(listener: OnPlaceInfoClickListener) {
             this@MapView.onPlaceInfoClickListener = listener
@@ -520,23 +530,41 @@ class MapView(
             return mapOptions
         }
 
+
+        override fun setZoom(zoomLevel: Float) {
+            setZoom(zoomLevel, 0)
+        }
+
         override fun setZoom(zoomLevel: Float, duration: Int) {
-            if (isValidZoomLevel(zoomLevel)) {
-                when (zoomLevel) {
-                    !in 1F..mapOptions.getMaxZoom() -> {
-                        Log.w("MapView", "Zoom level exceeds maximum level.")
-                    }
-                    else -> {
-                        if (duration == 0) {
-                            mapController.zoom = (zoomLevel)
-                        } else {
-                            mapController.setZoomEased(zoomLevel, duration)
-                        }
-                    }
-                }
+            val normalizedZoomLevel = normalizeZoomLevel(zoomLevel)
+
+            if (duration == 0) {
+                mapController.zoom = (normalizedZoomLevel)
+            } else {
+                mapController.setZoomEased(normalizedZoomLevel, duration)
             }
         }
     }
+
+    private fun normalizeZoomLevel(zoomLevel: Float): Float =
+        when {
+            zoomLevel > mapOptions.getMaxZoom() -> {
+                Log.w(
+                    "MapView",
+                    "Zoom level exceeds maximum level and will be set maximum zoom level:  ${mapOptions.getMaxZoom()}"
+                )
+                mapOptions.getMaxZoom()
+            }
+            zoomLevel < mapOptions.getMinZoom() -> {
+                Log.w(
+                    "MapView",
+                    "Zoom level below minimum level and will be set minimum zoom level:  ${mapOptions.getMinZoom()}"
+                )
+                mapOptions.getMinZoom()
+            }
+            else -> zoomLevel
+        }
+
 
     fun getPlaceInfoAdapter(): MapfitMap.PlaceInfoAdapter? = placeInfoAdapter
 

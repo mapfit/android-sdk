@@ -281,6 +281,9 @@ public class MapController implements Renderer {
         if (mapPointer <= 0) {
             throw new RuntimeException("Unable to create a native Map object! There may be insufficient memory available.");
         }
+
+//        setSimultaneousGestureAllowed(Gestures.SCALE, Gestures.ROTATE, true);
+//        setSimultaneousGestureAllowed(Gestures.SCALE, Gestures.SHOVE, true);
     }
 
     private static final String POLYGON_LAYER_NAME = "mz_default_polygon";

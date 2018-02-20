@@ -36,7 +36,10 @@ class Layer {
         annotations.add(annotation)
         annotation.bindToLayer(this)
         if (drawOrder > 0) {
-            annotation.drawOder = drawOrder
+            if (annotation is Marker) {
+                annotation.markerOptions.drawOrder = drawOrder
+            }
+
         }
         maps.forEach { mapController ->
             annotation.addToMap(mapController)
@@ -44,7 +47,11 @@ class Layer {
     }
 
     fun setDrawOrder(orderIndex: Int) {
-        annotations.forEach { it.drawOder = orderIndex }
+        annotations.forEach {
+            if (it is Marker) {
+                it.markerOptions.drawOrder = orderIndex
+            }
+        }
         drawOrder = orderIndex
     }
 

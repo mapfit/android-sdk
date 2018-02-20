@@ -40,7 +40,6 @@ import com.mapfit.mapfitsdk.utils.decodePolyline
 import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*
-import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
@@ -127,6 +126,10 @@ class CoffeeShopActivity : AppCompatActivity() {
             setOnMarkerClickListener(onMarkerClickListener)
             setOnMapLongClickListener(onMapLongClickListener)
 
+            getMapOptions().setMaxZoom(17f)
+            getMapOptions().setMinZoom(12f)
+
+
             setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
                 override fun onPlaceInfoClicked(marker: Marker) {
                     Toast.makeText(
@@ -154,22 +157,16 @@ class CoffeeShopActivity : AppCompatActivity() {
         this.mapfitMap2 = mapfitMap
         mapfitMap2.addLayer(alwaysOpenShopLayer)
 
-        launch {
-            delay(5000)
-//setMapBoundsToColorado()
-//            mapfitMap.setLatLngBounds(alwaysOpenShopLayer.getLatLngBounds(), 0.9f)
-        }
-
         mapfitMap2.apply {
             setCenter(LatLng(40.700798, -74.0050177), 500)
             setZoom(13f, 500)
-        }
 
+            getMapOptions().theme = MapTheme.MAPFIT_GREYSCALE
+        }
 
         mapfitMap2.setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
             override fun onPlaceInfoClicked(marker: Marker) {
 //                marker.placeInfo
-
 
 //                marker.setIcon("https://darley-cpl.netdna-ssl.com/sites/default/files/styles/stallion_thumbnail/public/drupal-media/stallion-images/Australia-2016/exceed-and-excel/square-Exceed_And_Excel_0001_Thoroughbred_stallion.jpg?itok=ByfQuwCC")
 
@@ -181,8 +178,6 @@ class CoffeeShopActivity : AppCompatActivity() {
 
             }
         })
-
-        markers.first().drawOder
 
         mapfitMap.setOnMarkerClickListener(object : OnMarkerClickListener {
             override fun onMarkerClicked(marker: Marker) {

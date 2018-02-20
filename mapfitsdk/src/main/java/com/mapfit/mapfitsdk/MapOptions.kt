@@ -17,8 +17,8 @@ class MapOptions internal constructor(
 ) {
 
     companion object {
-        const val MAP_MIN_ZOOM = 1.0
-        const val MAP_MAX_ZOOM = 20.5
+        const val MAP_MIN_ZOOM = 0.0
+        const val MAP_MAX_ZOOM = 20.0
     }
 
     private var maxZoom: Float = 20.5f
@@ -40,6 +40,7 @@ class MapOptions internal constructor(
 
     private fun updateAttributionImage(value: MapTheme) {
         val attributionImage = when (value) {
+            MapTheme.MAPFIT_GREYSCALE,
             MapTheme.MAPFIT_DAY -> {
                 mapView.btnLegal?.setTextColor(
                     ContextCompat.getColor(
@@ -127,7 +128,7 @@ class MapOptions internal constructor(
     /**
      * @param zoomLevel desired maximum zoom level
      */
-    internal fun setMaxZoom(@FloatRange(from = MAP_MIN_ZOOM, to = MAP_MAX_ZOOM) zoomLevel: Float) {
+    fun setMaxZoom(@FloatRange(from = MAP_MIN_ZOOM, to = MAP_MAX_ZOOM) zoomLevel: Float) {
         if (isValidZoomLevel(zoomLevel)) {
             maxZoom = zoomLevel
         }
@@ -136,13 +137,15 @@ class MapOptions internal constructor(
     /**
      * @param zoomLevel desired minimum zoom level
      */
-    internal fun setMinZoom(@FloatRange(from = MAP_MIN_ZOOM, to = MAP_MAX_ZOOM) zoomLevel: Float) {
+    fun setMinZoom(@FloatRange(from = MAP_MIN_ZOOM, to = MAP_MAX_ZOOM) zoomLevel: Float) {
         if (isValidZoomLevel(zoomLevel)) {
             minZoom = zoomLevel
         }
     }
 
     internal fun getMaxZoom() = maxZoom
+
+    internal fun getMinZoom() = minZoom
 
     private enum class CameraType {
         PERSPECTIVE,

@@ -20,28 +20,9 @@ class Polygon(
     internal val polygon: MutableList<List<LatLng>>
 ) : Annotation(polygonId, mapController) {
 
-    val properties by lazy {
-        val props = HashMap<String, String>()
-        props["type"] = "polygons"
-        props["order"] = "500"
-//        props["fill"] = "blue"
-//        props["width"] = "2px"
-        props["color"] = "yellow"
-
-        val out = arrayOfNulls<String>(props.size * 2)
-        var i = 0
-        for ((key, value) in props) {
-            out[i++] = key
-            out[i++] = value
-        }
-        out
-    }
-
-
     val points = polygon
     lateinit var coordinates: DoubleArray
     lateinit var rings: IntArray
-
 
     init {
         initAnnotation(mapController, polygonId)

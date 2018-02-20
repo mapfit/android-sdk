@@ -13,26 +13,6 @@ class MarkerOptions internal constructor(
     internal val mapController: MutableList<MapController>
 ) {
 
-
-    val properties by lazy {
-        val props = HashMap<String, String>()
-//        props["type"] = "lines"
-        props["type"] = "point"
-        props["color"] = "yellow"
-        getStringMapAsArray(props)
-    }
-
-    private fun getStringMapAsArray(properties: Map<String, String>): Array<String?> {
-        val out = arrayOfNulls<String>(properties.size * 2)
-        var i = 0
-        for ((key, value) in properties) {
-            out[i++] = key
-            out[i++] = value
-        }
-        return out
-    }
-
-
     private val markerDotSide by lazy {
         11
     }
