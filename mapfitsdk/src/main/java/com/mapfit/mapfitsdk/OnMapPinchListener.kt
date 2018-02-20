@@ -3,6 +3,8 @@ package com.mapfit.mapfitsdk
 import android.support.annotation.UiThread
 
 /**
+ * Interface to listen map pinch events.
+ *
  * Created by dogangulcan on 1/4/18.
  */
 interface OnMapPinchListener {

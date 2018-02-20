@@ -4,11 +4,13 @@ import com.mapfit.mapfitsdk.utils.toPx
 
 
 /**
+ * Defines a rectangle with north east and south west coordinates.
+ *
  * Created by dogangulcan on 1/4/18.
  */
 class LatLngBounds(
-    var northEast: LatLng = LatLng(),
-    var southWest: LatLng = LatLng()
+    val northEast: LatLng = LatLng(),
+    val southWest: LatLng = LatLng()
 ) {
 
     val center by lazy {
@@ -19,10 +21,16 @@ class LatLngBounds(
 
         private val latLngList = mutableListOf<LatLng>()
 
+        /**
+         * @param [LatLng] point to be included in the bounds
+         */
         fun include(latLng: LatLng) {
             latLngList.add(latLng)
         }
 
+        /**
+         * Builds [LatLngBounds] with the current list of [LatLng] points.
+         */
         fun build(): LatLngBounds {
             var south: Double? = null
             var west: Double? = null
@@ -43,6 +51,9 @@ class LatLngBounds(
         }
     }
 
+    /**
+     * INTERNAL USAGE ONLY.
+     */
     fun getVisibleBounds(viewWidth: Int, viewHeight: Int, padding: Float): Pair<LatLng, Float> {
 
         fun latRad(lat: Double): Double {

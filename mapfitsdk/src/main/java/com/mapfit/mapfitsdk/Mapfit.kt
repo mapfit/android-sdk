@@ -1,15 +1,16 @@
 package com.mapfit.mapfitsdk
 
 import android.content.Context
-import com.mapfit.mapfitsdk.exceptions.MapfitConfigurationException
 import android.text.TextUtils
+import com.mapfit.mapfitsdk.exceptions.MapfitConfigurationException
 
 
 /**
+ * Mapfit class is to initialize Mapfit Android SDK.
+ *
  * Created by dogangulcan on 12/18/17.
  */
 class Mapfit private constructor(private val context: Context?, apiKey: String) {
-
 
     companion object {
 
@@ -33,6 +34,9 @@ class Mapfit private constructor(private val context: Context?, apiKey: String) 
             }
         }
 
+        /**
+         * Returns Mapfit API key.
+         */
         @JvmStatic
         fun getApiKey(): String {
             validateMapfit()

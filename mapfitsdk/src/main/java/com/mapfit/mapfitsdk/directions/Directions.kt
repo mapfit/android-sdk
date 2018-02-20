@@ -7,7 +7,7 @@ import com.mapfit.mapfitsdk.directions.model.Route
 import com.mapfit.mapfitsdk.geocoder.Geocoder.HttpHandler.httpClient
 import com.mapfit.mapfitsdk.geocoder.model.EntranceType
 import com.mapfit.mapfitsdk.geometry.LatLng
-import com.mapfit.mapfitsdk.geometry.isEmpty
+import com.mapfit.mapfitsdk.utils.isEmpty
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.android.UI
@@ -85,6 +85,7 @@ class Directions {
         route(
             originAddress = "",
             originLocation = originLocation,
+            destinationAddress = "",
             destinationLocation = destinationLocation,
             callback = callback
         )

@@ -3,6 +3,8 @@ package com.mapfit.mapfitsdk
 import android.support.annotation.UiThread
 
 /**
+ * Interface to listen map pan events.
+ *
  * Created by dogangulcan on 1/4/18.
  */
 interface OnMapPanListener {

@@ -2,7 +2,7 @@ package com.mapfit.mapfitsdk
 
 
 /**
- * Built in scenes.
+ * Built in Mapfit map themes.
  *
  * Created by dogangulcan on 12/21/17.
  */

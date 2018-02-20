@@ -3,7 +3,6 @@ package com.mapfit.mapfitsdk;
 import com.mapfit.mapfitsdk.annotations.Marker;
 import com.mapfit.mapfitsdk.annotations.Polygon;
 import com.mapfit.mapfitsdk.annotations.Polyline;
-import com.mapfit.tetragon.geometry.Geometry;
 
 /**
  * {@code MapData} is a named collection of drawable map features.
@@ -27,17 +26,6 @@ public class MapData {
         this.map = map;
     }
 
-    /**
-     * Add a geometry feature to this data collection
-     *
-     * @param geometry The feature to add
-     */
-    protected void addFeature(Geometry geometry) {
-        map.addFeature(id,
-                geometry.getCoordinateArray(),
-                geometry.getRingArray(),
-                geometry.getPropertyArray());
-    }
 
     /**
      * Get the name of this {@code MapData}.

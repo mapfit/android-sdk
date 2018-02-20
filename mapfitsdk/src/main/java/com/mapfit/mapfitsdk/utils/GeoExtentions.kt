@@ -1,11 +1,10 @@
-package com.mapfit.mapfitsdk.geometry
+package com.mapfit.mapfitsdk.utils
 
 import android.util.Log
+import com.mapfit.mapfitsdk.geometry.LatLng
 
 /**
- * Extension functions for geometries.
- *
- * Created by dogangulcan on 12/27/17.
+ * Created by dogangulcan on 2/20/18.
  */
 
 fun LatLng.isValid(): Boolean {

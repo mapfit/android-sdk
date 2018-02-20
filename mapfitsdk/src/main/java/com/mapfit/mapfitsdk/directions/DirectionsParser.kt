@@ -6,9 +6,11 @@ import org.json.JSONObject
 import java.security.InvalidParameterException
 
 /**
+ * Internally used.
+ *
  * Created by dogangulcan on 2/4/18.
  */
-class DirectionsParser {
+internal class DirectionsParser {
 
     fun parseError(response: Response?): Pair<String, Exception> {
 

@@ -7,7 +7,7 @@ import com.mapfit.mapfitsdk.annotations.Polyline
 import com.mapfit.mapfitsdk.geometry.LatLngBounds
 
 /**
- * Layer structure enables
+ * Layer structure is to re-use [Annotation]s and have them synchronised across maps.
  *
  * Created by dogangulcan on 12/21/17.
  */

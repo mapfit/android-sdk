@@ -2,6 +2,7 @@ package com.mapfit.mapfitsdk.geometry
 
 import android.os.Parcelable
 import android.support.annotation.FloatRange
+import com.mapfit.mapfitsdk.utils.isValid
 import kotlinx.android.parcel.Parcelize
 
 /**
@@ -14,8 +15,8 @@ import kotlinx.android.parcel.Parcelize
  */
 @Parcelize
 data class LatLng(
-        @FloatRange(from = -90.0, to = 90.0) val lat: Double = 0.0,
-        @FloatRange(from = -180.0, to = 180.0) val lon: Double = 0.0
+    @FloatRange(from = -90.0, to = 90.0) val lat: Double = 0.0,
+    @FloatRange(from = -180.0, to = 180.0) val lon: Double = 0.0
 ) : Parcelable {
     init {
         isValid()
