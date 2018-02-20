@@ -286,7 +286,6 @@ public class MapController implements Renderer {
     private static final String POLYGON_LAYER_NAME = "mz_default_polygon";
     private static final String POLYLINE_LAYER_NAME = "mz_default_line";
 
-
     void dispose() {
         // Disposing native resources involves GL calls, so we need to run on the GL thread.
         queueEvent(new Runnable() {
@@ -305,10 +304,6 @@ public class MapController implements Renderer {
                 markers.clear();
             }
         });
-    }
-
-    void setTiltEnabled(boolean enabled) {
-        touchInput.setTiltEnabled(enabled);
     }
 
     /**

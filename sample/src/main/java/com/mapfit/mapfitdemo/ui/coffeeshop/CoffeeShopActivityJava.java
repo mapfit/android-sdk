@@ -29,8 +29,11 @@ import com.mapfit.mapfitsdk.OnMapPinchListener;
 import com.mapfit.mapfitsdk.OnMapReadyCallback;
 import com.mapfit.mapfitsdk.annotations.Annotation;
 import com.mapfit.mapfitsdk.annotations.Marker;
+import com.mapfit.mapfitsdk.annotations.Polygon;
 import com.mapfit.mapfitsdk.annotations.Polyline;
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener;
+import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener;
+import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener;
 import com.mapfit.mapfitsdk.directions.Directions;
 import com.mapfit.mapfitsdk.directions.DirectionsCallback;
 import com.mapfit.mapfitsdk.directions.DirectionsType;
@@ -167,7 +170,7 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
 
         };
 
-        new Directions().getRoute(
+        new Directions().route(
                 "119 W 24th St new york",
                 "1000 5th Ave, New York, NY 10028",
                 callback);
@@ -193,6 +196,8 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
 
 
         Polyline pol = mapfitMap.addPolyline(line);
+
+        pol.setVisibility(false);
 
         mapfitMap.getDirectionsOptions()
                 .setDestination(new LatLng(40.744043, -73.993209))
@@ -254,20 +259,6 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
 
             }
         });
-
-//        mapfitMap.setOnPolylineClickListener(new OnPolylineClickListener() {
-//            @Override
-//            public void onPolylineClicked(@NotNull Polyline polyline) {
-//
-//            }
-//        });
-//
-//        mapfitMap.setOnPolygonClickListener(new OnPolygonClickListener() {
-//            @Override
-//            public void onPolygonClicked(@NotNull Polygon polygon) {
-//
-//            }
-//        });
 
     }
 

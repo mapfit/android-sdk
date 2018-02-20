@@ -49,6 +49,8 @@ class Layer {
     }
 
     /**
+     * Returns the draw order index for the layer.
+     *
      * @return draw order of the layer. Will return -1 if not set.
      */
     fun getDrawOrder() = drawOrder
@@ -59,7 +61,7 @@ class Layer {
     }
 
     /**
-     * Removes the given annotation from the layer and the maps the layer is added to.
+     * Removes the input annotation(s) from the layer.
      */
     fun remove(vararg annotation: Annotation) {
         annotation.forEach {
@@ -68,6 +70,9 @@ class Layer {
         }
     }
 
+    /**
+     * Returns the bounding coordinates for the layer.
+     */
     fun getLatLngBounds(): LatLngBounds {
         val boundsBuilder = LatLngBounds.Builder()
 

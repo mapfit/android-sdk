@@ -18,15 +18,23 @@ abstract class Annotation(
 
     internal val mapBindings = HashMap<MapController, Long>()
     internal val layers = mutableListOf<Layer>()
-    private var isVisible: Boolean = true
 
     var visibility: Boolean = true
+        /**
+         * Setter
+         */
         set(value) {
             mapBindings.forEach {
                 it.key.changeAnnotationVisibility(it.value, value)
             }
             subAnnotation?.visibility = value
             field = value
+        }
+        /**
+         * Getter
+         */
+        get() {
+            return field
         }
 
     var drawOder: Int = 0
@@ -38,9 +46,11 @@ abstract class Annotation(
             field = value
         }
 
-
     internal var subAnnotation: Annotation? = null
 
+    /**
+     * Annotation's unique identifier.
+     */
     val id: Long by lazy { generateUniqueId() }
 
     init {

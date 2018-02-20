@@ -111,7 +111,9 @@ class Marker internal constructor(
     }
 
     /**
-     * @return current position of the marker
+     * Get the geographical coordinate position of the marker.
+     *
+     * @return latLng
      */
     fun getPosition(): LatLng = position
 

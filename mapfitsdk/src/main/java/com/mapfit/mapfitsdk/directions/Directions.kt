@@ -59,7 +59,7 @@ class Directions {
         directionsType: DirectionsType = DirectionsType.DRIVING,
         callback: DirectionsCallback
     ) {
-        getRoute(
+        route(
             originAddress = "",
             originLocation = originLocation,
             destinationLocation = destinationLocation,
@@ -82,7 +82,7 @@ class Directions {
         destinationLocation: LatLng = LatLng(),
         callback: DirectionsCallback
     ) {
-        getRoute(
+        route(
             originAddress = "",
             originLocation = originLocation,
             destinationLocation = destinationLocation,
@@ -102,7 +102,7 @@ class Directions {
      * @param callback will be called when [Route] is obtained
      */
     @JvmOverloads
-    fun getRoute(
+    fun route(
         originAddress: String = "",
         destinationAddress: String = "",
         originLocation: LatLng = LatLng(),
@@ -128,7 +128,6 @@ class Directions {
             override fun onResponse(call: Call?, response: Response?) {
 
                 if (response != null && response.isSuccessful) {
-
                     async(UI) {
                         val route = parseRoute(response)
                         route.await()?.let { callback.onSuccess(it) }

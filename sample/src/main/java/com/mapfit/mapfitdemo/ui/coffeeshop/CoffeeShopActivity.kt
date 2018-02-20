@@ -27,6 +27,8 @@ import com.mapfit.mapfitsdk.annotations.Marker
 import com.mapfit.mapfitsdk.annotations.Polyline
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
+import com.mapfit.mapfitsdk.directions.Directions
+import com.mapfit.mapfitsdk.directions.DirectionsCallback
 import com.mapfit.mapfitsdk.directions.DirectionsType
 import com.mapfit.mapfitsdk.directions.model.Route
 import com.mapfit.mapfitsdk.geocoder.Geocoder
@@ -60,7 +62,6 @@ class CoffeeShopActivity : AppCompatActivity() {
     private var buildingLayer = Layer()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private lateinit var drawerLayout: DrawerLayout
-    private var bottomSheetHideJob = Job()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -111,24 +112,12 @@ class CoffeeShopActivity : AppCompatActivity() {
         })
     }
 
-
     private fun setupMap(mapfitMap: MapfitMap) {
         this.mapfitMap = mapfitMap
-//        drawDummyMarkers()
-        launch {
-            delay(5000)
-//setMapBoundsToColorado()
 
-            mapfitMap.addMarker(buildingLayer.getLatLngBounds().southWest)
-                .setIcon("http://www.ashs.com.au/images/New_Buttons-2017-03-24/StudBook3.png")
-            mapfitMap.addMarker(buildingLayer.getLatLngBounds().northEast)
-                .setIcon("http://www.ashs.com.au/images/New_Buttons-2017-03-24/StudBook3.png")
-            mapfitMap.setLatLngBounds(buildingLayer.getLatLngBounds(), 1f)
-        }
         mapfitMap.apply {
             setCenter(LatLng(40.700798, -74.0050177), 500)
             setZoom(13f, 500)
-
 //            boundaryBuilder()
 //            addMapfitOfficeWithGeocoder()
             setupMarkerWithAddressInput()
@@ -137,7 +126,6 @@ class CoffeeShopActivity : AppCompatActivity() {
 //            setMapBoundsToUtah()
             setOnMarkerClickListener(onMarkerClickListener)
             setOnMapLongClickListener(onMapLongClickListener)
-//            setOnPolylineClickListener()
 
             setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
                 override fun onPlaceInfoClicked(marker: Marker) {
@@ -148,11 +136,12 @@ class CoffeeShopActivity : AppCompatActivity() {
                     ).show()
                 }
             })
-
         }
+
         val polyline = mapfitMap.addPolyline(repository.getLowerManhattanPolyline())
         alwaysOpenShopLayer.add(polyline)
 
+        polyline.visibility
 
         addMarkerWithAddress("119 w 24th street, new york, ny")
         addMarkerWithAddress("135 w 23th street, new york, ny")
@@ -207,6 +196,20 @@ class CoffeeShopActivity : AppCompatActivity() {
         val list = mutableListOf<LatLng>()
 
 //        buildingLayer.visible =false
+
+        Directions().route(
+            LatLng(40.742887, -73.993148),
+            LatLng(40.742887, -73.993148),
+            object : DirectionsCallback {
+                override fun onSuccess(route: Route) {
+
+                }
+
+                override fun onError(message: String, e: Exception) {
+
+                }
+            })
+
         mapfitMap
             .getDirectionsOptions()
             .setDestination(LatLng(40.742887, -73.993148))
@@ -460,7 +463,6 @@ class CoffeeShopActivity : AppCompatActivity() {
 
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(toolbar.windowToken, 0)
-
 
 //            mapfitMap.addPolyline()
             mapfitMap.addMarker(address,

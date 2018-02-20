@@ -18,8 +18,6 @@ import com.mapfit.mapfitsdk.annotations.*
 import com.mapfit.mapfitsdk.annotations.Annotation
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.mapfitsdk.annotations.callback.OnMarkerClickListener
-import com.mapfit.mapfitsdk.annotations.callback.OnPolygonClickListener
-import com.mapfit.mapfitsdk.annotations.callback.OnPolylineClickListener
 import com.mapfit.mapfitsdk.annotations.widget.PlaceInfo
 import com.mapfit.mapfitsdk.geocoder.Geocoder
 import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
@@ -88,8 +86,6 @@ class MapView(
 
     // event listeners
     private var markerClickListener: OnMarkerClickListener? = null
-    private var polylineClickListener: OnPolylineClickListener? = null
-    private var polygonClickListener: OnPolygonClickListener? = null
     private var mapClickListener: OnMapClickListener? = null
     private var mapDoubleClickListener: OnMapDoubleClickListener? = null
     private var mapLongClickListener: OnMapLongClickListener? = null
@@ -200,6 +196,11 @@ class MapView(
             setShoveResponder(shoveResponder())
 
             setMarkerPickListener(onAnnotationClickListener)
+            setFeaturePickListener { properties, positionX, positionY ->
+
+                Log.e("FEATURE PICKED!!!", "")
+
+            }
 
             setSceneLoadListener({ _, _ ->
                 mapController.reAddMarkers()
@@ -224,8 +225,6 @@ class MapView(
                         markerClickListener?.onMarkerClicked(it)
                         showPlaceInfo(it)
                     }
-                    is Polyline -> polylineClickListener?.onPolylineClicked(it)
-                    is Polygon -> polygonClickListener?.onPolygonClicked(it)
                     else -> Unit
                 }
 
@@ -314,36 +313,6 @@ class MapView(
             true
         }
     }
-
-//    private fun markerPickListener(): (MarkerPickResult?, Float, Float) -> Unit {
-//        return { markerPickResult, _, _ ->
-//
-//            runBlocking {
-//                markerPickResult?.let {
-//
-//                    val annotation = annotationLayer.annotations.find {
-//                        it.getId() == markerPickResult.marker.mapBindings[mapController]
-//                    }
-//
-//                    annotation?.let {
-//
-//                        if (placeInfoRemoveJob.isActive) placeInfoRemoveJob.cancel()
-//
-//                        when (it) {
-//                            is Marker -> {
-//                                markerClickListener?.onMarkerClicked(it)
-//                                showPlaceInfo(it)
-//                            }
-//                            is Polyline -> polylineClickListener?.onPolylineClicked(it)
-//                            else -> {
-//                            }
-//                        }
-//
-//                    }
-//                }
-//            }
-//        }
-//    }
 
     private fun setZoomOnDoubleTap(x: Float, y: Float) {
         val lngLat = mapController.screenPositionToLatLng(PointF(x, y))
@@ -435,18 +404,15 @@ class MapView(
         override fun addMarker(latLng: LatLng): Marker {
             val marker = mapController.addMarker()
             marker.setPosition(latLng)
-//            annotationLayer.add(marker)
             return marker
         }
 
         override fun addPolyline(line: List<LatLng>): Polyline {
-            val polyline = mapController.addPolyline(line)
-            return polyline
+            return mapController.addPolyline(line)
         }
 
         override fun addPolygon(polygon: List<List<LatLng>>): Polygon {
-            val poly = mapController.addPolygon(polygon)
-            return poly
+            return mapController.addPolygon(polygon)
         }
 
         override fun getLayers(): List<Layer> {
@@ -481,14 +447,6 @@ class MapView(
 
         override fun setOnMapPanListener(listener: OnMapPanListener) {
             mapPanListener = listener
-        }
-
-        override fun setOnPolylineClickListener(listener: OnPolylineClickListener) {
-            polylineClickListener = listener
-        }
-
-        override fun setOnPolygonClickListener(listener: OnPolygonClickListener) {
-            polygonClickListener = listener
         }
 
         override fun getDirectionsOptions(): DirectionsOptions = directionsOptions

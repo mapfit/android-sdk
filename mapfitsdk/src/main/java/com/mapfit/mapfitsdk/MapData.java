@@ -86,7 +86,7 @@ public class MapData {
         map.addFeature(id,
                 polyline.getCoordinates(),
                 null,
-                null);
+                polyline.getPolylineOptions().getProperties());
 
         return this;
     }
@@ -104,7 +104,7 @@ public class MapData {
         map.addFeature(id,
                 polygon.getCoordinates(),
                 polygon.rings,
-                null);
+                polygon.getProperties());
         return this;
     }
 

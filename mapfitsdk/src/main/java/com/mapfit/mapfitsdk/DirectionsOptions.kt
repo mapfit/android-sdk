@@ -80,7 +80,8 @@ class DirectionsOptions internal constructor(private val mapController: MapContr
     fun getType() = type
 
     /**
-     * Draws the route as polyline on the map and returns the route details to [RouteDrawCallback].
+     * Draws the route as polyline on the map and returns the route details to the given
+     * [RouteDrawCallback].
      *
      * @param callback will be called when the route is drawn on the map as polyline
      */
@@ -96,9 +97,12 @@ class DirectionsOptions internal constructor(private val mapController: MapContr
                 callback.onError("", e)
             }
         }
-        Directions().getRoute(
+
+        Directions().route(
             originLocation = originLocation,
+            originAddress = originLocationString,
             destinationLocation = destinationLocation,
+            destinationAddress = destinationLocationString,
             directionsType = type,
             callback = directionsCallback
         )

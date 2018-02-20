@@ -1,6 +1,5 @@
 package com.mapfit.mapfitsdk.geometry
 
-import android.content.res.Resources
 import com.mapfit.mapfitsdk.utils.toPx
 
 
