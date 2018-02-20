@@ -1,7 +1,7 @@
 package com.mapfit.mapfitsdk.annotations
 
 import com.mapfit.mapfitsdk.MapController
-import java.util.HashMap
+import java.util.*
 
 /**
  * Defines options for [Marker].
@@ -60,6 +60,9 @@ class MarkerOptions internal constructor(
         set(value) {
             field = value
             updateStyle()
+            marker.mapBindings.forEach {
+                it.key.setMarkerDrawOrder(it.value, value)
+            }
         }
 
     var color = "white"

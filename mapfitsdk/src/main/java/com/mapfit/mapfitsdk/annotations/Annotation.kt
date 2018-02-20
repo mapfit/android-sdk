@@ -20,29 +20,11 @@ abstract class Annotation(
     internal val layers = mutableListOf<Layer>()
 
     var visibility: Boolean = true
-        /**
-         * Setter
-         */
         set(value) {
             mapBindings.forEach {
                 it.key.changeAnnotationVisibility(it.value, value)
             }
             subAnnotation?.visibility = value
-            field = value
-        }
-        /**
-         * Getter
-         */
-        get() {
-            return field
-        }
-
-    var drawOder: Int = 0
-        set(value) {
-            mapBindings.forEach {
-                it.key.setMarkerDrawOrder(it.value, value)
-            }
-            subAnnotation?.drawOder = value
             field = value
         }
 

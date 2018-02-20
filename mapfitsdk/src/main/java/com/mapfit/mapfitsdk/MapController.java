@@ -1147,7 +1147,6 @@ public class MapController implements Renderer {
         return nativeMarkerRemove(mapPointer, markerId);
     }
 
-
     public void removePolyline(long polylineId) {
         checkPointer(mapPointer);
         checkId(polylineId);
