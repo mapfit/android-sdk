@@ -8,7 +8,8 @@ package com.mapfit.mapfitsdk
  */
 enum class MapTheme(private val scenePath: String) {
     MAPFIT_DAY("asset:///mapfit-day.yaml"),
-    MAPFIT_NIGHT("asset:///mapfit-night.yaml");
+    MAPFIT_NIGHT("asset:///mapfit-night.yaml"),
+    MAPFIT_GREYSCALE("asset:///mapfit-greyscale.yaml");
 
     override fun toString(): String {
         return scenePath
