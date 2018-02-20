@@ -17,14 +17,14 @@ import com.mapfit.mapfitsdk.annotations.Polygon;
 import com.mapfit.mapfitsdk.annotations.Polyline;
 import com.mapfit.mapfitsdk.geometry.LatLng;
 import com.mapfit.mapfitsdk.geometry.LatLngBounds;
-import com.mapfit.tangram.FontFileParser;
-import com.mapfit.tangram.HttpHandler;
-import com.mapfit.tangram.LabelPickResult;
-import com.mapfit.tangram.MarkerPickResult;
-import com.mapfit.tangram.SceneError;
-import com.mapfit.tangram.SceneUpdate;
-import com.mapfit.tangram.TouchInput;
-import com.mapfit.tangram.TouchInput.Gestures;
+import com.mapfit.tetragon.FontFileParser;
+import com.mapfit.tetragon.HttpHandler;
+import com.mapfit.tetragon.LabelPickResult;
+import com.mapfit.tetragon.MarkerPickResult;
+import com.mapfit.tetragon.SceneError;
+import com.mapfit.tetragon.SceneUpdate;
+import com.mapfit.tetragon.TouchInput;
+import com.mapfit.tetragon.TouchInput.Gestures;
 
 import org.jetbrains.annotations.NotNull;
 

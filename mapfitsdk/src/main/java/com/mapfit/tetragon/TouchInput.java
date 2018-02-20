@@ -1,4 +1,4 @@
-package com.mapfit.tangram;
+package com.mapfit.tetragon;
 
 import android.content.Context;
 import android.os.SystemClock;

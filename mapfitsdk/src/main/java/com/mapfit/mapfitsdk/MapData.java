@@ -3,11 +3,7 @@ package com.mapfit.mapfitsdk;
 import com.mapfit.mapfitsdk.annotations.Marker;
 import com.mapfit.mapfitsdk.annotations.Polygon;
 import com.mapfit.mapfitsdk.annotations.Polyline;
-import com.mapfit.mapfitsdk.geometry.LatLng;
-import com.mapfit.tangram.geometry.Geometry;
-
-import java.util.List;
-import java.util.Map;
+import com.mapfit.tetragon.geometry.Geometry;
 
 /**
  * {@code MapData} is a named collection of drawable map features.

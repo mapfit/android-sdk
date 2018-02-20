@@ -1,4 +1,4 @@
-package com.mapfit.tangram;
+package com.mapfit.tetragon;
 
 import okhttp3.CacheControl;
 import okhttp3.HttpUrl;

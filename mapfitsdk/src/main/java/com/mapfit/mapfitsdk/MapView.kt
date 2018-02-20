@@ -26,8 +26,8 @@ import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.LatLngBounds
 import com.mapfit.mapfitsdk.geometry.isEmpty
 import com.mapfit.mapfitsdk.utils.startActivitySafe
-import com.mapfit.tangram.ConfigChooser
-import com.mapfit.tangram.TouchInput
+import com.mapfit.tetragon.ConfigChooser
+import com.mapfit.tetragon.TouchInput
 import kotlinx.android.synthetic.main.overlay_map_controls.view.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI

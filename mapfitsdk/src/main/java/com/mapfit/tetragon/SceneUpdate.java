@@ -1,4 +1,4 @@
-package com.mapfit.tangram;
+package com.mapfit.tetragon;
 
 /**
  * {@code SceneUpdate} Represents a DataStructure to specify a yaml path and the corresponding value for a Scene Update.

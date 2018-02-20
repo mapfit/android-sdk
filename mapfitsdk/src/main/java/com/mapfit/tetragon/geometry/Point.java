@@ -1,4 +1,4 @@
-package com.mapfit.tangram.geometry;
+package com.mapfit.tetragon.geometry;
 
 import com.mapfit.mapfitsdk.geometry.LatLng;
 
