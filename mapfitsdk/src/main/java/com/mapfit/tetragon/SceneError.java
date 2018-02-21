@@ -2,7 +2,7 @@ package com.mapfit.tetragon;
 
 import android.support.annotation.Keep;
 
-import com.mapfit.mapfitsdk.MapController.Error;
+import com.mapfit.android.MapController.Error;
 
 /**
  * {@code SceneError} Holds an error status and its associated scene updated

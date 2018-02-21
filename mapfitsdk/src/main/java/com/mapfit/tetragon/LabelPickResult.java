@@ -2,7 +2,7 @@ package com.mapfit.tetragon;
 
 import android.support.annotation.Keep;
 
-import com.mapfit.mapfitsdk.geometry.LatLng;
+import com.mapfit.android.geometry.LatLng;
 
 import java.util.Map;
 

@@ -1,7 +1,7 @@
 package com.mapfit.mapfitdemo
 
 import android.app.Application
-import com.mapfit.mapfitsdk.Mapfit
+import com.mapfit.android.Mapfit
 
 /**
  * Created by dogangulcan on 1/18/18.

@@ -6,7 +6,7 @@ import com.google.gson.reflect.TypeToken
 import com.mapfit.mapfitdemo.data.model.CoffeeShop
 import com.mapfit.mapfitdemo.data.model.Filter
 import com.mapfit.mapfitdemo.ui.adapter.FilterType
-import com.mapfit.mapfitsdk.geometry.LatLng
+import com.mapfit.android.geometry.LatLng
 import java.io.IOException
 import java.lang.reflect.Modifier
 import java.nio.charset.Charset

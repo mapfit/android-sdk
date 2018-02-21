@@ -20,7 +20,7 @@
             android:layout_above="@+id/linearLayout"
             android:orientation="vertical">
 
-            <com.mapfit.mapfitsdk.MapView
+            <com.mapfit.android.MapView
                 android:id="@+id/map"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -34,7 +34,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="3dp" />
 
-            <com.mapfit.mapfitsdk.MapView
+            <com.mapfit.android.MapView
                 android:id="@+id/map2"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"

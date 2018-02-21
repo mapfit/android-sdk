@@ -1,0 +1,116 @@
+package com.mapfit.android;
+
+import com.mapfit.android.annotations.Marker;
+import com.mapfit.android.annotations.Polygon;
+import com.mapfit.android.annotations.Polyline;
+
+/**
+ * {@code MapData} is a named collection of drawable map features.
+ */
+public class MapData {
+
+    String name;
+    long id = 0;
+    private MapController map;
+
+    /**
+     * For package-internal use only; create a new {@code MapData}
+     *
+     * @param name    The name of the associated data source
+     * @param pointer The markerId to the native data source, encoded as a long
+     * @param map     The {@code MapController} associated with this data source
+     */
+    MapData(String name, long pointer, MapController map) {
+        this.name = name;
+        this.id = pointer;
+        this.map = map;
+    }
+
+
+    /**
+     * Get the name of this {@code MapData}.
+     *
+     * @return The name.
+     */
+    public String name() {
+        return name;
+    }
+
+    /**
+     * Remove this {@code MapData} from the map it is currently associated with. Using this object
+     * after {@code remove} is called will cause an exception to be thrown. {@code remove} is called
+     * on every {@code MapData} associated with a map when its {@code MapController} is destroyed.
+     */
+    public void remove() {
+        map.removeDataLayer(this);
+        id = 0;
+        map = null;
+    }
+
+    /**
+     * Add a point feature to this collection.
+     * the scene file used by the map; may be null.
+     *
+     * @return This object, for chaining.
+     */
+    public MapData addPoint(Marker marker) {
+        double[] coordinates = new double[2];
+        coordinates[0] = marker.getPosition().getLon();
+        coordinates[1] = marker.getPosition().getLat();
+
+        map.addFeature(id,
+                coordinates,
+                null,
+                null);
+        return this;
+    }
+
+
+    public MapData addPolyline(Polyline polyline) {
+        map.addFeature(id,
+                polyline.getCoordinates(),
+                null,
+                null);
+
+        return this;
+    }
+
+    /**
+     * Add a polygon feature to this collection.
+     *
+     * @param polygon A list of rings describing the shape of the feature. Each
+     *                ring is a list of coordinates in which the first point is the same as the last point. The
+     *                first ring is taken as the "exterior" of the polygon and rings with opposite winding are
+     *                considered "holes".
+     * @return This object, for chaining.
+     */
+    public MapData addPolygon(Polygon polygon) {
+        map.addFeature(id,
+                polygon.getCoordinates(),
+                polygon.rings,
+                null);
+        return this;
+    }
+
+    /**
+     * Add features described in a GeoJSON string to this collection.
+     *
+     * @param data A string containing a <a href="http://geojson.org/">GeoJSON</a> FeatureCollection
+     * @return This object, for chaining.
+     */
+    public MapData addGeoJson(String data) {
+        map.addGeoJson(id, data);
+        return this;
+    }
+
+    /**
+     * Remove all features from this collection.
+     *
+     * @return This object, for chaining.
+     */
+    public MapData clear() {
+        map.clearTileSource(id);
+        return this;
+    }
+
+}
