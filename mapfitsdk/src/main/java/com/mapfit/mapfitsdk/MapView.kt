@@ -24,7 +24,7 @@ import com.mapfit.mapfitsdk.geocoder.GeocoderCallback
 import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.LatLngBounds
-import com.mapfit.mapfitsdk.geometry.isEmpty
+import com.mapfit.mapfitsdk.utils.isEmpty
 import com.mapfit.mapfitsdk.utils.startActivitySafe
 import com.mapfit.tetragon.ConfigChooser
 import com.mapfit.tetragon.TouchInput

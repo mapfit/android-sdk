@@ -15,8 +15,8 @@ import com.mapfit.mapfitsdk.annotations.widget.PlaceInfo
 import com.mapfit.mapfitsdk.geocoder.model.Address
 import com.mapfit.mapfitsdk.geometry.LatLng
 import com.mapfit.mapfitsdk.geometry.LatLngBounds
-import com.mapfit.mapfitsdk.geometry.isValid
 import com.mapfit.mapfitsdk.utils.getBitmapFromVectorDrawable
+import com.mapfit.mapfitsdk.utils.isValid
 import com.mapfit.mapfitsdk.utils.loadImageFromUrl
 import kotlinx.coroutines.experimental.launch
 
