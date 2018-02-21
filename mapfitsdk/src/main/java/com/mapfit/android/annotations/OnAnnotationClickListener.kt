@@ -5,7 +5,7 @@ package com.mapfit.android.annotations
  *
  * Created by dogangulcan on 2/12/18.
  */
-interface OnAnnotationClickListener {
+internal interface OnAnnotationClickListener {
 
     fun onAnnotationClicked(annotation: Annotation)
 

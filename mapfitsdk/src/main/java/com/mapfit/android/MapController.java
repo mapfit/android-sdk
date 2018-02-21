@@ -466,7 +466,7 @@ public class MapController implements Renderer {
      * @param duration Time in milliseconds to ease to the given position
      */
     public void setPositionEased(LatLng position, int duration) {
-        setPositionEased(position, duration, DEFAULT_EASE_TYPE);
+        setPositionEased(position, duration, DEFAULT_EASE_TYPE, true);
     }
 
     /**
@@ -476,10 +476,12 @@ public class MapController implements Renderer {
      * @param duration Time in milliseconds to ease to the given position
      * @param ease     Type of easing to use
      */
-    public void setPositionEased(LatLng position, int duration, EaseType ease) {
+    public void setPositionEased(LatLng position, int duration, EaseType ease, boolean save) {
         float seconds = duration / 1000.f;
         checkPointer(mapPointer);
-        lastCenter = position;
+        if (save) {
+            lastCenter = position;
+        }
         nativeSetPositionEased(mapPointer, position.getLon(), position.getLat(), seconds, ease.ordinal());
     }
 

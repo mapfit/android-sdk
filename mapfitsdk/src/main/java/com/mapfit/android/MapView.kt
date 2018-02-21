@@ -330,7 +330,7 @@ class MapView(
 
     private fun setZoomOnDoubleTap(x: Float, y: Float) {
         val lngLat = mapController.screenPositionToLatLng(PointF(x, y))
-        mapController.setPositionEased(lngLat, ANIMATION_DURATION)
+        mapController.setPositionEased(lngLat, ANIMATION_DURATION, DEFAULT_EASE, false)
         mapfitMap.setZoom(mapController.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION)
     }
 
@@ -391,7 +391,6 @@ class MapView(
                             val marker = mapController.addMarker().setPosition(latLng)
 //
                             marker.address = addressList[0]
-//                            annotationLayer.add(marker)
                             if (withBuilding) {
                                 val polygon =
                                     mapController.addPolygon(addressList[0].buildingPolygon)
@@ -463,7 +462,7 @@ class MapView(
 
 
         override fun setOnMarkerClickListener(listener: OnMarkerClickListener) {
-            this@MapView.markerClickListener = listener
+            markerClickListener = listener
         }
 
         override fun getZoom(): Float {
@@ -482,7 +481,8 @@ class MapView(
                 mapController.setPositionEased(
                     latLng,
                     duration.toInt(),
-                    DEFAULT_EASE
+                    DEFAULT_EASE,
+                    true
                 )
             }
         }
@@ -564,9 +564,6 @@ class MapView(
             }
             else -> zoomLevel
         }
-
-
-    fun getPlaceInfoAdapter(): MapfitMap.PlaceInfoAdapter? = placeInfoAdapter
 
     private var activePlaceInfo: PlaceInfo? = null
 
