@@ -3,10 +3,10 @@ package com.mapfit.mapfitdemo.module.coffeeshop.data
 import android.content.Context
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import com.mapfit.android.geometry.LatLng
 import com.mapfit.mapfitdemo.data.model.CoffeeShop
 import com.mapfit.mapfitdemo.data.model.Filter
 import com.mapfit.mapfitdemo.ui.adapter.FilterType
-import com.mapfit.android.geometry.LatLng
 import java.io.IOException
 import java.lang.reflect.Modifier
 import java.nio.charset.Charset
@@ -70,7 +70,7 @@ class Repository(private val context: Context) {
                 FilterType.MAP_THEME,
                 "Map Theme",
                 true,
-                listOf("MAPFIT_DAY", "MAPFIT_NIGHT")
+                listOf("MAPFIT_DAY", "MAPFIT_NIGHT", "MAPFIT_GREYSCALE")
             )
         )
 //        filters.add(Filter(FilterType.CAMERA_STYLE, "Camera Style", true))

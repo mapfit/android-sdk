@@ -98,6 +98,7 @@ class MapView(
 
     private var placeInfoRemoveJob = Job()
     private var reCentered = false
+    private var sceneUpdateFlag = false
 
     init {
         Mapfit.getApiKey()
@@ -195,15 +196,13 @@ class MapView(
             setShoveResponder(shoveResponder())
 
             setMarkerPickListener(onAnnotationClickListener)
-            setFeaturePickListener { properties, positionX, positionY ->
-
-                Log.e("FEATURE PICKED!!!", "")
-
-            }
 
             setSceneLoadListener({ _, _ ->
                 mapController.reAddMarkers()
-                onMapReadyCallback.onMapReady(mapfitMap)
+                if (!sceneUpdateFlag) {
+                    onMapReadyCallback.onMapReady(mapfitMap)
+                    sceneUpdateFlag = true
+                }
             })
 
             mapOptions = MapOptions(this@MapView, this)
@@ -216,7 +215,6 @@ class MapView(
     private val onAnnotationClickListener = object : OnAnnotationClickListener {
         override fun onAnnotationClicked(annotation: Annotation) {
             annotation.let {
-
                 if (placeInfoRemoveJob.isActive) placeInfoRemoveJob.cancel()
 
                 when (it) {
@@ -226,7 +224,6 @@ class MapView(
                     }
                     else -> Unit
                 }
-
             }
         }
     }

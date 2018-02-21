@@ -108,6 +108,17 @@ class DirectionsOptions internal constructor(private val mapController: MapContr
         )
     }
 
+    private fun drawRoute(route: Route): List<Polyline> {
+        val legs = mutableListOf<Polyline>()
+        route.trip.legs.forEach {
+            val line = decodePolyline(it.shape)
+            val polyline = mapController.addPolyline(line)
+            legs.add(polyline)
+            routeDrawn = true
+        }
+        return legs
+    }
+
     /**
      * Callback to be invoked when the route is drawn or there is an error.
      */
@@ -122,15 +133,5 @@ class DirectionsOptions internal constructor(private val mapController: MapContr
 
     }
 
-    private fun drawRoute(route: Route): List<Polyline> {
-        val legs = mutableListOf<Polyline>()
-        route.trip.legs.forEach {
-            val line = decodePolyline(it.shape)
-            val polyline = mapController.addPolyline(line)
-            legs.add(polyline)
-            routeDrawn = true
-        }
-        return legs
-    }
 
 }

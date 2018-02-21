@@ -92,7 +92,11 @@ class CoffeeShopActivity : AppCompatActivity() {
     private fun initMap() {
         map.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
-
+                Toast.makeText(
+                    this@CoffeeShopActivity,
+                    "getMapAsync!",
+                    Toast.LENGTH_SHORT
+                ).show()
                 if (!alreadyLoaded) {
                     setupMap(mapfitMap)
                     alreadyLoaded = true
