@@ -85,7 +85,7 @@ namespace Tangram {
         requestRenderMethodID = jniEnv->GetMethodID(tangramClass, "requestRender", "()V");
         setRenderModeMethodID = jniEnv->GetMethodID(tangramClass, "setRenderMode", "(I)V");
         sceneReadyCallbackMID = jniEnv->GetMethodID(tangramClass, "sceneReadyCallback",
-                                                    "(ILcom/mapfit/tangram/SceneError;)V");
+                                                    "(ILcom/mapfit/tetragon/SceneError;)V");
 
         jclass featurePickListenerClass = jniEnv->FindClass(
                 "com/mapfit/mapfitsdk/MapController$FeaturePickListener");
@@ -94,13 +94,13 @@ namespace Tangram {
         jclass labelPickListenerClass = jniEnv->FindClass(
                 "com/mapfit/mapfitsdk/MapController$LabelPickListener");
         onLabelPickMID = jniEnv->GetMethodID(labelPickListenerClass, "onLabelPick",
-                                             "(Lcom/mapfit/tangram/LabelPickResult;FF)V");
+                                             "(Lcom/mapfit/tetragon/LabelPickResult;FF)V");
 
         if (labelPickResultClass) {
             jniEnv->DeleteGlobalRef(labelPickResultClass);
         }
         labelPickResultClass = (jclass) jniEnv->NewGlobalRef(
-                jniEnv->FindClass("com/mapfit/tangram/LabelPickResult"));
+                jniEnv->FindClass("com/mapfit/tetragon/LabelPickResult"));
         labelPickResultInitMID = jniEnv->GetMethodID(labelPickResultClass, "<init>",
                                                      "(DDILjava/util/Map;)V");
 
@@ -108,7 +108,7 @@ namespace Tangram {
             jniEnv->DeleteGlobalRef(markerPickResultClass);
         }
         markerPickResultClass = (jclass) jniEnv->NewGlobalRef(
-                jniEnv->FindClass("com/mapfit/tangram/MarkerPickResult"));
+                jniEnv->FindClass("com/mapfit/tetragon/MarkerPickResult"));
         markerPickResultInitMID = jniEnv->GetMethodID(markerPickResultClass, "<init>",
                                                       "(Lcom/mapfit/mapfitsdk/annotations/Marker;DD)V");
 
@@ -116,7 +116,7 @@ namespace Tangram {
             jniEnv->DeleteGlobalRef(sceneErrorClass);
         }
         sceneErrorClass = (jclass) jniEnv->NewGlobalRef(
-                jniEnv->FindClass("com/mapfit/tangram/SceneError"));
+                jniEnv->FindClass("com/mapfit/tetragon/SceneError"));
         sceneErrorInitMID = jniEnv->GetMethodID(sceneErrorClass, "<init>",
                                                 "(Ljava/lang/String;Ljava/lang/String;I)V");
 
@@ -134,7 +134,7 @@ namespace Tangram {
         jclass markerPickListenerClass = jniEnv->FindClass(
                 "com/mapfit/mapfitsdk/MapController$MarkerPickListener");
         onMarkerPickMID = jniEnv->GetMethodID(markerPickListenerClass, "onMarkerPick",
-                                              "(Lcom/mapfit/tangram/MarkerPickResult;FF)V");
+                                              "(Lcom/mapfit/tetragon/MarkerPickResult;FF)V");
     }
 
     std::string stringFromJString(JNIEnv *jniEnv, jstring string) {

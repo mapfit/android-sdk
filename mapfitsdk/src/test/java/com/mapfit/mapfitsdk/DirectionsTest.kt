@@ -31,7 +31,7 @@ class DirectionsTest {
 
     @Test(expected = MapfitConfigurationException::class)
     fun testMapfitConfiguration() {
-        Directions().getRoute(
+        Directions().route(
             originAddress = "119 W 24th St",
             destinationAddress = "107 Sacred Heart Ln",
             callback = directionsCallback
@@ -49,7 +49,7 @@ class DirectionsTest {
         server.enqueue(MockResponse().setBody(mockResponse))
 //        server.start()
 
-        Directions().getRoute(
+        Directions().route(
             originAddress = "119 W 24th St",
             destinationAddress = "107 Sacred Heart Ln",
             callback = directionsCallback

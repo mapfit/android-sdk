@@ -1,5 +1,6 @@
 package com.mapfit.mapfitsdk.geometry
 
+import com.mapfit.mapfitsdk.utils.isValid
 import org.junit.Assert
 import org.junit.Test
 

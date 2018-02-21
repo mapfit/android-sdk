@@ -161,7 +161,7 @@ class MarkerTest {
 
         val placeInfo = marker.placeInfoMap.values.first()
 
-        Assert.assertTrue(placeInfo!!.getVisible())
+        Assert.assertTrue(placeInfo!!.getVisibility())
     }
 
     @Test

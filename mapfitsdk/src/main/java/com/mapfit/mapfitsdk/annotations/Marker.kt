@@ -245,7 +245,7 @@ class Marker internal constructor(
 
             } else {
 
-                if (getVisible(mapController)) {
+                if (getVisibility(mapController)) {
                     setBitmap(iconChangedWhenPlaceInfo ?: previousIcon!!, mapController, markerId)
                     markerOptions.placeInfoShown(shown, markerId, mapController)
                     placeInfoMap.remove(mapController)

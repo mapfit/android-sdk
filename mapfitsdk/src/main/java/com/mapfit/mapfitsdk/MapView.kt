@@ -575,7 +575,7 @@ class MapView(
 
             if (activePlaceInfo != null
                 && activePlaceInfo?.marker == marker
-                && activePlaceInfo?.getVisible()!!) {
+                && activePlaceInfo?.getVisibility()!!) {
                 return
             }
 

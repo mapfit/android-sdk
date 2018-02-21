@@ -1419,7 +1419,7 @@ public class MapController implements Renderer {
 
     static {
         System.loadLibrary("c++_shared");
-        System.loadLibrary("tetragon");
+        System.loadLibrary("tangram");
     }
 
     synchronized native void nativeOnLowMemory(long mapPtr);

@@ -116,9 +116,9 @@ class PlaceInfo internal constructor(
             })
     }
 
-    fun getVisible(): Boolean = infoView.visibility == View.VISIBLE
+    fun getVisibility(): Boolean = infoView.visibility == View.VISIBLE
 
-    fun getVisible(mapController: MapController): Boolean =
+    fun getVisibility(mapController: MapController): Boolean =
         infoView.visibility == View.VISIBLE && this.mapController == mapController
 
 

@@ -20,7 +20,7 @@ android {
 
         externalNativeBuild {
             cmake {
-                targets 'tetragon'
+                targets 'tangram'
                 arguments '-DPLATFORM_TARGET=android',
                         '-DANDROID_TOOLCHAIN=clang',
                         '-DANDROID_STL=c++_shared'
