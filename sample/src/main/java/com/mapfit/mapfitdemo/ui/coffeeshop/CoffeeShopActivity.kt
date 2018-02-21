@@ -24,6 +24,7 @@ import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener
 import com.mapfit.android.*
 import com.mapfit.android.annotations.MapfitMarker
 import com.mapfit.android.annotations.Marker
+import com.mapfit.android.annotations.Polygon
 import com.mapfit.android.annotations.Polyline
 import com.mapfit.android.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.android.annotations.callback.OnMarkerClickListener
@@ -102,6 +103,12 @@ class CoffeeShopActivity : AppCompatActivity() {
 //                mapfitMap.getMapOptions().setMaxZoom(55.0f)
             }
         })
+
+//        mapfitMap.setOnMarkerClickListener(object: OnMarkerClickListener{
+//            override fun onMarkerClicked(marker: Marker) {
+////                marker.setPosition().setIcon()
+//            }
+//        })
 
         map2.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {

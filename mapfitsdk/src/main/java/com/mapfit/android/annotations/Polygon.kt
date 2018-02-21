@@ -20,8 +20,8 @@ class Polygon(
 ) : Annotation(polygonId, mapController) {
 
     val points = polygon
-    lateinit var coordinates: DoubleArray
-    lateinit var rings: IntArray
+    internal lateinit var coordinates: DoubleArray
+    internal lateinit var rings: IntArray
 
     init {
         initAnnotation(mapController, polygonId)
@@ -70,7 +70,6 @@ class Polygon(
     override fun remove(mapController: MapController) {
         mapBindings[mapController]?.let { mapController.removePolyline(it) }
     }
-
 
 }
 

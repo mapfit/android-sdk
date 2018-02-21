@@ -736,10 +736,10 @@ public class MapController implements Renderer {
      * @param mapData The {@code MapData} to remove
      */
     void removeDataLayer(MapData mapData) {
-        clientTileSources.remove(mapData.name);
+        clientTileSources.remove(mapData.getName());
         checkPointer(mapPointer);
-        checkPointer(mapData.id);
-        nativeRemoveTileSource(mapPointer, mapData.id);
+        checkPointer(mapData.getId());
+        nativeRemoveTileSource(mapPointer, mapData.getId());
     }
 
     /**
@@ -1067,11 +1067,11 @@ public class MapController implements Renderer {
         checkPointer(mapPointer);
 
         MapData pointData = addDataLayer("mz_default_point");
-        Marker marker = new Marker(mapView.getContext(), pointData.id, this);
+        Marker marker = new Marker(mapView.getContext(), pointData.getId(), this);
         marker.setPosition(latLng);
         pointData.addPoint(marker);
 
-        markers.put(pointData.id, marker);
+        markers.put(pointData.getId(), marker);
         return marker;
     }
 
@@ -1081,13 +1081,13 @@ public class MapController implements Renderer {
 
         Polyline polyline = new Polyline(
                 mapView.getContext(),
-                polylineData.id,
+                polylineData.getId(),
                 this,
                 line);
 
         polylineData.addPolyline(polyline);
 
-        polylines.put(polylineData.id, polyline);
+        polylines.put(polylineData.getId(), polyline);
 
         return polyline;
     }
@@ -1099,13 +1099,13 @@ public class MapController implements Renderer {
 
         Polygon poly = new Polygon(
                 mapView.getContext(),
-                polygonLayer.id,
+                polygonLayer.getId(),
                 this,
                 polygon);
 
         polygonLayer.addPolygon(poly);
 
-        polygons.put(polygonLayer.id, poly);
+        polygons.put(polygonLayer.getId(), poly);
 //        requestRender();
         return poly;
     }
@@ -1121,14 +1121,14 @@ public class MapController implements Renderer {
         } else if (annotation instanceof Polyline) {
             MapData dataLayer = addDataLayer(POLYLINE_LAYER_NAME);
             dataLayer.addPolyline((Polyline) annotation);
-            polylines.put(dataLayer.id, (Polyline) annotation);
-            return dataLayer.id;
+            polylines.put(dataLayer.getId(), (Polyline) annotation);
+            return dataLayer.getId();
 
         } else if (annotation instanceof Polygon) {
             MapData polygonLayer = addDataLayer(POLYGON_LAYER_NAME);
             polygonLayer.addPolygon((Polygon) annotation);
-            polygons.put(polygonLayer.id, (Polygon) annotation);
-            return polygonLayer.id;
+            polygons.put(polygonLayer.getId(), (Polygon) annotation);
+            return polygonLayer.getId();
 
         } else {
             return 0;
@@ -1167,7 +1167,7 @@ public class MapController implements Renderer {
         MapData polylineData = addDataLayer(POLYLINE_LAYER_NAME);
         polylineData.addPolyline(polyline);
         polylines.remove(polylineId);
-        polylines.put(polylineData.id, polyline);
+        polylines.put(polylineData.getId(), polyline);
     }
 
     private void showPolygon(long polygonId) {
@@ -1175,7 +1175,7 @@ public class MapController implements Renderer {
         MapData polygonData = addDataLayer(POLYGON_LAYER_NAME);
         polygonData.addPolygon(polygon);
         polygons.remove(polygonId);
-        polygons.put(polygonData.id, polygon);
+        polygons.put(polygonData.getId(), polygon);
     }
 
     public void removePolygon(long polygonId) {

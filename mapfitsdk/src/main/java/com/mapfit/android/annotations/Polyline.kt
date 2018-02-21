@@ -18,7 +18,7 @@ class Polyline(
 ) : Annotation(polylineId, mapController) {
 
     val points = line
-    val coordinates by lazy {
+    internal val coordinates by lazy {
         val coordinates = DoubleArray(points.size * 2)
         var i = 0
         for (point in points) {

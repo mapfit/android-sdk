@@ -42,19 +42,12 @@ allprojects {
     }
 }
 
-
-//task clean(type: Delete) {
-//    delete rootProject.buildDir
-//}
-
-
 dokka {
     moduleName = 'mapfitsdk'
     outputFormat = 'html'
     outputDirectory = "$buildDir/mapfit-api-ref"
 
     sourceDirs = files('mapfitsdk/src/main/java/com')
-
 
     skipEmptyPackages = true
     reportNotDocumented = true
@@ -69,15 +62,6 @@ dokka {
         // Suffix which is used to append the line number to the URL. Use #L for GitHub
         suffix = "#L"
     }
-
-//    packageOptions {
-//        prefix = "kotlin" // will match kotlin and all sub-packages of it
-//        // All options are optional, default values are below:
-//        skipDeprecated = false
-//        reportUndocumented = true // Emit warnings about not documented members
-//        includeNonPublic = false
-//    }
-
 }
 
 task deleteUnusedDokkaAssets(type: Delete) {
