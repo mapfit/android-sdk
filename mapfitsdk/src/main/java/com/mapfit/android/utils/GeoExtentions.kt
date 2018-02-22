@@ -7,7 +7,7 @@ import com.mapfit.android.geometry.LatLng
  * Created by dogangulcan on 2/20/18.
  */
 
-fun LatLng.isValid(): Boolean {
+internal fun LatLng.isValid(): Boolean {
 
 //    ^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$
     val latRegex = """^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$""".toRegex()
@@ -27,4 +27,4 @@ fun LatLng.isValid(): Boolean {
     return isLatValid && isLonValid
 }
 
-fun LatLng.isEmpty(): Boolean = lat == 0.0 && lng == 0.0
+internal fun LatLng.isEmpty(): Boolean = lat == 0.0 && lng == 0.0
