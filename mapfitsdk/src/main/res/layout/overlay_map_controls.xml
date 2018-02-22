@@ -59,9 +59,13 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
+        android:layout_marginBottom="8dp"
         android:gravity="center"
         android:orientation="vertical">
 
+        <android.support.v4.widget.Space
+            android:layout_width="wrap_content"
+            android:layout_height="12dp" />
 
         <RelativeLayout
             android:id="@+id/zoomControls"
@@ -107,6 +111,7 @@
             android:id="@+id/btnCompass"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="-13dp"
             android:adjustViewBounds="true"
             android:clickable="true"
             android:foreground="@drawable/button_selector"
@@ -119,6 +124,7 @@
             android:id="@+id/btnRecenter"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="-13dp"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:src="@drawable/re_center_off"

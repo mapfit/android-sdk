@@ -6,7 +6,7 @@ package com.mapfit.android.geocoder.model
  * Created by dogangulcan on 1/18/18.
  */
 data class Entrance(
-    val latitude: Double,
-    val longitude: Double,
+    val lat: Double,
+    val lng: Double,
     val entranceType: EntranceType?
 )

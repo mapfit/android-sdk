@@ -149,18 +149,20 @@ class Directions {
         response.body()?.string()?.let {
             val moshi = Moshi.Builder().build()
             val jsonAdapter = moshi.adapter<Route>(Route::class.java)
+            val route = jsonAdapter.fromJson(it.trimIndent())
 
-            val route = jsonAdapter.fromJson(it) as Route
-            route.destinationLocation =
-                    listOf(
-                        route.destinationLocation[1],
-                        route.destinationLocation[0]
-                    )
-            route.sourceLocation =
-                    listOf(
-                        route.sourceLocation[1],
-                        route.sourceLocation[0]
-                    )
+            route?.apply {
+                destinationLocation =
+                        listOf(
+                            route.destinationLocation[1],
+                            route.destinationLocation[0]
+                        )
+                originLocation =
+                        listOf(
+                            route.originLocation[1],
+                            route.originLocation[0]
+                        )
+            }
 
             route
         }
@@ -184,7 +186,7 @@ class Directions {
         val srcLocation = when {
             !originLocation.isEmpty() -> JSONObject()
                 .put("lat", originLocation.lat)
-                .put("lon", originLocation.lon)
+                .put("lon", originLocation.lng)
             else -> null
         }
 
@@ -198,7 +200,7 @@ class Directions {
         val destLocation = when {
             !destinationLocation.isEmpty() -> JSONObject()
                 .put("lat", destinationLocation.lat)
-                .put("lon", destinationLocation.lon)
+                .put("lon", destinationLocation.lng)
             else -> null
         }
 

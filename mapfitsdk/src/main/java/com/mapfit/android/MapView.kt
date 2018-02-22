@@ -35,6 +35,7 @@ import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 import org.jetbrains.annotations.NotNull
+import org.jetbrains.annotations.TestOnly
 import java.io.IOException
 
 
@@ -353,6 +354,7 @@ class MapView(
         override fun getRotation(): Float = mapController.rotation
 
 
+        @TestOnly
         override fun has(annotation: Annotation): Boolean = mapController.contains(annotation)
 
         override fun setOnPlaceInfoClickListener(listener: OnPlaceInfoClickListener) {
@@ -390,7 +392,7 @@ class MapView(
                             marker.address = addressList[0]
                             if (withBuilding) {
                                 val polygon =
-                                    mapController.addPolygon(addressList[0].buildingPolygon)
+                                    mapController.addPolygon(addressList[0].building.polygon)
                                 marker.setPolygon(polygon)
                             }
                             async(UI) {
@@ -500,11 +502,11 @@ class MapView(
         override fun removeLayer(layer: Layer) {
             layer.annotations.forEach {
                 it.mapBindings[mapController]?.let { id ->
-
                     if (it is Marker && activePlaceInfo?.marker == it) {
                         activePlaceInfo?.dispose(true)
                     }
                     mapController.removeMarker(id)
+                    it.mapBindings.remove(mapController)
                 }
             }
 

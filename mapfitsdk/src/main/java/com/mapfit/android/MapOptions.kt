@@ -17,11 +17,11 @@ class MapOptions internal constructor(
 ) {
 
     companion object {
-        const val MAP_MIN_ZOOM = 0.0
-        const val MAP_MAX_ZOOM = 20.0
+        const val MAP_MIN_ZOOM = 1.0
+        const val MAP_MAX_ZOOM = 18.0
     }
 
-    private var maxZoom: Float = 20.5f
+    private var maxZoom: Float = 18f
 
     private var minZoom: Float = 1f
 
@@ -40,7 +40,7 @@ class MapOptions internal constructor(
 
     private fun updateAttributionImage(value: MapTheme) {
         val attributionImage = when (value) {
-            MapTheme.MAPFIT_GREYSCALE,
+            MapTheme.MAPFIT_GRAYSCALE,
             MapTheme.MAPFIT_DAY -> {
                 mapView.btnLegal?.setTextColor(
                     ContextCompat.getColor(

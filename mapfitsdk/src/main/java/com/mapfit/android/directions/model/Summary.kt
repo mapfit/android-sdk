@@ -1,13 +1,15 @@
 package com.mapfit.android.directions.model
 
+import com.squareup.moshi.Json
+
 /**
  * Created by dogangulcan on 2/4/18.
  */
 data class Summary(
-    val min_lon: Double,
-    val max_lat: Double,
-    val max_lon: Double,
+    @field:Json(name = "min_lon") val minLon: Double,
+    @field:Json(name = "max_lat") val maxLat: Double,
+    @field:Json(name = "max_lon") val maxLon: Double,
     val length: Double,
     val time: Int,
-    val min_lat: Double
+    @field:Json(name = "min_lat") val minLat: Double
 )

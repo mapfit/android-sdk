@@ -125,12 +125,10 @@ class Marker internal constructor(
     fun setPosition(latLng: LatLng): Marker {
         if (latLng.isValid()) {
             mapBindings.forEach {
-                val markerPositionSet = it.key.setMarkerPointEased(
+                val markerPositionSet = it.key.setMarkerPoint(
                     it.value,
-                    latLng.lon,
-                    latLng.lat,
-                    0,
-                    MapController.EaseType.CUBIC
+                    latLng.lng,
+                    latLng.lat
                 )
 
                 updatePosition(markerPositionSet, latLng)
@@ -145,7 +143,7 @@ class Marker internal constructor(
             mapBindings.forEach {
                 val markerPositionSet = it.key.setMarkerPointEased(
                     it.value,
-                    latLng.lon,
+                    latLng.lng,
                     latLng.lat,
                     duration,
                     MapController.EaseType.CUBIC
@@ -163,7 +161,7 @@ class Marker internal constructor(
         } else {
             Log.e(
                 "Mapfit",
-                "Setting Marker position is failed for ${latLng.lat}, ${latLng.lon}"
+                "Setting Marker position is failed for ${latLng.lat}, ${latLng.lng}"
             )
         }
     }

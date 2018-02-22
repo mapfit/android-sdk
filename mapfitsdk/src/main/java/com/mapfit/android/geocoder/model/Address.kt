@@ -3,29 +3,30 @@ package com.mapfit.android.geocoder.model
 import com.mapfit.android.geometry.LatLng
 
 /**
- * Class represent an address for Mapfit Geocoding API.
+ * Class representing the result from the Mapfit Geocoding API, including the normalized address
+ * components, geographical coordinate position and the (optional) building polygon.
  *
  * Created by dogangulcan on 1/18/18.
  */
-data class Address(
+data class Address internal constructor(
     val streetAddress: String = "",
     val country: String = "",
     val adminArea: String = "",
     val locality: String = "",
     val postalCode: String = "",
     val neighborhood: String = "",
-    val buildingPolygon: List<List<LatLng>>,
-    val latitude: Double = 0.0,
-    val longitude: Double = 0.0,
-    val status: LocationStatus?,
+    val building: Building,
+    val lat: Double = 0.0,
+    val lng: Double = 0.0,
+    val responseType: ResponseType?,
     val entrances: List<Entrance> = mutableListOf()
 ) {
 
     internal fun getPrimaryEntrance(): LatLng =
         if (entrances.isNotEmpty()) {
-            LatLng(entrances.first().latitude, entrances.first().longitude)
+            LatLng(entrances.first().lat, entrances.first().lng)
         } else {
-            LatLng(latitude, longitude)
+            LatLng(lat, lng)
         }
 
 }

@@ -52,7 +52,6 @@ abstract class Annotation(
     internal fun bindToLayer(layer: Layer) {
         if (!layers.contains(layer)) {
             layers.add(layer)
-
             subAnnotation?.bindToLayer(layer)
         }
     }
@@ -81,6 +80,7 @@ abstract class Annotation(
                     is Polygon -> it.key.removePolygon(it.value)
                     is Polyline -> it.key.removePolyline(it.value)
                 }
+                mapBindings.remove(it.key)
             }
     }
 

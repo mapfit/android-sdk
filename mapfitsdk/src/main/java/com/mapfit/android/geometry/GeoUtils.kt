@@ -17,7 +17,7 @@ internal fun getCenterLatLng(geoCoordinates: List<LatLng>): LatLng {
 
     geoCoordinates.forEach { latLng ->
         val latitude = Math.toRadians(latLng.lat)
-        val longitude = Math.toRadians(latLng.lon)
+        val longitude = Math.toRadians(latLng.lng)
 
         x += Math.cos(latitude) * Math.cos(longitude)
         y += Math.cos(latitude) * Math.sin(longitude)

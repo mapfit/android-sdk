@@ -11,6 +11,9 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+import com.mapfit.android.MapTheme;
+import com.mapfit.android.annotations.callback.OnMarkerAddedCallback;
+import com.mapfit.android.geometry.LatLngBounds;
 import com.mapfit.mapfitdemo.R;
 import com.mapfit.mapfitdemo.data.model.CoffeeShop;
 import com.mapfit.mapfitdemo.module.coffeeshop.data.Repository;
@@ -151,6 +154,108 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
         }
     };
 
+
+    private void unusedFunction() {
+
+        mapfitMap.addMarker("119w 24th st new york ny",
+                true,
+                new OnMarkerAddedCallback() {
+                    @Override
+                    public void onMarkerAdded(@NotNull Marker marker) {
+
+                    }
+
+                    @Override
+                    public void onError(@NotNull Exception exception) {
+
+                    }
+                });
+
+
+        new Geocoder().geocode("119w 24th st new york ny",
+                true, new GeocoderCallback() {
+                    @Override
+                    public void onSuccess(@NotNull List<Address> addressList) {
+
+                    }
+
+                    @Override
+                    public void onError(@NotNull String message, @NotNull Exception e) {
+
+                    }
+                });
+
+
+        Float tiltAngle = mapfitMap.getTilt();
+        mapfitMap.setTilt(70f);
+        LatLng latLng = new LatLng(40.744043, -73.993209);
+        mapfitMap.setCenter(latLng);
+        Float currentZoomLevel = mapfitMap.getZoom();
+
+        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
+        boundsBuilder.include(new LatLng(40.744043, -73.993209));
+        boundsBuilder.include(new LatLng(40.6902223, -73.9770368));
+        boundsBuilder.include(new LatLng(40.7061326, -74.000769));
+
+        LatLngBounds bounds = boundsBuilder.build();
+        float paddingPercentage = 0.1f;
+
+
+        mapfitMap.reCenter();
+        mapfitMap.getMapOptions().setMaxZoom(15f);
+        mapfitMap.setLatLngBounds(bounds, paddingPercentage);
+
+        LatLngBounds currentMapBounds = mapfitMap.getLatLngBounds();
+        Float currentRotation = mapfitMap.getRotation();
+        mapfitMap.setRotation(50f);
+
+        mapfitMap.setZoom(16f);
+        LatLng centerLatLng = mapfitMap.getCenter();
+
+        mapfitMap.setOnMarkerClickListener(new OnMarkerClickListener() {
+            @Override
+            public void onMarkerClicked(@NotNull Marker marker) {
+
+            }
+        });
+        mapfitMap.getMapOptions().setTiltEnabled(false);
+        mapfitMap.setOnMapClickListener(new OnMapClickListener() {
+            @Override
+            public void onMapClicked(@NotNull LatLng latLng) {
+
+            }
+        });
+
+        mapfitMap.setOnMapDoubleClickListener(new OnMapDoubleClickListener() {
+            @Override
+            public void onMapDoubleClicked(@NotNull LatLng latLng) {
+
+            }
+        });
+
+        mapfitMap.setOnMapLongClickListener(new OnMapLongClickListener() {
+            @Override
+            public void onMapLongClicked(@NotNull LatLng latLng) {
+
+            }
+        });
+        mapfitMap.setOnMapPanListener(new
+
+                                              OnMapPanListener() {
+                                                  @Override
+                                                  public void onMapPan() {
+
+                                                  }
+                                              });
+        mapfitMap.setOnMapPinchListener(new
+
+                                                OnMapPinchListener() {
+                                                    @Override
+                                                    public void onMapPinch() {
+
+                                                    }
+                                                });
+    }
 
     private void directions() {
         DirectionsCallback callback = new DirectionsCallback() {
@@ -303,7 +408,7 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
     private void addMarkersFromCoffeeShops(List<CoffeeShop> coffeeShops) {
 
         for (CoffeeShop coffeeShop : coffeeShops) {
-            Marker marker = mapfitMap.addMarker(new LatLng(coffeeShop.getLat(), coffeeShop.getLon()));
+            Marker marker = mapfitMap.addMarker(new LatLng(coffeeShop.getLat(), coffeeShop.getLng()));
 //            marker.invalidate()
 
             markers.add(marker);

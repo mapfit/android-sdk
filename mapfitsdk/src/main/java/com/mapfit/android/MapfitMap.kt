@@ -49,7 +49,6 @@ abstract class MapfitMap {
      */
     abstract fun addLayer(layer: Layer)
 
-
     /**
      * Returns the list of layers bound to the map view.
      *

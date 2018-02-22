@@ -30,6 +30,8 @@ class LayerTest {
     @Before
     @UiThreadTest
     fun init() {
+
+        Mapfit.getInstance(mMockContext, mMockContext.getString(R.string.mapfit_debug_api_key))
         MockitoAnnotations.initMocks(this)
 
         MapView(mMockContext).getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
@@ -49,12 +51,13 @@ class LayerTest {
     @UiThreadTest
     fun testLayerDefaults() {
         val layer = Layer()
-        Assert.assertTrue(layer.visible)
+        Assert.assertTrue(layer.visibility)
     }
 
     @Test
     @UiThreadTest
-    fun testAddingMarkerToLayer() {
+    fun
+            testAddingMarkerToLayer() {
         val (marker, layer) = addLayerWithMarkerToMaps()
 
         layer.add(marker)

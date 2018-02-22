@@ -20,7 +20,7 @@ class GeocoderParserTest {
 
         Assert.assertTrue(firstAddress.streetAddress.isNotBlank())
         Assert.assertTrue(firstAddress.adminArea.isNotBlank())
-        Assert.assertNotNull(firstAddress.status)
+        Assert.assertNotNull(firstAddress.responseType)
         Assert.assertTrue(firstAddress.locality.isNotBlank())
         Assert.assertTrue(firstAddress.neighborhood.isNotBlank())
         Assert.assertTrue(firstAddress.postalCode.isNotBlank())

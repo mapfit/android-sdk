@@ -41,7 +41,7 @@ class Polygon(
         var j = 0
         for (ring in polygon) {
             for (point in ring) {
-                coordinates[j++] = point.lon
+                coordinates[j++] = point.lng
                 coordinates[j++] = point.lat
             }
         }
@@ -68,7 +68,7 @@ class Polygon(
     }
 
     override fun remove(mapController: MapController) {
-        mapBindings[mapController]?.let { mapController.removePolyline(it) }
+        mapBindings[mapController]?.let { mapController.removePolygon(it) }
     }
 
 }

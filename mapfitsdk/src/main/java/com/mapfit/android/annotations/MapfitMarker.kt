@@ -34,6 +34,6 @@ enum class MapfitMarker(private val iconUrl: String) {
     RESTAURANT("lighttheme/restaurant"),
     SHOPPING("lighttheme/shopping");
 
-    fun getUrl() = "http://cdn.stg.mapfit.com/v2/assets/images/markers/pngs/$iconUrl.png"
+    internal fun getUrl() = "http://cdn.stg.mapfit.com/v2/assets/images/markers/pngs/$iconUrl.png"
 
 }

@@ -12,10 +12,11 @@ sources:
   max_zoom: 16
 
 # Note: edit this section to enable 3d building perspective, lighting, etc.
-# cameras:
-#     camera1:
-#         type: isometric
-#         axis: [.5, .5]
+cameras:
+    camera1:
+        type: perspective
+        max_tilt: 60
+        active: true
 # lights:
 #     light1:
 #         type: directional
@@ -504,8 +505,8 @@ global:
 
 textures:
     pois:
-        url: https://cdn.mapfit.com/v1/themes/images/refill-grey@2x.png
-        # url: images/refill@2x.png
+        # url: https://cdn.mapfit.com/v1/themes/images/refill-grey@2x.png
+        url: images/refill-gray@2x.png
         filtering: mipmap
         sprites:
             # define sprites: [x origin, y origin, width, height]
@@ -640,11 +641,11 @@ styles:
     sdk-line-overlay:
         base: lines
         blend: overlay
-        blend_order: 0
+        blend_order: 2
     sdk-polygon-overlay:
         base: polygons
         blend: overlay
-        blend_order: 0
+        blend_order: 2
 
 fonts:
     Open Sans:
@@ -896,20 +897,20 @@ layers:
         draw:
             sdk-line-overlay:
                 interactive: global.sdk_interactive
-                color: black
+                color: '#009eff'
                 order: 503
-                width: 3px
+                width: 2px
     mz_default_polygon:
         data: { source: mz_default_polygon }
         draw:
             sdk-polygon-overlay:
                 interactive: global.sdk_interactive
-                color: [0.,0.,0.,0.4]  #'#06b1e2'
+                color: '#d6efff'
                 order: 501
             sdk-line-overlay:
-                color: black
+                color: '#009eff'
                 order: 502
-                width: 0px
+                width: 2px
     water:
         data: { source: mapfit, layer: water }
         ocean-water:

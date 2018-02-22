@@ -105,9 +105,9 @@ dependencies {
 
     testImplementation 'junit:junit:4.12'
     testCompile "org.json:json:20140107"
-    testCompile "org.mockito:mockito-core:2.13.0"
-    testCompile group: 'org.mockito', name: 'mockito-inline', version: '2.13.0'
-    androidTestImplementation "org.mockito:mockito-android:2.13.0"
+    testCompile "org.mockito:mockito-core:2.15.0"
+    testCompile group: 'org.mockito', name: 'mockito-inline', version: '2.15.0'
+    androidTestImplementation "org.mockito:mockito-android:2.15.0"
     testImplementation 'com.squareup.okhttp3:mockwebserver:3.9.1'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
@@ -128,7 +128,7 @@ kotlin {
 apply plugin: 'maven-publish'
 group = 'com.mapfit'
 archivesBaseName = 'mapfit-sdk'
-version = '1.0.1'
+version = '1.0.3'
 
 publishing {
 

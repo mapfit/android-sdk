@@ -5,7 +5,7 @@ package com.mapfit.android.geocoder.model
  *
  * Created by dogangulcan on 1/18/18.
  */
-enum class EntranceType(val sourceName: String) {
+enum class EntranceType(val entranceType: String) {
     PEDESTRIAN_PRIMARY("pedestrian-primary"),
     PEDESTRIAN_SECONDARY("pedestrian-secondary"),
     ALL_PEDESTRIAN("all-pedestrian"),

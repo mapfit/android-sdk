@@ -39,9 +39,9 @@ class LatLngBounds(
 
             latLngList.forEach {
                 if (south == null || south!! > it.lat) south = it.lat
-                if (west == null || west!! > it.lon) west = it.lon
+                if (west == null || west!! > it.lng) west = it.lng
                 if (north == null || north!! < it.lat) north = it.lat
-                if (east == null || east!! < it.lon) east = it.lon
+                if (east == null || east!! < it.lng) east = it.lng
             }
 
             val northEast = LatLng(north ?: 0.0, east ?: 0.0)
@@ -68,7 +68,7 @@ class LatLngBounds(
 
         val latFraction = (latRad(northEast.lat) - latRad(southWest.lat)) / Math.PI
 
-        val lngDiff = northEast.lon - southWest.lon
+        val lngDiff = northEast.lng - southWest.lng
         val lngFraction = (if (lngDiff < 0) (lngDiff + 360) else lngDiff) / 360
 
         val latZoom = zoom((viewHeight * padding).toInt(), 256.toPx, latFraction)

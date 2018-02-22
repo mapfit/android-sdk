@@ -50,7 +50,7 @@ class PolylineTest {
     fun init() {
         MockitoAnnotations.initMocks(this)
 
-        Mapfit.getInstance(mMockContext, mMockContext.getString(R.string.api_key))
+        Mapfit.getInstance(mMockContext, mMockContext.getString(R.string.mapfit_debug_api_key))
         val mapView: MapView = activityRule.activity.findViewById(R.id.mapView)
         mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {

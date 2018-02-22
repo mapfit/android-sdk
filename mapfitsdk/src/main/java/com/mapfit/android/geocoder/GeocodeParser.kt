@@ -1,10 +1,7 @@
 package com.mapfit.android.geocoder
 
 import com.mapfit.android.exceptions.MapfitAuthorizationException
-import com.mapfit.android.geocoder.model.Address
-import com.mapfit.android.geocoder.model.Entrance
-import com.mapfit.android.geocoder.model.EntranceType
-import com.mapfit.android.geocoder.model.LocationStatus
+import com.mapfit.android.geocoder.model.*
 import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.utils.DebugUtils
 import okhttp3.Response
@@ -59,17 +56,17 @@ internal class GeocodeParser internal constructor() {
                 val neighborhood = addressJson.getSafeString("neighborhood")
                 val streetAddress = addressJson.getSafeString("street_address")
 
-                val buildingPolygon: List<List<LatLng>> = if (addressJson.has("building")) {
-                    parseBuildingPolygon(addressJson.getJSONObject("building"))
+                val building: Building = if (addressJson.has("building")) {
+                    parseBuilding(addressJson.getJSONObject("building"))
                 } else {
-                    emptyList()
+                    Building()
                 }
 
-                val statusCode: LocationStatus? = if (addressJson.has("response_type")) {
-                    LocationStatus.values()
+                val responseType: ResponseType? = if (addressJson.has("response_type")) {
+                    ResponseType.values()
                         .find { status -> status.code == addressJson.getInt("response_type") }
                 } else {
-                    LocationStatus.ERROR
+                    ResponseType.ERROR
                 }
 
                 val entrances = if (addressJson.has("entrances")) {
@@ -90,12 +87,12 @@ internal class GeocodeParser internal constructor() {
                     adminArea = adminArea,
                     neighborhood = neighborhood,
                     country = country,
-                    buildingPolygon = buildingPolygon,
-                    status = statusCode,
+                    building = building,
+                    responseType = responseType,
                     streetAddress = streetAddress,
                     entrances = entrances ?: emptyList(),
-                    latitude = lat,
-                    longitude = lon
+                    lat = lat,
+                    lng = lon
                 )
 
                 addressList.add(address)
@@ -109,15 +106,17 @@ internal class GeocodeParser internal constructor() {
         return addressList
     }
 
-    private fun parseBuildingPolygon(jsonObject: JSONObject): List<List<LatLng>> {
+    private fun parseBuilding(jsonObject: JSONObject): Building {
         val coordinates = jsonObject.getJSONArray("coordinates")
         val type = jsonObject.getSafeString("type")
 
-        return when (type) {
+        val polygon = when (type) {
             "Polygon" -> parsePolygon(coordinates)
             "MultiPolygon" -> parseMultiPolygon(coordinates)[0]
             else -> listOf()
         }
+
+        return Building(polygon, type)
     }
 
     private fun parseMultiPolygon(jsonArray: JSONArray): List<List<List<LatLng>>> {
@@ -175,7 +174,7 @@ internal class GeocodeParser internal constructor() {
                 val lon = entranceJson.getDouble("lon")
                 val entranceType = EntranceType.values()
                     .find { status ->
-                        status.sourceName
+                        status.entranceType
                             .contentEquals(entranceJson.getString("entrance_type"))
                     }
 

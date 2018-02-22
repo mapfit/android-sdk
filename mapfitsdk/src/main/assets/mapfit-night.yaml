@@ -6,14 +6,33 @@
 sources:
  mapfit:
   type: MVT
-  url:  https://tiles.mapfit.com/vector/v1/roads,water,places,buildings,landuse/{z}/{x}/{y}.mvt 
+  url:  https://tiles.mapfit.com/vector/v1/roads,water,places,buildings,landuse,boundaries,transit/{z}/{x}/{y}.mvt
   tile_size: 512
   max_zoom: 16
- 
+
+# Note: edit this section to enable 3d building perspective, lighting, etc.
+cameras:
+    camera1:
+        type: perspective
+        max_tilt: 60
+        active: true
+# lights:
+#     light1:
+#         type: directional
+#         direction: [0, 1, -.5]
+#         diffuse: 1
+#         ambient: .3
+
+
 global:
 
-    ux_language: false             
-    ux_language_fallback: false    
+    # Subway/transit overlay
+    sdk_transit_overlay: false
+    # Building Extrude (3D buildings)
+    sdk_building_extrude: false
+
+    ux_language: false
+    ux_language_fallback: false
     ux_language_text_source: |
         function() {
             // if a ux_langauge has been defined use that, else if there is feature name in the fallback_ux_language then use that, else use the feature's default name in the local language
@@ -271,7 +290,7 @@ global:
     text_visible_exits_e:           false     # false for default, false for more
     #
     #label styling
-    
+
     text_fill2:         '#000'             # WHITE
     text_fill_road_e:   '#555'             # WHITE
     text_fill_exits:    '#D16768'          # motorway junctions, highway_casing1
@@ -291,44 +310,44 @@ global:
     townspot_sprite:    townspot-l-rev     # depends on land color and text settings
     text_font_family:  'Open Sans'        # branding in asperational Unicode, yo (or Helvetica)
     #
-    
+
 ######################### PZ: START OF EDIT SECTION *******************************************************
-    
+
     ## ROADS
     ## the Orange roads/highways
-    highway1:                   [1,.639,.361,1] 
-    highway1_e:                 hsl(238, 39%, 7%) #white       
-    highway_tunnel_casing1:     hsl(238, 39%, 7%)) #white 
-    highway_link_tunnel_casing1: hsl(238, 39%, 7%) #white     
+    highway1:                   [1,.639,.361,1]
+    highway1_e:                 hsl(238, 39%, 7%) #white
+    highway_tunnel_casing1:     hsl(238, 39%, 7%)) #white
+    highway_link_tunnel_casing1: hsl(238, 39%, 7%) #white
 
-    highway_link1: [1,.639,.361,1] 
-    highway_tunnel1: [1,.639,.361,1] 
+    highway_link1: [1,.639,.361,1]
+    highway_tunnel1: [1,.639,.361,1]
     highway_casing1: hsl(238, 39%, 7%)
 
-    major_road1:                hsl(238, 39%, 7%) 
-    major_road1b:               hsl(238, 39%, 7%) 
-    major_road1c:               hsl(238, 39%, 7%) 
-    major_road1c:               hsl(238, 39%, 7%)   
-    major_road2:                hsl(238, 39%, 7%)     
-    major_road2a:               hsl(238, 39%, 7%)    
-    major_road2b:               hsl(238, 39%, 7%)    
-    major_road3:                hsl(238, 39%, 7%)     
-    major_road4:                hsl(238, 39%, 7%) 
-    major_road5:                hsl(238, 39%, 7%) 
-    major_road6:                hsl(238, 39%, 7%) 
-    major_casing1:              hsl(238, 39%, 7%)   
-    major_casing2:              hsl(238, 39%, 7%)  
-    major_route1:               hsl(238, 39%, 7%) 
-    major_route2:               hsl(238, 39%, 7%)           
-    minor_route:                hsl(238, 39%, 7%)            
-    minor_casing1:              hsl(238, 39%, 7%)               
-    minor_casing2:              hsl(238, 39%, 7%) #white                
+    major_road1:                hsl(238, 39%, 7%)
+    major_road1b:               hsl(238, 39%, 7%)
+    major_road1c:               hsl(238, 39%, 7%)
+    major_road1c:               hsl(238, 39%, 7%)
+    major_road2:                hsl(238, 39%, 7%)
+    major_road2a:               hsl(238, 39%, 7%)
+    major_road2b:               hsl(238, 39%, 7%)
+    major_road3:                hsl(238, 39%, 7%)
+    major_road4:                hsl(238, 39%, 7%)
+    major_road5:                hsl(238, 39%, 7%)
+    major_road6:                hsl(238, 39%, 7%)
+    major_casing1:              hsl(238, 39%, 7%)
+    major_casing2:              hsl(238, 39%, 7%)
+    major_route1:               hsl(238, 39%, 7%)
+    major_route2:               hsl(238, 39%, 7%)
+    minor_route:                hsl(238, 39%, 7%)
+    minor_casing1:              hsl(238, 39%, 7%)
+    minor_casing2:              hsl(238, 39%, 7%) #white
     text_stroke_road1:          hsl(238, 39%, 7%) #white  # road stroke color highway
     text_stroke_road2:          hsl(238, 39%, 7%) #white  # road stroke color major road
     text_stroke_road3:          hsl(238, 39%, 7%) #white  # road stroke color major road route
     text_stroke_road4:          hsl(238, 39%, 7%) #white  # road stroke color minor road
     text_stroke_shield:         hsl(238, 39%, 7%) #white  # road shield stroke color &highway_casing1
-    major_tunnel1:              hsl(238, 39%, 7%) 
+    major_tunnel1:              hsl(238, 39%, 7%)
     major_tunnel_casing1:       hsl(238, 39%, 7%)
     minor_road1:                hsl(238, 39%, 7%)               # natural earth
     minor_road2:                hsl(238, 39%, 7%)               # natural earth, same as major_road2
@@ -343,9 +362,9 @@ global:
     service_road_casing2:       hsl(238, 39%, 7%)
 
 
-  
-  
-  
+
+
+
     ## ON-ROAD DIRECTIONAL ARROW
     directional_arrow:         white # rgba(199,216,227,1) # color of road directional arrow
 
@@ -359,7 +378,7 @@ global:
     ## STREET NAME LABELS
     text_fill:          white            # WHITE
     text_stroke_size:   0 # size (in pixels of the font outline stroke)
-  
+
     ## labels for smaller roads
     text_road_1_fill: white #road fill color
     text_road_1_stroke: white #road stroke color
@@ -369,13 +388,13 @@ global:
     text_road_2_fill: white #road fill color
     text_road_2_stroke:  black #road stroke color
     text_road_2_stroke_width: 4 #outline stroke for roads
-    
+
     ## NEIGHBORHOOD NAMES
     text_neighborhood_font_size: 14 #font size for neighborhood names
     text_neighborhood_fill:   white  #neighborhood text fill color
     text_neighborhood_stroke_size:   0 # size (in pixels of the font outline stroke)
     text_neighborhood_stroke: white #stroke outline color for neighborhood names
-   
+
     ## PLACE NAMES
     text_place_font_size: 14 #font size for neighborhood names
     text_place_fill:   white  #neighborhood text fill color
@@ -383,8 +402,8 @@ global:
     text_place_stroke: hsl(238, 39%, 7%) #stroke outline color for neighborhood names
     text_stroke: hsl(238, 39%, 7%)
 
-   
-   
+
+
     ## OCEANS, RIVERS, INLAND BODIES OF WATER, SWIMMING POOLS
     water1:                hsl(203, 82%, 4%) #   '#94E4EF' # water color for oceans, rivers, inland bodies of water
     water2_o:             hsl(203, 82%, 4%) #    '#94E4EF' # water boundary color for inland bodies of water
@@ -401,20 +420,20 @@ global:
     ## RAILWAYS
     rail1:                     hsl(238, 39%, 7%)
     rail1_e:                   hsl(238, 39%, 7%)
-    rail2:                     hsl(238, 39%, 7%)   # less important rail (service, 
+    rail2:                     hsl(238, 39%, 7%)   # less important rail (service,
 
     ## PEDESTRIAN PATHWAYS
     grey1:              hsla(0, 0%, 0%, 0.25)  # retail, airport apron, parking, church
     path1:                  hsl(238, 39%, 7%)  # pedestrian path color
     path2:                      hsl(238, 39%, 7%) # unknown pedestrian path color value
-    path_bridge_casing1:        hsl(238, 39%, 7%) # pedestrian bridge path casing color     
-    path_casing1:               hsl(238, 39%, 7%) # pedestrian path casing color 
+    path_bridge_casing1:        hsl(238, 39%, 7%) # pedestrian bridge path casing color
+    path_casing1:               hsl(238, 39%, 7%) # pedestrian path casing color
 
     ## ALL BUILDINGS
     building1:                 '#052F4C' # building fill color
     building2:                 hsl(207, 83%, 13%) #building outline color
 
-   
+
 
 
 ###**************************** PZ: END OF EDIT SECTION *****************************
@@ -422,7 +441,7 @@ global:
 
 
 
-    
+
     ferry1:                     '#7caacb'
     path_bridge_casing2:        grey                # zoomed out
     path_steps1:                '#bcc19e'
@@ -433,9 +452,9 @@ global:
     piste_expert:               '#a6a6a6'
 
     # boundaries:
-    country_boundary:           '#fff'
-    region_boundary:            '#eee'
-    subregion_boundary:         '#eee'
+    country_boundary:           [.569,.69,.722,.5]
+    region_boundary:            [.569,.69,.722,.5]
+    subregion_boundary:         [.569,.69,.722,.5]
     city_wall:                  '#ccb38f'
     retaining_wall:             '#d9c4a5'
     snow_fence:                 '#d9c4a5'
@@ -514,6 +533,7 @@ global:
 
 textures:
     pois:
+        #url: https://cdn.mapfit.com/v1/themes/images/refill@2x.png
         url: images/refill@2x.png
         filtering: mipmap
         sprites:
@@ -649,24 +669,24 @@ styles:
     sdk-line-overlay:
         base: lines
         blend: overlay
-        blend_order: 0
+        blend_order: 2
     sdk-polygon-overlay:
         base: polygons
         blend: overlay
-        blend_order: 0
+        blend_order: 2
 
 fonts:
     Open Sans:
-        - weight: 300 
+        - weight: 300
           url: fonts/OpenSans-Light.woff
-        - weight: normal 
+        - weight: normal
           url: fonts/OpenSans-Regular.woff
-        - weight: normal 
+        - weight: normal
           style: italic
           url: fonts/OpenSans-Italic.woff
-        - weight: 600 
+        - weight: 600
           url: fonts/OpenSans-Semibold.woff
-        - weight: 600 
+        - weight: 600
           style: italic
           url: fonts/OpenSans-SemiboldItalic.woff
         - weight: bold
@@ -905,22 +925,20 @@ layers:
         draw:
             sdk-line-overlay:
                 interactive: global.sdk_interactive
-                color: black
+                color: '#009eff'
                 order: 503
-                width: 3px
+                width: 2px
     mz_default_polygon:
         data: { source: mz_default_polygon }
         draw:
             sdk-polygon-overlay:
                 interactive: global.sdk_interactive
-                color: '#20dc3983'
-                order: 500
-
-            sdk-line-overlay:
-                color: '#dc3983'
-                cap: round
+                color: '#357094'
                 order: 501
-                width: 3px
+            sdk-line-overlay:
+                color: '#009eff'
+                order: 502
+                width: 2px
     water:
         data: { source: mapfit, layer: water }
         ocean-water:
@@ -2874,22 +2892,22 @@ layers:
     buildings:
         data: { source: mapfit, layer: buildings }
         filter:
-            any:
-                # limit show smaller landuse areas to higher zooms
-                - { $zoom: [13], scale_rank: [1,2] }
-                - { $zoom: [14], scale_rank: [1,2,3] }
-                - { $zoom: [15], area: { min: 5000 }, name: true }
-                - { $zoom: [15], area: { min: 5000 }, kind: true }
-                - { $zoom: [15], area: { min: 3000 }, landuse_kind: true }
-                - { $zoom: [15], height: { min: 100 } }
-                - { $zoom: [15], volume: { min: 10000 } }
-                - { $zoom: [16], area: { min: 1000 }, name: true }
-                - { $zoom: [16], area: { min: 1000 }, kind: true }
-                - { $zoom: [16], area: { min: 2000 }, landuse_kind: true }
-                - { $zoom: [16], volume: { min: 50000 } }
-                #- { $zoom: [16], height: { min: 50 } }
-                - { $zoom: { min: 17 } }
             all:
+                # limit show smaller landuse areas to higher zooms
+                # - { $zoom: [13], scale_rank: [1,2] }
+                # - { $zoom: [14], scale_rank: [1,2,3] }
+                # - { $zoom: [15], area: { min: 5000 }, name: true }
+                # - { $zoom: [15], area: { min: 5000 }, kind: true }
+                # - { $zoom: [15], area: { min: 3000 }, landuse_kind: true }
+                # - { $zoom: [15], height: { min: 100 } }
+                # - { $zoom: [15], volume: { min: 10000 } }
+                #- { $zoom: [16], area: { min: 2000 }, name: true }
+               # - { $zoom: [16], area: { min: 2000 }, kind: true }
+                #- { landuse_kind: attraction }
+                #- { $zoom: [15], area: { min: 70000 } }
+                #- { $zoom: [15], volume: { min: 70000 } }
+                #- { $zoom: [17], volume: { min: 50 } }
+                - { $zoom: { min: 16 } } #16.5 is preferred
                 - not: { location: underground }
 #                - { $zoom: { max: 18 } }
         draw:
@@ -2903,20 +2921,20 @@ layers:
                 style: lines
                 order: 439
                 color: global.building2
-                width: [[14,0.1px],[15,2m],[17,1px],[18,1m],[19,1m]]
+                width: [[17,1px],[18,1m],[19,1m]]
                 extrude: global.sdk_building_extrude
 
-        basement:
-            filter:
-                all:
-                    - layer: [-1, -2, -3, -4, -5]
-            draw:
-                polygons:
-                    extrude: false
-                    order: 329
-                outline:
-                    extrude: false
-                    order: 330
+        # basement:
+        #     filter:
+        #         all:
+        #             - layer: [-1, -2, -3, -4, -5]
+        #     draw:
+        #         polygons:
+        #             extrude: false
+        #             order: 329
+        #         outline:
+        #             extrude: false
+        #             order: 330
 
         in_park:
             #todo: does forest belong here?
@@ -2976,84 +2994,25 @@ layers:
 #                polygons:
 #                    color: orange
 
-        building-labels:
-            filter:
-                all:
-                    - { $zoom: { min: 17 } }
-                    - $geometry: point
-                    - not: { kind: address }
-                    - name: true
-                    - function() { return global.text_visible_building; }
-    #                - kind: [false, building, university, college, school, kindergarten]
-                any:
-                    - { $zoom: [16], area: { min: 5000 } }
-                    - { $zoom: [16], area: { min: 5000 } }
-                    - { $zoom: [16], area: { min: 10000 }, landuse_kind: true }
-                    - { $zoom: [16], area: { min: 7000 }, kind_detail: [university, college, school, kindergarten] }
-                    - { $zoom: [16], volume: { min: 50000 }, name: true }
-                    - { $zoom: [17], area: { min: 3000 } }
-                    - { $zoom: [17], area: { min: 2000 }, kind_detail: [university, college, school, kindergarten] }
-                    - { $zoom: [18], area: { min: 1000 } }
-                    - { $zoom: [18], kind_detail: [university, college, school, kindergarten] }
-                    - { $zoom: [19], area: { min: 200 } }
-                    - { $zoom: { min: 19 }, kind_detail: [university, college, school, kindergarten] }
-                    - { $zoom: { min: 20 }, area: true }
-            draw:
-                text-blend-order:
-                    #interactive: global.sdk_interactive
-                    text_source: global.ux_language_text_source
-                    move_into_tile: true
-                    priority: 51
-                    order: 7
-                    font:
-                        fill: global.text_fill
-                        family: global.text_font_family
-                        style: italic
-                        size: 11px
-                        stroke: { color: global.text_stroke_address, width: 1 }
-            building_labels-z15-z16-z17:
-                filter: { $zoom: [15,16,17] }
-                draw: { text-blend-order: { font: { size: 12px, stroke: { width: 2 } } } }
-            building_labels-z18:
-                filter: { $zoom: [18,19] }
-                draw: { text-blend-order: { font: { size: 12px, weight: 600, stroke: { width: 3 } } } }
-            building_labels-z20-up:
-                filter: { $zoom: { min: 20 } }
-                draw: { text-blend-order: { font: { size: 14px, weight: 600, stroke: { width: 3 }  } } }
-            building-labels-z16:
-                filter: function() { if( $zoom == 16 && feature.name.length > 20 ) { return true; } else { return false; } }
-                draw:
-                    text-blend-order:
-                        visible: false
-            building-labels-z17:
-                filter: function() { if( $zoom == 17 && feature.name.length > 30 ) { return true; } else { return false; } }
-                draw:
-                    text-blend-order:
-                        visible: false
-            building-labels-z20+:
-                filter: { $zoom: { min: 20 } }
-                draw:
-                    text-blend-order:
-                        text_source: global.ux_language_text_source_building_and_address
-        address-labels:
-            filter:
-                all:
-                    - function() { return global.text_visible_address; }
-                    - $zoom: { min: 20 }
-                any:
-                    - kind: address
-                    - { label_position: true, addr_housenumber: true, name: false }
-            draw:
-                text-blend-order:
-                    #interactive: global.sdk_interactive
-                    order: 7
-                    text_source: addr_housenumber
-                    font:
-                        fill: global.text_fill_address
-                        family: global.text_font_family
-                        style: italic
-                        size: 10px
-                        stroke: { color: global.building1, width: 4 }
+        # address-labels:
+        #     filter:
+        #         all:
+        #             - function() { return global.text_visible_address; }
+        #             - $zoom: { min: 20 }
+        #         any:
+        #             - kind: address
+        #             - { label_position: true, addr_housenumber: true, name: false }
+        #     draw:
+        #         text-blend-order:
+        #             #interactive: global.sdk_interactive
+        #             order: 7
+        #             text_source: addr_housenumber
+        #             font:
+        #                 fill: global.text_fill_address
+        #                 family: global.text_font_family
+        #                 style: italic
+        #                 size: 10px
+        #                 stroke: { color: global.building1, width: 4 }
 
     boundaries:
         data: { source: mapfit, layer: boundaries }
@@ -3069,7 +3028,7 @@ layers:
             draw:
                 lines:
                     color: global.country_boundary
-                    width: [[1, 0.5px], [2, 1.0px], [4, 1.5px], [9, 2.5px], [14, 3.5px], [16, 4.5px], [17, 14m]]
+                    width: [[1, 0.5px], [2, 1.0px], [4, 1px], [9, 2px], [14, 3.5px], [16, 4.5px], [17, 14m]]
             water:
                 filter: { maritime_boundary: true }
                 draw:
@@ -3121,7 +3080,7 @@ layers:
             draw:
                 lines:
                     color: global.region_boundary
-                    width: [[2, 0.75px], [3, 1px], [5, 5m], [9, 5m], [14, 5m], [16, 5m], [17, 5m]]
+                    width: [[0, 0.5px], [2, .5px]]
             water:
                 filter: { maritime_boundary: true }
                 draw:
@@ -3532,6 +3491,7 @@ layers:
                         priority: 7
                         text:
                             font:
+                                fill: global.text_fill
                                 size: [[4,10px],[6,16px],[8,18px],[12,20px],[13,0px]]
                     text-blend-order:
                         priority: 7
@@ -3731,12 +3691,12 @@ layers:
                         priority: 21
                         text:
                             font:
-                                fill: [[9,[0.25,0.25,0.25]],[11,[0.00,0.00,0.00]]]
+                                fill: global.text_fill
                                 size: [[9,10px],[14,12px],[15,0px]]
                     text-blend-order:
                         priority: 21
                         font:
-                            fill: [[9,[0.25,0.25,0.25]],[11,[0.00,0.00,0.00]]]
+                            fill: global.text_fill
                             size: [[9,10px],[14,12px],[15,0px]]
                 capital:
                     filter: { country_capital: true, $zoom: { min: 5 } }
@@ -3757,12 +3717,12 @@ layers:
                         priority: 23
                         text:
                             font:
-                                fill: [[9,[0.25,0.25,0.25]],[11,[0.00,0.00,0.00]]]
+                                fill: global.text_fill
                                 size: [[9,10px],[14,12px],[15,0px]]
                     text-blend-order:
                         priority: 23
                         font:
-                            fill: [[9,[0.25,0.25,0.25]],[11,[0.00,0.00,0.00]]]
+                            fill: global.text_fill
                             size: [[9,10px],[14,12px],[15,0px]]
                 capital:
                     filter: { country_capital: true, $zoom: { min: 5 } }
@@ -3783,12 +3743,12 @@ layers:
                         priority: 25
                         text:
                             font:
-                                fill: [[9,[0.25,0.25,0.25]],[11,[0.00,0.00,0.00]]]
+                                fill: global.text_fill
                                 size: [[9,10px],[14,12px],[15,0px]]
                     text-blend-order:
                         priority: 25
                         font:
-                            fill: [[9,[0.25,0.25,0.25]],[11,[0.00,0.00,0.00]]]
+                            fill: global.text_fill
                             size: [[9,10px],[14,12px],[15,0px]]
                 capital:
                     filter: { country_capital: true, $zoom: { min: 5 } }
@@ -3809,12 +3769,12 @@ layers:
                         priority: 27
                         text:
                             font:
-                                fill: [[9,[0.25,0.25,0.25]],[11,[0.00,0.00,0.00]]]
+                                fill: global.text_fill
                                 size: [[9,10px],[14,12px],[15,0px]]
                     text-blend-order:
                         priority: 27
                         font:
-                            fill: [[9,[0.25,0.25,0.25]],[11,[0.00,0.00,0.00]]]
+                            fill: global.text_fill
                             size: [[9,10px],[14,12px],[15,0px]]
                 capital:
                     filter: { country_capital: true, $zoom: { min: 5 } }
@@ -3835,12 +3795,12 @@ layers:
                         priority: 28
                         text:
                             font:
-                                fill: [[9,[0.25,0.25,0.25]],[11,[0.00,0.00,0.00]]]
+                                fill: global.text_fill
                                 size: [[9,10px],[14,11px],[15,0px]]
                     text-blend-order:
                         priority: 28
                         font:
-                            fill: [[9,[0.25,0.25,0.25]],[11,[0.00,0.00,0.00]]]
+                            fill: global.text_fill
                             size: [[9,10px],[14,11px],[15,0px]]
                 capital:
                     filter: { country_capital: true, $zoom: { min: 5 } }
@@ -3872,7 +3832,7 @@ layers:
                         fill: global.text_neighborhood_fill
                         weight: normal
                         transform: uppercase
-                        stroke: { color: global.text_neighborhood_stroke, width: global.text_neighborhood_stroke_size }
+                        stroke: { color: global.text_stroke, width: 3 }
             neighborhood-z11-z12:
                 filter:
                     $zoom: [11]
@@ -3905,12 +3865,11 @@ layers:
                     kind_tile_rank: { max: 8 }
                 draw:
                     text-blend-order:
-                        text_wrap: 14
+                        text_wrap: 12
                         visible: global.text_visible_neighbourhoods
                         font:
-                            size: 12
-
-                            stroke: { color: global.text_neighborhood_stroke, width:  global.text_neighborhood_stroke_size }
+                            size: 12px
+                            stroke: { color: global.text_stroke, width: 4 }
             neighborhood-z15:
                 filter:
                     $zoom: [15]
@@ -3922,9 +3881,9 @@ layers:
                         text_wrap: 12
                         visible: global.text_visible_neighbourhoods
                         font:
-                            size: 14
-             
-                            stroke: { color: global.text_neighborhood_stroke, width: global.text_neighborhood_stroke_size }
+                            size: 14px
+                            weight: 300
+                            stroke: { color: global.text_stroke, width: 4 }
                 z15-new:
                     filter:
                         all:
@@ -3944,10 +3903,10 @@ layers:
                     text-blend-order:
                         visible: global.text_visible_neighbourhoods
                         font:
-                            size: 18
-                     
-                            fill: global.text_neighborhood_fill
-                            stroke: { color: global.text_neighborhood_stroke, width: global.text_neighborhood_stroke_size }
+                            size: 14px
+                            weight: 300
+                            fill: [0.00,0.00,0.00,0.50]
+                            stroke: { color: global.text_stroke, width: 3 }
 
     earth-labels:
         data: { source: mapfit, layer: earth }

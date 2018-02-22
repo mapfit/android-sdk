@@ -14,17 +14,17 @@ fun LatLng.isValid(): Boolean {
     val lonRegex = """^\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)${'$'}""".toRegex()
 
     val isLatValid = latRegex.containsMatchIn(lat.toString())
-    val isLonValid = lonRegex.containsMatchIn(lon.toString())
+    val isLonValid = lonRegex.containsMatchIn(lng.toString())
 
     if (!isLatValid) {
         Log.e("Mapfit", "Invalid latitude: $lat. Should be in the range [-90, 90].")
     }
 
     if (!isLatValid) {
-        Log.e("Mapfit", "Invalid longitude: $lon. Should be in the range [-180, 180).")
+        Log.e("Mapfit", "Invalid longitude: $lng. Should be in the range [-180, 180).")
     }
 
     return isLatValid && isLonValid
 }
 
-fun LatLng.isEmpty(): Boolean = lat == 0.0 && lon == 0.0
+fun LatLng.isEmpty(): Boolean = lat == 0.0 && lng == 0.0

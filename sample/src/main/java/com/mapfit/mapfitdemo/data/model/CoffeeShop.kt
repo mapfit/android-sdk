@@ -5,7 +5,7 @@ package com.mapfit.mapfitdemo.data.model
  */
 data class CoffeeShop(var id: String,
                       var lat: Double,
-                      var lon: Double,
+                      var lng: Double,
                       var address: String,
                       var title: String,
                       var open24Hours: Boolean)

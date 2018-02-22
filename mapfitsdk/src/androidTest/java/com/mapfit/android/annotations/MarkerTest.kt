@@ -58,7 +58,7 @@ class MarkerTest {
     fun init() {
         MockitoAnnotations.initMocks(this)
 
-        Mapfit.getInstance(mMockContext, mMockContext.getString(R.string.api_key))
+        Mapfit.getInstance(mMockContext, mMockContext.getString(R.string.mapfit_debug_api_key))
         val mapView: MapView = activityRule.activity.findViewById(R.id.mapView)
 
         mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
@@ -95,8 +95,9 @@ class MarkerTest {
         val marker = mapfitMap.addMarker(LatLng())
         Assert.assertNotNull(marker)
 
-        val removed = mapfitMap.removeMarker(marker)
-        Assert.assertTrue(removed)
+        mapfitMap.removeMarker(marker)
+
+        Assert.assertTrue(marker.mapBindings.size == 0)
     }
 
     @Test
@@ -128,8 +129,8 @@ class MarkerTest {
             0.0001
         )
         Assert.assertEquals(
-            expectedMarker.getPosition().lon,
-            actualMarker?.getPosition()?.lon
+            expectedMarker.getPosition().lng,
+            actualMarker?.getPosition()?.lng
                     ?: 0.0,
             0.0001
         )

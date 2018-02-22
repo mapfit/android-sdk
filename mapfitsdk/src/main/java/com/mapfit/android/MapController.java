@@ -456,7 +456,7 @@ public class MapController implements Renderer {
     public void setPosition(LatLng position) {
         checkPointer(mapPointer);
         lastCenter = position;
-        nativeSetPosition(mapPointer, position.getLon(), position.getLat());
+        nativeSetPosition(mapPointer, position.getLng(), position.getLat());
     }
 
     /**
@@ -482,7 +482,7 @@ public class MapController implements Renderer {
         if (save) {
             lastCenter = position;
         }
-        nativeSetPositionEased(mapPointer, position.getLon(), position.getLat(), seconds, ease.ordinal());
+        nativeSetPositionEased(mapPointer, position.getLng(), position.getLat(), seconds, ease.ordinal());
     }
 
     public void setLatlngBounds(final LatLngBounds latlngBounds, final float padding) {
@@ -496,7 +496,7 @@ public class MapController implements Renderer {
                 lastCenter = pair.component1();
                 checkPointer(mapPointer);
                 nativeSetZoom(mapPointer, pair.component2());
-                nativeSetPosition(mapPointer, pair.component1().getLon(), pair.component1().getLat());
+                nativeSetPosition(mapPointer, pair.component1().getLng(), pair.component1().getLat());
             }
         });
     }
@@ -686,7 +686,7 @@ public class MapController implements Renderer {
      * may not lie within the viewable screen area)
      */
     public PointF lngLatToScreenPosition(LatLng lngLat) {
-        double[] tmp = {lngLat.getLon(), lngLat.getLat()};
+        double[] tmp = {lngLat.getLng(), lngLat.getLat()};
         checkPointer(mapPointer);
         nativeLngLatToScreenPosition(mapPointer, tmp);
         return new PointF((float) tmp[0], (float) tmp[1]);
@@ -1352,7 +1352,7 @@ public class MapController implements Renderer {
         return nativeMarkerSetBitmap(mapPointer, markerId, width, height, data);
     }
 
-    boolean setMarkerPoint(long markerId, double lng, double lat) {
+    public boolean setMarkerPoint(long markerId, double lng, double lat) {
         checkPointer(mapPointer);
         checkId(markerId);
         return nativeMarkerSetPoint(mapPointer, markerId, lng, lat);

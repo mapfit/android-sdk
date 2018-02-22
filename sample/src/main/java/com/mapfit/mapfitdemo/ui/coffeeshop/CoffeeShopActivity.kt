@@ -15,16 +15,9 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
 import android.widget.Toast
-import com.mapfit.mapfitdemo.R
-import com.mapfit.mapfitdemo.data.model.CoffeeShop
-import com.mapfit.mapfitdemo.module.coffeeshop.data.Repository
-import com.mapfit.mapfitdemo.ui.adapter.FilterAdapter
-import com.mapfit.mapfitdemo.ui.adapter.FilterType
-import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener
 import com.mapfit.android.*
 import com.mapfit.android.annotations.MapfitMarker
 import com.mapfit.android.annotations.Marker
-import com.mapfit.android.annotations.Polygon
 import com.mapfit.android.annotations.Polyline
 import com.mapfit.android.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.android.annotations.callback.OnMarkerClickListener
@@ -38,6 +31,12 @@ import com.mapfit.android.geocoder.model.Address
 import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.geometry.LatLngBounds
 import com.mapfit.android.utils.decodePolyline
+import com.mapfit.mapfitdemo.R
+import com.mapfit.mapfitdemo.data.model.CoffeeShop
+import com.mapfit.mapfitdemo.module.coffeeshop.data.Repository
+import com.mapfit.mapfitdemo.ui.adapter.FilterAdapter
+import com.mapfit.mapfitdemo.ui.adapter.FilterType
+import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener
 import kotlinx.android.synthetic.main.activity_coffee_shops.*
 import kotlinx.android.synthetic.main.app_bar_coffee_shops.*
 import kotlinx.android.synthetic.main.content_coffee_shops.*
@@ -62,11 +61,9 @@ class CoffeeShopActivity : AppCompatActivity() {
     private var buildingLayer = Layer()
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private lateinit var drawerLayout: DrawerLayout
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_coffee_shops)
-
 
         init()
         initFilterDrawer()
@@ -83,7 +80,6 @@ class CoffeeShopActivity : AppCompatActivity() {
 
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = filterAdapter
-
         bottomSheetBehavior = BottomSheetBehavior.from(bottom_sheet)
 
     }
@@ -122,6 +118,108 @@ class CoffeeShopActivity : AppCompatActivity() {
         })
     }
 
+    private fun unusedFunction() {
+
+        mapfitMap.getMapOptions().theme = MapTheme.MAPFIT_GRAYSCALE
+        mapfitMap.getMapOptions().zoomControlsEnabled = true
+        mapfitMap.getMapOptions().recenterButtonEnabled = true
+
+
+        mapfitMap.getDirectionsOptions()
+            .setDestination(LatLng(40.744043, -73.993209))
+            .setOrigin(LatLng(40.7794406, -73.9654327))
+            .setType(DirectionsType.CYCLING)
+            .showDirections(object : DirectionsOptions.RouteDrawCallback {
+                override fun onRouteDrawn(route: Route, legs: List<Polyline>) {
+                    // at this point, the route is drawn on map. drawn polylines are returned as legs.
+                    // you may want to add a marker to the origin and destination location inside route
+                    // object.
+                }
+
+                override fun onError(message: String, e: Exception) {
+                    // handle the error
+                }
+            })
+
+        mapfitMap.getDirectionsOptions()
+            .setDestination(LatLng(40.744043, -73.993209))
+            .setOrigin(LatLng(40.7794406, -73.9654327))
+            .setType(DirectionsType.CYCLING)
+            .showDirections(object : DirectionsOptions.RouteDrawCallback {
+                override fun onRouteDrawn(route: Route, legs: List<Polyline>) {
+                    // at this point, the route is drawn on map. drawn polylines are returned as legs.
+                    // you may want to add a marker to the origin and destination location inside route
+                    // object.
+                }
+
+                override fun onError(message: String, e: Exception) {
+                    // handle the error
+                }
+            })
+
+
+        val tiltAngle: Float = mapfitMap.getTilt()
+        val currentZoomLevel = mapfitMap.getZoom()
+        mapfitMap.setZoom(16f)
+
+        mapfitMap.getMapOptions().setMaxZoom(15f)
+
+        mapfitMap.reCenter()
+        val boundsBuilder: LatLngBounds.Builder = LatLngBounds.Builder()
+        boundsBuilder.include(LatLng(40.744043, -73.993209))
+        boundsBuilder.include(LatLng(40.6902223, -73.9770368))
+        boundsBuilder.include(LatLng(40.7061326, -74.000769))
+
+        val bounds = boundsBuilder.build()
+        val paddingPercentage = 0.1f
+
+        mapfitMap.setLatLngBounds(bounds, paddingPercentage)
+
+
+        val currentMapBounds: LatLngBounds = mapfitMap.getLatLngBounds()
+        mapfitMap.setRotation(50f)
+        mapfitMap.setTilt(70f)
+        mapfitMap.getMapOptions().tiltEnabled = false
+        mapfitMap.setOnMarkerClickListener(object : OnMarkerClickListener {
+            override fun onMarkerClicked(marker: Marker) {
+
+            }
+        })
+
+        val centerLatLng = mapfitMap.getCenter()
+
+        val latLng = LatLng(40.744043, -73.993209)
+        mapfitMap.setCenter(latLng)
+
+        mapfitMap.setOnMapClickListener(object : OnMapClickListener {
+            override fun onMapClicked(latLng: LatLng) {
+
+            }
+        })
+        mapfitMap.setOnMapDoubleClickListener(object : OnMapDoubleClickListener {
+            override fun onMapDoubleClicked(latLng: LatLng) {
+
+            }
+        })
+
+        mapfitMap.setOnMapLongClickListener(object : OnMapLongClickListener {
+            override fun onMapLongClicked(latLng: LatLng) {
+
+            }
+        })
+        mapfitMap.setOnMapPanListener(object : OnMapPanListener {
+            override fun onMapPan() {
+
+            }
+        })
+        mapfitMap.setOnMapPinchListener(object : OnMapPinchListener {
+            override fun onMapPinch() {
+
+            }
+        })
+
+    }
+
     private fun setupMap(mapfitMap: MapfitMap) {
         this.mapfitMap = mapfitMap
 
@@ -137,8 +235,8 @@ class CoffeeShopActivity : AppCompatActivity() {
             setOnMarkerClickListener(onMarkerClickListener)
             setOnMapLongClickListener(onMapLongClickListener)
 
-            getMapOptions().setMaxZoom(17f)
-            getMapOptions().setMinZoom(12f)
+//            getMapOptions().setMaxZoom(17f)
+//            getMapOptions().setMinZoom(12f)
 
 
             setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
@@ -172,7 +270,7 @@ class CoffeeShopActivity : AppCompatActivity() {
             setCenter(LatLng(40.700798, -74.0050177), 500)
             setZoom(13f, 500)
 
-            getMapOptions().theme = MapTheme.MAPFIT_GREYSCALE
+//            getMapOptions().theme = MapTheme.MAPFIT_GRAYSCALE
         }
 
         mapfitMap2.setOnPlaceInfoClickListener(object : MapfitMap.OnPlaceInfoClickListener {
@@ -231,34 +329,34 @@ class CoffeeShopActivity : AppCompatActivity() {
                 }
             })
 
-        list.add(LatLng(lat = 40.742887, lon = -73.993148))
-        list.add(LatLng(lat = 40.742846, lon = -73.993052))
-        list.add(LatLng(lat = 40.742927, lon = -73.993244))
-        list.add(LatLng(lat = 40.742863, lon = -73.993291))
-        list.add(LatLng(lat = 40.742782, lon = -73.993099))
-        list.add(LatLng(lat = 40.742846, lon = -73.993052))
-        list.add(LatLng(lat = 40.744488, lon = -73.99428))
-        list.add(LatLng(lat = 40.744674, lon = -73.994089))
-        list.add(LatLng(lat = 40.744784, lon = -73.99435))
-        list.add(LatLng(lat = 40.74458, lon = -73.994498))
-        list.add(LatLng(lat = 40.74447, lon = -73.994237))
-        list.add(LatLng(lat = 40.744674, lon = -73.994089))
-        list.add(LatLng(lat = 40.74405, lon = -73.99324))
-        list.add(LatLng(lat = 40.744257, lon = -73.992954))
-        list.add(LatLng(lat = 40.744006, lon = -73.993136))
-        list.add(LatLng(lat = 40.744138, lon = -73.993448))
-        list.add(LatLng(lat = 40.744349, lon = -73.993294))
-        list.add(LatLng(lat = 40.744281, lon = -73.993133))
-        list.add(LatLng(lat = 40.744321, lon = -73.993104))
-        list.add(LatLng(lat = 40.744257, lon = -73.992954))
-        list.add(LatLng(lat = 40.743663, lon = -73.994243))
-        list.add(LatLng(lat = 40.743806, lon = -73.994583))
-        list.add(LatLng(lat = 40.744044, lon = -73.994409))
-        list.add(LatLng(lat = 40.743895, lon = -73.994055))
-        list.add(LatLng(lat = 40.743797, lon = -73.994126))
-        list.add(LatLng(lat = 40.74366, lon = -73.9938))
-        list.add(LatLng(lat = 40.743519, lon = -73.993903))
-        list.add(LatLng(lat = 40.743806, lon = -73.994583))
+        list.add(LatLng(lat = 40.742887, lng = -73.993148))
+        list.add(LatLng(lat = 40.742846, lng = -73.993052))
+        list.add(LatLng(lat = 40.742927, lng = -73.993244))
+        list.add(LatLng(lat = 40.742863, lng = -73.993291))
+        list.add(LatLng(lat = 40.742782, lng = -73.993099))
+        list.add(LatLng(lat = 40.742846, lng = -73.993052))
+        list.add(LatLng(lat = 40.744488, lng = -73.99428))
+        list.add(LatLng(lat = 40.744674, lng = -73.994089))
+        list.add(LatLng(lat = 40.744784, lng = -73.99435))
+        list.add(LatLng(lat = 40.74458, lng = -73.994498))
+        list.add(LatLng(lat = 40.74447, lng = -73.994237))
+        list.add(LatLng(lat = 40.744674, lng = -73.994089))
+        list.add(LatLng(lat = 40.74405, lng = -73.99324))
+        list.add(LatLng(lat = 40.744257, lng = -73.992954))
+        list.add(LatLng(lat = 40.744006, lng = -73.993136))
+        list.add(LatLng(lat = 40.744138, lng = -73.993448))
+        list.add(LatLng(lat = 40.744349, lng = -73.993294))
+        list.add(LatLng(lat = 40.744281, lng = -73.993133))
+        list.add(LatLng(lat = 40.744321, lng = -73.993104))
+        list.add(LatLng(lat = 40.744257, lng = -73.992954))
+        list.add(LatLng(lat = 40.743663, lng = -73.994243))
+        list.add(LatLng(lat = 40.743806, lng = -73.994583))
+        list.add(LatLng(lat = 40.744044, lng = -73.994409))
+        list.add(LatLng(lat = 40.743895, lng = -73.994055))
+        list.add(LatLng(lat = 40.743797, lng = -73.994126))
+        list.add(LatLng(lat = 40.74366, lng = -73.9938))
+        list.add(LatLng(lat = 40.743519, lng = -73.993903))
+        list.add(LatLng(lat = 40.743806, lng = -73.994583))
 
         list.forEach {
             mapfitMap.addMarker(it)
@@ -276,7 +374,7 @@ class CoffeeShopActivity : AppCompatActivity() {
                 override fun onRouteDrawn(route: Route, legs: List<Polyline>) {
                     val destination =
                         LatLng(route.destinationLocation[0], route.destinationLocation[1])
-                    val origin = LatLng(route.sourceLocation[0], route.sourceLocation[1])
+                    val origin = LatLng(route.originLocation[0], route.originLocation[1])
 
                     mapfitMap.addMarker(origin)
                     mapfitMap.addMarker(destination)
@@ -331,7 +429,7 @@ class CoffeeShopActivity : AppCompatActivity() {
         async {
             val destinationLocation =
                 LatLng(route.destinationLocation[1], route.destinationLocation[0])
-            val originLocation = LatLng(route.sourceLocation[1], route.sourceLocation[0])
+            val originLocation = LatLng(route.originLocation[1], route.originLocation[0])
             val startMarker =
                 mapfitMap2.addMarker(destinationLocation).setIcon(MapfitMarker.COOKING)
             val endMarker = mapfitMap2.addMarker(originLocation).setIcon(MapfitMarker.BAR)
@@ -470,6 +568,21 @@ class CoffeeShopActivity : AppCompatActivity() {
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(toolbar.windowToken, 0)
 
+
+            mapfitMap.addMarker(address,
+                true,
+                object : OnMarkerAddedCallback {
+                    override fun onMarkerAdded(marker: Marker) {
+
+                    }
+
+                    override fun onError(exception: Exception) {
+
+                    }
+                }
+            )
+
+
 //            mapfitMap.addPolyline()
             mapfitMap.addMarker(address,
                 true,
@@ -507,10 +620,9 @@ class CoffeeShopActivity : AppCompatActivity() {
     }
 
     private fun addMarkersFromCoffeeShops(mapfitMap: MapfitMap, coffeeShops: List<CoffeeShop>) {
-        var i = 100
         coffeeShops.forEach { shop ->
 
-            val marker = mapfitMap.addMarker(LatLng(shop.lat, shop.lon))
+            val marker = mapfitMap.addMarker(LatLng(shop.lat, shop.lng))
 //            marker.invalidate()
 
             val markerIcon = when (shop.id) {
@@ -524,31 +636,11 @@ class CoffeeShopActivity : AppCompatActivity() {
                 else -> MapfitMarker.DEFAULT
             }
 
-//            i += 1300
-//            launch {
-//                delay(15800 + i)
-//                marker.setIcon("https://fthmb.tqn.com/d7HzCU0Al_KrpBh9TL_7bhsjadA=/3865x2576/filters:fill(auto,1)/horse-galloping-in-grass-688899769-587673275f9b584db3a44cdf.jpg")
-//                marker.markerOptions.height = 1000
-//                marker.markerOptions.width = 50
-//
-//            }
 
             marker.setIcon(markerIcon)
                 .setTitle(shop.title)
                 .setSubtitle1(shop.address)
                 .setSubtitle2(shop.id)
-            val position = LatLng(40.744023, -73.993150)
-
-//            marker.icon(markerIcon)
-//                .title(shop.title)
-//                .subtitle1(shop.address)
-//                .subtitle2(shop.id)
-//
-//
-//            marker.icon = markerIcon
-//            marker.title = shop.title
-//            marker.subtitle1 = shop.address
-//            marker.subtitle2 = shop.id
 
             markers.add(marker)
 
@@ -577,39 +669,40 @@ class CoffeeShopActivity : AppCompatActivity() {
         Geocoder().geocode("119w 24th st new york ny",
             true,
             object : GeocoderCallback {
+                override fun onSuccess(addressList: List<Address>) {
 
-                override fun onError(message: String, e: Exception) {
-                    print(e)
                 }
 
-                override fun onSuccess(addressList: List<Address>) {
-                    addressList.forEach { address ->
+                override fun onError(message: String, e: Exception) {
 
-                        if (address.entrances.isNotEmpty()) {
-                            address.entrances.forEach {
-                                markers.add(
-                                    mapfitMap.addMarker(
-                                        LatLng(
-                                            it.latitude,
-                                            it.longitude
-                                        )
-                                    )
-                                )
-                            }
-                        } else {
-                            markers.add(
-                                mapfitMap.addMarker(
-                                    LatLng(
-                                        address.latitude,
-                                        address.longitude
-                                    )
-                                )
-                            )
-                        }
-                    }
                 }
             })
 
+
+//        addressList.forEach { address ->
+//
+//            if (address.entrances.isNotEmpty()) {
+//                address.entrances.forEach {
+//                    markers.add(
+//                        mapfitMap.addMarker(
+//                            LatLng(
+//                                it.lat,
+//                                it.lng
+//                            )
+//                        )
+//                    )
+//                }
+//            } else {
+//                markers.add(
+//                    mapfitMap.addMarker(
+//                        LatLng(
+//                            address.lat,
+//                            address.lng
+//                        )
+//                    )
+//                )
+//            }
+//        }
 
 
         mapfitMap.setOnMapClickListener(object : OnMapClickListener {

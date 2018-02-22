@@ -105,14 +105,14 @@ class MapViewTest {
         val zoomLevelAboveMax = (MAP_MAX_ZOOM + 5).toFloat()
         mapfitMap.setZoom(zoomLevelAboveMax)
 
-        // zoomLevelAboveMax should not be applied
-        Assert.assertEquals(zoomLevel, mapfitMap.getZoom())
+        // zoomLevelAboveMax should be normalized to max
+        Assert.assertEquals(MAP_MAX_ZOOM.toFloat(), mapfitMap.getZoom())
 
         val zoomLevelBelowMin = (MAP_MIN_ZOOM - 5).toFloat()
         mapfitMap.setZoom(zoomLevelBelowMin)
 
-        // zoomLevelBelowMin should not be applied
-        Assert.assertEquals(zoomLevel, mapfitMap.getZoom())
+        // zoomLevelBelowMin should be normalized to min
+        Assert.assertEquals(MAP_MIN_ZOOM.toFloat(), mapfitMap.getZoom())
     }
 
     @Test
@@ -123,7 +123,7 @@ class MapViewTest {
 
         val actualLatLng = mapfitMap.getCenter()
         Assert.assertEquals(latLng.lat, actualLatLng.lat, 0.0000001)
-        Assert.assertEquals(latLng.lon, actualLatLng.lon, 0.0000001)
+        Assert.assertEquals(latLng.lng, actualLatLng.lng, 0.0000001)
 
     }
 
@@ -135,7 +135,7 @@ class MapViewTest {
         Assert.assertEquals(layer, mapfitMap.getLayers().last())
 
         mapfitMap.removeLayer(layer)
-        Assert.assertNotEquals(layer, mapfitMap.getLayers().last())
+        Assert.assertTrue(mapfitMap.getLayers().isEmpty())
     }
 
 

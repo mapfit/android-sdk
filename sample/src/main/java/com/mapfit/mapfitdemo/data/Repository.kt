@@ -70,7 +70,7 @@ class Repository(private val context: Context) {
                 FilterType.MAP_THEME,
                 "Map Theme",
                 true,
-                listOf("MAPFIT_DAY", "MAPFIT_NIGHT", "MAPFIT_GREYSCALE")
+                listOf("MAPFIT_DAY", "MAPFIT_NIGHT", "MAPFIT_GRAYSCALE")
             )
         )
 //        filters.add(Filter(FilterType.CAMERA_STYLE, "Camera Style", true))

@@ -1,5 +1,7 @@
 package com.mapfit.android.directions.model
 
+import com.squareup.moshi.Json
+
 /**
  * Route of a trip from the origin to the destination.
  *
@@ -8,5 +10,5 @@ package com.mapfit.android.directions.model
 data class Route(
     val trip: Trip,
     var destinationLocation: List<Double>,
-    var sourceLocation: List<Double>
+    @field:Json(name = "sourceLocation") var originLocation: List<Double>
 )

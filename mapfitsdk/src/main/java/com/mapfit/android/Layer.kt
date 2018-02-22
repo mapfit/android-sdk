@@ -52,8 +52,9 @@ class Layer {
      */
     fun remove(vararg annotation: Annotation) {
         annotation.forEach {
-            it.subAnnotation?.remove(maps)
             it.remove(maps)
+            it.subAnnotation?.remove(maps)
+            annotations.remove(it)
         }
     }
 

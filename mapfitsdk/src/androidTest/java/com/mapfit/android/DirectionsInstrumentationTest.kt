@@ -3,8 +3,10 @@ package com.mapfit.android
 import android.support.test.InstrumentationRegistry
 import android.support.test.annotation.UiThreadTest
 import android.support.test.runner.AndroidJUnit4
+import com.mapfit.android.annotations.Polyline
 import com.mapfit.android.directions.DirectionsType
 import com.mapfit.android.directions.model.Route
+import com.mapfit.android.directions.model.Trip
 import com.mapfit.android.geometry.LatLng
 import junit.framework.Assert
 import org.junit.Before
@@ -36,7 +38,8 @@ class DirectionsInstrumentationTest {
     @UiThreadTest
     fun init() {
         MockitoAnnotations.initMocks(this)
-        Mapfit.getInstance(context, context.getString(R.string.api_key))
+
+        Mapfit.getInstance(context, context.getString(R.string.mapfit_debug_api_key))
 
         MapView(context).getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
@@ -57,7 +60,10 @@ class DirectionsInstrumentationTest {
             .showDirections(routeDrawCallback)
 
         Mockito.verify(routeDrawCallback, Mockito.times(1))
-            .onRouteDrawn(Mockito.any(Route::class.java) ?: route)
+            .onRouteDrawn(
+                Mockito.any(Route::class.java) ?: route,
+                Mockito.any(List::class.java) as List<Polyline>
+            )
 
         Assert.assertTrue(mapfitMap.getDirectionsOptions().routeDrawn)
 

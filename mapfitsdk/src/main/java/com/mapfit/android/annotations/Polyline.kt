@@ -22,7 +22,7 @@ class Polyline(
         val coordinates = DoubleArray(points.size * 2)
         var i = 0
         for (point in points) {
-            coordinates[i++] = point.lon
+            coordinates[i++] = point.lng
             coordinates[i++] = point.lat
         }
         coordinates
