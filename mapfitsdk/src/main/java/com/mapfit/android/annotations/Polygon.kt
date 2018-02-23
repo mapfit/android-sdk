@@ -61,14 +61,23 @@ class Polygon(
      * Removes the polygon from the map(s) it is added to.
      */
     override fun remove() {
+
+        val toBeRemoved = mutableListOf<MapController>()
+
         mapBindings.forEach {
             it.key.removePolygon(it.value)
+            toBeRemoved.add(it.key)
         }
+
+        toBeRemoved.forEach { mapBindings.remove(it) }
         layers.forEach { it.remove(this) }
     }
 
     override fun remove(mapController: MapController) {
-        mapBindings[mapController]?.let { mapController.removePolygon(it) }
+        mapBindings[mapController]?.let {
+            mapController.removePolygon(it)
+        }
+        mapBindings.remove(mapController)
     }
 
 }

@@ -101,6 +101,22 @@ class MarkerTest {
     }
 
     @Test
+    @UiThreadTest
+    fun testAddRemoveMarkerFromItself() {
+        val marker = mapfitMap.addMarker(LatLng())
+        Assert.assertNotNull(marker)
+
+        Layer().add(marker)
+        Assert.assertTrue(marker.mapBindings.size == 1)
+        Assert.assertTrue(marker.layers.size == 1)
+
+        marker.remove()
+
+        Assert.assertTrue(marker.mapBindings.size == 0)
+        Assert.assertTrue(marker.layers.size == 0)
+    }
+
+    @Test
     fun testAddMarkerWithAddress() {
         Thread.sleep(500)
 
@@ -121,7 +137,7 @@ class MarkerTest {
                 }
             })
 
-        Thread.sleep(500)
+        Thread.sleep(1500)
         Assert.assertEquals(
             expectedMarker.getPosition().lat,
             actualMarker?.getPosition()?.lat
@@ -154,7 +170,7 @@ class MarkerTest {
     fun testDefaultPlaceInfo() {
         Thread.sleep(500)
 
-        val marker = mapfitMap.addMarker(latLng)
+        val marker = mapfitMap.addMarker(latLng).setTitle("title")
 
         clickOnMarker(marker)
 
@@ -169,7 +185,7 @@ class MarkerTest {
     fun testDefaultPlaceInfoClickListener() {
         Thread.sleep(500)
 
-        val marker = mapfitMap.addMarker(latLng)
+        val marker = mapfitMap.addMarker(latLng).setTitle("title")
 
         mapfitMap.setOnPlaceInfoClickListener(onPlaceInfoClickListener)
 
@@ -183,7 +199,7 @@ class MarkerTest {
     fun testPlaceInfoAdapter() {
         Thread.sleep(500)
 
-        val marker = mapfitMap.addMarker(latLng)
+        val marker = mapfitMap.addMarker(latLng).setTitle("title")
 
         mapfitMap.setPlaceInfoAdapter(placeInfoAdapter)
 
@@ -193,10 +209,11 @@ class MarkerTest {
     }
 
     private fun clickOnMarker(marker: Marker) {
+        Thread.sleep(500)
         val map = marker.mapBindings.keys.first()
         val screenPosition = marker.getScreenPosition(map)
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
-            .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt()))
+            .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt() - 30))
         Thread.sleep(1500)
     }
 

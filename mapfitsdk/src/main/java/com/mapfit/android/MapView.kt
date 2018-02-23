@@ -97,11 +97,13 @@ class MapView(
     private var viewHeight: Int? = null
     private var viewWidth: Int? = null
 
+    private var activePlaceInfo: PlaceInfo? = null
     private var placeInfoRemoveJob = Job()
     private var reCentered = false
     private var sceneUpdateFlag = false
 
     init {
+
         Mapfit.getApiKey()
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
@@ -564,8 +566,6 @@ class MapView(
             else -> zoomLevel
         }
 
-    private var activePlaceInfo: PlaceInfo? = null
-
     private fun showPlaceInfo(marker: Marker) {
         if (marker.hasPlaceInfoFields()) {
 
@@ -609,7 +609,7 @@ class MapView(
             view?.let {
                 it.visibility = View.GONE
                 activePlaceInfo = PlaceInfo(it, marker, mapController)
-                marker.placeInfoMap[mapController] = activePlaceInfo
+                marker.placeInfoMap.put(mapController, activePlaceInfo)
                 activePlaceInfo?.show()
             }
         }

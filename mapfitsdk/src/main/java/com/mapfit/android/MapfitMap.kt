@@ -158,10 +158,12 @@ abstract class MapfitMap {
      * @param padding between map and bounds as percentage. For 10% padding, you can pass 0.1f.
      */
     abstract fun setLatLngBounds(
-        bounds: LatLngBounds, @FloatRange(
+        bounds: LatLngBounds,
+        @FloatRange(
             from = 0.0,
             to = 1.0
-        ) padding: Float
+        )
+        padding: Float
     )
 
     /**

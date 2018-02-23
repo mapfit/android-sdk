@@ -493,10 +493,8 @@ public class MapController implements Renderer {
                         mapView.getWidth(),
                         mapView.getHeight(),
                         padding);
-                lastCenter = pair.component1();
-                checkPointer(mapPointer);
-                nativeSetZoom(mapPointer, pair.component2());
-                nativeSetPosition(mapPointer, pair.component1().getLng(), pair.component1().getLat());
+                setZoom(pair.component2());
+                setPosition(pair.component1());
             }
         });
     }

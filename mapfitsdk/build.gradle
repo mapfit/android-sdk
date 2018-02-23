@@ -128,7 +128,7 @@ kotlin {
 apply plugin: 'maven-publish'
 group = 'com.mapfit'
 archivesBaseName = 'mapfit-sdk'
-version = '1.0.3'
+version = '1.0.6'
 
 publishing {
 
@@ -152,14 +152,14 @@ publishing {
             artifactId archivesBaseName
 
             // Tell maven to prepare the generated "*.aar" file for publishing
-            artifact("$buildDir/outputs/aar/${archivesBaseName}-debug.aar")
+            artifact("$buildDir/outputs/aar/${archivesBaseName}-release.aar")
 
             pom.withXml {
                 //Creating additional node for dependencies
                 def dependenciesNode = asNode().appendNode('dependencies')
 
                 //Defining configuration names from which dependencies will be taken (debugCompile or releaseCompile and compile)
-                def configurationNames = ["debugCompile", 'compile']
+                def configurationNames = ["releaseCompile", 'compile']
 
                 configurationNames.each { configurationName ->
                     configurations[configurationName].allDependencies.each {

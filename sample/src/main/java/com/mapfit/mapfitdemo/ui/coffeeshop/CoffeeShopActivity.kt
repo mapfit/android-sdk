@@ -248,6 +248,20 @@ class CoffeeShopActivity : AppCompatActivity() {
                     ).show()
                 }
             })
+
+
+            setPlaceInfoAdapter(object : MapfitMap.PlaceInfoAdapter {
+                override fun getPlaceInfoView(marker: Marker): View {
+
+                    val view = layoutInflater.inflate(
+                        R.layout.widget_place_info,
+                        window.decorView.findViewById(android.R.id.content),
+                        false
+                    )
+
+                    return view
+                }
+            })
         }
 
         val polyline = mapfitMap.addPolyline(repository.getLowerManhattanPolyline())
@@ -267,9 +281,9 @@ class CoffeeShopActivity : AppCompatActivity() {
         mapfitMap2.addLayer(alwaysOpenShopLayer)
 
         mapfitMap2.apply {
-            setCenter(LatLng(40.700798, -74.0050177), 500)
-            setZoom(13f, 500)
-
+//            setCenter(LatLng(40.700798, -74.0050177), 500)
+//            setZoom(13f, 500)
+            setMapBoundsToColorado()
 //            getMapOptions().theme = MapTheme.MAPFIT_GRAYSCALE
         }
 
@@ -422,6 +436,7 @@ class CoffeeShopActivity : AppCompatActivity() {
             }
 
             drawerLayout.closeDrawer(GravityCompat.END)
+            mapfitMap.setZoom(16f, 200)
         }
     }
 
@@ -441,6 +456,9 @@ class CoffeeShopActivity : AppCompatActivity() {
                 mapfitMap2.addPolyline(line)
             }
         }
+
+
+        mapfitMap.reCenter()
 
     }
 
@@ -491,16 +509,9 @@ class CoffeeShopActivity : AppCompatActivity() {
         val sw = LatLng(37.040997, -108.995177)
         val bounds = LatLngBounds(ne, sw)
 
-        mapfitMap.addMarker(ne)
-        mapfitMap.addMarker(sw)
-        mapfitMap.setLatLngBounds(bounds, 0.1f)
-
-//        launch {
-//            delay(2000)
-//            val afterBounds = mapfitMap.getLatLngBounds()
-//            delay(5000)
-//            mapfitMap.setLatLngBounds(afterBounds)
-//        }
+        mapfitMap2.addMarker(ne)
+        mapfitMap2.addMarker(sw)
+        mapfitMap2.setLatLngBounds(bounds, 1f)
 
     }
 
@@ -509,7 +520,10 @@ class CoffeeShopActivity : AppCompatActivity() {
         val sw = LatLng(38.326325, -111.351381)
         val bounds = LatLngBounds(ne, sw)
 
-        mapfitMap.addMarker(ne)
+
+        val marker = mapfitMap.addMarker(ne)
+
+        marker.setIcon(MapfitMarker.EDUCATION)
         mapfitMap.addMarker(sw)
         mapfitMap.setLatLngBounds(bounds, 1f)
 
@@ -567,21 +581,6 @@ class CoffeeShopActivity : AppCompatActivity() {
 
             val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(toolbar.windowToken, 0)
-
-
-            mapfitMap.addMarker(address,
-                true,
-                object : OnMarkerAddedCallback {
-                    override fun onMarkerAdded(marker: Marker) {
-
-                    }
-
-                    override fun onError(exception: Exception) {
-
-                    }
-                }
-            )
-
 
 //            mapfitMap.addPolyline()
             mapfitMap.addMarker(address,

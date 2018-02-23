@@ -55,6 +55,7 @@ class Layer {
             it.remove(maps)
             it.subAnnotation?.remove(maps)
             annotations.remove(it)
+            it.layers.remove(this@Layer)
         }
     }
 

@@ -906,7 +906,7 @@ layers:
         draw:
             sdk-polygon-overlay:
                 interactive: global.sdk_interactive
-                color: '#d6efff'
+                color: '#60d6efff'
                 order: 501
             sdk-line-overlay:
                 color: '#009eff'

@@ -17,6 +17,10 @@ class LatLngBounds(
         getCenterLatLng(listOf(northEast, southWest))
     }
 
+    private val mapSideLenght by lazy {
+        256.toPx
+    }
+
     class Builder {
 
         private val latLngList = mutableListOf<LatLng>()
@@ -56,23 +60,14 @@ class LatLngBounds(
      */
     fun getVisibleBounds(viewWidth: Int, viewHeight: Int, padding: Float): Pair<LatLng, Float> {
 
-        fun latRad(lat: Double): Double {
-            val sin = Math.sin(lat * Math.PI / 180)
-            val radX2 = Math.log((1 + sin) / (1 - sin)) / 2
-            return Math.max(Math.min(radX2, Math.PI), -Math.PI) / 2
-        }
+        fun zoom(mapPx: Int, worldPx: Int, fraction: Double): Double =
+            Math.floor(Math.log(mapPx / worldPx / fraction) / 0.693)
 
-        fun zoom(mapPx: Int, worldPx: Int, fraction: Double): Double {
-            return Math.floor(Math.log(mapPx / worldPx / fraction) / 0.693)
-        }
+        val fraction1 = (northEast.lat - southWest.lat) / mapSideLenght
+        val fraction2 = (northEast.lng - southWest.lng) / mapSideLenght
 
-        val latFraction = (latRad(northEast.lat) - latRad(southWest.lat)) / Math.PI
-
-        val lngDiff = northEast.lng - southWest.lng
-        val lngFraction = (if (lngDiff < 0) (lngDiff + 360) else lngDiff) / 360
-
-        val latZoom = zoom((viewHeight * padding).toInt(), 256.toPx, latFraction)
-        val lngZoom = zoom((viewWidth * padding).toInt(), 256.toPx, lngFraction)
+        val latZoom = zoom((viewHeight * padding).toInt(), mapSideLenght, fraction2)
+        val lngZoom = zoom((viewWidth * padding).toInt(), mapSideLenght, fraction1)
 
         val result = Math.min(latZoom, lngZoom)
 

@@ -40,14 +40,27 @@ class Polyline(
      * Removes the polyline from the map(s) it is added to.
      */
     override fun remove() {
+
+        mapBindings.forEach {
+            it.key.removePolygon(it.value)
+
+        }
+        val toBeRemoved = mutableListOf<MapController>()
+
         mapBindings.forEach {
             it.key.removeMarker(it.value)
+            toBeRemoved.add(it.key)
         }
+
+        toBeRemoved.forEach { mapBindings.remove(it) }
         layers.forEach { it.remove(this) }
     }
 
     override fun remove(mapController: MapController) {
-        mapBindings[mapController]?.let { mapController.removePolyline(it) }
+        mapBindings[mapController]?.let {
+            mapController.removePolyline(it)
+        }
+        mapBindings.remove(mapController)
     }
 
     override fun getLatLngBounds(): LatLngBounds {

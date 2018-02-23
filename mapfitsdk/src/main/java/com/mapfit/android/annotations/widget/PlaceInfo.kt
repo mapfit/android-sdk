@@ -26,7 +26,6 @@ class PlaceInfo internal constructor(
     private lateinit var subtitle2View: TextView
     private var viewHeight: Int? = null
     private var viewWidth: Int? = null
-    //    private val MARKER_HEIGHT_MULTIPLIER: Float = if (infoView.tag == "default") 1f else 3.3f
     private var positionUpdateJob = Job()
 
     init {

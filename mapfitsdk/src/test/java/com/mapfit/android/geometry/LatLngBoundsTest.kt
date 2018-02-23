@@ -52,7 +52,7 @@ class LatLngBoundsTest {
 
 
         Assert.assertEquals(expectedCenter.lat, center.lat, 0.00001)
-        Assert.assertEquals(expectedCenter.lon, center.lon, 0.00001)
+        Assert.assertEquals(expectedCenter.lng, center.lng, 0.00001)
         Assert.assertEquals(expectedZoomLevel, zoomLevel)
     }
 

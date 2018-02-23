@@ -1,5 +1,6 @@
 package com.mapfit.mapfitdemo.ui.coffeeshop;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.view.GravityCompat;
@@ -10,16 +11,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.ViewGroupOverlay;
 
-import com.mapfit.android.MapTheme;
-import com.mapfit.android.annotations.callback.OnMarkerAddedCallback;
-import com.mapfit.android.geometry.LatLngBounds;
-import com.mapfit.mapfitdemo.R;
-import com.mapfit.mapfitdemo.data.model.CoffeeShop;
-import com.mapfit.mapfitdemo.module.coffeeshop.data.Repository;
-import com.mapfit.mapfitdemo.ui.adapter.FilterAdapter;
-import com.mapfit.mapfitdemo.ui.adapter.FilterType;
-import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener;
 import com.mapfit.android.DirectionsOptions;
 import com.mapfit.android.Layer;
 import com.mapfit.android.MapView;
@@ -31,8 +25,10 @@ import com.mapfit.android.OnMapPanListener;
 import com.mapfit.android.OnMapPinchListener;
 import com.mapfit.android.OnMapReadyCallback;
 import com.mapfit.android.annotations.Annotation;
+import com.mapfit.android.annotations.MapfitMarker;
 import com.mapfit.android.annotations.Marker;
 import com.mapfit.android.annotations.Polyline;
+import com.mapfit.android.annotations.callback.OnMarkerAddedCallback;
 import com.mapfit.android.annotations.callback.OnMarkerClickListener;
 import com.mapfit.android.directions.Directions;
 import com.mapfit.android.directions.DirectionsCallback;
@@ -42,6 +38,14 @@ import com.mapfit.android.geocoder.Geocoder;
 import com.mapfit.android.geocoder.GeocoderCallback;
 import com.mapfit.android.geocoder.model.Address;
 import com.mapfit.android.geometry.LatLng;
+import com.mapfit.android.geometry.LatLngBounds;
+import com.mapfit.android.utils.MapfitUtils;
+import com.mapfit.mapfitdemo.R;
+import com.mapfit.mapfitdemo.data.model.CoffeeShop;
+import com.mapfit.mapfitdemo.module.coffeeshop.data.Repository;
+import com.mapfit.mapfitdemo.ui.adapter.FilterAdapter;
+import com.mapfit.mapfitdemo.ui.adapter.FilterType;
+import com.mapfit.mapfitdemo.ui.adapter.OnFilterCheckedListener;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -156,7 +160,6 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
 
 
     private void unusedFunction() {
-
         mapfitMap.addMarker("119w 24th st new york ny",
                 true,
                 new OnMarkerAddedCallback() {
@@ -202,7 +205,9 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
 
 
         mapfitMap.reCenter();
-        mapfitMap.getMapOptions().setMaxZoom(15f);
+        mapfitMap.getMapOptions().
+
+                setMaxZoom(15f);
         mapfitMap.setLatLngBounds(bounds, paddingPercentage);
 
         LatLngBounds currentMapBounds = mapfitMap.getLatLngBounds();
@@ -212,33 +217,43 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
         mapfitMap.setZoom(16f);
         LatLng centerLatLng = mapfitMap.getCenter();
 
-        mapfitMap.setOnMarkerClickListener(new OnMarkerClickListener() {
-            @Override
-            public void onMarkerClicked(@NotNull Marker marker) {
+        mapfitMap.setOnMarkerClickListener(new
 
-            }
-        });
-        mapfitMap.getMapOptions().setTiltEnabled(false);
-        mapfitMap.setOnMapClickListener(new OnMapClickListener() {
-            @Override
-            public void onMapClicked(@NotNull LatLng latLng) {
+                                                   OnMarkerClickListener() {
+                                                       @Override
+                                                       public void onMarkerClicked(@NotNull Marker marker) {
 
-            }
-        });
+                                                       }
+                                                   });
+        mapfitMap.getMapOptions().
 
-        mapfitMap.setOnMapDoubleClickListener(new OnMapDoubleClickListener() {
-            @Override
-            public void onMapDoubleClicked(@NotNull LatLng latLng) {
+                setTiltEnabled(false);
+        mapfitMap.setOnMapClickListener(new
 
-            }
-        });
+                                                OnMapClickListener() {
+                                                    @Override
+                                                    public void onMapClicked(@NotNull LatLng latLng) {
 
-        mapfitMap.setOnMapLongClickListener(new OnMapLongClickListener() {
-            @Override
-            public void onMapLongClicked(@NotNull LatLng latLng) {
+                                                    }
+                                                });
 
-            }
-        });
+        mapfitMap.setOnMapDoubleClickListener(new
+
+                                                      OnMapDoubleClickListener() {
+                                                          @Override
+                                                          public void onMapDoubleClicked(@NotNull LatLng latLng) {
+
+                                                          }
+                                                      });
+
+        mapfitMap.setOnMapLongClickListener(new
+
+                                                    OnMapLongClickListener() {
+                                                        @Override
+                                                        public void onMapLongClicked(@NotNull LatLng latLng) {
+
+                                                        }
+                                                    });
         mapfitMap.setOnMapPanListener(new
 
                                               OnMapPanListener() {
@@ -258,11 +273,13 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
     }
 
     private void directions() {
+
+
         DirectionsCallback callback = new DirectionsCallback() {
 
             @Override
             public void onSuccess(@NotNull Route route) {
-                // you can draw and show the route now!
+                List<LatLng> polyline = MapfitUtils.decodePolyline(route.getTrip().getLegs().get(0).getShape());
             }
 
             @Override
@@ -398,6 +415,7 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
         poly.add(new LatLng(40.7061326, -74.000769));
         poly.add(new LatLng(40.693825, -73.998691));
 
+
         List<List<LatLng>> polygon = new ArrayList();
         polygon.add(poly);
         mapfitMap.addPolygon(polygon);
@@ -409,7 +427,6 @@ public class CoffeeShopActivityJava extends AppCompatActivity {
 
         for (CoffeeShop coffeeShop : coffeeShops) {
             Marker marker = mapfitMap.addMarker(new LatLng(coffeeShop.getLat(), coffeeShop.getLng()));
-//            marker.invalidate()
 
             markers.add(marker);
 

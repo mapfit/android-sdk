@@ -1,14 +1,13 @@
+@file:JvmName("MapfitUtils")
+
 package com.mapfit.android.utils
 
 import com.mapfit.android.geometry.LatLng
 
-
 /**
- * Created by dogangulcan on 2/5/18.
- */
-
-/**
- * Decodes an encoded path string into a sequence of LatLngs.
+ * Decodes an encoded path string into a sequence of [LatLng]s.
+ *
+ * @param encodedPath
  */
 fun decodePolyline(encodedPath: String): List<LatLng> {
     val len = encodedPath.length

@@ -18,6 +18,7 @@ import com.mapfit.android.geometry.LatLngBounds
 import com.mapfit.android.utils.getBitmapFromVectorDrawable
 import com.mapfit.android.utils.isValid
 import com.mapfit.android.utils.loadImageFromUrl
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
 
 /**
@@ -46,6 +47,7 @@ class Marker internal constructor(
     private var icon: Bitmap? = null
     private var previousIcon: Bitmap? = null
     private var iconChangedWhenPlaceInfo: Bitmap? = null
+    private var iconHttpJob = Job()
 
     private var title: String = ""
     private var subtitle1: String = ""
@@ -172,13 +174,16 @@ class Marker internal constructor(
      * @param drawable
      */
     fun setIcon(drawable: Drawable): Marker {
-        val density = context.resources.displayMetrics.densityDpi
-        val bitmapDrawable = drawable as BitmapDrawable
-        bitmapDrawable.setTargetDensity(density)
-        val bitmap = bitmapDrawable.bitmap
-        bitmap.density = density
-        setBitmap(bitmap, mapController)
-        usingDefaultIcon = false
+        iconHttpJob.cancel()
+        iconHttpJob = launch {
+            val density = this@Marker.context.resources.displayMetrics.densityDpi
+            val bitmapDrawable = drawable as BitmapDrawable
+            bitmapDrawable.setTargetDensity(density)
+            val bitmap = bitmapDrawable.bitmap
+            bitmap.density = density
+            setBitmap(bitmap, mapController)
+            usingDefaultIcon = false
+        }
         return this
     }
 
@@ -188,11 +193,15 @@ class Marker internal constructor(
      * @param drawableId
      */
     fun setIcon(@DrawableRes drawableId: Int): Marker {
-        val options = BitmapFactory.Options()
-        options.inTargetDensity = context.resources.displayMetrics.densityDpi
-        val bitmap = BitmapFactory.decodeResource(context.resources, drawableId, options)
-        setBitmap(bitmap, mapController)
-        usingDefaultIcon = false
+        iconHttpJob.cancel()
+        iconHttpJob = launch {
+            val options = BitmapFactory.Options()
+            options.inTargetDensity = this@Marker.context.resources.displayMetrics.densityDpi
+            val bitmap =
+                BitmapFactory.decodeResource(this@Marker.context.resources, drawableId, options)
+            setBitmap(bitmap, mapController)
+            usingDefaultIcon = false
+        }
         return this
     }
 
@@ -213,7 +222,8 @@ class Marker internal constructor(
      * @param imageUrl
      */
     fun setIcon(imageUrl: String): Marker {
-        launch {
+        iconHttpJob.cancel()
+        iconHttpJob = launch {
             val drawable = loadImageFromUrl(imageUrl)
             drawable.await()?.let {
                 setIcon(it)
@@ -312,9 +322,14 @@ class Marker internal constructor(
             it.value?.dispose(true)
         }
 
+        val toBeRemoved = mutableListOf<MapController>()
+
         mapBindings.forEach {
             it.key.removeMarker(it.value)
+            toBeRemoved.add(it.key)
         }
+
+        toBeRemoved.forEach { mapBindings.remove(it) }
 
         layers.forEach { it.remove(this) }
 
@@ -336,7 +351,10 @@ class Marker internal constructor(
     override fun remove(mapController: MapController) {
         subAnnotation?.remove(listOf(mapController))
         placeInfoMap[mapController]?.dispose()
-        mapBindings[mapController]?.let { mapController.removeMarker(it) }
+        mapBindings[mapController]?.let {
+            mapController.removeMarker(it)
+        }
+        mapBindings.remove(mapController)
     }
 
     internal fun getScreenPosition(mapController: MapController): PointF {

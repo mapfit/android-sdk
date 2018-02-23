@@ -16,9 +16,13 @@ class DummyActivity : AppCompatActivity() {
 
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        Mapfit.getInstance(this, getString(R.string.mapfit_debug_api_key))
         val mapView = MapView(this)
-        mapView.layoutParams = FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT)
+        mapView.layoutParams = FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        )
         mapView.id = R.id.mapView
         setContentView(mapView)
     }

@@ -28,7 +28,7 @@ class DirectionsInstrumentationTest {
 
     @Mock
     lateinit var routeDrawCallback: DirectionsOptions.RouteDrawCallback
-
+//
     @Mock
     lateinit var route: Route
 
@@ -61,7 +61,7 @@ class DirectionsInstrumentationTest {
 
         Mockito.verify(routeDrawCallback, Mockito.times(1))
             .onRouteDrawn(
-                Mockito.any(Route::class.java) ?: route,
+                Mockito.any(Route::class.java) ?:route,
                 Mockito.any(List::class.java) as List<Polyline>
             )
 
