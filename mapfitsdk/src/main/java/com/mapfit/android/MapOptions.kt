@@ -18,10 +18,10 @@ class MapOptions internal constructor(
 
     companion object {
         const val MAP_MIN_ZOOM = 1.0
-        const val MAP_MAX_ZOOM = 18.0
+        const val MAP_MAX_ZOOM = 20.0
     }
 
-    private var maxZoom: Float = 18f
+    private var maxZoom: Float = 20f
 
     private var minZoom: Float = 1f
 

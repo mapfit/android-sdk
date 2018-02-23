@@ -3,6 +3,7 @@ package com.mapfit.android
 import android.content.Context
 import android.text.TextUtils
 import com.mapfit.android.exceptions.MapfitConfigurationException
+import org.jetbrains.annotations.TestOnly
 
 
 /**
@@ -57,6 +58,11 @@ class Mapfit private constructor(private val context: Context?, apiKey: String) 
             if (TextUtils.isEmpty(apiKey)) {
                 throw MapfitConfigurationException()
             }
+        }
+
+        @TestOnly
+        internal fun dispose() {
+            MAPFIT_API_KEY = ""
         }
 
 

@@ -3,12 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context="com.mapfit.mapfitdemo.ui.coffeeshop.ShowcaseActivity">
-
+    tools:context="com.mapfit.demo.KotlinActivity">
 
     <com.mapfit.android.MapView
-        android:id="@+id/map"
+        android:id="@+id/mapView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

@@ -44,17 +44,15 @@ class Geocoder {
      * @param callback for response and errors
      */
     @JvmOverloads
-    fun geocode(address: String, withBuilding: Boolean = false, callback: GeocoderCallback) {
+    fun geocode(address: String, includeBuilding: Boolean = false, callback: GeocoderCallback) {
 
         val request = Request.Builder()
-            .url(createRequestUrl(address, withBuilding))
+            .url(createRequestUrl(address, includeBuilding))
             .build()
 
         httpClient.newCall(request).enqueue(object : Callback {
             override fun onResponse(call: Call?, response: Response?) {
-
                 if (response != null && response.isSuccessful) {
-
                     async(UI) {
                         val addressList = bg {
                             response.body()?.string()?.let {

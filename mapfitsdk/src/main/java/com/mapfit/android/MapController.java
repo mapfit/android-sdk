@@ -485,7 +485,7 @@ public class MapController implements Renderer {
         nativeSetPositionEased(mapPointer, position.getLng(), position.getLat(), seconds, ease.ordinal());
     }
 
-    public void setLatlngBounds(final LatLngBounds latlngBounds, final float padding) {
+    public void setLatLngBounds(final LatLngBounds latlngBounds, final float padding) {
         mapView.post(new Runnable() {
             @Override
             public void run() {

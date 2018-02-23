@@ -434,7 +434,7 @@ class MapView(
         }
 
         override fun setLatLngBounds(bounds: LatLngBounds, padding: Float) {
-            mapController.setLatlngBounds(bounds, padding)
+            mapController.setLatLngBounds(bounds, padding)
         }
 
         override fun getLatLngBounds(): LatLngBounds {

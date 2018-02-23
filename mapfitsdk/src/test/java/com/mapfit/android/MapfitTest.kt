@@ -19,12 +19,15 @@ class MapfitTest {
     @Before
     fun init() {
         MockitoAnnotations.initMocks(this)
+        if (Mapfit.getContext() != null){
+            Mapfit.dispose()
+        }
 
     }
 
     @Test(expected = MapfitConfigurationException::class)
     fun testNoApiKey() {
-        Assert.assertEquals("nokey", Mapfit.getApiKey())
+        Mapfit.getApiKey()
     }
 
     @Test

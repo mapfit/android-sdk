@@ -1,6 +1,8 @@
 package com.mapfit.android.geometry
 
+import android.content.res.Resources
 import com.mapfit.android.utils.toPx
+import kotlin.math.ln
 
 
 /**
@@ -17,8 +19,8 @@ class LatLngBounds(
         getCenterLatLng(listOf(northEast, southWest))
     }
 
-    private val mapSideLenght by lazy {
-        256.toPx
+    private val mapSideLength by lazy {
+        256 * Resources.getSystem().displayMetrics.density
     }
 
     class Builder {
@@ -60,14 +62,17 @@ class LatLngBounds(
      */
     fun getVisibleBounds(viewWidth: Int, viewHeight: Int, padding: Float): Pair<LatLng, Float> {
 
-        fun zoom(mapPx: Int, worldPx: Int, fraction: Double): Double =
-            Math.floor(Math.log(mapPx / worldPx / fraction) / 0.693)
+        fun zoom(mapPx: Int, fraction: Double): Double =
+            ln((mapPx / mapSideLength / fraction) * padding) / 0.69314718056
 
-        val fraction1 = (northEast.lat - southWest.lat) / mapSideLenght
-        val fraction2 = (northEast.lng - southWest.lng) / mapSideLenght
+        val latFraction =
+            (StrictMath.toRadians(northEast.lat) - StrictMath.toRadians((southWest.lat))) / Math.PI
 
-        val latZoom = zoom((viewHeight * padding).toInt(), mapSideLenght, fraction2)
-        val lngZoom = zoom((viewWidth * padding).toInt(), mapSideLenght, fraction1)
+        val lngDiff = northEast.lng - southWest.lng
+        val lngFraction = (if (lngDiff < 0) (lngDiff + 360) else lngDiff) / 360
+
+        val latZoom = zoom(viewHeight, latFraction)
+        val lngZoom = zoom(viewWidth, lngFraction)
 
         val result = Math.min(latZoom, lngZoom)
 

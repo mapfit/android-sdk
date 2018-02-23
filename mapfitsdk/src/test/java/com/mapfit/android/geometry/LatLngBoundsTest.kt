@@ -50,7 +50,6 @@ class LatLngBoundsTest {
 
         val (center, zoomLevel) = bounds.getVisibleBounds(viewWidth, viewHeight, 1f)
 
-
         Assert.assertEquals(expectedCenter.lat, center.lat, 0.00001)
         Assert.assertEquals(expectedCenter.lng, center.lng, 0.00001)
         Assert.assertEquals(expectedZoomLevel, zoomLevel)

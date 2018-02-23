@@ -24,16 +24,16 @@ class GeocoderParserTest {
         Assert.assertTrue(firstAddress.locality.isNotBlank())
         Assert.assertTrue(firstAddress.neighborhood.isNotBlank())
         Assert.assertTrue(firstAddress.postalCode.isNotBlank())
-        Assert.assertEquals(0.0, firstAddress.latitude, 0.0001)
-        Assert.assertEquals(0.0, firstAddress.longitude, 0.0001)
+        Assert.assertEquals(0.0, firstAddress.lat, 0.0001)
+        Assert.assertEquals(0.0, firstAddress.lng, 0.0001)
         Assert.assertTrue(firstAddress.postalCode.isNotBlank())
-        Assert.assertTrue(firstAddress.buildingPolygon.isNotEmpty())
+        Assert.assertTrue(firstAddress.building.polygon.isNotEmpty())
 
         val entrance = firstAddress.entrances[0]
 
         Assert.assertNotNull(entrance.entranceType)
-        Assert.assertEquals(40.74405, entrance.latitude, 0.0001)
-        Assert.assertEquals(-73.99324, entrance.longitude, 0.0001)
+        Assert.assertEquals(40.74405, entrance.lat, 0.0001)
+        Assert.assertEquals(-73.99324, entrance.lng, 0.0001)
 
     }
 
