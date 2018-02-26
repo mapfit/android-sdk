@@ -4,7 +4,7 @@ import android.support.annotation.FloatRange
 import android.support.v4.content.ContextCompat
 import android.view.View
 import com.mapfit.android.utils.isValidZoomLevel
-import kotlinx.android.synthetic.main.overlay_map_controls.view.*
+import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
 
 /**
  * Map settings and options are manipulated trough this class.
@@ -54,7 +54,7 @@ class MapOptions internal constructor(
                         R.color.dark_text
                     )
                 )
-                R.drawable.ic_watermark_light
+                R.drawable.mf_watermark_light
             }
 
             MapTheme.MAPFIT_NIGHT -> {
@@ -70,7 +70,7 @@ class MapOptions internal constructor(
                         R.color.light_text
                     )
                 )
-                R.drawable.ic_watermark_dark
+                R.drawable.mf_watermark_dark
             }
         }
 

@@ -127,12 +127,13 @@ class Directions {
 
         httpClient.newCall(request).enqueue(object : Callback {
             override fun onResponse(call: Call?, response: Response?) {
-
-                if (response != null && response.isSuccessful) {
+                val (isSuccessful, jsonResponse) = isSuccessful(response)
+                if (isSuccessful) {
                     async(UI) {
-                        val route = parseRoute(response)
+                        val route = jsonResponse.let { parseRoute(jsonResponse) }
                         route.await()?.let { callback.onSuccess(it) }
                     }
+
                 } else {
                     val (message, exception) = directionsParser.parseError(response)
                     callback.onError(message, exception)
@@ -145,27 +146,35 @@ class Directions {
         })
     }
 
-    private fun parseRoute(response: Response): Deferred<Route?> = bg {
-        response.body()?.string()?.let {
-            val moshi = Moshi.Builder().build()
-            val jsonAdapter = moshi.adapter<Route>(Route::class.java)
-            val route = jsonAdapter.fromJson(it.trimIndent())
+    private fun isSuccessful(response: Response?): Pair<Boolean, JSONObject> {
+        val rawResponse = JSONObject(response?.body()?.string()?.trimIndent())
+        return Pair(
+            response != null && response.isSuccessful && !rawResponse.has("error_type"),
+            rawResponse
+        )
+    }
 
-            route?.apply {
-                destinationLocation =
-                        listOf(
-                            route.destinationLocation[1],
-                            route.destinationLocation[0]
-                        )
-                originLocation =
-                        listOf(
-                            route.originLocation[1],
-                            route.originLocation[0]
-                        )
-            }
+    private fun parseRoute(response: JSONObject): Deferred<Route?> = bg {
 
-            route
+        val moshi = Moshi.Builder().build()
+        val jsonAdapter = moshi.adapter<Route>(Route::class.java)
+        val route = jsonAdapter.fromJson(response.toString())
+
+        route?.apply {
+            destinationLocation =
+                    listOf(
+                        route.destinationLocation[1],
+                        route.destinationLocation[0]
+                    )
+            originLocation =
+                    listOf(
+                        route.originLocation[1],
+                        route.originLocation[0]
+                    )
         }
+
+        route
+
     }
 
     private fun createRequestBody(

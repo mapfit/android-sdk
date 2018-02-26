@@ -28,7 +28,7 @@ import com.mapfit.android.utils.isEmpty
 import com.mapfit.android.utils.startActivitySafe
 import com.mapfit.tetragon.ConfigChooser
 import com.mapfit.tetragon.TouchInput
-import kotlinx.android.synthetic.main.overlay_map_controls.view.*
+import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
@@ -60,7 +60,7 @@ class MapView(
 
     // Views
     private val controlsView: View by lazy {
-        LayoutInflater.from(context).inflate(R.layout.overlay_map_controls, this, false)
+        LayoutInflater.from(context).inflate(R.layout.mf_overlay_map_controls, this, false)
     }
 
     private val placeInfoFrame = FrameLayout(context)
@@ -156,11 +156,11 @@ class MapView(
         })
 
         btnZoomIn.setOnClickListener {
-            mapfitMap.setZoom(mapfitMap.getZoom() + ZOOM_STEP_LEVEL, ANIMATION_DURATION)
+            mapfitMap.setZoom(mapfitMap.getZoom() + ZOOM_STEP_LEVEL, ANIMATION_DURATION.toLong())
         }
 
         btnZoomOut.setOnClickListener {
-            mapfitMap.setZoom(mapfitMap.getZoom() - ZOOM_STEP_LEVEL, ANIMATION_DURATION)
+            mapfitMap.setZoom(mapfitMap.getZoom() - ZOOM_STEP_LEVEL, ANIMATION_DURATION.toLong())
         }
 
         btnRecenter.setOnClickListener {
@@ -177,9 +177,9 @@ class MapView(
         when {
             recenter -> {
                 mapfitMap.reCenter()
-                btnRecenter.setImageResource(R.drawable.re_center)
+                btnRecenter.setImageResource(R.drawable.mf_re_center)
             }
-            else -> btnRecenter.setImageResource(R.drawable.re_center_off)
+            else -> btnRecenter.setImageResource(R.drawable.mf_re_center_off)
         }
 
         reCentered = recenter
@@ -331,7 +331,7 @@ class MapView(
     private fun setZoomOnDoubleTap(x: Float, y: Float) {
         val lngLat = mapController.screenPositionToLatLng(PointF(x, y))
         mapController.setPositionEased(lngLat, ANIMATION_DURATION, DEFAULT_EASE, false)
-        mapfitMap.setZoom(mapController.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION)
+        mapfitMap.setZoom(mapController.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION.toLong())
     }
 
     private val mapfitMap = object : MapfitMap() {
@@ -345,8 +345,8 @@ class MapView(
             mapController.tilt = angle
         }
 
-        override fun setRotation(rotation: Float, duration: Int) {
-            mapController.setRotationEased(rotation, duration, DEFAULT_EASE)
+        override fun setRotation(rotation: Float, duration: Long) {
+            mapController.setRotationEased(rotation, duration.toInt(), DEFAULT_EASE)
         }
 
         override fun setRotation(rotation: Float) {
@@ -354,7 +354,6 @@ class MapView(
         }
 
         override fun getRotation(): Float = mapController.rotation
-
 
         @TestOnly
         override fun has(annotation: Annotation): Boolean = mapController.contains(annotation)
@@ -431,10 +430,12 @@ class MapView(
 
         override fun setCenterWithLayer(layer: Layer) {
             mapController.position = layer.getLatLngBounds().center
+            updatePlaceInfoPosition(true)
         }
 
         override fun setLatLngBounds(bounds: LatLngBounds, padding: Float) {
             mapController.setLatLngBounds(bounds, padding)
+            updatePlaceInfoPosition(true)
         }
 
         override fun getLatLngBounds(): LatLngBounds {
@@ -486,12 +487,14 @@ class MapView(
                     true
                 )
             }
+            updatePlaceInfoPosition(true)
         }
 
         override fun getCenter(): LatLng = mapController.position
 
         override fun reCenter() {
             mapController.reCenter()
+            updatePlaceInfoPosition(true)
         }
 
         override fun addLayer(layer: Layer) {
@@ -536,13 +539,13 @@ class MapView(
             setZoom(zoomLevel, 0)
         }
 
-        override fun setZoom(zoomLevel: Float, duration: Int) {
+        override fun setZoom(zoomLevel: Float, duration: Long) {
             val normalizedZoomLevel = normalizeZoomLevel(zoomLevel)
 
-            if (duration == 0) {
+            if (duration.toInt() == 0) {
                 mapController.zoom = (normalizedZoomLevel)
             } else {
-                mapController.setZoomEased(normalizedZoomLevel, duration)
+                mapController.setZoomEased(normalizedZoomLevel, duration.toInt())
             }
         }
     }
@@ -595,7 +598,8 @@ class MapView(
 
             } else {
                 val view =
-                    LayoutInflater.from(context).inflate(R.layout.widget_place_info, placeInfoFrame)
+                    LayoutInflater.from(context)
+                        .inflate(R.layout.mf_widget_place_info, placeInfoFrame)
 
                 val child = (view as FrameLayout).getChildAt(0)
                 child.tag = "default"
@@ -618,11 +622,15 @@ class MapView(
     private fun isCustomPlaceInfo() = placeInfoAdapter != null
 
     private fun updatePlaceInfoPosition(repeating: Boolean) {
-        if (!repeating) {
-            activePlaceInfo?.onPositionChanged()
-        } else {
-            activePlaceInfo?.updatePositionDelayed()
-        }
+        activePlaceInfo
+            ?.takeIf { it.getVisibility() }
+            .let {
+                if (!repeating) {
+                    activePlaceInfo?.onPositionChanged()
+                } else {
+                    activePlaceInfo?.updatePositionDelayed()
+                }
+            }
     }
 
     private fun getGLSurfaceView(): GLSurfaceView {

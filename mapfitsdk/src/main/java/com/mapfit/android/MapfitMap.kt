@@ -141,7 +141,7 @@ abstract class MapfitMap {
      * @param zoomLevel Zoom level for the view
      * @param duration optional duration for zooming in milliseconds
      */
-    abstract fun setZoom(zoomLevel: Float, duration: Int = 0)
+    abstract fun setZoom(zoomLevel: Float, duration: Long = 0)
 
     /**
      * Returns the current zoom level of the map.
@@ -254,7 +254,7 @@ abstract class MapfitMap {
      * @param rotation in radians
      * @param duration duration of the rotation in milliseconds
      */
-    abstract fun setRotation(rotation: Float, duration: Int = 0)
+    abstract fun setRotation(rotation: Float, duration: Long = 0)
 
 
     /**

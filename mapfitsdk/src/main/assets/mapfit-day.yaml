@@ -651,22 +651,22 @@ styles:
 fonts:
     Open Sans:
         - weight: 300
-          url: fonts/OpenSans-Light.woff
+          url: OpenSans-Light.woff
         - weight: normal
-          url: fonts/OpenSans-Regular.woff
+          url: OpenSans-Regular.woff
         - weight: normal
           style: italic
-          url: fonts/OpenSans-Italic.woff
+          url: OpenSans-Italic.woff
         - weight: 600
-          url: fonts/OpenSans-Semibold.woff
+          url: OpenSans-Semibold.woff
         - weight: 600
           style: italic
-          url: fonts/OpenSans-SemiboldItalic.woff
+          url: OpenSans-SemiboldItalic.woff
         - weight: bold
-          url: fonts/OpenSans-Bold.woff
+          url: OpenSans-Bold.woff
     Montserrat:
         - weight: normal
-          url: fonts/Montserrat-Regular.woff
+          url: Montserrat-Regular.woff
 
 scene:
     background:

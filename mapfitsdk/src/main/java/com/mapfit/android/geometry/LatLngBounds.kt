@@ -1,7 +1,6 @@
 package com.mapfit.android.geometry
 
 import android.content.res.Resources
-import com.mapfit.android.utils.toPx
 import kotlin.math.ln
 
 

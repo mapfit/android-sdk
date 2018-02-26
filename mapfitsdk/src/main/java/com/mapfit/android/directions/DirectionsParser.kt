@@ -23,10 +23,12 @@ internal class DirectionsParser {
 
     private fun parseResponseForError(response: Response): Pair<String, Exception> {
         val errorJson = JSONObject(response.body()?.string())
+
+
         return if (errorJson.has("response_type")) {
             when (errorJson.getInt("response_type")) {
                 0 -> Pair(
-                    "An origin and destination address or location must be specified.",
+                    "Unable to retrieve directions. Check if you have set an origin and destination address or location properly.",
                     InvalidParameterException()
                 )
                 else -> {
@@ -38,6 +40,10 @@ internal class DirectionsParser {
         }
     }
 
-    private fun getDefaultException() = Pair("An unexpected error has occurred", Exception())
+    private fun getDefaultException() =
+        Pair(
+            "Unable to retrieve directions due to an unexpected error.",
+            Exception("Unable to retrieve directions due to an unexpected error")
+        )
 
 }

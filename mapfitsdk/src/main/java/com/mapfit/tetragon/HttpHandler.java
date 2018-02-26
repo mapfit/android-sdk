@@ -45,7 +45,7 @@ public class HttpHandler {
      * @see SSLSocketFactory
      */
     private class Tls12SocketFactory extends SSLSocketFactory {
-        private final String[] TLS_V12_ONLY = {"TLSv1.2", "TLSv1", "TLSv1.1"};
+        private final String[] TLS_V12_ONLY = {"TLSv1", "TLSv1.1", "TLSv1.2"};
 
         final SSLSocketFactory delegate;
 

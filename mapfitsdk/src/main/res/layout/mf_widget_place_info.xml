@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_marginLeft="8dp"
     android:layout_marginRight="8dp"
-    android:background="@drawable/place_info_bg"
+    android:background="@drawable/mf_place_info_bg"
     android:paddingBottom="36dp">
 
     <LinearLayout

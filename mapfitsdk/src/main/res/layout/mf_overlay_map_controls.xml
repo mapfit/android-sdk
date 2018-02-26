@@ -78,7 +78,7 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="@drawable/zoom_bg" />
+                android:background="@drawable/mf_zoom_bg" />
 
             <ImageView
                 android:id="@+id/btnZoomIn"
@@ -90,7 +90,7 @@
                 android:adjustViewBounds="true"
                 android:clickable="true"
                 android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_zoom_in" />
+                app:srcCompat="@drawable/mf_zoom_in" />
 
             <ImageView
                 android:id="@+id/btnZoomOut"
@@ -103,7 +103,7 @@
                 android:adjustViewBounds="true"
                 android:clickable="true"
                 android:scaleType="centerInside"
-                app:srcCompat="@drawable/ic_zoom_out" />
+                app:srcCompat="@drawable/mf_zoom_out" />
 
         </RelativeLayout>
 
@@ -114,9 +114,9 @@
             android:layout_marginTop="-13dp"
             android:adjustViewBounds="true"
             android:clickable="true"
-            android:foreground="@drawable/button_selector"
+            android:foreground="@drawable/mf_button_selector"
             android:scaleType="centerInside"
-            android:src="@drawable/compass_with_bg"
+            android:src="@drawable/mf_compass_with_bg"
             android:visibility="gone"
             tools:visibility="visible" />
 
@@ -127,7 +127,7 @@
             android:layout_marginTop="-13dp"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
-            android:src="@drawable/re_center_off"
+            android:src="@drawable/mf_re_center_off"
             android:visibility="gone"
             tools:visibility="visible" />
 

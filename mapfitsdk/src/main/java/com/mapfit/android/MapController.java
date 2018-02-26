@@ -1406,7 +1406,12 @@ public class MapController implements Renderer {
     public boolean setMarkerDrawOrder(long markerId, int drawOrder) {
         checkPointer(mapPointer);
         checkId(markerId);
-        return nativeMarkerSetDrawOrder(mapPointer, markerId, drawOrder);
+        Boolean isSuccessful = nativeMarkerSetDrawOrder(mapPointer, markerId, drawOrder);
+        if (isSuccessful) {
+            requestRender();
+        }
+
+        return isSuccessful;
     }
 
     @Keep

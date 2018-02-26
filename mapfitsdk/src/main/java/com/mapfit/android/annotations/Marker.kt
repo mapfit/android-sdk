@@ -245,7 +245,7 @@ class Marker internal constructor(
 
             if (shown) {
                 setBitmap(
-                    getBitmapFromVectorDrawable(context, R.drawable.ic_marker_dot),
+                    getBitmapFromVectorDrawable(context, R.drawable.mf_marker_dot),
                     mapController,
                     markerId
                 )

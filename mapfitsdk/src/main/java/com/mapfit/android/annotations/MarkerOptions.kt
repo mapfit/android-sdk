@@ -12,10 +12,6 @@ class MarkerOptions internal constructor(
     internal val mapController: MutableList<MapController>
 ) {
 
-    private val markerDotSide by lazy {
-        11
-    }
-
     /**
      * Height of the marker icon in pixels.
      */
@@ -39,16 +35,18 @@ class MarkerOptions internal constructor(
         set(value) {
             field = value
             updateStyle()
-            marker.mapBindings.forEach {
-                it.key.setMarkerDrawOrder(it.value, value)
-            }
         }
 
-    var color = "white"
-        set(value) {
-            field = value
-            updateStyle()
-        }
+    private val markerDotSide by lazy {
+        11
+    }
+
+    private val placeInfoMarkerStyle =
+        "{ style: 'sdk-point-overlay', anchor: top, size: [${markerDotSide}px, ${markerDotSide}px], order: $drawOrder, interactive: true, collide: false }"
+
+    init {
+        updateStyle()
+    }
 
     internal fun setDefaultMarkerSize() {
         marker.usingDefaultIcon = false
@@ -57,20 +55,16 @@ class MarkerOptions internal constructor(
         marker.usingDefaultIcon = true
     }
 
-    private val placeInfoMarkerStyle =
-        "{ style: 'sdk-point-overlay', anchor: top,color: $color, size: [${markerDotSide}px, ${markerDotSide}px], order: $drawOrder, interactive: true, collide: false }"
-
-    init {
-        updateStyle()
-    }
-
     private fun getStyleString() =
-        "{ style: 'sdk-point-overlay', anchor: top, color: $color, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
+        "{ style: 'sdk-point-overlay', anchor: top, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
 
     internal fun updateStyle() {
         marker.mapBindings.forEach {
             it.key.setMarkerStylingFromString(it.value, getStyleString())
+            it.key.setMarkerDrawOrder(it.value, drawOrder)
         }
+//        marker.mapBindings.forEach {
+//        }
     }
 
     internal fun placeInfoShown(

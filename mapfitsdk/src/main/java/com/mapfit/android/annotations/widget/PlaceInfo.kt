@@ -120,7 +120,6 @@ class PlaceInfo internal constructor(
     fun getVisibility(mapController: MapController): Boolean =
         infoView.visibility == View.VISIBLE && this.mapController == mapController
 
-
     internal fun dispose(removed: Boolean = false) {
         if (infoView.parent != null) {
             (infoView.parent as ViewGroup).removeView(infoView)

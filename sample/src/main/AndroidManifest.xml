@@ -26,6 +26,8 @@
 
         </activity>
 
+        <activity android:name="com.mapfit.demo.JavaActivity" />
+
     </application>
 
 </manifest>
