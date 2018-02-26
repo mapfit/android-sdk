@@ -17,7 +17,7 @@ dependencies {
 Inside your layout file, add `MapView` as follows
 
 ```xml
-<com.mapfit.mapfitsdk.MapView
+<com.mapfit.android.MapView
 	        android:id="@+id/mapView"
 	        android:layout_width="match_parent"
 	        android:layout_height="match_parent" />
