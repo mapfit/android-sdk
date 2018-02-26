@@ -1,5 +1,5 @@
 
-#Mapfit SDK for Android
+# Mapfit SDK for Android
 
 
 ## Get your Mapfit API key
@@ -9,7 +9,7 @@ To use Mapfit Maps and services, your application will need an API key. You can 
 In your module level `build.gradle` file, add depencency as follows
 ```
 dependencies {
-    	compile 'com.mapfit.mapfitsdk:mapfit-android-sdk:1.0.0'
+    	// will be updated
 }
 ```
 
