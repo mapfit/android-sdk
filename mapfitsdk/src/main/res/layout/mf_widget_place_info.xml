@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp"
+    android:background="@drawable/mf_place_info_bg"
+    android:paddingBottom="36dp">
+
+    <LinearLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:contentDescription="@string/content_desc_place_info"
+        android:orientation="vertical"
+        android:paddingBottom="10dp"
+        android:paddingLeft="30dp"
+        android:paddingRight="30dp"
+        android:paddingTop="16dp">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.01"
+            android:maxLines="1"
+            android:textColor="@color/titleTextColor"
+            android:textSize="16sp"
+            android:textStyle="normal"
+            tools:text="Neighborhood Coffee Roaster" />
+
+        <TextView
+            android:id="@+id/subtitle1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif"
+            android:maxLines="1"
+            android:textColor="@color/gunMetal"
+            android:textSize="13sp"
+            android:textStyle="normal"
+            tools:text="119 West 24th Street Floor 2, New York, NY 1001-…" />
+
+        <TextView
+            android:id="@+id/subtitle2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif"
+            android:maxLines="1"
+            android:textColor="@color/gunMetal"
+            android:textSize="13sp"
+            android:textStyle="normal"
+            tools:text="Coffee shop, Breakfast, American" />
+
+    </LinearLayout>
+</RelativeLayout>

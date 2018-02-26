@@ -12,10 +12,11 @@ sources:
   max_zoom: 16
 
 # Note: edit this section to enable 3d building perspective, lighting, etc.
-# cameras:
-#     camera1:
-#         type: isometric
-#         axis: [.5, .5]
+cameras:
+    camera1:
+        type: perspective
+        max_tilt: 60
+        active: true
 # lights:
 #     light1:
 #         type: directional
@@ -29,7 +30,7 @@ global:
     # Subway/transit overlay
     sdk_transit_overlay: false
     # Building Extrude (3D buildings)
-    sdk_building_extrude: false          
+    sdk_building_extrude: false
 
 
 
@@ -504,8 +505,9 @@ global:
 
 textures:
     pois:
-        url: https://cdn.mapfit.com/v1/themes/images/refill@2x.png
-        # url: images/refill@2x.png
+        # url: https://cdn.mapfit.com/v1/themes/images/refill@2x.png
+        url: images/refill@2x.png
+
         filtering: mipmap
         sprites:
             # define sprites: [x origin, y origin, width, height]
@@ -600,7 +602,7 @@ styles:
     icons:
         base: points
         texture: pois
-        blend_order: 4
+        blend_order: 1
     text-blend-order:
         base: text
         blend_order: 1
@@ -643,28 +645,28 @@ styles:
         blend_order: 2
     sdk-polygon-overlay:
         base: polygons
-        blend: inlay
+        blend: overlay
         blend_order: 2
 
 fonts:
     Open Sans:
         - weight: 300
-          url: fonts/OpenSans-Light.woff
+          url: OpenSans-Light.woff
         - weight: normal
-          url: fonts/OpenSans-Regular.woff
+          url: OpenSans-Regular.woff
         - weight: normal
           style: italic
-          url: fonts/OpenSans-Italic.woff
+          url: OpenSans-Italic.woff
         - weight: 600
-          url: fonts/OpenSans-Semibold.woff
+          url: OpenSans-Semibold.woff
         - weight: 600
           style: italic
-          url: fonts/OpenSans-SemiboldItalic.woff
+          url: OpenSans-SemiboldItalic.woff
         - weight: bold
-          url: fonts/OpenSans-Bold.woff
+          url: OpenSans-Bold.woff
     Montserrat:
         - weight: normal
-          url: fonts/Montserrat-Regular.woff
+          url: Montserrat-Regular.woff
 
 scene:
     background:
@@ -782,7 +784,6 @@ layers:
                 sprite: ux-search-active
                 size: [36px,54px]
                 collide: false
-                order: 2000
                 anchor: top
                 transition: { show: { time: 0s }, hide: { time: 0s } }
     mz_default_shield:
@@ -897,32 +898,20 @@ layers:
         draw:
             sdk-line-overlay:
                 interactive: global.sdk_interactive
-                color: blue
-                order: 100
-                width: 5px
-
-    mz_default_polyline:
-        data: { source: mz_default_polyline }
-        draw:
-            sdk-line-overlay:
-                interactive: global.sdk_interactive
-                color: '#dc3983'
-                order: 100
-                width: 3px
+                color: '#009eff'
+                order: 503
+                width: 2px
     mz_default_polygon:
         data: { source: mz_default_polygon }
         draw:
             sdk-polygon-overlay:
                 interactive: global.sdk_interactive
-                color: '#20dc3983'
-                order: 500
-
-            sdk-line-overlay:
-                color: '#dc3983'
-                cap: round
+                color: '#60d6efff'
                 order: 501
-                width: 3px
-
+            sdk-line-overlay:
+                color: '#009eff'
+                order: 502
+                width: 2px
     water:
         data: { source: mapfit, layer: water }
         ocean-water:
@@ -1221,8 +1210,8 @@ layers:
                         lines:
                             order: 511
             subway-sizing:
-                filter: { kind: [subway]} 
-       
+                filter: { kind: [subway]}
+
                 draw:
                     lines:
                         cap: round
@@ -1231,7 +1220,7 @@ layers:
                         #width: [[9,1px],[11,2px],[12,3px],[13,4px],[15,5px],[16,7px],[17,9px]]
                         outline:
                             #color: [[10,white],[11,black]]
-                            
+
                             width: [[12, 2.5px],[13,1.5px],[15,2px]]
                             #width: [[12,1.5px],[13,2.0px],[14,2.5px]]
             # light-rail-and-tram-sizing:
@@ -1423,7 +1412,7 @@ layers:
         bridges-tunnels:
             filter:
                 all:
-                    - any: [is_bridge: true, is_tunnel: true]  
+                    - any: [is_bridge: true, is_tunnel: true]
                     - any: [is_bridge: true, is_tunnel: true]
                     - not: { kind_detail: [subway, monorail] }
             draw:
@@ -1593,7 +1582,7 @@ layers:
             trunk_primary:
                 filter: { kind_detail: [trunk_primary, primary, trunk] }
                 draw:
-                    lines:                       
+                    lines:
                         color: [[8, global.major_road1], [9, global.major_road1], [13, global.major_road1], [14, global.major_road1], [15, global.major_road1], [17, global.major_road1]]
                         width: [[8, 0.6px], [9, 0.75px], [10, 1.5px], [13, 2.5px], [14, 4.5px], [15, 5.5px], [16, 7.0px], [19, 7m]]
                         # outline:
@@ -3007,7 +2996,7 @@ layers:
                     join: round
                     color: global.orange3
                     width: [[13,1.5px],[14,2px],[15, 3px], [16, 5px], [18, 10m], [19, 15m]]
-        
+
         airport-lines:
             filter: { kind: aeroway, kind_detail: [runway,taxiway] }
 #            filter:
@@ -3020,7 +3009,7 @@ layers:
                     color:  [[10,[0.4,0.4,0.4]],[11,[0.50,0.50,0.50]],[12,[0.7,0.7,0.7]],[13,[0.75,0.75,0.75]],[14,[0.95,0.95,0.95]]]
                     cap: butt
                     width: [[10,0.75px],[11,1.25px],[12,2px],[13,4px],[14,8px],[15,16px],[16,32px],[17,60m]]
-                    
+
                     #color: global.grey2
                     #cap: butt
                     #width: [[10, 1px], [11, 1.5px], [12, 2px], [13, 4px], [14, 8px], [15, 16px], [16, 32px], [17, 60m]]
@@ -3163,7 +3152,7 @@ layers:
     # buildings are the only layer that gets lighting
     buildings:
         data: { source: mapfit, layer: buildings }
-        filter: 
+        filter:
             all:
                 # limit show smaller landuse areas to higher zooms
                 # - { $zoom: [13], scale_rank: [1,2] }
@@ -3179,7 +3168,7 @@ layers:
                 #- { $zoom: [15], area: { min: 70000 } }
                 #- { $zoom: [15], volume: { min: 70000 } }
                 #- { $zoom: [17], volume: { min: 50 } }
-                - { $zoom: { min: 17 } } #16.5 is preferred
+                - { $zoom: { min: 16 } } #16.5 is preferred
                 - not: { location: underground }
 #                - { $zoom: { max: 18 } }
         draw:
