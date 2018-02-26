@@ -1,7 +1,6 @@
 package com.mapfit.android.utils
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
@@ -22,6 +21,8 @@ import java.util.*
 
 
 /**
+ * Commonly used utility functions.
+ *
  * Created by dogangulcan on 12/21/17.
  */
 
@@ -43,7 +44,7 @@ fun loadImageFromUrl(url: String): Deferred<Drawable?> = async {
 
             drawable
         } catch (e: Exception) {
-            DebugUtils.logException(e)
+            logException(e)
             null
         }
     } else {
@@ -80,12 +81,6 @@ internal fun getBitmapFromVectorDrawable(context: Context, drawableId: Int): Bit
 
     return bitmap
 }
-
-internal val Int.toPx: Int
-    get() = (this * Resources.getSystem().displayMetrics.density).toInt()
-
-internal val Int.toDp: Int
-    get() = (this / Resources.getSystem().displayMetrics.density).toInt()
 
 internal fun generateUniqueId(): Long {
     var id: Long
