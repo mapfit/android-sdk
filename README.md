@@ -6,10 +6,19 @@
 To use Mapfit Maps and services, your application will need an API key. You can get your API key for free [here](https://mapfit.com/getstarted).
 
 ## Install the Mapfit Android SDK
+Make sure `JCenter` is included in your repositories scope inside project level `build.gradle` file as follows
+```
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+```
+
 In your module level `build.gradle` file, add depencency as follows
 ```
 dependencies {
-    	// will be updated
+    	implementation 'com.mapfit:android-sdk:1.0.0'
 }
 ```
 
