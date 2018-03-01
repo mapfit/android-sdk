@@ -1,0 +1,30 @@
+dokka {
+    moduleName = 'android-sdk'
+    outputFormat = 'html'
+    outputDirectory = "$buildDir/mapfit-sdk-ref"
+
+    sourceDirs = files('mapfitsdk/src/main/java/com')
+
+    skipEmptyPackages = true
+    reportNotDocumented = true
+
+    linkMapping {
+        // Source directory
+        dir = "android-sdk/src/main/java/com"
+
+        // URL showing where the source code can be accessed through the web browser
+        url = "https://github.com/mapfit/android-sdk"
+
+        // Suffix which is used to append the line number to the URL. Use #L for GitHub
+        suffix = "#L"
+    }
+}
+
+task deleteUnusedDokkaAssets(type: Delete) {
+    file("$rootDir/mapfit-sdk-ref").listFiles().each {
+        if (it.name.contains("android.R")) project.delete it
+        if (it.name.contains("android.support")) project.delete it
+        if (it.name.contains("com.google")) project.delete it
+        if (it.name.contains("com.mapfit.mapfitsdk.utils")) project.delete it
+    }
+}
