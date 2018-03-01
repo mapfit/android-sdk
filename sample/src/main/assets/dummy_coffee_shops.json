@@ -1,0 +1,72 @@
+[
+  {
+    "id": "vendor0001",
+    "title": "Coffee Shop 1",
+    "address": "395 Flatbush Ave Extension, D, Brooklyn, NY 11201",
+    "lat": 40.693825,
+    "lng": -73.998691,
+    "opensAt": "08:00",
+    "closesAt": "22:00",
+    "open24Hours": false
+  },
+  {
+    "id": "vendor0002",
+    "title": "Coffee Shop 2",
+    "address": "67 Front St, Brooklyn, NY 11201",
+    "lat": 40.6902223,
+    "lng": -73.9770368,
+    "opensAt": "00:00",
+    "closesAt": "00:00",
+    "open24Hours": true
+  },
+  {
+    "id": "vendor0003",
+    "title": "Coffee Shop 3",
+    "address": "134 Montague St, Brooklyn, NY 11201",
+    "lat": 40.6930532,
+    "lng": -73.9860919,
+    "opensAt": "10:00",
+    "closesAt": "18:00",
+    "open24Hours": false
+  },
+  {
+    "id": "vendor0004",
+    "title": "Coffee Shop 4",
+    "address": "135 John St, New York, NY 10038",
+    "lat": 40.7061326,
+    "lng": -74.000769,
+    "opensAt": "08:00",
+    "closesAt": "22:00",
+    "open24Hours": false
+  },
+  {
+    "id": "vendor0005",
+    "title": "Coffee Shop 5",
+    "address": "55 Broad St, New York, NY 10004",
+    "lat": 40.7170279,
+    "lng": -74.0072867,
+    "opensAt": "05:30",
+    "closesAt": "22:00",
+    "open24Hours": false
+  },
+  {
+    "id": "vendor0006",
+    "title": "Coffee Shop 6",
+    "address": "Lower Manhattan, New York, NY 10004",
+    "lat": 40.703126,
+    "lng": -74.015175,
+    "opensAt": "00:00",
+    "closesAt": "00:00",
+    "open24Hours": true
+  },
+  {
+    "id": "vendor0007",
+    "title": "Coffee Shop 7",
+    "address": "Hoboken, New Jersey, NJ 07030",
+    "lat": 40.743181,
+    "lng": -74.026164,
+    "opensAt": "10:00",
+    "closesAt": "21:00",
+    "open24Hours": false
+  }
+]

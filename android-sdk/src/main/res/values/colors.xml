@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="cerulean_blue">#0955ec</color>
+    <color name="pink">#ff90c3</color>
+    <color name="darkish_pink">#dc3983</color>
+    <color name="dark_blue_grey_20">#33132836</color>
+    <color name="silver">#c7cfd4</color>
+    <color name="silver_two">#dde2e5</color>
+    <color name="cool_grey">#a9b1b5</color>
+    <color name="cool_grey_two">#95979a</color>
+    <color name="gunMetal">#535658</color>
+    <color name="charcoal_grey">#414346</color>
+    <color name="dark_text">#212121</color>
+    <color name="light_text">#fafafa</color>
+
+    <color name="md_btn_selected">#33969696</color>
+    <color name="md_btn_selected_dark">#40CBCBCB</color>
+    <color name="titleTextColor">#3a3e43</color>
+
+</resources>
