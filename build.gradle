@@ -1,20 +1,19 @@
 buildscript {
 
-    ext.kotlin_version = '1.2.21'
+    ext.kotlin_version = '1.2.30'
     ext.dokka_version = '0.9.16-eap-2'
     ext.gradleBuildToolsVersion = '3.0.1'
-
 
     repositories {
         google()
         jcenter()
         maven { url "https://dl.bintray.com/kotlin/kotlin-eap/" }
     }
+
     dependencies {
         classpath "com.android.tools.build:gradle:$gradleBuildToolsVersion"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:${dokka_version}"
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
         classpath 'com.novoda:bintray-release:0.8.0'
     }
