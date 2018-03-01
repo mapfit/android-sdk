@@ -1,6 +1,6 @@
 
 # Mapfit SDK for Android
-
+<img  src="/assets/Android-banner.png"/>
 
 ## Get your Mapfit API key
 To use Mapfit Maps and services, your application will need an API key. You can get your API key for free [here](https://mapfit.com/getstarted).
