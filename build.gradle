@@ -1,7 +1,9 @@
 buildscript {
+
     ext.kotlin_version = '1.2.21'
     ext.dokka_version = '0.9.16-eap-2'
     ext.gradleBuildToolsVersion = '3.0.1'
+
 
     repositories {
         google()
@@ -12,13 +14,14 @@ buildscript {
         classpath "com.android.tools.build:gradle:$gradleBuildToolsVersion"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-android-gradle-plugin:${dokka_version}"
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.3'
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
+        classpath 'com.novoda:bintray-release:0.8.0'
     }
 
 }
 
-apply plugin: 'com.github.dcendents.android-maven'
-apply plugin: 'org.jetbrains.dokka-android'
+
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -40,35 +43,10 @@ allprojects {
             dirs 'libs'
         }
     }
-}
 
-dokka {
-    moduleName = 'mapfitsdk'
-    outputFormat = 'html'
-    outputDirectory = "$buildDir/mapfit-api-ref"
-
-    sourceDirs = files('mapfitsdk/src/main/java/com')
-
-    skipEmptyPackages = true
-    reportNotDocumented = true
-
-    linkMapping {
-        // Source directory
-        dir = "mapfitsdk/src/main/java/com"
-
-        // URL showing where the source code can be accessed through the web browser
-        url = "https://github.com/mapfit/android-sdk"
-
-        // Suffix which is used to append the line number to the URL. Use #L for GitHub
-        suffix = "#L"
+    tasks.withType(Javadoc).all {
+        enabled = false
     }
 }
 
-task deleteUnusedDokkaAssets(type: Delete) {
-    file("$rootDir/mapfit-api-ref").listFiles().each {
-        if (it.name.contains("android.R")) project.delete it
-        if (it.name.contains("android.support")) project.delete it
-        if (it.name.contains("com.google")) project.delete it
-        if (it.name.contains("com.mapfit.mapfitsdk.utils")) project.delete it
-    }
-}
+apply from: file('gradle/dokka.gradle')
