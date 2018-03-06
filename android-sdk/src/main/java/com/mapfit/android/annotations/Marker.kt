@@ -15,8 +15,8 @@ import com.mapfit.android.annotations.widget.PlaceInfo
 import com.mapfit.android.geocoder.model.Address
 import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.geometry.LatLngBounds
+import com.mapfit.android.geometry.isValid
 import com.mapfit.android.utils.getBitmapFromVectorDrawable
-import com.mapfit.android.utils.isValid
 import com.mapfit.android.utils.loadImageFromUrl
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
@@ -140,7 +140,7 @@ class Marker internal constructor(
         return this
     }
 
-    private fun setPositionEased(latLng: LatLng, duration: Int): Marker {
+    internal fun setPositionEased(latLng: LatLng, duration: Int): Marker {
         if (latLng.isValid()) {
             mapBindings.forEach {
                 val markerPositionSet = it.key.setMarkerPointEased(

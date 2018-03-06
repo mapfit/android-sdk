@@ -37,6 +37,12 @@ class MarkerOptions internal constructor(
             updateStyle()
         }
 
+    var anchor = Anchor.TOP
+        set(value) {
+            field = value
+            updateStyle()
+        }
+
     private val markerDotSide by lazy {
         11
     }
@@ -56,15 +62,13 @@ class MarkerOptions internal constructor(
     }
 
     private fun getStyleString() =
-        "{ style: 'sdk-point-overlay', anchor: top, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
+        "{ style: 'sdk-point-overlay', anchor: ${anchor.getAnchor()}, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
 
     internal fun updateStyle() {
         marker.mapBindings.forEach {
             it.key.setMarkerStylingFromString(it.value, getStyleString())
             it.key.setMarkerDrawOrder(it.value, drawOrder)
         }
-//        marker.mapBindings.forEach {
-//        }
     }
 
     internal fun placeInfoShown(

@@ -76,7 +76,7 @@ public class MapController implements Renderer {
         NO_VALID_SCENE,
     }
 
-    private static EaseType DEFAULT_EASE_TYPE = EaseType.CUBIC;
+    private static EaseType DEFAULT_EASE_TYPE = EaseType.SINE;
 
     /**
      * Options for enabling debug rendering features

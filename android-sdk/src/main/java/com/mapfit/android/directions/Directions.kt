@@ -7,7 +7,7 @@ import com.mapfit.android.directions.model.Route
 import com.mapfit.android.geocoder.Geocoder.HttpHandler.httpClient
 import com.mapfit.android.geocoder.model.EntranceType
 import com.mapfit.android.geometry.LatLng
-import com.mapfit.android.utils.isEmpty
+import com.mapfit.android.geometry.isEmpty
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.android.UI

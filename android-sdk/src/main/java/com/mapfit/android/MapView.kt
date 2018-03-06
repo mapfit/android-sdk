@@ -24,7 +24,7 @@ import com.mapfit.android.geocoder.GeocoderCallback
 import com.mapfit.android.geocoder.model.Address
 import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.geometry.LatLngBounds
-import com.mapfit.android.utils.isEmpty
+import com.mapfit.android.geometry.isEmpty
 import com.mapfit.android.utils.startActivitySafe
 import com.mapfit.tetragon.ConfigChooser
 import com.mapfit.tetragon.TouchInput
@@ -259,6 +259,8 @@ class MapView(
             updatePlaceInfoPosition(false)
         }
 
+        mapOptions.resizeAccuracyMarker()
+
         consumed
     }
 
@@ -324,6 +326,7 @@ class MapView(
             )
             setZoomOnDoubleTap(x, y)
             activePlaceInfo?.updatePositionDelayed()
+            mapOptions.resizeAccuracyMarker()
             true
         }
     }
