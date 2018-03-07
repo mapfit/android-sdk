@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.support.annotation.DrawableRes
 import android.support.annotation.NonNull
+import android.support.annotation.RestrictTo
 import android.util.Log
 import com.mapfit.android.MapController
 import com.mapfit.android.R

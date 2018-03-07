@@ -1,5 +1,6 @@
 package com.mapfit.android.annotations
 
+import android.support.annotation.RestrictTo
 import com.mapfit.android.Layer
 import com.mapfit.android.MapController
 import com.mapfit.android.geometry.LatLngBounds
@@ -64,6 +65,7 @@ abstract class Annotation(
     /**
      * Do not use this method. It is for internal usage.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract fun initAnnotation(mapController: MapController, id: Long)
 
     abstract fun getLatLngBounds(): LatLngBounds
