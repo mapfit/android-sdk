@@ -4,6 +4,7 @@ import com.mapfit.android.BuildConfig
 import com.mapfit.android.Mapfit
 import com.mapfit.android.geocoder.Geocoder.HttpHandler.geocodeParser
 import com.mapfit.android.geocoder.Geocoder.HttpHandler.httpClient
+import com.mapfit.android.geometry.LatLng
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import okhttp3.*
@@ -38,16 +39,20 @@ class Geocoder {
     }
 
     /**
-     * Returns a list of addresses with entrance rings.
+     * Geocodes and returns a list of addresses with entrance rings.
      *
      * @param address an address such as "119w 24th st NY" venue names are shouldn't be given
      * @param callback for response and errors
      */
     @JvmOverloads
-    fun geocode(address: String, includeBuilding: Boolean = false, callback: GeocoderCallback) {
+    fun geocode(
+        address: String,
+        includeBuilding: Boolean = false,
+        callback: GeocoderCallback
+    ) {
 
         val request = Request.Builder()
-            .url(createRequestUrl(address, includeBuilding))
+            .url(createGeocodingURl(address, includeBuilding))
             .build()
 
         httpClient.newCall(request).enqueue(object : Callback {
@@ -73,9 +78,62 @@ class Geocoder {
         })
     }
 
-    private fun createRequestUrl(address: String, withBuilding: Boolean): String =
+    /**
+     * Reverse-geocodes and returns a list of addresses with entrance rings.
+     *
+     * @param latLng coordinates for the expected geocoding
+     * @param callback for response and errors
+     */
+    @JvmOverloads
+    fun reverseGeocode(
+        latLng: LatLng,
+        includeBuilding: Boolean = false,
+        callback: GeocoderCallback
+    ) {
+
+        val request = Request.Builder()
+            .url(createReverseGeocodingURl(latLng, includeBuilding))
+            .build()
+
+        httpClient.newCall(request).enqueue(object : Callback {
+            override fun onResponse(call: Call?, response: Response?) {
+                if (response != null && response.isSuccessful) {
+                    async(UI) {
+                        val addressList = bg {
+                            response.body()?.string()?.let {
+                                geocodeParser.parseGeocodeResponse(it)
+                            }
+                        }
+                        addressList.await()?.let { callback.onSuccess(it) }
+                    }
+                } else {
+                    val (message, exception) = geocodeParser.parseError(response)
+                    callback.onError(message, exception)
+                }
+            }
+
+            override fun onFailure(call: Call, e: IOException) {
+                e.let { callback.onError("An unexpected error has occurred", it) }
+            }
+        })
+    }
+
+
+    private fun createGeocodingURl(
+        address: String,
+        withBuilding: Boolean
+    ): String =
         "https://api.mapfit.com/v2/geocode?" +
                 "street_address=$address" +
+                "&building=$withBuilding" +
+                "&api_key=${Mapfit.getApiKey()}"
+
+    private fun createReverseGeocodingURl(
+        latLng: LatLng,
+        withBuilding: Boolean
+    ): String =
+        "https://api.mapfit.com/v2/reverse-geocode?" +
+                "lat=${latLng.lat}&lon=${latLng.lng}" +
                 "&building=$withBuilding" +
                 "&api_key=${Mapfit.getApiKey()}"
 

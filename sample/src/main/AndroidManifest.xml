@@ -14,7 +14,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.mapfit.demo.KotlinActivity"
+            android:name="com.mapfit.demo.GeocoderActivity"
             android:windowSoftInputMode="stateHidden|adjustResize">
 
             <intent-filter>
