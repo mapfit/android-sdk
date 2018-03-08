@@ -36,8 +36,7 @@ class MapOptions internal constructor(
 
     var customTheme: String? = null
         set(value) {
-//            mapController.loadSceneFileAsync(value)
-//
+
             val isUrl = value?.let { Patterns.WEB_URL.matcher(it).matches() } ?: false
             if (isUrl) {
                 mapController.loadSceneFileAsync(value)
