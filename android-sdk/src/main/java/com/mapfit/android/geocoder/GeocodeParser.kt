@@ -3,6 +3,7 @@ package com.mapfit.android.geocoder
 import com.mapfit.android.exceptions.MapfitAuthorizationException
 import com.mapfit.android.geocoder.model.*
 import com.mapfit.android.geometry.LatLng
+import com.mapfit.android.geometry.LatLngBounds
 import com.mapfit.android.utils.logException
 import okhttp3.Response
 import org.json.JSONArray
@@ -62,6 +63,12 @@ internal class GeocodeParser internal constructor() {
                     Building()
                 }
 
+                val viewport: LatLngBounds? = if (addressJson.has("viewport")) {
+                    parseViewport(addressJson.getJSONObject("viewport"))
+                } else {
+                    null
+                }
+
                 val responseType: ResponseType? = if (addressJson.has("response_type")) {
                     ResponseType.values()
                         .find { status -> status.code == addressJson.getInt("response_type") }
@@ -86,6 +93,7 @@ internal class GeocodeParser internal constructor() {
                     postalCode = postalCode,
                     adminArea = adminArea,
                     neighborhood = neighborhood,
+                    viewport = viewport,
                     country = country,
                     building = building,
                     responseType = responseType,
@@ -104,6 +112,21 @@ internal class GeocodeParser internal constructor() {
         }
 
         return addressList
+    }
+
+    private fun parseViewport(jsonObject: JSONObject): LatLngBounds {
+        return try {
+            val swJson = jsonObject.getJSONObject("southwest")
+            val neJson = jsonObject.getJSONObject("northeast")
+
+            val sw = LatLng(swJson.getDouble("lat"), swJson.getDouble("lon"))
+            val ne = LatLng(neJson.getDouble("lat"), neJson.getDouble("lon"))
+
+            LatLngBounds(ne, sw)
+        } catch (e: Exception) {
+            logException(e)
+            LatLngBounds()
+        }
     }
 
     private fun parseBuilding(jsonObject: JSONObject): Building {
