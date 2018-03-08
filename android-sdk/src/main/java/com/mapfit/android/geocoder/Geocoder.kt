@@ -39,9 +39,10 @@ class Geocoder {
     }
 
     /**
-     * Geocodes and returns a list of addresses with entrance rings.
+     * Geocodes the given address and returns a list of addresses.
      *
      * @param address an address such as "119w 24th st NY" venue names are shouldn't be given
+     * @param includeBuilding flag for including building polygon
      * @param callback for response and errors
      */
     @JvmOverloads
@@ -50,38 +51,18 @@ class Geocoder {
         includeBuilding: Boolean = false,
         callback: GeocoderCallback
     ) {
-
         val request = Request.Builder()
             .url(createGeocodingURl(address, includeBuilding))
             .build()
 
-        httpClient.newCall(request).enqueue(object : Callback {
-            override fun onResponse(call: Call?, response: Response?) {
-                if (response != null && response.isSuccessful) {
-                    async(UI) {
-                        val addressList = bg {
-                            response.body()?.string()?.let {
-                                geocodeParser.parseGeocodeResponse(it)
-                            }
-                        }
-                        addressList.await()?.let { callback.onSuccess(it) }
-                    }
-                } else {
-                    val (message, exception) = geocodeParser.parseError(response)
-                    callback.onError(message, exception)
-                }
-            }
-
-            override fun onFailure(call: Call, e: IOException) {
-                e.let { callback.onError("An unexpected error has occurred", it) }
-            }
-        })
+        callApi(request, callback)
     }
 
     /**
-     * Reverse-geocodes and returns a list of addresses with entrance rings.
+     * Reverse-geocodes the given [LatLng] coordinate and returns a list of addresses.
      *
      * @param latLng coordinates for the expected geocoding
+     * @param includeBuilding flag for including building polygon
      * @param callback for response and errors
      */
     @JvmOverloads
@@ -90,11 +71,17 @@ class Geocoder {
         includeBuilding: Boolean = false,
         callback: GeocoderCallback
     ) {
-
         val request = Request.Builder()
             .url(createReverseGeocodingURl(latLng, includeBuilding))
             .build()
 
+        callApi(request, callback)
+    }
+
+    private fun callApi(
+        request: Request,
+        callback: GeocoderCallback
+    ) {
         httpClient.newCall(request).enqueue(object : Callback {
             override fun onResponse(call: Call?, response: Response?) {
                 if (response != null && response.isSuccessful) {
