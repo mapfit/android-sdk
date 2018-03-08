@@ -127,15 +127,15 @@ class Directions {
 
         httpClient.newCall(request).enqueue(object : Callback {
             override fun onResponse(call: Call?, response: Response?) {
-                val (isSuccessful, jsonResponse) = isSuccessful(response)
+                val (isSuccessful, rawResponseJson) = isSuccessful(response)
                 if (isSuccessful) {
                     async(UI) {
-                        val route = jsonResponse.let { parseRoute(jsonResponse) }
+                        val route = rawResponseJson.let { parseRoute(rawResponseJson) }
                         route.await()?.let { callback.onSuccess(it) }
                     }
 
                 } else {
-                    val (message, exception) = directionsParser.parseError(response)
+                    val (message, exception) = directionsParser.parseError(response,rawResponseJson)
                     callback.onError(message, exception)
                 }
             }

@@ -18,6 +18,7 @@ class DummyActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         Mapfit.getInstance(this, getString(R.string.mapfit_debug_api_key))
+
         val mapView = MapView(this)
         mapView.layoutParams = FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
