@@ -2,7 +2,10 @@ package com.mapfit.demo
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.mapfit.android.*
+import com.mapfit.android.MapTheme
+import com.mapfit.android.MapView
+import com.mapfit.android.MapfitMap
+import com.mapfit.android.OnMapReadyCallback
 import com.mapfit.android.geocoder.Geocoder
 import com.mapfit.android.geocoder.GeocoderCallback
 import com.mapfit.android.geocoder.model.Address
@@ -45,23 +48,26 @@ class GeocoderActivity : AppCompatActivity() {
     }
 
     private fun reverseGeocodeAddress() {
-        Geocoder().reverseGeocode(LatLng(40.74405, -73.99324), true, object : GeocoderCallback {
-            override fun onError(message: String, e: Exception) {
-                e.printStackTrace()
-            }
-
-            override fun onSuccess(addressList: List<Address>) {
-
-                var latLng = LatLng()
-                addressList.forEach { address ->
-                    latLng = LatLng(address.entrances.first().lat, address.entrances.first().lng)
+        Geocoder().reverseGeocode(
+            LatLng(40.74405, -73.99324),
+            true,
+            object : GeocoderCallback {
+                override fun onError(message: String, e: Exception) {
+                    e.printStackTrace()
                 }
-                val marker = mapfitMap.addMarker(latLng)
-                val polygon = mapfitMap.addPolygon(addressList[0].building.polygon)
 
-            }
+                override fun onSuccess(addressList: List<Address>) {
 
-        })
+                    var latLng = LatLng()
+                    addressList.forEach { address ->
+                        latLng =
+                                LatLng(address.entrances.first().lat, address.entrances.first().lng)
+                    }
+                    val marker = mapfitMap.addMarker(latLng)
+                    val polygon = mapfitMap.addPolygon(addressList[0].building.polygon)
+
+                }
+            })
     }
 
 

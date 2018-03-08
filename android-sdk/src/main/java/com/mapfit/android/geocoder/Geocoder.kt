@@ -39,7 +39,8 @@ class Geocoder {
     }
 
     /**
-     * Geocodes the given address and returns a list of addresses.
+     * Returns a list of addresses with entrance points. Optionally returns the associated building
+     * polygon (where available).
      *
      * @param address an address such as "119w 24th st NY" venue names are shouldn't be given
      * @param includeBuilding flag for including building polygon
@@ -59,7 +60,8 @@ class Geocoder {
     }
 
     /**
-     * Reverse-geocodes the given [LatLng] coordinate and returns a list of addresses.
+     * Returns a list of addresses with entrance points. Optionally returns the associated building
+     * polygon (where available).
      *
      * @param latLng coordinates for the expected geocoding
      * @param includeBuilding flag for including building polygon
