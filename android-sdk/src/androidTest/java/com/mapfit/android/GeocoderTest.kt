@@ -77,7 +77,6 @@ class GeocoderTest {
             )
     }
 
-
     @Test
     fun testGeocoderErrorCallback() {
 
@@ -96,7 +95,6 @@ class GeocoderTest {
                 Mockito.any(Exception::class.java) ?: Exception()
             )
     }
-
 
     @Test
     fun testReverseGeocoderSuccessCallback() {
