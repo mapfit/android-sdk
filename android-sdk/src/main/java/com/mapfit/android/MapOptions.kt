@@ -2,6 +2,7 @@ package com.mapfit.android
 
 import android.support.annotation.FloatRange
 import android.support.v4.content.ContextCompat
+import android.util.Patterns
 import android.view.View
 import com.mapfit.android.utils.isValidZoomLevel
 import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
@@ -33,49 +34,17 @@ class MapOptions internal constructor(
             }
         }
 
-    private fun updateScene(value: MapTheme) {
-        mapController.loadSceneFile(value.toString())
-        updateAttributionImage(value)
-    }
+    var customTheme: String? = null
+        set(value) {
 
-    private fun updateAttributionImage(value: MapTheme) {
-        val attributionImage = when (value) {
-            MapTheme.MAPFIT_GRAYSCALE,
-            MapTheme.MAPFIT_DAY -> {
-                mapView.btnLegal?.setTextColor(
-                    ContextCompat.getColor(
-                        mapView.context,
-                        R.color.dark_text
-                    )
-                )
-                mapView.btnBuildYourMap?.setTextColor(
-                    ContextCompat.getColor(
-                        mapView.context,
-                        R.color.dark_text
-                    )
-                )
-                R.drawable.mf_watermark_light
+            val isUrl = value?.let { Patterns.WEB_URL.matcher(it).matches() } ?: false
+            if (isUrl) {
+                mapController.loadSceneFileAsync(value)
+            } else {
+                mapController.loadSceneFile(value)
             }
-
-            MapTheme.MAPFIT_NIGHT -> {
-                mapView.btnLegal?.setTextColor(
-                    ContextCompat.getColor(
-                        mapView.context,
-                        R.color.light_text
-                    )
-                )
-                mapView.btnBuildYourMap?.setTextColor(
-                    ContextCompat.getColor(
-                        mapView.context,
-                        R.color.light_text
-                    )
-                )
-                R.drawable.mf_watermark_dark
-            }
+            field = value
         }
-
-        mapView.getAttributionImage().setImageResource(attributionImage)
-    }
 
     var compassButtonEnabled = false
         set(value) {
@@ -141,6 +110,50 @@ class MapOptions internal constructor(
         if (isValidZoomLevel(zoomLevel)) {
             minZoom = zoomLevel
         }
+    }
+
+    private fun updateScene(value: MapTheme) {
+        mapController.loadSceneFile(value.toString())
+        updateAttributionImage(value)
+    }
+
+    private fun updateAttributionImage(value: MapTheme) {
+        val attributionImage = when (value) {
+            MapTheme.MAPFIT_GRAYSCALE,
+            MapTheme.MAPFIT_DAY -> {
+                mapView.btnLegal?.setTextColor(
+                    ContextCompat.getColor(
+                        mapView.context,
+                        R.color.dark_text
+                    )
+                )
+                mapView.btnBuildYourMap?.setTextColor(
+                    ContextCompat.getColor(
+                        mapView.context,
+                        R.color.dark_text
+                    )
+                )
+                R.drawable.mf_watermark_light
+            }
+
+            MapTheme.MAPFIT_NIGHT -> {
+                mapView.btnLegal?.setTextColor(
+                    ContextCompat.getColor(
+                        mapView.context,
+                        R.color.light_text
+                    )
+                )
+                mapView.btnBuildYourMap?.setTextColor(
+                    ContextCompat.getColor(
+                        mapView.context,
+                        R.color.light_text
+                    )
+                )
+                R.drawable.mf_watermark_dark
+            }
+        }
+
+        mapView.getAttributionImage().setImageResource(attributionImage)
     }
 
     internal fun getMaxZoom() = maxZoom

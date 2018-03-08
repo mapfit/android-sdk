@@ -90,6 +90,7 @@ class MapView(
     private var mapDoubleClickListener: OnMapDoubleClickListener? = null
     private var mapLongClickListener: OnMapLongClickListener? = null
     private var mapPanListener: OnMapPanListener? = null
+    private var mapThemeLoadListener: OnMapThemeLoadListener? = null
     private var mapPinchListener: OnMapPinchListener? = null
     private var placeInfoAdapter: MapfitMap.PlaceInfoAdapter? = null
     private var onPlaceInfoClickListener: MapfitMap.OnPlaceInfoClickListener? = null
@@ -200,13 +201,21 @@ class MapView(
 
             setMarkerPickListener(onAnnotationClickListener)
 
-            setSceneLoadListener({ _, _ ->
+            setSceneLoadListener { sceneId, sceneError ->
                 mapController.reAddMarkers()
                 if (!sceneUpdateFlag) {
                     onMapReadyCallback.onMapReady(mapfitMap)
                     sceneUpdateFlag = true
                 }
-            })
+
+                mapThemeLoadListener?.let {
+                    if (sceneError == null) {
+                        it.onLoaded()
+                    } else {
+                        it.onError()
+                    }
+                }
+            }
 
             mapOptions = MapOptions(this@MapView, this)
             directionsOptions = DirectionsOptions(this)
@@ -335,6 +344,11 @@ class MapView(
     }
 
     private val mapfitMap = object : MapfitMap() {
+
+        override fun setOnMapThemeLoadListener(listener: OnMapThemeLoadListener) {
+            mapThemeLoadListener = listener
+        }
+
         override fun getTilt(): Float = mapController.tilt
 
         override fun setTilt(angle: Float, duration: Long) {

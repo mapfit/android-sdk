@@ -1,6 +1,7 @@
 package com.mapfit.android
 
 import android.support.annotation.FloatRange
+import android.support.annotation.RestrictTo
 import android.view.View
 import com.mapfit.android.annotations.Annotation
 import com.mapfit.android.annotations.Marker
@@ -286,6 +287,13 @@ abstract class MapfitMap {
     abstract fun reCenter()
 
     /**
+     * Sets a callback that's invoked when a map theme is loaded or an error has occurred.
+     *
+     * @param listener invoked when the theme is loaded or an error has occurred.
+     */
+    abstract fun setOnMapThemeLoadListener(listener: OnMapThemeLoadListener)
+
+    /**
      * Interface to be used to set custom view for Place Info.
      */
     interface PlaceInfoAdapter {
@@ -313,6 +321,7 @@ abstract class MapfitMap {
         fun onPlaceInfoClicked(marker: Marker)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @TestOnly
     internal abstract fun has(annotation: Annotation): Boolean
 

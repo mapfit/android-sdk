@@ -48,6 +48,9 @@ class MapViewTest {
     private lateinit var onMapLongClickListener: OnMapLongClickListener
 
     @Mock
+    private lateinit var onMapThemeLoadListener: OnMapThemeLoadListener
+
+    @Mock
     private lateinit var onMapPanListener: OnMapPanListener
 
     @Mock
@@ -74,6 +77,8 @@ class MapViewTest {
         mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
                 this@MapViewTest.mapfitMap = mapfitMap
+                this@MapViewTest.mapfitMap.setOnMapThemeLoadListener(onMapThemeLoadListener)
+
             }
         })
     }
@@ -150,7 +155,15 @@ class MapViewTest {
     @UiThreadTest
     fun testStyleChanges() {
         mapfitMap.getMapOptions().theme = MapTheme.MAPFIT_NIGHT
+        verify(onMapThemeLoadListener, times(1)).onLoaded()
         Assert.assertEquals(MapTheme.MAPFIT_NIGHT, mapfitMap.getMapOptions().theme)
+    }
+
+    @Test
+    @UiThreadTest
+    fun testCustomStyleChanges() {
+        mapfitMap.getMapOptions().customTheme = "https://cdn.mapfit.com/m1/themes/mapfit-day.yaml"
+        verify(onMapThemeLoadListener, times(1)).onLoaded()
     }
 
     @Test

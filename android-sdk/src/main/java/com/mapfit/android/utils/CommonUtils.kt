@@ -26,7 +26,6 @@ import java.util.*
  * Created by dogangulcan on 12/21/17.
  */
 
-
 fun isValidZoomLevel(zoomLevel: Float): Boolean {
     return if (zoomLevel !in MAP_MIN_ZOOM..MAP_MAX_ZOOM) {
         Log.w("Mapfit", "Zoom level must be between $MAP_MIN_ZOOM and $MAP_MAX_ZOOM")
@@ -58,7 +57,7 @@ fun isValidImageUrl(url: String): Boolean {
     return imgRg.containsMatchIn(url)
 }
 
-private fun isNetworkAvailable(): Boolean {
+internal fun isNetworkAvailable(): Boolean {
     val connectivityManager =
         Mapfit.getContext()?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val activeNetworkInfo = connectivityManager.activeNetworkInfo
