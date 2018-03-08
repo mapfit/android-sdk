@@ -9,6 +9,8 @@ import android.support.test.runner.AndroidJUnit4
 import android.view.View
 import com.mapfit.android.MapOptions.Companion.MAP_MAX_ZOOM
 import com.mapfit.android.MapOptions.Companion.MAP_MIN_ZOOM
+import com.mapfit.android.directions.DirectionsType
+import com.mapfit.android.directions.model.Route
 import com.mapfit.android.geometry.LatLng
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
@@ -17,6 +19,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.*
@@ -32,6 +35,7 @@ import org.mockito.MockitoAnnotations
 class MapViewTest {
 
     private lateinit var mapView: com.mapfit.android.MapView
+
     private lateinit var mapfitMap: MapfitMap
 
     @Mock
@@ -51,6 +55,9 @@ class MapViewTest {
 
     @Mock
     private lateinit var onMapPinchListener: OnMapPinchListener
+
+    @Mock
+    private lateinit var routeDrawCallback: DirectionsOptions.RouteDrawCallback
 
     @Rule
     @JvmField
@@ -262,5 +269,42 @@ class MapViewTest {
             verify(onMapPinchListener, atLeastOnce()).onMapPinch()
         }
     }
+
+
+    @Test
+    fun testOnRouteAddedCallback() {
+        runBlocking {
+            delay(400)
+            mapfitMap.getDirectionsOptions()
+                .setDestination(LatLng(40.744255, -73.993774))
+                .setOrigin(LatLng(40.575534, -73.961857))
+                .setType(DirectionsType.DRIVING)
+                .showDirections(routeDrawCallback)
+
+            Thread.sleep(700)
+
+            Mockito.verify(routeDrawCallback, Mockito.times(1))
+                .onRouteDrawn(
+                    ArgumentMatchers.any(Route::class.java) ?: Route(),
+                    ArgumentMatchers.anyList()
+                )
+        }
+    }
+
+    @Test
+    @UiThreadTest
+    fun testOnRouteErrorCallback() {
+        mapfitMap.getDirectionsOptions()
+            .setType(DirectionsType.DRIVING)
+            .showDirections(routeDrawCallback)
+
+        Thread.sleep(700)
+        Mockito.verify(routeDrawCallback, Mockito.times(1))
+            .onError(
+                ArgumentMatchers.anyString(),
+                Mockito.any(Exception::class.java) ?: Exception()
+            )
+    }
+
 
 }
