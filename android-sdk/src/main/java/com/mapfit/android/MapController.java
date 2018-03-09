@@ -1118,8 +1118,8 @@ public class MapController implements Renderer {
 
         polylineData.addPolyline(polyline);
 
-        polylines.put(polyline.getId(), polyline);
-
+        polylines.put(polylineData.getId(), polyline);
+        requestRender();
         return polyline;
     }
 
@@ -1137,7 +1137,7 @@ public class MapController implements Renderer {
         polygonLayer.addPolygon(poly);
 
         polygons.put(polygonLayer.getId(), poly);
-//        requestRender();
+        requestRender();
         return poly;
     }
 
@@ -1150,10 +1150,10 @@ public class MapController implements Renderer {
             return markerId;
 
         } else if (annotation instanceof Polyline) {
-            MapData dataLayer = addDataLayer(POLYLINE_LAYER_NAME);
-            dataLayer.addPolyline((Polyline) annotation);
-            polylines.put(annotation.getId(), (Polyline) annotation);
-            return dataLayer.getId();
+            MapData lineLayer = addDataLayer(POLYLINE_LAYER_NAME);
+            lineLayer.addPolyline((Polyline) annotation);
+            polylines.put(lineLayer.getId(), (Polyline) annotation);
+            return lineLayer.getId();
 
         } else if (annotation instanceof Polygon) {
             MapData polygonLayer = addDataLayer(POLYGON_LAYER_NAME);

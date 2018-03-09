@@ -18,6 +18,7 @@ import com.mapfit.android.annotations.*
 import com.mapfit.android.annotations.Annotation
 import com.mapfit.android.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.android.annotations.callback.OnMarkerClickListener
+import com.mapfit.android.annotations.callback.OnPolygonClickListener
 import com.mapfit.android.annotations.callback.OnPolylineClickListener
 import com.mapfit.android.annotations.widget.PlaceInfo
 import com.mapfit.android.geocoder.Geocoder
@@ -88,6 +89,7 @@ class MapView(
     // event listeners
     private var markerClickListener: OnMarkerClickListener? = null
     private var polylineClickListener: OnPolylineClickListener? = null
+    private var polygonClickListener: OnPolygonClickListener? = null
     private var mapClickListener: OnMapClickListener? = null
     private var mapDoubleClickListener: OnMapDoubleClickListener? = null
     private var mapLongClickListener: OnMapLongClickListener? = null
@@ -237,6 +239,7 @@ class MapView(
                         showPlaceInfo(it)
                     }
                     is Polyline -> polylineClickListener?.onPolylineClicked(it)
+                    is Polygon -> polygonClickListener?.onPolygonClicked(it)
 
                     else -> Unit
                 }
@@ -346,6 +349,9 @@ class MapView(
     }
 
     private val mapfitMap = object : MapfitMap() {
+        override fun setOnPolygonClickListener(listener: OnPolygonClickListener) {
+            polygonClickListener = listener
+        }
 
         override fun setOnPolylineClickListener(listener: OnPolylineClickListener) {
             polylineClickListener = listener
