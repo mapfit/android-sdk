@@ -7,6 +7,8 @@ import com.mapfit.android.directions.model.Route
 import com.mapfit.android.geocoder.Geocoder.HttpHandler.httpClient
 import com.mapfit.android.geocoder.model.EntranceType
 import com.mapfit.android.geometry.LatLng
+import com.mapfit.android.geometry.LatLngBounds
+import com.mapfit.android.utils.decodePolyline
 import com.mapfit.android.utils.isEmpty
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.experimental.Deferred
@@ -135,7 +137,10 @@ class Directions {
                     }
 
                 } else {
-                    val (message, exception) = directionsParser.parseError(response,rawResponseJson)
+                    val (message, exception) = directionsParser.parseError(
+                        response,
+                        rawResponseJson
+                    )
                     callback.onError(message, exception)
                 }
             }
@@ -155,11 +160,9 @@ class Directions {
     }
 
     private fun parseRoute(response: JSONObject): Deferred<Route?> = bg {
-
         val moshi = Moshi.Builder().build()
         val jsonAdapter = moshi.adapter<Route>(Route::class.java)
         val route = jsonAdapter.fromJson(response.toString())
-
         route?.apply {
             destinationLocation =
                     listOf(
@@ -171,10 +174,15 @@ class Directions {
                         route.originLocation[1],
                         route.originLocation[0]
                     )
+            val boundsBuilder = LatLngBounds.Builder()
+
+            trip.legs.forEach {
+                val line = decodePolyline(it.shape)
+                line.forEach { boundsBuilder.include(it) }
+            }
+            route.viewport = boundsBuilder.build()
         }
-
         route
-
     }
 
     private fun createRequestBody(

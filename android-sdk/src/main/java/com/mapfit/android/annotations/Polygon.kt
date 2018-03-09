@@ -62,14 +62,11 @@ class Polygon(
      */
     override fun remove() {
 
-        val toBeRemoved = mutableListOf<MapController>()
-
         mapBindings.forEach {
             it.key.removePolygon(it.value)
-            toBeRemoved.add(it.key)
         }
+        mapBindings.clear()
 
-        toBeRemoved.forEach { mapBindings.remove(it) }
         layers.forEach { it.remove(this) }
     }
 
