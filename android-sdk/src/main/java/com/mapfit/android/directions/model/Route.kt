@@ -1,5 +1,6 @@
 package com.mapfit.android.directions.model
 
+import com.mapfit.android.geometry.LatLngBounds
 import com.squareup.moshi.Json
 
 /**
@@ -10,5 +11,6 @@ import com.squareup.moshi.Json
 data class Route(
     val trip: Trip = Trip(),
     var destinationLocation: List<Double> = listOf(),
-    @field:Json(name = "sourceLocation") var originLocation: List<Double> = listOf()
+    @field:Json(name = "sourceLocation") var originLocation: List<Double> = listOf(),
+    @field:Transient var viewport: LatLngBounds = LatLngBounds()
 )

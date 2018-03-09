@@ -69,7 +69,6 @@ class DirectionsTest {
         Thread.sleep(500)
         Mockito.verify(directionsCallback, Mockito.times(1))
             .onSuccess(ArgumentMatchers.any(Route::class.java) ?: Route())
-
     }
 
     @Test
@@ -87,8 +86,6 @@ class DirectionsTest {
                 ArgumentMatchers.anyString(),
                 Mockito.any(Exception::class.java) ?: Exception()
             )
-
     }
-
 
 }

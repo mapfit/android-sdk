@@ -17,7 +17,7 @@ class Polyline(
     private val line: MutableList<LatLng>
 ) : Annotation(polylineId, mapController) {
 
-    val points = line
+    val points = line.toMutableList()
     internal val coordinates by lazy {
         val coordinates = DoubleArray(points.size * 2)
         var i = 0
@@ -36,23 +36,29 @@ class Polyline(
         mapBindings[mapController] = polylineId
     }
 
+    fun addPoints(vararg latLngs: LatLng) {
+        points.addAll(latLngs)
+        refreshPolyline()
+    }
+
+    private fun refreshPolyline() {
+        mapBindings.forEach {
+            it.key.removePolyline(it.value)
+            it.key.addPolyline(points)
+        }
+    }
+
     /**
      * Removes the polyline from the map(s) it is added to.
      */
     override fun remove() {
 
         mapBindings.forEach {
-            it.key.removePolygon(it.value)
-
-        }
-        val toBeRemoved = mutableListOf<MapController>()
-
-        mapBindings.forEach {
-            it.key.removeMarker(it.value)
-            toBeRemoved.add(it.key)
+            it.key.removePolyline(it.value)
         }
 
-        toBeRemoved.forEach { mapBindings.remove(it) }
+        mapBindings.clear()
+
         layers.forEach { it.remove(this) }
     }
 

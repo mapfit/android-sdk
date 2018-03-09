@@ -9,6 +9,8 @@ import com.mapfit.android.annotations.Polygon
 import com.mapfit.android.annotations.Polyline
 import com.mapfit.android.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.android.annotations.callback.OnMarkerClickListener
+import com.mapfit.android.annotations.callback.OnPolygonClickListener
+import com.mapfit.android.annotations.callback.OnPolylineClickListener
 import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.geometry.LatLngBounds
 import org.jetbrains.annotations.TestOnly
@@ -193,6 +195,16 @@ abstract class MapfitMap {
      * Sets [OnMarkerClickListener] for [MapView] that marker click events will be passed to.
      */
     abstract fun setOnMarkerClickListener(listener: OnMarkerClickListener)
+
+    /**
+     * Sets [OnPolylineClickListener] for [MapView] that polyline click events will be passed to.
+     */
+            abstract fun setOnPolylineClickListener(listener: OnPolylineClickListener)
+
+    /**
+     * Sets [OnPolygonClickListener] for [MapView] that polygon click events will be passed to.
+     */
+    abstract fun setOnPolygonClickListener(listener: OnPolygonClickListener)
 
     /**
      * Sets [OnMapPanListener] for [MapView] that pan events will be passed to.x
