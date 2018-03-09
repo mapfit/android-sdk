@@ -73,7 +73,6 @@ class PolylineTest {
 
         assertNotNull(polyline)
         assertTrue(mapfitMap.has(polyline))
-//        assertEquals(4, polyline.points.size)
 
         mapfitMap.removePolyline(polyline)
         assertFalse(mapfitMap.has(polyline))

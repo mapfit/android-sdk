@@ -49,11 +49,15 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
 
 
     fun addPolyline(polyline: Polyline): MapData {
+
+        val props = HashMap<String, String>()
+        props["id"] = "${polyline.id}"
+
         map!!.addFeature(
             id,
             polyline.coordinates,
             null,
-            null
+            getStringMapAsArray(props)
         )
 
         return this
@@ -98,6 +102,16 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
     fun clear(): MapData {
         map!!.clearTileSource(id)
         return this
+    }
+
+    private fun getStringMapAsArray(properties: Map<String, String>): Array<String?> {
+        val out = arrayOfNulls<String>(properties.size * 2)
+        var i = 0
+        for ((key, value) in properties) {
+            out[i++] = key
+            out[i++] = value
+        }
+        return out
     }
 
 }
