@@ -19,7 +19,7 @@ class Polygon(
     internal val polygon: MutableList<List<LatLng>>
 ) : Annotation(polygonId, mapController) {
 
-    val points = polygon
+    val points = polygon.toMutableList()
     internal lateinit var coordinates: DoubleArray
     internal lateinit var rings: IntArray
 

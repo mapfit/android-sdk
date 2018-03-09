@@ -199,7 +199,7 @@ abstract class MapfitMap {
     /**
      * Sets [OnPolylineClickListener] for [MapView] that polyline click events will be passed to.
      */
-    abstract fun setOnPolylineClickListener(listener: OnPolylineClickListener)
+            abstract fun setOnPolylineClickListener(listener: OnPolylineClickListener)
 
     /**
      * Sets [OnPolygonClickListener] for [MapView] that polygon click events will be passed to.

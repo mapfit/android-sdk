@@ -1,5 +1,6 @@
 package com.mapfit.android.directions
 
+import android.support.annotation.VisibleForTesting
 import com.mapfit.android.BuildConfig
 import com.mapfit.android.Mapfit
 import com.mapfit.android.directions.Directions.HttpHandler.directionsParser
