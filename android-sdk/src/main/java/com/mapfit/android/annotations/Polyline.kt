@@ -43,8 +43,8 @@ class Polyline(
 
     private fun refreshPolyline() {
         mapBindings.forEach {
-            it.key.removePolyline(it.value)
             it.key.addPolyline(points)
+            it.key.removePolyline(it.value)
         }
     }
 
