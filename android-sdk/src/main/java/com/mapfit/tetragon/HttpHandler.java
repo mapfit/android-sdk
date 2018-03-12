@@ -2,6 +2,8 @@ package com.mapfit.tetragon;
 
 import android.os.Build;
 
+import com.mapfit.android.BuildConfig;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -45,7 +47,7 @@ public class HttpHandler {
      * @see SSLSocketFactory
      */
     private class Tls12SocketFactory extends SSLSocketFactory {
-        private final String[] TLS_V12_ONLY = {"TLSv1", "TLSv1.1", "TLSv1.2"};
+        private final String[] TLS_V12_ONLY = {"TLSv1.1"};
 
         final SSLSocketFactory delegate;
 
@@ -179,7 +181,12 @@ public class HttpHandler {
      */
     public void onRequest(String url, Callback cb, long requestHandle) {
         HttpUrl httpUrl = HttpUrl.parse(url);
-        Request.Builder builder = new Request.Builder().url(httpUrl).tag(requestHandle);
+
+        Request.Builder builder = new Request.Builder()
+                .header("User-Agent", BuildConfig.APPLICATION_ID)
+                .url(httpUrl)
+                .tag(requestHandle);
+
         CacheControl cacheControl = cachePolicy.apply(httpUrl);
         if (cacheControl != null) {
             builder.cacheControl(cacheControl);
