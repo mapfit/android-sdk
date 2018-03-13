@@ -195,11 +195,17 @@ internal class GeocodeParser internal constructor() {
 
                 val lat = entranceJson.getDouble("lat")
                 val lon = entranceJson.getDouble("lon")
-                val entranceType = EntranceType.values()
-                    .find { status ->
-                        status.entranceType
-                            .contentEquals(entranceJson.getString("entrance_type"))
-                    }
+
+                val entranceType = if (entranceJson.has("entrance_type")) {
+                    EntranceType.values()
+                        .find { status ->
+                            status.entranceType
+                                .contentEquals(entranceJson.getString("entrance_type"))
+                        }
+                } else {
+                    EntranceType.INTERPOLATED
+                }
+
 
                 val entrance = Entrance(lat, lon, entranceType)
                 entrances.add(entrance)
