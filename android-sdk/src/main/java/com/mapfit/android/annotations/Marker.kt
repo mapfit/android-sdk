@@ -49,6 +49,7 @@ class Marker internal constructor(
     private var previousIcon: Bitmap? = null
     private var iconChangedWhenPlaceInfo: Bitmap? = null
     private var iconHttpJob = Job()
+    private var iconDrawableJob = Job()
 
     private var title: String = ""
     private var subtitle1: String = ""
@@ -176,7 +177,8 @@ class Marker internal constructor(
      */
     fun setIcon(drawable: Drawable): Marker {
         iconHttpJob.cancel()
-        iconHttpJob = launch {
+        iconDrawableJob.cancel()
+        iconDrawableJob = launch {
             val density = this@Marker.context.resources.displayMetrics.densityDpi
             val bitmapDrawable = drawable as BitmapDrawable
             bitmapDrawable.setTargetDensity(density)
@@ -195,7 +197,8 @@ class Marker internal constructor(
      */
     fun setIcon(@DrawableRes drawableId: Int): Marker {
         iconHttpJob.cancel()
-        iconHttpJob = launch {
+        iconDrawableJob.cancel()
+        iconDrawableJob = launch {
             val options = BitmapFactory.Options()
             options.inTargetDensity = this@Marker.context.resources.displayMetrics.densityDpi
             val bitmap =
@@ -213,6 +216,7 @@ class Marker internal constructor(
      */
     fun setIcon(@NonNull mapfitMarker: MapfitMarker): Marker {
         setIcon(mapfitMarker.getUrl())
+
         markerOptions.setDefaultMarkerSize()
         return this
     }
@@ -224,6 +228,7 @@ class Marker internal constructor(
      */
     fun setIcon(imageUrl: String): Marker {
         iconHttpJob.cancel()
+        iconDrawableJob.cancel()
         iconHttpJob = launch {
             val drawable = loadImageFromUrl(imageUrl)
             drawable.await()?.let {
@@ -305,10 +310,9 @@ class Marker internal constructor(
 
                 if (it.value != activePlaceInfoMarkerId) {
                     it.key.setMarkerBitmap(it.value, width, height, abgr)
-                    previousIcon = if (previousIcon == null) bitmap else icon
+                    iconChangedWhenPlaceInfo = if (previousIcon == null) bitmap else icon
                     icon = bitmap
                 } else {
-//                    previousIcon = bitmap
                     iconChangedWhenPlaceInfo = bitmap
                 }
             }
