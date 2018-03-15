@@ -8,7 +8,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.support.annotation.DrawableRes
 import android.support.annotation.NonNull
-import android.support.annotation.RestrictTo
 import android.util.Log
 import com.mapfit.android.MapController
 import com.mapfit.android.R
@@ -18,8 +17,9 @@ import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.geometry.LatLngBounds
 import com.mapfit.android.utils.getBitmapFromVectorDrawable
 import com.mapfit.android.utils.isValid
-import com.mapfit.android.utils.loadImageFromUrl
+import com.mapfit.android.utils.loadBitmapFromUrl
 import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
 
 /**
@@ -110,7 +110,7 @@ class Marker internal constructor(
         }
         mapBindings[mapController] = id
         markerOptions.updateStyle()
-        icon?.let { setBitmap(it, mapController, id) }
+        icon?.let { setBitmap(it, mapController) }
         setPosition(position)
     }
 
@@ -179,11 +179,8 @@ class Marker internal constructor(
         iconHttpJob.cancel()
         iconDrawableJob.cancel()
         iconDrawableJob = launch {
-            val density = this@Marker.context.resources.displayMetrics.densityDpi
             val bitmapDrawable = drawable as BitmapDrawable
-            bitmapDrawable.setTargetDensity(density)
             val bitmap = bitmapDrawable.bitmap
-            bitmap.density = density
             setBitmap(bitmap, mapController)
             usingDefaultIcon = false
         }
@@ -230,9 +227,10 @@ class Marker internal constructor(
         iconHttpJob.cancel()
         iconDrawableJob.cancel()
         iconHttpJob = launch {
-            val drawable = loadImageFromUrl(imageUrl)
-            drawable.await()?.let {
-                setIcon(it)
+            delay(500)
+            val bitmap = loadBitmapFromUrl(imageUrl)
+            bitmap.await()?.let {
+                setBitmap(it, mapController)
                 usingDefaultIcon = false
             }
         }
@@ -288,7 +286,7 @@ class Marker internal constructor(
         val abgr = IntArray(width * height)
         var row: Int
         var col: Int
-        for (i in argb.indices) {
+        argb.indices.forEach { i ->
             col = i % width
             row = i / width
             val pix = argb[i]
@@ -302,9 +300,7 @@ class Marker internal constructor(
         if (markerId != 0L) {
             mapController.setMarkerBitmap(markerId, width, height, abgr)
         } else {
-
             mapBindings.forEach {
-
                 val activePlaceInfoMarkerId =
                     placeInfoMap[it.key]?.marker?.mapBindings?.get(it.key) ?: 0L
 
@@ -317,6 +313,8 @@ class Marker internal constructor(
                 }
             }
         }
+
+        markerOptions.updateStyle()
     }
 
     /**

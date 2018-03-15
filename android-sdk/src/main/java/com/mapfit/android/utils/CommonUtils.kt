@@ -2,6 +2,7 @@ package com.mapfit.android.utils
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
@@ -41,7 +42,26 @@ fun loadImageFromUrl(url: String): Deferred<Drawable?> = async {
             val inputStream = URL(url).openStream()
             val drawable = Drawable.createFromStream(inputStream, "")
 
+
             drawable
+        } catch (e: Exception) {
+            logException(e)
+            null
+        }
+    } else {
+        Log.w("Mapfit", "Invalid image url $url")
+        null
+    }
+}
+
+fun loadBitmapFromUrl(url: String): Deferred<Bitmap?> = async {
+    if (isValidImageUrl(url) && isNetworkAvailable()) {
+        try {
+            val connection = URL(url).openConnection()
+            connection.doInput = true
+            connection.connect()
+            val input = connection.getInputStream()
+            BitmapFactory.decodeStream(input)
         } catch (e: Exception) {
             logException(e)
             null
