@@ -4,6 +4,8 @@ import android.content.Context
 import android.location.Location
 
 /**
+ * Utils for locations.
+ *
  * Created by dogangulcan on 3/1/18.
  */
 
@@ -71,12 +73,14 @@ private fun isSameProvider(provider1: String?, provider2: String?): Boolean {
     } else provider1 == provider2
 }
 
-fun getPixelsPerMeter(context: Context, lat: Double, zoom: Float): Double {
+/**
+ * Calculates and returns pixels per meter according to given latitude and zoom level.
+ *
+ * @return pixels per meter
+ */
+internal fun getPixelsPerMeter(context: Context, lat: Double, zoom: Float): Double {
     val pixelsPerTile = (TILE_SIZE * context.resources.displayMetrics.densityDpi) / 160
-
     val numTiles = Math.pow(2.0, zoom.toDouble() - 3)
     val metersPerTile = Math.cos(Math.toRadians(lat)) * EARTH_RADIUS / numTiles
     return pixelsPerTile / metersPerTile
 }
-
-
