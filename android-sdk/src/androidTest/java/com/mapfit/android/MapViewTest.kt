@@ -1,21 +1,27 @@
 package com.mapfit.android
 
+import android.location.Location
 import android.support.test.annotation.UiThreadTest
 import android.support.test.espresso.Espresso.onView
+import android.support.test.espresso.IdlingRegistry
 import android.support.test.espresso.action.ViewActions.*
+import android.support.test.espresso.idling.CountingIdlingResource
 import android.support.test.espresso.matcher.ViewMatchers.withId
+import android.support.test.filters.LargeTest
 import android.support.test.rule.ActivityTestRule
+import android.support.test.rule.GrantPermissionRule
 import android.support.test.runner.AndroidJUnit4
 import android.view.View
 import com.mapfit.android.MapOptions.Companion.MAP_MAX_ZOOM
 import com.mapfit.android.MapOptions.Companion.MAP_MIN_ZOOM
 import com.mapfit.android.geometry.LatLng
+import com.mapfit.android.location.LocationListener
+import com.mapfit.android.location.LocationPriority
+import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
+import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import org.junit.*
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -29,9 +35,11 @@ import org.mockito.MockitoAnnotations
  * Created by dogangulcan on 1/8/18.
  */
 @RunWith(AndroidJUnit4::class)
+@LargeTest
 class MapViewTest {
 
     private lateinit var mapView: com.mapfit.android.MapView
+
     private lateinit var mapfitMap: MapfitMap
 
     @Mock
@@ -49,26 +57,44 @@ class MapViewTest {
     @Mock
     private lateinit var onMapPinchListener: OnMapPinchListener
 
+    @Mock
+    private lateinit var locationListener: LocationListener
+
     @Rule
     @JvmField
-    val activityRule: ActivityTestRule<DummyActivity> = ActivityTestRule(
-        DummyActivity::class.java,
+    val activityRule: ActivityTestRule<MapViewTestActivity> = ActivityTestRule(
+        MapViewTestActivity::class.java,
         true,
         true
     )
+
+    @Rule
+    @JvmField
+    val grantPermissionRule: GrantPermissionRule =
+        GrantPermissionRule.grant(android.Manifest.permission.ACCESS_FINE_LOCATION)
+
+    private lateinit var idlingResource: CountingIdlingResource
 
     @Before
     @UiThreadTest
     fun init() {
         MockitoAnnotations.initMocks(this)
 
-        mapView = activityRule.activity.findViewById(R.id.mapView)
+        idlingResource = activityRule.activity.idlingResource
+        IdlingRegistry.getInstance().register(idlingResource)
 
-        mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
-            override fun onMapReady(mapfitMap: MapfitMap) {
-                this@MapViewTest.mapfitMap = mapfitMap
-            }
+        idlingResource.registerIdleTransitionCallback({
+            mapfitMap = activityRule.activity.mapfitMap
+            mapView = activityRule.activity.mapView
         })
+
+        activityRule.activity.init()
+
+    }
+
+    @After
+    fun cleanup() {
+        IdlingRegistry.getInstance().unregister(idlingResource)
     }
 
     @Test
@@ -112,7 +138,7 @@ class MapViewTest {
         mapfitMap.setZoom(zoomLevelBelowMin)
 
         // zoomLevelBelowMin should be normalized to min
-        Assert.assertEquals(MAP_MIN_ZOOM.toFloat(), mapfitMap.getZoom())
+        Assert.assertEquals(MAP_MIN_ZOOM.toFloat(), mapfitMap.getZoom(), 1f)
     }
 
     @Test
@@ -190,6 +216,7 @@ class MapViewTest {
         }
     }
 
+
     @Test
     fun testOnMapDoubleClickListener() {
         runBlocking {
@@ -217,6 +244,30 @@ class MapViewTest {
                 .onMapLongClicked(Mockito.any(LatLng::class.java) ?: LatLng())
         }
     }
+
+
+    /**
+     * Location update is not mocked.
+     */
+    @Test
+    fun testOnUserLocationListener() {
+        runBlocking(UI) {
+            delay(400)
+            mapfitMap.getMapOptions().setUserLocationEnabled(
+                true,
+                LocationPriority.HIGH_ACCURACY,
+                locationListener
+            )
+
+            delay(20000)
+
+            verify(locationListener, atLeastOnce())
+                .onLocation(Mockito.any(Location::class.java) ?: Location(""))
+
+            mapfitMap.getMapOptions().setUserLocationEnabled(false)
+        }
+    }
+
 
     @Test
     fun testOnMapPanListener() {
@@ -249,5 +300,6 @@ class MapViewTest {
             verify(onMapPinchListener, atLeastOnce()).onMapPinch()
         }
     }
+
 
 }
