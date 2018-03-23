@@ -2,10 +2,12 @@ package com.mapfit.android.utils
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.os.Build
+import android.support.annotation.DrawableRes
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.util.Log
@@ -36,7 +38,7 @@ fun isValidZoomLevel(zoomLevel: Float): Boolean {
     }
 }
 
-fun loadImageFromUrl(url: String): Deferred<Drawable?> = async {
+internal fun loadImageFromUrl(url: String): Deferred<Drawable?> = async {
     if (isValidImageUrl(url) && isNetworkAvailable()) {
         try {
             val inputStream = URL(url).openStream()
@@ -53,7 +55,7 @@ fun loadImageFromUrl(url: String): Deferred<Drawable?> = async {
     }
 }
 
-fun isValidImageUrl(url: String): Boolean {
+private fun isValidImageUrl(url: String): Boolean {
     val imgRg = """(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*\.(?:jpg|gif|png))""".toRegex()
     return imgRg.containsMatchIn(url)
 }
@@ -93,4 +95,10 @@ internal fun generateUniqueId(): Long {
     } while (id < 0)
 
     return id
+}
+
+internal fun getBitmapFromDrawableID(context: Context, @DrawableRes drawableId: Int): Bitmap? {
+    val options = BitmapFactory.Options()
+    options.inTargetDensity = context.resources.displayMetrics.densityDpi
+    return BitmapFactory.decodeResource(context.resources, drawableId, options)
 }

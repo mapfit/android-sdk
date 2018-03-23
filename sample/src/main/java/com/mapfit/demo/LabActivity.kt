@@ -5,6 +5,9 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.mapfit.android.*
 import com.mapfit.mapfitdemo.R
+import kotlinx.coroutines.experimental.channels.consumeEach
+import kotlinx.coroutines.experimental.channels.produce
+import kotlinx.coroutines.experimental.runBlocking
 
 class LabActivity : AppCompatActivity() {
 
@@ -27,12 +30,24 @@ class LabActivity : AppCompatActivity() {
 
     }
 
+
+    fun produceSquares() = produce<Int> {
+        for (x in 1..5) send(x * x)
+    }
+
+    fun main(args: Array<String>) = runBlocking<Unit> {
+        val squares = produceSquares()
+        squares.consumeEach { println(it) }
+        println("Done!")
+    }
+
     @SuppressLint("MissingPermission")
     private fun testLocation() {
 
-
         mapfitMap.getMapOptions().setUserLocationEnabled(true)
+        mapfitMap.getMapOptions().userLocationButtonEnabled = true
 
+        mapfitMap.setZoom(17f)
 //
 //        val marker = mapfitMap.addMarker(LatLng())
 //

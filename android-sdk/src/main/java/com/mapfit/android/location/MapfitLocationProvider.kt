@@ -1,14 +1,19 @@
 package com.mapfit.android.location
 
+import android.Manifest
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
 import android.location.Criteria
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Bundle
 import android.support.annotation.RequiresPermission
+import android.support.v4.content.ContextCompat
+import com.mapfit.android.Mapfit
+import com.mapfit.android.utils.logError
 
 /**
  * Location API for accessing accurate device location.
@@ -16,7 +21,7 @@ import android.support.annotation.RequiresPermission
  * Created by dogangulcan on 3/1/18.
  */
 @SuppressLint("MissingPermission")
-class MapfitLocationProvider(context: Context) {
+internal class MapfitLocationProvider(context: Context) {
 
     var lastLocation: Location? = null
         private set
@@ -40,43 +45,48 @@ class MapfitLocationProvider(context: Context) {
         locationRequest: LocationRequest = LocationRequest(),
         locationListener: com.mapfit.android.location.LocationListener
     ) {
-        val locationCallback = object : LocationListener {
-            override fun onLocationChanged(location: Location) {
-                if (isBetterLocation(location, lastLocation)) {
-                    lastLocation = location
+
+        if (isLocationPermissionGranted()) {
+            val locationCallback = object : LocationListener {
+                override fun onLocationChanged(location: Location) {
+                    if (isBetterLocation(location, lastLocation)) {
+                        lastLocation = location
+                    }
+
+                    lastLocation?.let { locationListener.onLocation(it) }
                 }
 
-                lastLocation?.let { locationListener.onLocation(it) }
-            }
+                override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
+                    val providerStatus = when (status) {
+                        0 -> ProviderStatus.OUT_OF_SERVICE
+                        1 -> ProviderStatus.TEMPORARILY_UNAVAILABLE
+                        else -> ProviderStatus.ENABLED
+                    }
 
-            override fun onStatusChanged(provider: String, status: Int, extras: Bundle) {
-                val providerStatus = when (status) {
-                    0 -> ProviderStatus.OUT_OF_SERVICE
-                    1 -> ProviderStatus.TEMPORARILY_UNAVAILABLE
-                    else -> ProviderStatus.ENABLED
+                    locationListener.onProviderStatus(providerStatus)
                 }
 
-                locationListener.onProviderStatus(providerStatus)
+                override fun onProviderEnabled(provider: String) {
+                    locationListener.onProviderStatus(ProviderStatus.ENABLED)
+                }
+
+                override fun onProviderDisabled(provider: String) {
+                    locationListener.onProviderStatus(ProviderStatus.DISABLED)
+                }
             }
 
-            override fun onProviderEnabled(provider: String) {
-                locationListener.onProviderStatus(ProviderStatus.ENABLED)
-            }
+            locationManager.requestLocationUpdates(
+                locationRequest.interval,
+                locationRequest.minimumDisplacement,
+                getLocationCriteria(locationRequest.locationPriority),
+                locationCallback,
+                null
+            )
 
-            override fun onProviderDisabled(provider: String) {
-                locationListener.onProviderStatus(ProviderStatus.DISABLED)
-            }
+            listenerMap[locationListener] = locationCallback
+        } else {
+            logError("Failed to request location. Location permission is not granted.")
         }
-
-        locationManager.requestLocationUpdates(
-            locationRequest.interval,
-            locationRequest.minimumDisplacement,
-            getLocationCriteria(locationRequest.locationPriority),
-            locationCallback,
-            null
-        )
-
-        listenerMap[locationListener] = locationCallback
     }
 
     /**
@@ -97,9 +107,8 @@ class MapfitLocationProvider(context: Context) {
     private fun getLocationCriteria(locationPriority: LocationPriority): Criteria {
 
         val (accuracy, power) = when (locationPriority) {
-            LocationPriority.ACCURATE -> Pair(Criteria.ACCURACY_HIGH, Criteria.POWER_HIGH)
-            LocationPriority.BALANCED -> Pair(Criteria.ACCURACY_MEDIUM, Criteria.POWER_MEDIUM)
-            LocationPriority.LOW_POWER -> Pair(Criteria.ACCURACY_LOW, Criteria.POWER_LOW)
+            LocationPriority.HIGH_ACCURACY -> Pair(Criteria.ACCURACY_HIGH, Criteria.POWER_HIGH)
+            LocationPriority.LOW_ACCURACY -> Pair(Criteria.ACCURACY_LOW, Criteria.POWER_LOW)
         }
 
         return Criteria().apply {
@@ -118,5 +127,12 @@ class MapfitLocationProvider(context: Context) {
     private fun isNetworkEnabled() =
         locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
 
+    internal fun isLocationPermissionGranted() =
+        Mapfit.getContext()?.let {
+            ContextCompat.checkSelfPermission(
+                it,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        } == PackageManager.PERMISSION_GRANTED
 
 }

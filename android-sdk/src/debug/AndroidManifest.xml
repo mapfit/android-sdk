@@ -6,7 +6,7 @@
 
     <application>
         <activity
-            android:name=".DummyActivity"
+            android:name=".MapViewTestActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
     </application>
 

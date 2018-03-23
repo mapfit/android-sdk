@@ -31,6 +31,12 @@ class MarkerOptions internal constructor(
             }
         }
 
+    var flat = false
+        set(value) {
+            field = value
+            updateStyle()
+        }
+
     var drawOrder = 2000
         set(value) {
             field = value
@@ -62,12 +68,21 @@ class MarkerOptions internal constructor(
     }
 
     private fun getStyleString() =
-        "{ style: 'sdk-point-overlay', anchor: ${anchor.getAnchor()}, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
+        "{ style: 'sdk-point-overlay', anchor: ${anchor.getAnchor()}, flat: $flat, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
 
     internal fun updateStyle() {
         marker.mapBindings.forEach {
             it.key.setMarkerStylingFromString(it.value, getStyleString())
             it.key.setMarkerDrawOrder(it.value, drawOrder)
+        }
+    }
+
+    internal fun setSideSize(w: Int, h: Int) {
+        marker.mapBindings.forEach {
+            it.key.setMarkerStylingFromString(
+                it.value,
+                "{ style: 'sdk-point-overlay', anchor: ${anchor.getAnchor()}, flat: $flat, size: [${w}px, ${h}px], order: $drawOrder, interactive: false, collide: false }"
+            )
         }
     }
 

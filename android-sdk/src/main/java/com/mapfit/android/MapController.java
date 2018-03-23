@@ -453,9 +453,11 @@ public class MapController implements Renderer {
      * @param position LngLat of the position to set
      */
     public void setPosition(LatLng position) {
-        checkPointer(mapPointer);
-        lastCenter = position;
-        nativeSetPosition(mapPointer, position.getLng(), position.getLat());
+        if (position != null) {
+            checkPointer(mapPointer);
+            lastCenter = position;
+            nativeSetPosition(mapPointer, position.getLng(), position.getLat());
+        }
     }
 
     /**

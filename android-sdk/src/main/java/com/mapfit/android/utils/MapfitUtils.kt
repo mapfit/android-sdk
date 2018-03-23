@@ -2,7 +2,6 @@
 
 package com.mapfit.android.utils
 
-import com.mapfit.android.BuildConfig
 import com.mapfit.android.geometry.LatLng
 
 /**

@@ -11,7 +11,7 @@ package com.mapfit.android.location
  * @param updateCount number of location updates to be obtained
  */
 data class LocationRequest(
-    var locationPriority: LocationPriority = LocationPriority.ACCURATE,
+    var locationPriority: LocationPriority = LocationPriority.HIGH_ACCURACY,
     var interval: Long = DEFAULT_LOCATION_UPDATE_INTERVAL,
     var minimumDisplacement: Float = DEFAULT_LOCATION_UPDATE_DISTANCE,
     var updateCount: Int = -1

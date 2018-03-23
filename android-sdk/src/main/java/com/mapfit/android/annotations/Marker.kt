@@ -2,7 +2,6 @@ package com.mapfit.android.annotations
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.PointF
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -16,6 +15,7 @@ import com.mapfit.android.geocoder.model.Address
 import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.geometry.LatLngBounds
 import com.mapfit.android.geometry.isValid
+import com.mapfit.android.utils.getBitmapFromDrawableID
 import com.mapfit.android.utils.getBitmapFromVectorDrawable
 import com.mapfit.android.utils.loadImageFromUrl
 import kotlinx.coroutines.experimental.Job
@@ -195,15 +195,15 @@ class Marker internal constructor(
     fun setIcon(@DrawableRes drawableId: Int): Marker {
         iconHttpJob.cancel()
         iconHttpJob = launch {
-            val options = BitmapFactory.Options()
-            options.inTargetDensity = this@Marker.context.resources.displayMetrics.densityDpi
-            val bitmap =
-                BitmapFactory.decodeResource(this@Marker.context.resources, drawableId, options)
-            setBitmap(bitmap, mapController)
-            usingDefaultIcon = false
+            val bitmap = getBitmapFromDrawableID(this@Marker.context, drawableId)
+            bitmap?.let {
+                setBitmap(it, mapController)
+                usingDefaultIcon = false
+            }
         }
         return this
     }
+
 
     /**
      * Sets the marker icon with the given [MapfitMarker].
@@ -266,7 +266,7 @@ class Marker internal constructor(
         }
     }
 
-    private fun setBitmap(
+    internal fun setBitmap(
         bitmap: Bitmap,
         mapController: MapController,
         markerId: Long = 0
