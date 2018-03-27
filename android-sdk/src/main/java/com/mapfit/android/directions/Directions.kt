@@ -14,7 +14,6 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
-import org.jetbrains.anko.coroutines.experimental.bg
 import org.json.JSONObject
 import java.io.IOException
 
@@ -154,7 +153,7 @@ class Directions {
         )
     }
 
-    private fun parseRoute(response: JSONObject): Deferred<Route?> = bg {
+    private fun parseRoute(response: JSONObject): Deferred<Route?> = async {
 
         val moshi = Moshi.Builder().build()
         val jsonAdapter = moshi.adapter<Route>(Route::class.java)
@@ -174,7 +173,6 @@ class Directions {
         }
 
         route
-
     }
 
     private fun createRequestBody(
