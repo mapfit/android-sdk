@@ -5,9 +5,18 @@
     android:layout_height="match_parent"
     tools:context="com.mapfit.demo.KotlinActivity">
 
+
     <com.mapfit.android.MapView
         android:id="@+id/mapView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+
+    </com.mapfit.android.MapView>
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="b1" />
 
 </android.support.constraint.ConstraintLayout>

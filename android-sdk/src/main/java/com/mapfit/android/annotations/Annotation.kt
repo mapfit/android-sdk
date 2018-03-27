@@ -21,7 +21,7 @@ abstract class Annotation(
 
     var visibility: Boolean = true
         set(value) {
-            mapBindings.forEach {
+            mapBindings.forEach { it ->
                 it.key.changeAnnotationVisibility(it.value, value)
             }
             subAnnotation?.visibility = value

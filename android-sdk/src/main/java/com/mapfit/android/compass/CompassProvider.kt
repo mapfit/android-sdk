@@ -56,7 +56,7 @@ internal class CompassProvider(
         sensorManager.registerListener(
             sensorEventListener,
             sensor,
-            SensorManager.SENSOR_DELAY_GAME
+            SensorManager.SENSOR_DELAY_UI
         )
     }
 
