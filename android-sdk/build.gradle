@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: "org.jetbrains.kotlin.android.extensions"
 
 project.ext {
-    mapfitSdkVersion = '1.0.0'
+    mapfitSdkVersion = '1.1.0-alpha1'
     mapfitSdkVersionCode = 1
 }
 
@@ -96,20 +96,20 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22.2'
-    implementation 'org.jetbrains.anko:anko-coroutines:0.10.4'
-    implementation 'com.android.support:appcompat-v7:27.0.2'
-    implementation 'com.android.support:support-annotations:27.0.2'
-    implementation 'com.squareup.okhttp3:okhttp:3.9.1'
-    implementation 'com.squareup.okhttp3:logging-interceptor:3.9.1'
-    implementation 'com.squareup.moshi:moshi-kotlin:1.5.0'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutine_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutine_version"
+    implementation "com.android.support:appcompat-v7:$support_lib_version"
+    implementation "com.android.support:support-annotations:$support_lib_version"
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
+    implementation "com.squareup.moshi:moshi-kotlin:$moshi_version"
 
     testImplementation 'junit:junit:4.12'
     testCompile 'org.json:json:20140107'
-    testCompile 'org.mockito:mockito-core:2.15.0'
-    testCompile 'org.mockito:mockito-inline:2.15.0'
-    androidTestImplementation 'org.mockito:mockito-android:2.15.0'
-    testImplementation 'com.squareup.okhttp3:mockwebserver:3.9.1'
+    testCompile "org.mockito:mockito-core:$mockito_version"
+    testCompile "org.mockito:mockito-inline:$mockito_version"
+    androidTestImplementation "org.mockito:mockito-android:$mockito_version"
+    testImplementation "com.squareup.okhttp3:mockwebserver:$okhttp_version"
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     implementation 'com.android.support.test.espresso:espresso-idling-resource:3.0.1'
