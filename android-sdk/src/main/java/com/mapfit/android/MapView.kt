@@ -29,17 +29,20 @@ import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.geometry.LatLngBounds
 import com.mapfit.android.geometry.isEmpty
 import com.mapfit.android.utils.startActivitySafe
+import com.mapfit.tetragon.CachePolicy
 import com.mapfit.tetragon.ConfigChooser
+import com.mapfit.tetragon.HttpHandler
 import com.mapfit.tetragon.TouchInput
 import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
-import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
+import okhttp3.CacheControl
+import okhttp3.HttpUrl
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.TestOnly
+import java.io.File
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -67,11 +70,8 @@ class MapView(
     private val controlsView: View by lazy {
         LayoutInflater.from(context).inflate(R.layout.mf_overlay_map_controls, this, false)
     }
-
     private val placeInfoFrame = FrameLayout(context)
-
     private val attributionImage: ImageView = controlsView.findViewById(R.id.imgAttribution)
-
     internal val zoomControlsView: RelativeLayout by lazy {
         controlsView.findViewById<RelativeLayout>(R.id.zoomControls)
     }
@@ -100,9 +100,7 @@ class MapView(
     private var sceneUpdateFlag = false
     private var animatingCompass = false
 
-
     init {
-
         Mapfit.getApiKey()
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
@@ -190,9 +188,6 @@ class MapView(
                     yPivot
                 )
 
-//                val matrix = Matrix()
-//                matrix.postRotate(0f, xPivot, yPivot)
-
                 hideCompassButton()
 
                 anim.duration = ANIMATION_DURATION.toLong()
@@ -209,6 +204,10 @@ class MapView(
                     launch {
                         mapController.setPositionEased(it, ANIMATION_DURATION)
                         mapController.setZoomEased(17f, ANIMATION_DURATION)
+                        repeat(200) {
+                            delay(10)
+                            resizeAccuracyMarker()
+                        }
                     }
                 }
         }
@@ -230,14 +229,16 @@ class MapView(
         mapController = MapController(getGLSurfaceView())
 
         mapController.apply {
+            setHttpHandler(getHttpHandler())
+
             init()
 
             setTapResponder(singleTapResponder())
             setDoubleTapResponder(doubleTapResponder())
             setLongPressResponder(longClickResponder())
             setPanResponder(panResponder())
-            setScaleResponder(scaleResponder())
             setShoveResponder(shoveResponder())
+            setScaleResponder(scaleResponder())
             setRotateResponder(rotateResponder())
 
             setMarkerPickListener(onAnnotationClickListener)
@@ -249,6 +250,7 @@ class MapView(
                     sceneUpdateFlag = true
                 }
             })
+
 
             mapOptions = MapOptions(this@MapView, this)
             directionsOptions = DirectionsOptions(this)
@@ -273,36 +275,7 @@ class MapView(
         }
     }
 
-    private fun rotateResponder() = TouchInput.RotateResponder { x, y, rotation ->
-        if (mapController.rotation != 0f) {
-            btnCompass.visibility = View.VISIBLE
-            btnCompass.alpha = 1f
-        } else {
-            btnCompass.visibility = View.GONE
-        }
-
-        launch {
-            val matrix = Matrix()
-            val pivotCenter = (btnCompass.drawable.bounds.width() / 2).toFloat()
-
-            matrix.postRotate(
-                Math.toDegrees(mapController.rotation.toDouble()).toFloat(),
-                pivotCenter,
-                pivotCenter
-            )
-
-            Log.d(
-                "COMPASS",
-                "SET DEGREES${Math.toDegrees(mapController.rotation.toDouble()).toFloat()}"
-            )
-            btnCompass.imageMatrix = matrix
-
-        }
-
-        mapOptions.rotateUserDirection()
-
-        false
-    }
+    private val compassPivotCenter = 60f
 
     private fun hideCompassButton(matrix: Matrix? = null) {
         launch(UI) {
@@ -337,6 +310,8 @@ class MapView(
     private var max = false
     private var min = false
 
+    private var scaleFlingJob = Job()
+
     private fun scaleResponder() = TouchInput.ScaleResponder { x, y, scale, velocity ->
         var consumed = false
 
@@ -358,11 +333,25 @@ class MapView(
 
         if (mapOptions.userLocationButtonEnabled) resizeAccuracyMarker()
 
+        launch {
+            scaleFlingJob.cancelAndJoin()
+            scaleFlingJob = launch {
+                delay(700)
+                resizeAccuracyMarker()
+            }
+        }
+
+
         consumed
     }
 
+    private fun rotateResponder() = TouchInput.RotateResponder { x, y, rotation ->
+        rotateCompassButton()
+        false
+    }
+
     private fun resizeAccuracyMarker() {
-        mapOptions.resizeAccuracyMarker()
+        if (mapOptions.getUserLocationEnabled()) mapOptions.resizeAccuracyCircle()
     }
 
     private fun panResponder() = object : TouchInput.PanResponder {
@@ -445,6 +434,24 @@ class MapView(
         mapfitMap.setZoom(mapController.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION.toLong())
     }
 
+    @Synchronized
+    private fun rotateCompassButton() {
+        if (btnCompass.visibility != View.VISIBLE) {
+            btnCompass.visibility = View.VISIBLE
+            btnCompass.alpha = 1f
+        }
+
+        launch {
+            val compassRotationMatrix = Matrix()
+            compassRotationMatrix.postRotate(
+                Math.toDegrees(mapController.rotation.toDouble()).toFloat(),
+                compassPivotCenter,
+                compassPivotCenter
+            )
+            btnCompass.imageMatrix = compassRotationMatrix
+        }
+    }
+
     private val mapfitMap = object : MapfitMap() {
         override fun getTilt(): Float = mapController.tilt
 
@@ -497,7 +504,7 @@ class MapView(
                         }
 
                         if (latLng.isEmpty()) {
-                            onMarkerAddedCallback.onError(IOException("No coordinates found for given address."))
+                            onMarkerAddedCallback?.onError(IOException("No coordinates found for given address."))
                         } else {
                             val marker = mapController.addMarker().setPosition(latLng)
 //
@@ -507,8 +514,8 @@ class MapView(
                                     mapController.addPolygon(addressList[0].building.polygon)
                                 marker.setPolygon(polygon)
                             }
-                            async(UI) {
-                                onMarkerAddedCallback.onMarkerAdded(marker)
+                            launch(UI) {
+                                onMarkerAddedCallback?.onMarkerAdded(marker)
                             }
                         }
                     }
@@ -784,6 +791,32 @@ class MapView(
     }
 
     private var attributionAnimJob: Job? = null
+
+    private fun getHttpHandler(): HttpHandler {
+        val cacheDir = context.externalCacheDir
+
+        if (cacheDir != null && cacheDir.exists()) {
+            val cachePolicy = object : CachePolicy {
+                internal var tileCacheControl =
+                    CacheControl.Builder().maxStale(7, TimeUnit.DAYS).build()
+
+                internal var cdnCacheControl =
+                    CacheControl.Builder().maxStale(7, TimeUnit.DAYS).build()
+
+                override fun apply(url: HttpUrl): CacheControl? {
+                    return when (url.host()) {
+                        "tiles2.mapfit.com" -> tileCacheControl
+                        "cdn.mapfit.com" -> cdnCacheControl
+                        else -> null
+                    }
+                }
+            }
+
+            return HttpHandler(File(cacheDir, "tile_cache"), 30 * 1024 * 1024, cachePolicy)
+        }
+
+        return HttpHandler()
+    }
 
 }
 

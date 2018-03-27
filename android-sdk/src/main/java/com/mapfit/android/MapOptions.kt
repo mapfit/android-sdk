@@ -13,13 +13,16 @@ import com.mapfit.android.annotations.Anchor
 import com.mapfit.android.compass.CompassListener
 import com.mapfit.android.compass.CompassProvider
 import com.mapfit.android.geometry.LatLng
+import com.mapfit.android.geometry.isEmpty
 import com.mapfit.android.location.*
-import com.mapfit.android.utils.getBitmapFromDrawableID
+import com.mapfit.android.utils.getBitmapFromVectorDrawable
 import com.mapfit.android.utils.isValidZoomLevel
 import com.mapfit.android.utils.rotate
 import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
+import kotlin.math.abs
 
 
 /**
@@ -33,22 +36,32 @@ class MapOptions internal constructor(
 ) {
 
     private val mapfitLocationProvider by lazy { MapfitLocationProvider(mapView.context) }
-    private val compassProvider by lazy {
-        CompassProvider(mapView.context, compassListener)
+    private val compassProvider: CompassProvider by lazy {
+        CompassProvider(
+            mapView.context,
+            compassListener
+        )
     }
+    private var orientationIconBitmap: Bitmap? = null
     private var listener: LocationListener? = null
+    private var previousAccuracyMarkerSize = 0
+    private var rotationJob = Job()
+    private var orientationMarkerSize = 0
+    private var maxZoom: Float = 20f
+    private var minZoom: Float = 1f
+    private val screenDensity = mapView.context.resources.displayMetrics.densityDpi
 
     /**
      * Marker for user location.
      */
     private val userMarker by lazy {
         mapController.addMarker().apply {
-            setIcon(R.drawable.mf_user_location)
-            markerOptions.setSideSize(30, 30)
-
-            markerOptions.anchor = Anchor.CENTER
-            markerOptions.drawOrder = 3000
-            markerOptions.flat = true
+            setIcon(R.drawable.mf_user_loc)
+            markerOptions.apply {
+                anchor = Anchor.CENTER
+                drawOrder = 1900
+                flat = true
+            }
         }
     }
 
@@ -58,14 +71,11 @@ class MapOptions internal constructor(
     private val accuracyMarker by lazy {
         mapController.addMarker().apply {
             setIcon(R.drawable.mf_accuracy_radius)
-            markerOptions.setSideSize(100, 100)
             markerOptions.anchor = Anchor.CENTER
             markerOptions.drawOrder = 1000
             markerOptions.flat = true
         }
     }
-
-    private var orientationIconBitmap: Bitmap? = null
 
     /**
      * Marker for user location accuracy.
@@ -73,20 +83,23 @@ class MapOptions internal constructor(
     private val orientationMarker by lazy {
         mapController.addMarker().apply {
 
-            orientationIconBitmap =
-                    getBitmapFromDrawableID(
-                        mapView.context,
-                        R.drawable.mf_user_direction
-                    )
+            orientationIconBitmap = getBitmapFromVectorDrawable(
+                mapView.context,
+                R.drawable.mf_user_direction
+            )
 
             orientationIconBitmap?.let {
                 setBitmap(it, mapController)
             }
 
-            markerOptions.setSideSize(20, 20)
-            markerOptions.anchor = Anchor.CENTER
-            markerOptions.drawOrder = 1100
-            markerOptions.flat = true
+            markerOptions.apply {
+                setSideSize(10, 10)
+                anchor = Anchor.CENTER
+                drawOrder = 1100
+                flat = true
+            }
+
+            orientationMarkerSize = orientationIconBitmap?.getScaledWidth(screenDensity) ?: 0
         }
     }
 
@@ -95,9 +108,7 @@ class MapOptions internal constructor(
         const val MAP_MAX_ZOOM = 20.0
     }
 
-    private var maxZoom: Float = 20f
-    private var minZoom: Float = 1f
-    private var isUserLocationEnabled: Boolean = false
+    private var userLocationEnabled: Boolean = false
 
     internal fun getLastLocation() =
         mapfitLocationProvider.lastLocation?.let {
@@ -130,14 +141,14 @@ class MapOptions internal constructor(
     var userLocationButtonEnabled = true
         set(value) {
             mapView.btnUserLocation.setImageResource(
-                if (!isUserLocationEnabled || !mapfitLocationProvider.isLocationPermissionGranted()) {
+                if (!userLocationEnabled || !mapfitLocationProvider.isLocationPermissionGranted()) {
                     R.drawable.mf_current_location_passive
                 } else {
                     (R.drawable.mf_current_location)
                 }
             )
 
-            mapView.btnUserLocation.isEnabled = isUserLocationEnabled
+            mapView.btnUserLocation.isEnabled = userLocationEnabled
             mapView.btnUserLocation.visibility = if (value) View.VISIBLE else View.GONE
 
             field = value
@@ -263,7 +274,7 @@ class MapOptions internal constructor(
         listener: LocationListener? = null
     ) {
         this.listener = listener
-        isUserLocationEnabled = enable
+        userLocationEnabled = enable
 
         if (enable && userLocationButtonEnabled) {
             mapView.btnUserLocation.setImageResource(R.drawable.mf_current_location)
@@ -279,31 +290,49 @@ class MapOptions internal constructor(
                 locationListener = locationListener
             )
 
+            if (userLocationButtonEnabled) {
+                mapView.btnUserLocation.setImageResource(R.drawable.mf_current_location)
+                mapView.btnUserLocation.isEnabled = true
+            }
+
         } else {
             compassProvider.stop()
-
             mapfitLocationProvider.removeLocationUpdates(locationListener)
-            userMarker.visibility = enable
-            accuracyMarker.visibility = enable
+
+            mapView.btnUserLocation.setImageResource(R.drawable.mf_current_location_passive)
+            mapView.btnUserLocation.isEnabled = false
         }
+
+        userMarker.visibility = enable
+        orientationMarker.visibility = enable
+        accuracyMarker.visibility = enable
     }
+
+    /**
+     * Returns user location status.
+     *
+     * @return true if user location is enabled
+     */
+    fun getUserLocationEnabled() = userLocationEnabled
 
     private val locationListener = object : LocationListener {
         override fun onLocation(location: Location) {
-            val userLocation = LatLng(location.latitude, location.longitude)
+            launch {
+                val userLocation = LatLng(location.latitude, location.longitude)
 
-            when (location.accuracy) {
-                in 0..10 -> accuracyMarker.visibility = false
-                else -> {
-                    accuracyMarker.visibility = true
-                    resizeAccuracyMarker()
+                when (location.accuracy) {
+                    in 0..10 -> accuracyMarker.visibility = false
+                    else -> {
+                        accuracyMarker.visibility = true
+                    }
+                }
+
+                if (!userLocation.isEmpty()) {
+                    userMarker.setPositionEased(userLocation, ANIMATION_DURATION)
+                    accuracyMarker.setPositionEased(userLocation, ANIMATION_DURATION)
+                    orientationMarker.setPositionEased(userLocation, ANIMATION_DURATION)
                 }
             }
-
-            userMarker.setPositionEased(userLocation, ANIMATION_DURATION)
-            accuracyMarker.setPositionEased(userLocation, ANIMATION_DURATION)
-            orientationMarker.setPositionEased(userLocation, ANIMATION_DURATION)
-
             listener?.onLocation(location)
         }
 
@@ -312,32 +341,39 @@ class MapOptions internal constructor(
         }
     }
 
+    private var previousAngle = 0f
+    private var difference = 0f
     private val compassListener = object : CompassListener {
         override fun onOrientationChanged(angle: Float) {
-            rotateUserDirection(angle)
-        }
+            difference = abs(previousAngle - angle)
 
+            /* if the difference between previous and current angle is significant. */
+            if (difference > 0.8) {
+                rotateUserDirection(angle)
+                previousAngle = angle
+            }
+        }
     }
 
-    @Synchronized
-    internal fun rotateUserDirection(angle: Float = -1f) {
-        async {
+    internal fun rotateUserDirection(angle: Float = -1f) = launch {
+        rotationJob = launch {
             orientationIconBitmap?.let {
-
                 val rotateAngle = if (angle == -1f) {
                     compassProvider.azimuth
                 } else {
                     angle
                 }
-
                 val rotatedBitmap = it.rotate(rotateAngle)
-                orientationMarker.setBitmap(rotatedBitmap, mapController)
+                setOrientationBitmap(rotatedBitmap)
             }
         }
     }
 
-    internal fun resizeAccuracyMarker() {
-        launch {
+    /**
+     * Resize the accuracy circle.
+     */
+    internal fun resizeAccuracyCircle() = launch {
+        if (accuracyMarker.visibility) {
             accuracyMarker.markerOptions.apply {
                 val sizeLength = async {
                     mapfitLocationProvider.lastLocation?.latitude?.let {
@@ -352,11 +388,50 @@ class MapOptions internal constructor(
                     }
                 }
 
-                sizeLength.await()?.let {
-                    setSideSize(it, it)
-                }
+                sizeLength.await()
+                    ?.takeIf { abs(previousAccuracyMarkerSize - it) > 20 && it > 15 }
+                    ?.let {
+                        setSideSize(it, it)
+                        previousAccuracyMarkerSize = it
+                    }
             }
         }
+    }
+
+    private fun setOrientationBitmap(
+        bitmap: Bitmap
+    ) {
+        val argb = IntArray(orientationMarkerSize * orientationMarkerSize)
+        bitmap.getPixels(
+            argb,
+            0,
+            orientationMarkerSize,
+            0,
+            0,
+            orientationMarkerSize,
+            orientationMarkerSize
+        )
+
+        val abgr = IntArray(orientationMarkerSize * orientationMarkerSize)
+        var row: Int
+        var col: Int
+        for (i in argb.indices) {
+            col = i % orientationMarkerSize
+            row = i / orientationMarkerSize
+            val pix = argb[i]
+            val pb = pix shr 16 and 0xff
+            val pr = pix shl 16 and 0x00ff0000
+            val pix1 = pix and -0xff0100 or pr or pb
+            val flippedIndex = (orientationMarkerSize - 1 - row) * orientationMarkerSize + col
+            abgr[flippedIndex] = pix1
+        }
+
+        mapController.setMarkerBitmap(
+            orientationMarker.getIdForMap(mapController) ?: 0,
+            orientationMarkerSize,
+            orientationMarkerSize,
+            abgr
+        )
     }
 
     private enum class CameraType {
@@ -366,3 +441,4 @@ class MapOptions internal constructor(
     }
 
 }
+

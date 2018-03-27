@@ -70,6 +70,7 @@ class MarkerOptions internal constructor(
     private fun getStyleString() =
         "{ style: 'sdk-point-overlay', anchor: ${anchor.getAnchor()}, flat: $flat, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
 
+    @Synchronized
     internal fun updateStyle() {
         marker.mapBindings.forEach {
             it.key.setMarkerStylingFromString(it.value, getStyleString())
@@ -77,7 +78,10 @@ class MarkerOptions internal constructor(
         }
     }
 
-    internal fun setSideSize(w: Int, h: Int) {
+    internal fun setSideSize(
+        w: Int,
+        h: Int
+    ) {
         marker.mapBindings.forEach {
             it.key.setMarkerStylingFromString(
                 it.value,
