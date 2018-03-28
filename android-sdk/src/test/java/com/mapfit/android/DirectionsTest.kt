@@ -3,7 +3,6 @@ package com.mapfit.android
 import com.mapfit.android.directions.Directions
 import com.mapfit.android.directions.DirectionsCallback
 import com.mapfit.android.exceptions.MapfitConfigurationException
-import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Before
@@ -52,9 +51,6 @@ class DirectionsTest {
         val server = MockWebServer()
         server.url("api.mapfit.com/v2/directions")
 
-        server.enqueue(MockResponse().setBody(mockResponse))
-//        server.start()
-
         Directions().route(
             originAddress = "119 W 24th St",
             destinationAddress = "107 Sacred Heart Ln",
@@ -68,9 +64,6 @@ class DirectionsTest {
                 ArgumentMatchers.anyString(),
                 Mockito.any(Exception::class.java) ?: Exception()
             )
-
-        server.shutdown()
     }
 
-    private val mockResponse = ""
 }

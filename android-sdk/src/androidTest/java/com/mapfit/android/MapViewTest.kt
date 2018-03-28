@@ -259,7 +259,7 @@ class MapViewTest {
                 locationListener
             )
 
-            delay(20000)
+            delay(15000)
 
             verify(locationListener, atLeastOnce())
                 .onLocation(Mockito.any(Location::class.java) ?: Location(""))
