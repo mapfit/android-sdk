@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.*
 import android.graphics.Paint.*
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 
 
 /**
@@ -47,4 +49,18 @@ internal fun Bitmap.rotate(angle: Float): Bitmap {
     matrix.reset()
 
     return rotatedBitmap
+}
+
+/**
+ * Converts drawable to bitmap.
+ *
+ * @return bitmap relative to screen density
+ */
+internal fun Drawable.toBitmap(context: Context): Bitmap {
+    val density = context.resources.displayMetrics.densityDpi
+    val bitmapDrawable = this as BitmapDrawable
+    bitmapDrawable.setTargetDensity(density)
+    val bitmap = bitmapDrawable.bitmap
+    bitmap.density = density
+    return bitmap
 }
