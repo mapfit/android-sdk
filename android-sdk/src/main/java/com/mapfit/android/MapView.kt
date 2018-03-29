@@ -582,7 +582,6 @@ class MapView(
 
         override fun getDirectionsOptions(): DirectionsOptions = directionsOptions
 
-
         override fun setOnMarkerClickListener(listener: OnMarkerClickListener) {
             markerClickListener = listener
         }
@@ -793,30 +792,29 @@ class MapView(
     private var attributionAnimJob: Job? = null
 
     private fun getHttpHandler(): HttpHandler {
-        val cacheDir = context.externalCacheDir
-
+        val cacheDir = context.cacheDir
         if (cacheDir != null && cacheDir.exists()) {
             val cachePolicy = object : CachePolicy {
                 internal var tileCacheControl =
                     CacheControl.Builder().maxStale(7, TimeUnit.DAYS).build()
 
-                internal var cdnCacheControl =
-                    CacheControl.Builder().maxStale(7, TimeUnit.DAYS).build()
-
                 override fun apply(url: HttpUrl): CacheControl? {
                     return when (url.host()) {
-                        "tiles2.mapfit.com" -> tileCacheControl
-                        "cdn.mapfit.com" -> cdnCacheControl
+                        "tiles2.mapfit.com",
+                        "cdn.mapfit.com" -> tileCacheControl
                         else -> null
                     }
                 }
             }
-
-            return HttpHandler(File(cacheDir, "tile_cache"), 30 * 1024 * 1024, cachePolicy)
+            return HttpHandler(
+                File(cacheDir, "tile_cache"),
+                (30 * 1024 * 1024).toLong(),
+                cachePolicy
+            )
         }
-
         return HttpHandler()
     }
+
 
 }
 
