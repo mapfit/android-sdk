@@ -3,7 +3,6 @@ package com.mapfit.android.annotations
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.PointF
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.support.annotation.DrawableRes
 import android.support.annotation.NonNull
@@ -18,10 +17,10 @@ import com.mapfit.android.geometry.isValid
 import com.mapfit.android.utils.getBitmapFromDrawableID
 import com.mapfit.android.utils.getBitmapFromVectorDrawable
 import com.mapfit.android.utils.loadImageFromUrl
+import com.mapfit.android.utils.toBitmap
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.cancelAndJoin
 import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.newSingleThreadContext
 
 /**
  * Markers are icons placed on a particular location on the map.
@@ -49,7 +48,6 @@ class Marker internal constructor(
     private var icon: Bitmap? = null
     private var previousIcon: Bitmap? = null
     private var iconChangedWhenPlaceInfo: Bitmap? = null
-    private val iconThreadContext = newSingleThreadContext("icon_placement")
     private var iconPlacementJob = Job()
     private var position: LatLng = LatLng(0.0, 0.0)
     private val density = this@Marker.context.resources.displayMetrics.densityDpi
@@ -183,11 +181,7 @@ class Marker internal constructor(
         launch {
             iconPlacementJob.cancelAndJoin()
             iconPlacementJob = launch {
-                val density = this@Marker.context.resources.displayMetrics.densityDpi
-                val bitmapDrawable = drawable as BitmapDrawable
-                bitmapDrawable.setTargetDensity(density)
-                val bitmap = bitmapDrawable.bitmap
-                bitmap.density = density
+                val bitmap = drawable.toBitmap(this@Marker.context)
                 setBitmap(bitmap, mapController)
                 usingDefaultIcon = false
             }
@@ -205,7 +199,9 @@ class Marker internal constructor(
             iconPlacementJob.cancelAndJoin()
             iconPlacementJob = launch {
                 val bitmap = getBitmapFromDrawableID(this@Marker.context, drawableId)
-                bitmap?.let {
+                        ?: getBitmapFromVectorDrawable(this@Marker.context, drawableId)
+
+                bitmap.let {
                     setBitmap(it, mapController)
                     usingDefaultIcon = false
                 }
@@ -222,8 +218,15 @@ class Marker internal constructor(
     fun setIcon(@NonNull mapfitMarker: MapfitMarker): Marker {
         launch {
             iconPlacementJob.cancelAndJoin()
-            setIcon(mapfitMarker.getUrl())
-            markerOptions.setDefaultMarkerSize()
+            iconPlacementJob = launch {
+                val drawable = loadImageFromUrl(mapfitMarker.getUrl())
+                drawable.await()?.let {
+                    usingDefaultIcon = false
+                    val bitmap = it.toBitmap(this@Marker.context)
+                    setBitmap(bitmap, mapController, mapBindings[mapController] ?: 0)
+                    markerOptions.setDefaultMarkerSize()
+                }
+            }
         }
         return this
     }
@@ -240,13 +243,20 @@ class Marker internal constructor(
                 val drawable = loadImageFromUrl(imageUrl)
                 drawable.await()?.let {
                     usingDefaultIcon = false
-                    setIcon(it)
+                    val bitmap = it.toBitmap(this@Marker.context)
+                    setBitmap(bitmap, mapController)
                 }
             }
         }
         return this
     }
 
+    /**
+     * Toggle function for showing/hiding place info.
+     *
+     * @param shown true will show, false will hide
+     * @param mapController that marker is belong to
+     */
     internal fun placeInfoState(
         shown: Boolean,
         mapController: MapController
@@ -280,6 +290,9 @@ class Marker internal constructor(
         }
     }
 
+    /**
+     * Sets the given bitmap as marker icon of the Marker.
+     */
     internal fun setBitmap(
         bitmap: Bitmap,
         mapController: MapController,
@@ -374,6 +387,9 @@ class Marker internal constructor(
         return screenPosition
     }
 
+    /**
+     * Sets polygon as sub-annotation of the Marker.
+     */
     internal fun setPolygon(polygon: Polygon) {
         subAnnotation = polygon
     }
