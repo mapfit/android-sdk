@@ -8,7 +8,6 @@ import com.mapfit.android.directions.DirectionsCallback
 import com.mapfit.android.directions.DirectionsType
 import com.mapfit.android.directions.model.Route
 import com.mapfit.android.exceptions.MapfitConfigurationException
-import com.mapfit.android.geometry.LatLng
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -24,8 +23,6 @@ import java.lang.Exception
  */
 @RunWith(AndroidJUnit4::class)
 class DirectionsTest {
-
-    private lateinit var mapfitMap: MapfitMap
 
     @Mock
     private lateinit var directionsCallback: DirectionsCallback
@@ -46,12 +43,15 @@ class DirectionsTest {
 
 
     @Test(expected = MapfitConfigurationException::class)
+    @UiThreadTest
     fun testMapfitConfiguration() {
+        val originAddress = "111 Macdougal Street new york ny"
+        val destinationAddress = "119 W 24th Street new york ny"
+
         Directions().route(
-            LatLng(40.744255, -73.993774),
-            LatLng(40.575534, -73.961857),
-            DirectionsType.DRIVING,
-            directionsCallback
+            originAddress = originAddress,
+            destinationAddress = destinationAddress,
+            callback = directionsCallback
         )
     }
 
@@ -59,14 +59,15 @@ class DirectionsTest {
     fun testLatLngDirections() {
         Mapfit.getInstance(context, context.getString(R.string.mapfit_debug_api_key))
 
+        val originAddress = "111 Macdougal Street new york ny"
+        val destinationAddress = "119 W 24th Street new york ny"
+
         Directions().route(
-            LatLng(40.744255, -73.993774),
-            LatLng(40.575534, -73.961857),
-            DirectionsType.DRIVING,
-            directionsCallback
+            originAddress = originAddress,
+            destinationAddress = destinationAddress,
+            callback = directionsCallback
         )
 
-        Thread.sleep(500)
         Mockito.verify(directionsCallback, Mockito.times(1))
             .onSuccess(ArgumentMatchers.any(Route::class.java) ?: Route())
     }
@@ -80,7 +81,8 @@ class DirectionsTest {
             callback = directionsCallback
         )
 
-        Thread.sleep(500)
+        Thread.sleep(1500)
+
         Mockito.verify(directionsCallback, Mockito.times(1))
             .onError(
                 ArgumentMatchers.anyString(),

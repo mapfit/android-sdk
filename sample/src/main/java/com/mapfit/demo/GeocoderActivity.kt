@@ -39,33 +39,53 @@ class GeocoderActivity : AppCompatActivity() {
         mapfitMap.setCenter(LatLng(40.74405, -73.99324))
         mapfitMap.setZoom(14f)
 
+        geocodeAddress()
         reverseGeocodeAddress()
-
-        // enable ui controls
-        mapfitMap.getMapOptions().recenterButtonEnabled = true
-        mapfitMap.getMapOptions().zoomControlsEnabled = true
-        mapfitMap.getMapOptions().compassButtonEnabled = true
     }
 
-    private fun reverseGeocodeAddress() {
-        Geocoder().reverseGeocode(
-            LatLng(40.74405, -73.99324),
+
+    /**
+     * Geocodes an address.
+     */
+    private fun geocodeAddress() {
+        Geocoder().geocode(
+            "175 5th Ave, New York, NY 10010",
             true,
             object : GeocoderCallback {
-                override fun onError(message: String, e: Exception) {
-                    e.printStackTrace()
-                }
+                override fun onError(message: String, e: Exception) {}
 
                 override fun onSuccess(addressList: List<Address>) {
-
                     var latLng = LatLng()
                     addressList.forEach { address ->
                         latLng =
                                 LatLng(address.entrances.first().lat, address.entrances.first().lng)
                     }
+
                     val marker = mapfitMap.addMarker(latLng)
                     val polygon = mapfitMap.addPolygon(addressList[0].building.polygon)
+                }
+            })
+    }
 
+    /**
+     * Reverse geocodes address of a [LatLng].
+     */
+    private fun reverseGeocodeAddress() {
+        Geocoder().reverseGeocode(
+            LatLng(40.74405, -73.99324),
+            true,
+            object : GeocoderCallback {
+                override fun onError(message: String, e: Exception) {}
+
+                override fun onSuccess(addressList: List<Address>) {
+                    var latLng = LatLng()
+                    addressList.forEach { address ->
+                        latLng =
+                                LatLng(address.entrances.first().lat, address.entrances.first().lng)
+                    }
+
+                    val marker = mapfitMap.addMarker(latLng)
+                    val polygon = mapfitMap.addPolygon(addressList[0].building.polygon)
                 }
             })
     }

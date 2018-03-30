@@ -2,12 +2,17 @@ package com.mapfit.demo
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.mapfit.android.*
+import com.mapfit.android.MapTheme
+import com.mapfit.android.MapfitMap
+import com.mapfit.android.OnMapReadyCallback
+import com.mapfit.android.OnMapThemeLoadListener
 import com.mapfit.mapfitdemo.R
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.activity_showcase.*
 
 /**
+ * This example demonstrates how you can implement your own yaml file.
+ * You can use Mapfit paint tool to create your own style @see https://mapfit.com/paint/
+ *
  * Created by dogangulcan on 3/6/18.
  */
 class CustomYamlActivity : AppCompatActivity() {
@@ -33,24 +38,18 @@ class CustomYamlActivity : AppCompatActivity() {
 
         mapfitMap.setOnMapThemeLoadListener(object : OnMapThemeLoadListener {
             override fun onLoaded() {
-
+                // called when the scene is loaded
             }
 
             override fun onError() {
-
+                // called when there is an error while loading the scene
             }
         })
 
+        // you can provide a url or a file path here. if your yaml file is in assets folder,
+        // just write the filename as the example, assets prefix will be added.
         mapfitMap.getMapOptions().customTheme = "sample.yaml"
-//        mapfitMap.getMapOptions().customTheme = "https://cdn.mapfit.com/m1/themes/mapfit-greyscale.yaml"
-//        mapfitMap.getMapOptions().customTheme = "https://cdn.mapfit.com/m1/themes/mapfit-grayscale.yaml"
 
-//        val yamlFilePath = "file://data/data/com.sample.app/sample.yaml"
-//        mapfitMap.getMapOptions().customTheme = yamlFilePath
-//        mapfitMap.getMapOptions().customTheme = "5"
-////
-//        val yamlUrl = "https://mydomain.com/sample.yaml"
-//        mapfitMap.getMapOptions().customTheme = yamlUrl
 
     }
 }
