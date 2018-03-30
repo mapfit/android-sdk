@@ -19,7 +19,7 @@ class Polygon(
     internal val polygon: MutableList<List<LatLng>>
 ) : Annotation(polygonId, mapController) {
 
-    val points = polygon
+    val points = polygon.toMutableList()
     internal lateinit var coordinates: DoubleArray
     internal lateinit var rings: IntArray
 
@@ -62,14 +62,11 @@ class Polygon(
      */
     override fun remove() {
 
-        val toBeRemoved = mutableListOf<MapController>()
-
         mapBindings.forEach {
             it.key.removePolygon(it.value)
-            toBeRemoved.add(it.key)
         }
+        mapBindings.clear()
 
-        toBeRemoved.forEach { mapBindings.remove(it) }
         layers.forEach { it.remove(this) }
     }
 

@@ -1,6 +1,7 @@
 package com.mapfit.android.geocoder.model
 
 import com.mapfit.android.geometry.LatLng
+import com.mapfit.android.geometry.LatLngBounds
 
 /**
  * Class representing the result from the Mapfit Geocoding API, including the normalized address
@@ -16,6 +17,7 @@ data class Address internal constructor(
     val postalCode: String = "",
     val neighborhood: String = "",
     val building: Building,
+    val viewport: LatLngBounds?,
     val lat: Double = 0.0,
     val lng: Double = 0.0,
     val responseType: ResponseType?,

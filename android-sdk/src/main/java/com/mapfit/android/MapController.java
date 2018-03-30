@@ -103,7 +103,7 @@ public class MapController implements Renderer {
     /**
      * Interface for a callback to receive information about features picked from the map
      * Triggered after a call of {@link #pickFeature(float, float)}
-     * Listener should be set with {@link #setFeaturePickListener(FeaturePickListener)}
+     * Listener should be set with {@link #setFeaturePickListener()}
      * The callback will be run on the main (UI) thread.
      */
     @Keep
@@ -447,6 +447,7 @@ public class MapController implements Renderer {
     public void setHttpHandler(HttpHandler handler) {
         this.httpHandler = handler;
     }
+
 
     /**
      * Set the geographic position of the center of the map view
@@ -924,24 +925,6 @@ public class MapController implements Renderer {
         nativeSetPickRadius(mapPointer, radius);
     }
 
-    /**
-     * Set a listener for feature pick events
-     *
-     * @param listener The {@link FeaturePickListener} to call
-     */
-    public void setFeaturePickListener(final FeaturePickListener listener) {
-        featurePickListener = (listener == null) ? null : new FeaturePickListener() {
-            @Override
-            public void onFeaturePick(final Map<String, String> properties, final float positionX, final float positionY) {
-                uiThreadHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.onFeaturePick(properties, positionX, positionY);
-                    }
-                });
-            }
-        };
-    }
 
     /**
      * Set a listener for scene update error statuses
@@ -971,14 +954,65 @@ public class MapController implements Renderer {
         };
     }
 
+    void setAnnotationClickListener(OnAnnotationClickListener listener) {
+        annotationClickListener = listener;
+        setMarkerPickListener();
+        setFeaturePickListener();
+    }
+
+    /**
+     * Set a listener for feature pick events
+     */
+    private void setFeaturePickListener() {
+        featurePickListener = new FeaturePickListener() {
+            @Override
+            public void onFeaturePick(Map<String, String> properties, final float positionX, final float positionY) {
+                if (properties.size() > 0) {
+                    final Annotation annotation = pickAnnotation(properties);
+
+                    uiThreadHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (annotation != null) {
+                                annotationClickListener.onAnnotationClicked(annotation);
+                            }
+                        }
+                    });
+                }
+            }
+        };
+    }
+
+    /**
+     * Returns the annotation for the given properties that includes `id`.
+     *
+     * @param properties
+     * @return clicked annotation
+     */
+    private Annotation pickAnnotation(Map<String, String> properties) {
+        Annotation annotation = null;
+
+        for (Map.Entry<String, String> stringStringEntry : properties.entrySet()) {
+            if (stringStringEntry.getKey().equals("id")) {
+                long id = Long.valueOf(stringStringEntry.getValue());
+
+                if (polylines.containsKey(id)) {
+                    annotation = polylines.get(id);
+                    break;
+                } else if (polygons.containsKey(id)) {
+                    annotation = polygons.get(id);
+                    break;
+                }
+            }
+        }
+        return annotation;
+    }
 
     /**
      * Set a listener for marker pick events
-     *
-     * @param listener The {@link MarkerPickListener} to call
      */
-    public void setMarkerPickListener(final OnAnnotationClickListener listener) {
-        markerPickListener = (listener == null) ? null : new MarkerPickListener() {
+    private void setMarkerPickListener() {
+        markerPickListener = new MarkerPickListener() {
             @Override
             public void onMarkerPick(final MarkerPickResult markerPickResult, final float positionX, final float positionY) {
                 if (markerPickResult == null) {
@@ -998,11 +1032,9 @@ public class MapController implements Renderer {
                 uiThreadHandler.post(new Runnable() {
                     @Override
                     public void run() {
-
-                        if (finalPickedMarker != null) {
-                            listener.onAnnotationClicked(finalPickedMarker);
+                        if (finalPickedMarker != null && annotationClickListener != null) {
+                            annotationClickListener.onAnnotationClicked(finalPickedMarker);
                         }
-
                     }
                 });
             }
@@ -1011,7 +1043,7 @@ public class MapController implements Renderer {
 
     /**
      * Query the map for geometry features at the given screen coordinates; results will be returned
-     * in a callback to the object set by {@link #setFeaturePickListener(FeaturePickListener)}
+     * in a callback to the object set by {@link #setFeaturePickListener()}
      *
      * @param posX The horizontal screen coordinate
      * @param posY The vertical screen coordinate
@@ -1090,7 +1122,7 @@ public class MapController implements Renderer {
         polylineData.addPolyline(polyline);
 
         polylines.put(polylineData.getId(), polyline);
-
+        requestRender();
         return polyline;
     }
 
@@ -1108,7 +1140,7 @@ public class MapController implements Renderer {
         polygonLayer.addPolygon(poly);
 
         polygons.put(polygonLayer.getId(), poly);
-//        requestRender();
+        requestRender();
         return poly;
     }
 
@@ -1121,10 +1153,10 @@ public class MapController implements Renderer {
             return markerId;
 
         } else if (annotation instanceof Polyline) {
-            MapData dataLayer = addDataLayer(POLYLINE_LAYER_NAME);
-            dataLayer.addPolyline((Polyline) annotation);
-            polylines.put(dataLayer.getId(), (Polyline) annotation);
-            return dataLayer.getId();
+            MapData lineLayer = addDataLayer(POLYLINE_LAYER_NAME);
+            lineLayer.addPolyline((Polyline) annotation);
+            polylines.put(lineLayer.getId(), (Polyline) annotation);
+            return lineLayer.getId();
 
         } else if (annotation instanceof Polygon) {
             MapData polygonLayer = addDataLayer(POLYGON_LAYER_NAME);
@@ -1573,6 +1605,7 @@ public class MapController implements Renderer {
     private Map<Long, Marker> markers = new HashMap<>();
     private Map<Long, Polyline> polylines = new HashMap<>();
     private Map<Long, Polygon> polygons = new HashMap<>();
+    private OnAnnotationClickListener annotationClickListener;
 
     private Handler uiThreadHandler;
     TouchInput touchInput;
@@ -1700,5 +1733,6 @@ public class MapController implements Renderer {
     String getFontFallbackFilePath(int importance, int weightHint) {
         return fontFileParser.getFontFallback(importance, weightHint);
     }
+
 
 }

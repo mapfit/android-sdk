@@ -1,5 +1,6 @@
 package com.mapfit.android.directions
 
+import android.support.annotation.VisibleForTesting
 import com.mapfit.android.BuildConfig
 import com.mapfit.android.Mapfit
 import com.mapfit.android.directions.Directions.HttpHandler.directionsParser
@@ -7,13 +8,16 @@ import com.mapfit.android.directions.model.Route
 import com.mapfit.android.geocoder.Geocoder.HttpHandler.httpClient
 import com.mapfit.android.geocoder.model.EntranceType
 import com.mapfit.android.geometry.LatLng
-import com.mapfit.android.geometry.isEmpty
+import com.mapfit.android.geometry.LatLngBounds
+import com.mapfit.android.utils.decodePolyline
+import com.mapfit.android.utils.isEmpty
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
+import org.jetbrains.anko.coroutines.experimental.bg
 import org.json.JSONObject
 import java.io.IOException
 
@@ -126,15 +130,18 @@ class Directions {
 
         httpClient.newCall(request).enqueue(object : Callback {
             override fun onResponse(call: Call?, response: Response?) {
-                val (isSuccessful, jsonResponse) = isSuccessful(response)
+                val (isSuccessful, rawResponseJson) = isSuccessful(response)
                 if (isSuccessful) {
                     async(UI) {
-                        val route = jsonResponse.let { parseRoute(jsonResponse) }
+                        val route = rawResponseJson.let { parseRoute(rawResponseJson) }
                         route.await()?.let { callback.onSuccess(it) }
                     }
 
                 } else {
-                    val (message, exception) = directionsParser.parseError(response)
+                    val (message, exception) = directionsParser.parseError(
+                        response,
+                        rawResponseJson
+                    )
                     callback.onError(message, exception)
                 }
             }
@@ -153,12 +160,10 @@ class Directions {
         )
     }
 
-    private fun parseRoute(response: JSONObject): Deferred<Route?> = async {
-
+    private fun parseRoute(response: JSONObject): Deferred<Route?> = bg {
         val moshi = Moshi.Builder().build()
         val jsonAdapter = moshi.adapter<Route>(Route::class.java)
         val route = jsonAdapter.fromJson(response.toString())
-
         route?.apply {
             destinationLocation =
                     listOf(
@@ -170,8 +175,14 @@ class Directions {
                         route.originLocation[1],
                         route.originLocation[0]
                     )
-        }
+            val boundsBuilder = LatLngBounds.Builder()
 
+            trip.legs.forEach {
+                val line = decodePolyline(it.shape)
+                line.forEach { boundsBuilder.include(it) }
+            }
+            route.viewport = boundsBuilder.build()
+        }
         route
     }
 

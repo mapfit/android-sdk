@@ -12,6 +12,7 @@ enum class EntranceType(val entranceType: String) {
     LOADING("loading"),
     SERVICE("service"),
     PARKING("parking"),
-    ALL("all")
+    ALL("all"),
+    INTERPOLATED("interpolated")
 }
 
