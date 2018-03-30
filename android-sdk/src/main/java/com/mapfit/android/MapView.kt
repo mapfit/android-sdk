@@ -1,7 +1,9 @@
 package com.mapfit.android
 
+import android.animation.Animator
 import android.content.Context
 import android.content.Intent
+import android.graphics.Matrix
 import android.graphics.PointF
 import android.net.Uri
 import android.opengl.GLSurfaceView
@@ -11,6 +13,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.RotateAnimation
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.RelativeLayout
@@ -24,19 +27,23 @@ import com.mapfit.android.geocoder.GeocoderCallback
 import com.mapfit.android.geocoder.model.Address
 import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.geometry.LatLngBounds
-import com.mapfit.android.utils.isEmpty
+import com.mapfit.android.geometry.isEmpty
+import com.mapfit.android.utils.logWarning
 import com.mapfit.android.utils.startActivitySafe
+import com.mapfit.tetragon.CachePolicy
 import com.mapfit.tetragon.ConfigChooser
+import com.mapfit.tetragon.HttpHandler
 import com.mapfit.tetragon.TouchInput
 import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
-import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.launch
+import okhttp3.CacheControl
+import okhttp3.HttpUrl
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.TestOnly
+import java.io.File
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 
 
 /**
@@ -49,9 +56,11 @@ class MapView(
     attributeSet: AttributeSet? = null
 ) : FrameLayout(context, attributeSet) {
 
-    private val ANIMATION_DURATION = 200
-    private val ZOOM_STEP_LEVEL = 1
-    private val DEFAULT_EASE = MapController.EaseType.CUBIC
+    companion object {
+        internal const val ANIMATION_DURATION = 200
+        private const val ZOOM_STEP_LEVEL = 1
+        private val DEFAULT_EASE = MapController.EaseType.CUBIC
+    }
 
     private lateinit var mapController: MapController
     private lateinit var mapOptions: MapOptions
@@ -62,21 +71,10 @@ class MapView(
     private val controlsView: View by lazy {
         LayoutInflater.from(context).inflate(R.layout.mf_overlay_map_controls, this, false)
     }
-
     private val placeInfoFrame = FrameLayout(context)
-
     private val attributionImage: ImageView = controlsView.findViewById(R.id.imgAttribution)
-
     internal val zoomControlsView: RelativeLayout by lazy {
         controlsView.findViewById<RelativeLayout>(R.id.zoomControls)
-    }
-
-    internal val btnRecenter: ImageView by lazy {
-        controlsView.findViewById<ImageView>(R.id.btnRecenter)
-    }
-
-    internal val btnCompass: View by lazy {
-        controlsView.findViewById<View>(R.id.btnCompass)
     }
 
     @JvmSynthetic
@@ -101,9 +99,9 @@ class MapView(
     private var placeInfoRemoveJob = Job()
     private var reCentered = false
     private var sceneUpdateFlag = false
+    private var animatingCompass = false
 
     init {
-
         Mapfit.getApiKey()
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
@@ -147,13 +145,13 @@ class MapView(
             }
         }
 
-        btnLegal.setOnClickListener({
+        btnLegal.setOnClickListener {
             context.startActivitySafe(mapfitLegalIntent)
-        })
+        }
 
-        btnBuildYourMap.setOnClickListener({
+        btnBuildYourMap.setOnClickListener {
             context.startActivitySafe(mapfitWebsiteIntent)
-        })
+        }
 
         btnZoomIn.setOnClickListener {
             mapfitMap.setZoom(mapfitMap.getZoom() + ZOOM_STEP_LEVEL, ANIMATION_DURATION.toLong())
@@ -167,10 +165,53 @@ class MapView(
             onReCenterStateChanged(true)
         }
 
+        btnCompass.scaleType = ImageView.ScaleType.MATRIX   // required for rotation
+
         btnCompass.setOnClickListener {
-            mapController.setRotationEased(0f, ANIMATION_DURATION, DEFAULT_EASE)
+            launch {
+
+                val xPivot = (btnCompass.drawable.bounds.width() / 2).toFloat()
+                val yPivot = (btnCompass.drawable.bounds.height() / 2).toFloat()
+
+                val currentAngle =
+                    (Math.toDegrees(mapController.rotation.toDouble()) + 360) % 360
+
+                val toAngle = if (currentAngle > 180) {
+                    360 - currentAngle
+                } else {
+                    -currentAngle
+                }
+
+                val anim = RotateAnimation(
+                    0f,
+                    toAngle.toFloat(),
+                    xPivot,
+                    yPivot
+                )
+
+                hideCompassButton()
+
+                anim.duration = ANIMATION_DURATION.toLong()
+                btnCompass.startAnimation(anim)
+
+                mapController.setRotationEased(0f, ANIMATION_DURATION, DEFAULT_EASE)
+
+            }
         }
 
+        btnUserLocation.setOnClickListener {
+            mapOptions.getLastLocation()
+                ?.let {
+                    launch {
+                        mapController.setPositionEased(it, ANIMATION_DURATION)
+                        mapController.setZoomEased(17f, ANIMATION_DURATION)
+                        repeat(200) {
+                            delay(1)
+                            resizeAccuracyMarker()
+                        }
+                    }
+                }
+        }
     }
 
     private fun onReCenterStateChanged(recenter: Boolean) {
@@ -189,14 +230,17 @@ class MapView(
         mapController = MapController(getGLSurfaceView())
 
         mapController.apply {
+            setHttpHandler(getHttpHandler())
+
             init()
 
             setTapResponder(singleTapResponder())
             setDoubleTapResponder(doubleTapResponder())
             setLongPressResponder(longClickResponder())
             setPanResponder(panResponder())
-            setScaleResponder(scaleResponder())
             setShoveResponder(shoveResponder())
+            setScaleResponder(scaleResponder())
+            setRotateResponder(rotateResponder())
 
             setMarkerPickListener(onAnnotationClickListener)
 
@@ -207,6 +251,7 @@ class MapView(
                     sceneUpdateFlag = true
                 }
             })
+
 
             mapOptions = MapOptions(this@MapView, this)
             directionsOptions = DirectionsOptions(this)
@@ -231,6 +276,31 @@ class MapView(
         }
     }
 
+    private val compassPivotCenter = 60f
+
+    private fun hideCompassButton(matrix: Matrix? = null) {
+        launch(UI) {
+            if (btnCompass.visibility == View.VISIBLE && !animatingCompass) {
+                btnCompass.animate().alpha(0f)
+                    .setDuration(ANIMATION_DURATION.toLong())
+                    .setListener(object : Animator.AnimatorListener {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            btnCompass.visibility = View.GONE
+                            matrix?.let { btnCompass.imageMatrix = it }
+                            animatingCompass = false
+                        }
+
+                        override fun onAnimationRepeat(animation: Animator?) {}
+                        override fun onAnimationCancel(animation: Animator?) {}
+                        override fun onAnimationStart(animation: Animator?) {}
+                    })
+
+                    .start()
+                animatingCompass = true
+            }
+        }
+    }
+
     private fun shoveResponder() = TouchInput.ShoveResponder {
         updatePlaceInfoPosition(false)
         false
@@ -240,6 +310,9 @@ class MapView(
     private var scaledMin = false
     private var max = false
     private var min = false
+
+    private var scaleFlingJob = Job()
+
     private fun scaleResponder() = TouchInput.ScaleResponder { x, y, scale, velocity ->
         var consumed = false
 
@@ -250,7 +323,7 @@ class MapView(
 
         if (scaledMax && max || scaledMin && min) {
             consumed = true
-            mapfitMap.setZoom(mapController.zoom, 125)
+            mapController.zoom = normalizeZoomLevel(mapController.zoom, false)
         }
 
         if (!consumed) {
@@ -259,7 +332,27 @@ class MapView(
             updatePlaceInfoPosition(false)
         }
 
+        if (mapOptions.userLocationButtonEnabled) resizeAccuracyMarker()
+
+        launch {
+            scaleFlingJob.cancelAndJoin()
+            scaleFlingJob = launch {
+                delay(700)
+                resizeAccuracyMarker()
+            }
+        }
+
+
         consumed
+    }
+
+    private fun rotateResponder() = TouchInput.RotateResponder { x, y, rotation ->
+        rotateCompassButton()
+        false
+    }
+
+    private fun resizeAccuracyMarker() {
+        if (mapOptions.getUserLocationEnabled()) mapOptions.resizeAccuracyCircle()
     }
 
     private fun panResponder() = object : TouchInput.PanResponder {
@@ -301,7 +394,14 @@ class MapView(
 
             override fun onSingleTapConfirmed(x: Float, y: Float): Boolean {
                 mapController.pickMarker(x, y)
-                mapClickListener?.onMapClicked(mapController.screenPositionToLatLng(PointF(x, y)))
+                mapClickListener?.onMapClicked(
+                    mapController.screenPositionToLatLng(
+                        PointF(
+                            x,
+                            y
+                        )
+                    )
+                )
                 placeInfoRemoveJob = launch(UI) {
                     delay(20)
                     activePlaceInfo?.dispose()
@@ -324,6 +424,7 @@ class MapView(
             )
             setZoomOnDoubleTap(x, y)
             activePlaceInfo?.updatePositionDelayed()
+            resizeAccuracyMarker()
             true
         }
     }
@@ -332,6 +433,24 @@ class MapView(
         val lngLat = mapController.screenPositionToLatLng(PointF(x, y))
         mapController.setPositionEased(lngLat, ANIMATION_DURATION, DEFAULT_EASE, false)
         mapfitMap.setZoom(mapController.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION.toLong())
+    }
+
+    @Synchronized
+    private fun rotateCompassButton() {
+        if (btnCompass.visibility != View.VISIBLE) {
+            btnCompass.visibility = View.VISIBLE
+            btnCompass.alpha = 1f
+        }
+
+        launch {
+            val compassRotationMatrix = Matrix()
+            compassRotationMatrix.postRotate(
+                Math.toDegrees(mapController.rotation.toDouble()).toFloat(),
+                compassPivotCenter,
+                compassPivotCenter
+            )
+            btnCompass.imageMatrix = compassRotationMatrix
+        }
     }
 
     private val mapfitMap = object : MapfitMap() {
@@ -386,7 +505,7 @@ class MapView(
                         }
 
                         if (latLng.isEmpty()) {
-                            onMarkerAddedCallback.onError(IOException("No coordinates found for given address."))
+                            onMarkerAddedCallback?.onError(IOException("No coordinates found for given address."))
                         } else {
                             val marker = mapController.addMarker().setPosition(latLng)
 //
@@ -396,8 +515,8 @@ class MapView(
                                     mapController.addPolygon(addressList[0].building.polygon)
                                 marker.setPolygon(polygon)
                             }
-                            async(UI) {
-                                onMarkerAddedCallback.onMarkerAdded(marker)
+                            launch(UI) {
+                                onMarkerAddedCallback?.onMarkerAdded(marker)
                             }
                         }
                     }
@@ -439,8 +558,10 @@ class MapView(
         }
 
         override fun getLatLngBounds(): LatLngBounds {
-            val sw = mapController.screenPositionToLatLng(PointF(0f, viewHeight?.toFloat() ?: 0f))
-            val ne = mapController.screenPositionToLatLng(PointF(viewWidth?.toFloat() ?: 0f, 0f))
+            val sw =
+                mapController.screenPositionToLatLng(PointF(0f, viewHeight?.toFloat() ?: 0f))
+            val ne =
+                mapController.screenPositionToLatLng(PointF(viewWidth?.toFloat() ?: 0f, 0f))
             return LatLngBounds(ne ?: LatLng(), sw ?: LatLng())
         }
 
@@ -461,7 +582,6 @@ class MapView(
         }
 
         override fun getDirectionsOptions(): DirectionsOptions = directionsOptions
-
 
         override fun setOnMarkerClickListener(listener: OnMarkerClickListener) {
             markerClickListener = listener
@@ -550,20 +670,22 @@ class MapView(
         }
     }
 
-    private fun normalizeZoomLevel(zoomLevel: Float): Float =
+    private fun normalizeZoomLevel(zoomLevel: Float, warn: Boolean = true): Float =
         when {
             zoomLevel > mapOptions.getMaxZoom() -> {
-                Log.w(
-                    "MapView",
-                    "Zoom level exceeds maximum level and will be set maximum zoom level:  ${mapOptions.getMaxZoom()}"
-                )
+                if (warn) {
+                    logWarning(
+                        "Zoom level exceeds maximum level and will be set maximum zoom level:  ${mapOptions.getMaxZoom()}"
+                    )
+                }
                 mapOptions.getMaxZoom()
             }
             zoomLevel < mapOptions.getMinZoom() -> {
-                Log.w(
-                    "MapView",
-                    "Zoom level below minimum level and will be set minimum zoom level:  ${mapOptions.getMinZoom()}"
-                )
+                if (warn) {
+                    logWarning(
+                        "Zoom level below minimum level and will be set minimum zoom level:  ${mapOptions.getMinZoom()}"
+                    )
+                }
                 mapOptions.getMinZoom()
             }
             else -> zoomLevel
@@ -574,7 +696,8 @@ class MapView(
 
             if (activePlaceInfo != null
                 && activePlaceInfo?.marker == marker
-                && activePlaceInfo?.getVisibility()!!) {
+                && activePlaceInfo?.getVisibility()!!
+            ) {
                 return
             }
 
@@ -671,5 +794,30 @@ class MapView(
 
     private var attributionAnimJob: Job? = null
 
+    private fun getHttpHandler(): HttpHandler {
+        val cacheDir = context.cacheDir
+        if (cacheDir != null && cacheDir.exists()) {
+            val cachePolicy = object : CachePolicy {
+                internal var tileCacheControl =
+                    CacheControl.Builder().maxStale(7, TimeUnit.DAYS).build()
+
+                override fun apply(url: HttpUrl): CacheControl? {
+                    return when (url.host()) {
+                        "tiles2.mapfit.com",
+                        "cdn.mapfit.com" -> tileCacheControl
+                        else -> null
+                    }
+                }
+            }
+            return HttpHandler(
+                File(cacheDir, "tile_cache"),
+                (30 * 1024 * 1024).toLong(),
+                cachePolicy
+            )
+        }
+        return HttpHandler()
+    }
+
 
 }
+

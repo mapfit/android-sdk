@@ -21,9 +21,13 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.ConnectionSpec;
 import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.Response;
 import okhttp3.TlsVersion;
+
+import static com.mapfit.android.utils.CommonUtilsKt.isNetworkAvailable;
 
 /**
  * FIXME: Rename to UrlHandler.
@@ -32,8 +36,8 @@ import okhttp3.TlsVersion;
  */
 public class HttpHandler {
 
-    private OkHttpClient okClient;
-    private CachePolicy cachePolicy;
+    protected OkHttpClient okClient;
+    protected CachePolicy cachePolicy;
 
     /**
      * Enables TLS v1.2 when creating SSLSockets.
@@ -49,7 +53,7 @@ public class HttpHandler {
 
         final SSLSocketFactory delegate;
 
-        Tls12SocketFactory(SSLSocketFactory base) {
+        public Tls12SocketFactory(final SSLSocketFactory base) {
             this.delegate = base;
         }
 
@@ -64,17 +68,18 @@ public class HttpHandler {
         }
 
         @Override
-        public Socket createSocket(Socket s, String host, int port, boolean autoClose) throws IOException {
+        public Socket createSocket(final Socket s, final String host, final int port, final boolean autoClose) throws IOException {
             return patch(delegate.createSocket(s, host, port, autoClose));
         }
 
         @Override
-        public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
+        public Socket createSocket(final String host, final int port) throws IOException, UnknownHostException {
             return patch(delegate.createSocket(host, port));
         }
 
         @Override
-        public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException, UnknownHostException {
+        public Socket createSocket(final String host, final int port, final InetAddress localHost,
+                                   final int localPort) throws IOException, UnknownHostException {
             return patch(delegate.createSocket(host, port, localHost, localPort));
         }
 
@@ -84,11 +89,12 @@ public class HttpHandler {
         }
 
         @Override
-        public Socket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException {
+        public Socket createSocket(final InetAddress address, final int port, final InetAddress localAddress,
+                                   final int localPort) throws IOException {
             return patch(delegate.createSocket(address, port, localAddress, localPort));
         }
 
-        private Socket patch(Socket s) {
+        private Socket patch(final Socket s) {
             if (s instanceof SSLSocket) {
                 ((SSLSocket) s).setEnabledProtocols(TLS_V12_ONLY);
             }
@@ -110,7 +116,7 @@ public class HttpHandler {
      * @param directory Directory in which map data will be cached
      * @param maxSize   Maximum size of data to cache, in bytes
      */
-    public HttpHandler(File directory, long maxSize) {
+    public HttpHandler(final File directory, final long maxSize) {
         this(directory, maxSize, null);
     }
 
@@ -122,10 +128,12 @@ public class HttpHandler {
      * @param maxSize   Maximum size of data to cache, in bytes
      * @param policy    Cache policy to apply on requests
      */
-    public HttpHandler(File directory, long maxSize, CachePolicy policy) {
-        OkHttpClient.Builder builder = new OkHttpClient.Builder()
+    public HttpHandler(final File directory, final long maxSize, final CachePolicy policy) {
+        final OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .followRedirects(true)
                 .followSslRedirects(true)
+                .addInterceptor(getOfflineCacheInterceptor())
+                .addNetworkInterceptor(getCacheInterceptor())
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS);
@@ -139,7 +147,7 @@ public class HttpHandler {
         if (cachePolicy == null) {
             cachePolicy = new CachePolicy() {
                 @Override
-                public CacheControl apply(HttpUrl url) {
+                public CacheControl apply(final HttpUrl url) {
                     return null;
                 }
             };
@@ -147,21 +155,21 @@ public class HttpHandler {
 
         if (Build.VERSION.SDK_INT >= 16 && Build.VERSION.SDK_INT < 22) {
             try {
-                SSLContext sc = SSLContext.getInstance("TLSv1.2");
+                final SSLContext sc = SSLContext.getInstance("TLSv1.2");
                 sc.init(null, null, null);
                 builder.sslSocketFactory(new Tls12SocketFactory(sc.getSocketFactory()));
 
-                ConnectionSpec cs = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                final ConnectionSpec cs = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
                         .tlsVersions(TlsVersion.TLS_1_2)
                         .build();
 
-                List<ConnectionSpec> specs = new ArrayList<>();
+                final List<ConnectionSpec> specs = new ArrayList<>();
                 specs.add(cs);
                 specs.add(ConnectionSpec.COMPATIBLE_TLS);
                 specs.add(ConnectionSpec.CLEARTEXT);
 
                 builder.connectionSpecs(specs);
-            } catch (Exception exc) {
+            } catch (final Exception exc) {
                 android.util.Log.e("Tangram", "Error while setting TLS 1.2", exc);
             }
         }
@@ -170,22 +178,73 @@ public class HttpHandler {
     }
 
     /**
+     * Returns network interceptor to request caching to be 7 days.
+     *
+     * @return interceptor
+     */
+    private static Interceptor getCacheInterceptor() {
+        return new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Response response = chain.proceed(chain.request());
+
+                CacheControl cacheControl = new CacheControl.Builder()
+                        .maxAge(7, TimeUnit.DAYS)
+                        .build();
+
+                return response.newBuilder()
+                        .header("Cache-control", cacheControl.toString())
+                        .build();
+            }
+        };
+    }
+
+    /**
+     * Returns interceptor to use cached responses when the device is offline.
+     *
+     * @return interceptor
+     */
+    private static Interceptor getOfflineCacheInterceptor() {
+        return new Interceptor() {
+            @Override
+            public Response intercept(Chain chain) throws IOException {
+                Request request = chain.request();
+
+                if (isNetworkAvailable()) {
+
+                    /* overriding the cache control */
+                    CacheControl cacheControl = new CacheControl.Builder()
+                            .maxStale(7, TimeUnit.DAYS)
+                            .build();
+                    request = request.newBuilder().header("Cache-control", cacheControl.toString()).build();
+
+                } else {
+                    request = request.newBuilder().cacheControl(CacheControl.FORCE_CACHE).build();
+                }
+
+                return chain.proceed(request);
+            }
+        };
+    }
+
+    /**
      * Begin an HTTP request
      *
      * @param url           URL for the requested resource
      * @param cb            Callback for handling request result
      * @param requestHandle the identifier for the request
-     * @return The Okhttp3.Call enqueued for execution
      */
-    public void onRequest(String url, Callback cb, long requestHandle) {
-        HttpUrl httpUrl = HttpUrl.parse(url);
-        Request.Builder builder = new Request.Builder().url(httpUrl).tag(requestHandle);
-        CacheControl cacheControl = cachePolicy.apply(httpUrl);
+    public void onRequest(final String url, final Callback cb, final long requestHandle) {
+        final HttpUrl httpUrl = HttpUrl.parse(url);
+        final Request.Builder builder = new Request.Builder().url(httpUrl).tag(requestHandle);
+
+        final CacheControl cacheControl = cachePolicy.apply(httpUrl);
         if (cacheControl != null) {
             builder.cacheControl(cacheControl);
         }
-        Request request = builder.build();
-        Call call = okClient.newCall(request);
+        final Request request = builder.build();
+        final Call call = okClient.newCall(request);
+
         call.enqueue(cb);
     }
 
@@ -194,16 +253,16 @@ public class HttpHandler {
      *
      * @param requestHandle the identifier for the request to be cancelled
      */
-    public void onCancel(long requestHandle) {
+    public void onCancel(final long requestHandle) {
         // check and cancel running call
-        for (Call runningCall : okClient.dispatcher().runningCalls()) {
+        for (final Call runningCall : okClient.dispatcher().runningCalls()) {
             if (runningCall.request().tag().equals(requestHandle)) {
                 runningCall.cancel();
             }
         }
 
         // check and cancel queued call
-        for (Call queuedCall : okClient.dispatcher().queuedCalls()) {
+        for (final Call queuedCall : okClient.dispatcher().queuedCalls()) {
             if (queuedCall.request().tag().equals(requestHandle)) {
                 queuedCall.cancel();
             }

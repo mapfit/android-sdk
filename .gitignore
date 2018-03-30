@@ -9,4 +9,9 @@
 .externalNativeBuild
 /app/build
 *.aar
-appcompat-v7/build/intermediates/bundles/default/res/values/values.xml
+/mapfit-gl/
+/sample/src/main/java/com/mapfit/demo/LabJavaActivity.java
+android-sdk/src/debug/res/values/
+appcompat-v7/
+gradle/gradle-wrapper.properties
+mapfit_local.properties

@@ -8,7 +8,6 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
-import org.jetbrains.anko.coroutines.experimental.bg
 import java.io.IOException
 
 
@@ -32,6 +31,7 @@ class Geocoder {
 
         internal val httpClient = OkHttpClient.Builder()
             .addInterceptor(logging)
+//            .cache(Cache(Mapfit.getContext()?.cacheDir, 10 * 1024 * 1024))
             .build()
 
         internal val geocodeParser = GeocodeParser()
@@ -54,7 +54,7 @@ class Geocoder {
             override fun onResponse(call: Call?, response: Response?) {
                 if (response != null && response.isSuccessful) {
                     async(UI) {
-                        val addressList = bg {
+                        val addressList = async {
                             response.body()?.string()?.let {
                                 geocodeParser.parseGeocodeResponse(it)
                             }

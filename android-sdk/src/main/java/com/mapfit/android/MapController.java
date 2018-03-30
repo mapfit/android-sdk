@@ -16,6 +16,7 @@ import com.mapfit.android.annotations.Polygon;
 import com.mapfit.android.annotations.Polyline;
 import com.mapfit.android.geometry.LatLng;
 import com.mapfit.android.geometry.LatLngBounds;
+import com.mapfit.android.utils.DebugUtils;
 import com.mapfit.tetragon.FontFileParser;
 import com.mapfit.tetragon.HttpHandler;
 import com.mapfit.tetragon.LabelPickResult;
@@ -76,7 +77,7 @@ public class MapController implements Renderer {
         NO_VALID_SCENE,
     }
 
-    private static EaseType DEFAULT_EASE_TYPE = EaseType.CUBIC;
+    private static EaseType DEFAULT_EASE_TYPE = EaseType.SINE;
 
     /**
      * Options for enabling debug rendering features
@@ -453,9 +454,11 @@ public class MapController implements Renderer {
      * @param position LngLat of the position to set
      */
     public void setPosition(LatLng position) {
-        checkPointer(mapPointer);
-        lastCenter = position;
-        nativeSetPosition(mapPointer, position.getLng(), position.getLat());
+        if (position != null) {
+            checkPointer(mapPointer);
+            lastCenter = position;
+            nativeSetPosition(mapPointer, position.getLng(), position.getLat());
+        }
     }
 
     /**
@@ -1662,7 +1665,7 @@ public class MapController implements Renderer {
 
                 if (!response.isSuccessful()) {
                     nativeOnUrlComplete(mapPointer, requestHandle, null, response.message());
-                    throw new IOException("Unexpected response code: " + response + " for URL: " + url);
+                    DebugUtils.logException(new IOException("Unexpected response code: " + response + " for URL: " + url));
                 }
                 byte[] bytes = response.body().bytes();
                 nativeOnUrlComplete(mapPointer, requestHandle, bytes, null);

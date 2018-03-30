@@ -6,3 +6,5 @@
 /build
 /captures
 .externalNativeBuild
+/mapfit-gl/
+mapfit_local.properties

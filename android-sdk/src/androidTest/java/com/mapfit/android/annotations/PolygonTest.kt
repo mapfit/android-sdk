@@ -43,8 +43,8 @@ class PolygonTest {
 
     @Rule
     @JvmField
-    val activityRule: ActivityTestRule<DummyActivity> = ActivityTestRule(
-        DummyActivity::class.java,
+    val activityRule: ActivityTestRule<MapViewTestActivity> = ActivityTestRule(
+        MapViewTestActivity::class.java,
         true,
         true
     )

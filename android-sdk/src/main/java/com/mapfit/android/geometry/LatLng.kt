@@ -2,7 +2,6 @@ package com.mapfit.android.geometry
 
 import android.os.Parcelable
 import android.support.annotation.FloatRange
-import com.mapfit.android.utils.isValid
 import kotlinx.android.parcel.Parcelize
 
 /**
