@@ -224,53 +224,9 @@ class MapOptions internal constructor(
         updateAttributionImage(value)
     }
 
-    private fun updateAttributionImage(value: MapTheme) {
-        val attributionImage = when (value) {
-            MapTheme.MAPFIT_GRAYSCALE,
-            MapTheme.MAPFIT_DAY -> {
-                mapView.btnLegal?.setTextColor(
-                    ContextCompat.getColor(
-                        mapView.context,
-                        R.color.dark_text
-                    )
-                )
-                mapView.btnBuildYourMap?.setTextColor(
-                    ContextCompat.getColor(
-                        mapView.context,
-                        R.color.dark_text
-                    )
-                )
-                R.drawable.mf_watermark_light
-            }
-
-            MapTheme.MAPFIT_NIGHT -> {
-                mapView.btnLegal?.setTextColor(
-                    ContextCompat.getColor(
-                        mapView.context,
-                        R.color.light_text
-                    )
-                )
-                mapView.btnBuildYourMap?.setTextColor(
-                    ContextCompat.getColor(
-                        mapView.context,
-                        R.color.light_text
-                    )
-                )
-                R.drawable.mf_watermark_dark
-            }
-        }
-
-        mapView.getAttributionImage().setImageResource(attributionImage)
-    }
-
     internal fun getMaxZoom() = maxZoom
 
     internal fun getMinZoom() = minZoom
-
-    private fun updateScene(value: MapTheme) {
-        mapController.loadSceneFile(value.toString())
-        updateAttributionImage(value)
-    }
 
     private fun updateAttributionImage(value: MapTheme) {
         val attributionImage = when (value) {
@@ -458,7 +414,7 @@ class MapOptions internal constructor(
                 sizeLength.await()
                     ?.takeIf { it > 30 }
                     ?.let {
-                        setSideSize(it, it)
+                        setAccuracyMarkerStyle(it, it)
                         previousAccuracyMarkerSize = it
                     }
             }

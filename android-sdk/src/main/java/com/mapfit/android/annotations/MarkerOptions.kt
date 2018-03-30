@@ -85,7 +85,7 @@ class MarkerOptions internal constructor(
     }
 
     @Synchronized
-    internal fun setSideSize(
+    internal fun setAccuracyMarkerStyle(
         w: Int,
         h: Int
     ) {

@@ -45,7 +45,6 @@ class Marker internal constructor(
             }
         }
 
-    private var icon: Bitmap? = null
     private var previousIcon: Bitmap? = null
     private var iconChangedWhenPlaceInfo: Bitmap? = null
     private var iconPlacementJob = Job()
@@ -112,7 +111,7 @@ class Marker internal constructor(
 
         mapBindings[mapController] = id
         markerOptions.updateStyle()
-        icon?.let { setBitmap(it, mapController, id) }
+        previousIcon?.let { setBitmap(it, mapController, id) }
         setPosition(position)
     }
 
@@ -223,7 +222,7 @@ class Marker internal constructor(
                 drawable.await()?.let {
                     usingDefaultIcon = false
                     val bitmap = it.toBitmap(this@Marker.context)
-                    setBitmap(bitmap, mapController, mapBindings[mapController] ?: 0)
+                    setBitmap(bitmap, mapController)
                     markerOptions.setDefaultMarkerSize()
                 }
             }
@@ -273,18 +272,20 @@ class Marker internal constructor(
                     mapController,
                     markerId
                 )
+
                 markerOptions.placeInfoShown(shown, markerId, mapController)
 
             } else {
-
                 if (getVisibility(mapController)) {
-                    setBitmap(iconChangedWhenPlaceInfo ?: previousIcon!!, mapController, markerId)
                     markerOptions.placeInfoShown(shown, markerId, mapController)
+
                     placeInfoMap.remove(mapController)
                     iconChangedWhenPlaceInfo?.let {
                         previousIcon = it
                         iconChangedWhenPlaceInfo = null
                     }
+                    // 3
+                    setBitmap(iconChangedWhenPlaceInfo ?: previousIcon!!, mapController, markerId)
                 }
             }
         }
@@ -298,6 +299,7 @@ class Marker internal constructor(
         mapController: MapController,
         markerId: Long = 0
     ) {
+
         val width = bitmap.getScaledWidth(density)
         val height = bitmap.getScaledHeight(density)
 
@@ -319,19 +321,24 @@ class Marker internal constructor(
         }
 
         if (markerId != 0L) {
+
+            // 1 set dot marker
             mapController.setMarkerBitmap(markerId, width, height, abgr)
+
         } else {
+            // 2 set arts
             mapBindings.forEach {
+
                 val activePlaceInfoMarkerId =
                     placeInfoMap[it.key]?.marker?.mapBindings?.get(it.key) ?: 0L
 
                 if (it.value != activePlaceInfoMarkerId) {
                     it.key.setMarkerBitmap(it.value, width, height, abgr)
-                    previousIcon = if (previousIcon == null) bitmap else icon
-                    icon = bitmap
                 } else {
                     iconChangedWhenPlaceInfo = bitmap
                 }
+
+                previousIcon = bitmap
             }
         }
     }
