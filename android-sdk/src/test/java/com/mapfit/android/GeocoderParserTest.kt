@@ -1,7 +1,7 @@
 package com.mapfit.android
 
 import com.mapfit.android.geocoder.GeocodeParser
-import com.mapfit.android.utils.isEmpty
+import com.mapfit.android.geometry.isEmpty
 import org.junit.Assert
 import org.junit.Test
 

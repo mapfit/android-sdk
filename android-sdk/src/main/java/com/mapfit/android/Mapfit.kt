@@ -1,5 +1,6 @@
 package com.mapfit.android
 
+import android.annotation.SuppressLint
 import android.content.Context
 import com.mapfit.android.exceptions.MapfitConfigurationException
 import org.jetbrains.annotations.TestOnly
@@ -14,6 +15,9 @@ class Mapfit private constructor(private val context: Context?, apiKey: String) 
 
     companion object {
 
+        internal const val TAG = "Mapfit"
+
+        @SuppressLint("StaticFieldLeak")
         @Volatile
         private var mapfitInstance: Mapfit? = null
 

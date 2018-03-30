@@ -1,3 +1,5 @@
+@file:JvmName("DebugUtils")
+
 package com.mapfit.android.utils
 
 import com.mapfit.android.BuildConfig

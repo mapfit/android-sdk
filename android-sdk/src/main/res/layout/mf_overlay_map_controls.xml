@@ -7,7 +7,23 @@
     android:theme="@style/Theme.AppCompat"
     tools:background="#ff0">
 
+    <ImageView
+        android:id="@+id/btnCompass"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/linearLayout"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/linearLayout"
+        android:layout_marginTop="12dp"
+        android:adjustViewBounds="true"
+        android:clickable="true"
+        android:scaleType="centerInside"
+        android:src="@drawable/mf_compass"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
     <LinearLayout
+        android:id="@+id/attributionContainer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -61,7 +77,8 @@
         android:layout_alignParentRight="true"
         android:layout_marginBottom="8dp"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:id="@+id/linearLayout">
 
         <android.support.v4.widget.Space
             android:layout_width="wrap_content"
@@ -108,14 +125,14 @@
         </RelativeLayout>
 
         <ImageView
-            android:id="@+id/btnCompass"
+            android:id="@+id/btnUserLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="-13dp"
             android:adjustViewBounds="true"
             android:clickable="true"
             android:scaleType="centerInside"
-            android:src="@drawable/mf_compass_with_bg"
+            android:src="@drawable/mf_current_location"
             android:visibility="gone"
             tools:visibility="visible" />
 
@@ -130,5 +147,6 @@
             tools:visibility="visible" />
 
     </LinearLayout>
+
 
 </RelativeLayout>

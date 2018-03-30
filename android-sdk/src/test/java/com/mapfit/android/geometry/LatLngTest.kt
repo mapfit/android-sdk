@@ -1,6 +1,5 @@
 package com.mapfit.android.geometry
 
-import com.mapfit.android.utils.isValid
 import org.junit.Assert
 import org.junit.Test
 

@@ -22,11 +22,13 @@ abstract class Annotation(
 
     var visibility: Boolean = true
         set(value) {
-            mapBindings.forEach {
-                it.key.changeAnnotationVisibility(it.value, value)
+            if (field != value) {
+                mapBindings.forEach { it ->
+                    it.key.changeAnnotationVisibility(it.value, value)
+                }
+                subAnnotation?.visibility = value
+                field = value
             }
-            subAnnotation?.visibility = value
-            field = value
         }
 
     internal var subAnnotation: Annotation? = null

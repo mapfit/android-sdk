@@ -1,7 +1,6 @@
-package com.mapfit.android.utils
+package com.mapfit.android.geometry
 
 import android.util.Log
-import com.mapfit.android.geometry.LatLng
 
 /**
  * Created by dogangulcan on 2/20/18.
@@ -28,3 +27,4 @@ internal fun LatLng.isValid(): Boolean {
 }
 
 internal fun LatLng.isEmpty(): Boolean = lat == 0.0 && lng == 0.0
+

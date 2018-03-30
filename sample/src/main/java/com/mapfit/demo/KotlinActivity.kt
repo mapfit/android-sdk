@@ -21,7 +21,7 @@ class KotlinActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Mapfit.getInstance(this, getString(R.string.mapfit_debug_api_key))
+//        Mapfit.getInstance(this, getString(R.string.mapfit_debug_api_key))
 
         setContentView(R.layout.activity_main)
 
@@ -39,12 +39,13 @@ class KotlinActivity : AppCompatActivity() {
 
         mapfitMap.setCenter(LatLng(40.74405, -73.99324))
         mapfitMap.setZoom(14f)
-
+        mapfitMap.getMapOptions().userLocationButtonEnabled = true
+//
         placeMarker()
         placeMarkerWithAddress()
         getDirections()
-
-        setEventListeners()
+//
+//        setEventListeners()
 
         // enable ui controls
         mapfitMap.getMapOptions().recenterButtonEnabled = true
@@ -59,6 +60,7 @@ class KotlinActivity : AppCompatActivity() {
             }
         })
 
+
         mapfitMap.setOnMapDoubleClickListener(object : OnMapDoubleClickListener {
             override fun onMapDoubleClicked(latLng: LatLng) {
                 // map is double clicked!
@@ -70,6 +72,7 @@ class KotlinActivity : AppCompatActivity() {
     private fun placeMarker() {
         val position = LatLng(40.744023, -73.993150)
         val marker = mapfitMap.addMarker(position)
+
     }
 
     private fun getDirections() {
