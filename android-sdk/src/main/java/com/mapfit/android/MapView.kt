@@ -28,6 +28,7 @@ import com.mapfit.android.geocoder.model.Address
 import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.geometry.LatLngBounds
 import com.mapfit.android.geometry.isEmpty
+import com.mapfit.android.utils.logWarning
 import com.mapfit.android.utils.startActivitySafe
 import com.mapfit.tetragon.CachePolicy
 import com.mapfit.tetragon.ConfigChooser
@@ -205,7 +206,7 @@ class MapView(
                         mapController.setPositionEased(it, ANIMATION_DURATION)
                         mapController.setZoomEased(17f, ANIMATION_DURATION)
                         repeat(200) {
-                            delay(10)
+                            delay(1)
                             resizeAccuracyMarker()
                         }
                     }
@@ -322,7 +323,7 @@ class MapView(
 
         if (scaledMax && max || scaledMin && min) {
             consumed = true
-            mapfitMap.setZoom(mapController.zoom, 125)
+            mapController.zoom = normalizeZoomLevel(mapController.zoom, false)
         }
 
         if (!consumed) {
@@ -669,20 +670,22 @@ class MapView(
         }
     }
 
-    private fun normalizeZoomLevel(zoomLevel: Float): Float =
+    private fun normalizeZoomLevel(zoomLevel: Float, warn: Boolean = true): Float =
         when {
             zoomLevel > mapOptions.getMaxZoom() -> {
-                Log.w(
-                    "MapView",
-                    "Zoom level exceeds maximum level and will be set maximum zoom level:  ${mapOptions.getMaxZoom()}"
-                )
+                if (warn) {
+                    logWarning(
+                        "Zoom level exceeds maximum level and will be set maximum zoom level:  ${mapOptions.getMaxZoom()}"
+                    )
+                }
                 mapOptions.getMaxZoom()
             }
             zoomLevel < mapOptions.getMinZoom() -> {
-                Log.w(
-                    "MapView",
-                    "Zoom level below minimum level and will be set minimum zoom level:  ${mapOptions.getMinZoom()}"
-                )
+                if (warn) {
+                    logWarning(
+                        "Zoom level below minimum level and will be set minimum zoom level:  ${mapOptions.getMinZoom()}"
+                    )
+                }
                 mapOptions.getMinZoom()
             }
             else -> zoomLevel

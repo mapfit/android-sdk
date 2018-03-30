@@ -132,8 +132,8 @@ public class HttpHandler {
         final OkHttpClient.Builder builder = new OkHttpClient.Builder()
                 .followRedirects(true)
                 .followSslRedirects(true)
-                .addInterceptor(provideOfflineCacheInterceptor())
-//                .addNetworkInterceptor(provideCacheInterceptor())
+                .addInterceptor(getOfflineCacheInterceptor())
+                .addNetworkInterceptor(getCacheInterceptor())
                 .connectTimeout(10, TimeUnit.SECONDS)
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS);
@@ -177,7 +177,12 @@ public class HttpHandler {
         okClient = builder.build();
     }
 
-    private static Interceptor provideCacheInterceptor() {
+    /**
+     * Returns network interceptor to request caching to be 7 days.
+     *
+     * @return interceptor
+     */
+    private static Interceptor getCacheInterceptor() {
         return new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {
@@ -194,7 +199,12 @@ public class HttpHandler {
         };
     }
 
-    private static Interceptor provideOfflineCacheInterceptor() {
+    /**
+     * Returns interceptor to use cached responses when the device is offline.
+     *
+     * @return interceptor
+     */
+    private static Interceptor getOfflineCacheInterceptor() {
         return new Interceptor() {
             @Override
             public Response intercept(Chain chain) throws IOException {

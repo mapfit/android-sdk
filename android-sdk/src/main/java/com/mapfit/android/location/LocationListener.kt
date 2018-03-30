@@ -11,6 +11,6 @@ interface LocationListener {
 
     fun onLocation(location: Location)
 
-    fun onProviderStatus(availability: ProviderStatus)
+    fun onProviderStatus(status: ProviderStatus)
 
 }

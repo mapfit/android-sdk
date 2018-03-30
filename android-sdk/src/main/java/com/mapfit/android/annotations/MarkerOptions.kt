@@ -23,6 +23,9 @@ class MarkerOptions internal constructor(
             }
         }
 
+    /**
+     * Width of the marker icon in pixels.
+     */
     var width = 55
         set(value) {
             if (!marker.usingDefaultIcon) {
@@ -60,6 +63,7 @@ class MarkerOptions internal constructor(
         updateStyle()
     }
 
+    @Synchronized
     internal fun setDefaultMarkerSize() {
         marker.usingDefaultIcon = false
         height = 59
@@ -72,12 +76,15 @@ class MarkerOptions internal constructor(
 
     @Synchronized
     internal fun updateStyle() {
+        val styleString = getStyleString()
+
         marker.mapBindings.forEach {
-            it.key.setMarkerStylingFromString(it.value, getStyleString())
+            it.key.setMarkerStylingFromString(it.value, styleString)
             it.key.setMarkerDrawOrder(it.value, drawOrder)
         }
     }
 
+    @Synchronized
     internal fun setSideSize(
         w: Int,
         h: Int

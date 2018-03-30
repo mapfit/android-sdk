@@ -50,6 +50,7 @@ class MapOptions internal constructor(
     private var maxZoom: Float = 20f
     private var minZoom: Float = 1f
     private val screenDensity = mapView.context.resources.displayMetrics.densityDpi
+    private var userLocationEnabled: Boolean = false
 
     /**
      * Marker for user location.
@@ -59,7 +60,7 @@ class MapOptions internal constructor(
             setIcon(R.drawable.mf_user_loc)
             markerOptions.apply {
                 anchor = Anchor.CENTER
-                drawOrder = 1900
+                drawOrder = 2110
                 flat = true
             }
         }
@@ -70,9 +71,9 @@ class MapOptions internal constructor(
      */
     private val accuracyMarker by lazy {
         mapController.addMarker().apply {
-            setIcon(R.drawable.mf_accuracy_radius)
+            setIcon(R.drawable.mf_accuracy_circle)
             markerOptions.anchor = Anchor.CENTER
-            markerOptions.drawOrder = 1000
+            markerOptions.drawOrder = 2100
             markerOptions.flat = true
         }
     }
@@ -82,24 +83,23 @@ class MapOptions internal constructor(
      */
     private val orientationMarker by lazy {
         mapController.addMarker().apply {
-
             orientationIconBitmap = getBitmapFromVectorDrawable(
                 mapView.context,
                 R.drawable.mf_user_direction
             )
 
             orientationIconBitmap?.let {
-                setBitmap(it, mapController)
+                setBitmap(it, mapController, mapBindings[mapController] ?: 0)
+                orientationMarkerSize = orientationIconBitmap?.getScaledWidth(screenDensity) ?: 0
             }
 
             markerOptions.apply {
-                setSideSize(10, 10)
                 anchor = Anchor.CENTER
-                drawOrder = 1100
+                drawOrder = 2105
                 flat = true
             }
 
-            orientationMarkerSize = orientationIconBitmap?.getScaledWidth(screenDensity) ?: 0
+
         }
     }
 
@@ -107,8 +107,6 @@ class MapOptions internal constructor(
         const val MAP_MIN_ZOOM = 1.0
         const val MAP_MAX_ZOOM = 20.0
     }
-
-    private var userLocationEnabled: Boolean = false
 
     internal fun getLastLocation() =
         mapfitLocationProvider.lastLocation?.let {
@@ -303,9 +301,10 @@ class MapOptions internal constructor(
             mapView.btnUserLocation.isEnabled = false
         }
 
-        userMarker.visibility = enable
-        orientationMarker.visibility = enable
-        accuracyMarker.visibility = enable
+        // hide before a location update
+        userMarker.visibility = false
+        accuracyMarker.visibility = false
+        orientationMarker.visibility = false
     }
 
     /**
@@ -332,12 +331,17 @@ class MapOptions internal constructor(
                     accuracyMarker.setPositionEased(userLocation, ANIMATION_DURATION)
                     orientationMarker.setPositionEased(userLocation, ANIMATION_DURATION)
                 }
+
+                userMarker.visibility = !userLocation.isEmpty()
+                accuracyMarker.visibility = !userLocation.isEmpty()
+                orientationMarker.visibility = !userLocation.isEmpty()
             }
+
             listener?.onLocation(location)
         }
 
-        override fun onProviderStatus(availability: ProviderStatus) {
-            listener?.onProviderStatus(availability)
+        override fun onProviderStatus(status: ProviderStatus) {
+            listener?.onProviderStatus(status)
         }
     }
 
@@ -355,6 +359,11 @@ class MapOptions internal constructor(
         }
     }
 
+    /**
+     * Rotates and sets users' orientation marker accordingly to the given angle.
+     *
+     * @param angle to be rotated to
+     */
     internal fun rotateUserDirection(angle: Float = -1f) = launch {
         rotationJob = launch {
             orientationIconBitmap?.let {
@@ -363,6 +372,7 @@ class MapOptions internal constructor(
                 } else {
                     angle
                 }
+
                 val rotatedBitmap = it.rotate(rotateAngle)
                 setOrientationBitmap(rotatedBitmap)
             }
@@ -389,7 +399,7 @@ class MapOptions internal constructor(
                 }
 
                 sizeLength.await()
-                    ?.takeIf { abs(previousAccuracyMarkerSize - it) > 20 && it > 15 }
+                    ?.takeIf { it > 30 }
                     ?.let {
                         setSideSize(it, it)
                         previousAccuracyMarkerSize = it

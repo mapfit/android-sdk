@@ -7,3 +7,5 @@
 .build
 /captures
 .externalNativeBuild
+/src/main/java/com/mapfit/demo/LabActivity.kt
+/src/main/java/com/mapfit/demo/LabJavaActivity.java

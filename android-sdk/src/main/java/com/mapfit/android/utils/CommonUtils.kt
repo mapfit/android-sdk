@@ -55,12 +55,12 @@ internal fun loadImageFromUrl(url: String): Deferred<Drawable?> = async {
     }
 }
 
-private fun isValidImageUrl(url: String): Boolean {
+internal fun isValidImageUrl(url: String): Boolean {
     val imgRg = """(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*\.(?:jpg|gif|png))""".toRegex()
     return imgRg.containsMatchIn(url)
 }
 
-private fun isNetworkAvailable(): Boolean {
+internal fun isNetworkAvailable(): Boolean {
     val connectivityManager =
         Mapfit.getContext()?.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val activeNetworkInfo = connectivityManager.activeNetworkInfo
