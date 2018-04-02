@@ -1,6 +1,7 @@
 
 # Mapfit SDK for Android
 <img  src="/assets/Android-banner.png"/>
+<a href='https://bintray.com/mapfit/maven/android-sdk/_latestVersion'><img src='https://api.bintray.com/packages/mapfit/maven/android-sdk/images/download.svg'></a>
 
 ## Get your Mapfit API key
 To use Mapfit Maps and services, your application will need an API key. You can get your API key for free [here](https://mapfit.com/getstarted).
@@ -18,7 +19,7 @@ allprojects {
 In your module level `build.gradle` file, add depencency as follows
 ```
 dependencies {
-    	implementation 'com.mapfit:android-sdk:1.0.0'
+    	implementation 'com.mapfit:android-sdk:1.1'
 }
 ```
 
