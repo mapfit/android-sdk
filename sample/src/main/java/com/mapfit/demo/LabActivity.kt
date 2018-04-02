@@ -32,7 +32,7 @@ class LabActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        Mapfit.getInstance(this, getString(R.string.mapfit_debug_api_key))
+        Mapfit.getInstance(this, getString(R.string.mapfit_debug_api_key))
         setContentView(R.layout.activity_lab)
         mapView = findViewById(R.id.mapView)
         mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {

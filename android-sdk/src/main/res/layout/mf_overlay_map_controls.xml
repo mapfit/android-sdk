@@ -11,9 +11,10 @@
         android:id="@+id/btnCompass"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/linearLayout"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_alignStart="@+id/linearLayout"
+        android:layout_marginRight="8dp"
         android:layout_marginTop="12dp"
         android:adjustViewBounds="true"
         android:clickable="true"
@@ -70,6 +71,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -77,8 +79,7 @@
         android:layout_alignParentRight="true"
         android:layout_marginBottom="8dp"
         android:gravity="center"
-        android:orientation="vertical"
-        android:id="@+id/linearLayout">
+        android:orientation="vertical">
 
         <android.support.v4.widget.Space
             android:layout_width="wrap_content"
