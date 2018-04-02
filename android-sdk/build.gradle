@@ -3,8 +3,8 @@ apply plugin: 'kotlin-android'
 apply plugin: "org.jetbrains.kotlin.android.extensions"
 
 project.ext {
-    mapfitSdkVersion = '1.1.0-alpha1'
-    mapfitSdkVersionCode = 1
+    mapfitSdkVersion = '1.1'
+    mapfitSdkVersionCode = 2
 }
 
 android {

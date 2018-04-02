@@ -105,6 +105,7 @@ class MapView(
     private var reCentered = false
     private var sceneUpdateFlag = false
     private var animatingCompass = false
+    private var compassPivotCenter = 60f
 
     init {
         Mapfit.getApiKey()
@@ -172,11 +173,14 @@ class MapView(
 
         btnCompass.scaleType = ImageView.ScaleType.MATRIX   // required for rotation
 
+        val xPivot = (btnCompass.drawable.intrinsicWidth / 2).toFloat()
+        val yPivot = (btnCompass.drawable.intrinsicHeight / 2).toFloat()
+
+        compassPivotCenter = xPivot
+
         btnCompass.setOnClickListener {
             launch {
 
-                val xPivot = (btnCompass.drawable.bounds.width() / 2).toFloat()
-                val yPivot = (btnCompass.drawable.bounds.height() / 2).toFloat()
 
                 val currentAngle =
                     (Math.toDegrees(mapController.rotation.toDouble()) + 360) % 360
@@ -291,7 +295,6 @@ class MapView(
         }
     }
 
-    private val compassPivotCenter = 60f
 
     private fun hideCompassButton(matrix: Matrix? = null) {
         launch(UI) {

@@ -284,7 +284,7 @@ class Marker internal constructor(
                         previousIcon = it
                         iconChangedWhenPlaceInfo = null
                     }
-                    // 3
+
                     setBitmap(iconChangedWhenPlaceInfo ?: previousIcon!!, mapController, markerId)
                 }
             }
@@ -322,11 +322,9 @@ class Marker internal constructor(
 
         if (markerId != 0L) {
 
-            // 1 set dot marker
             mapController.setMarkerBitmap(markerId, width, height, abgr)
 
         } else {
-            // 2 set arts
             mapBindings.forEach {
 
                 val activePlaceInfoMarkerId =

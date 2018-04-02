@@ -54,7 +54,6 @@ class Directions {
      * @param callback will be called when [Route] is obtained
      */
     fun route(
-
         originLocation: LatLng = LatLng(),
         destinationLocation: LatLng = LatLng(),
         directionsType: DirectionsType = DirectionsType.DRIVING,
