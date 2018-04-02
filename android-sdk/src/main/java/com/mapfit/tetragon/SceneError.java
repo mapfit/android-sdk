@@ -4,9 +4,6 @@ import android.support.annotation.Keep;
 
 import com.mapfit.android.MapController.Error;
 
-/**
- * {@code SceneError} Holds an error status and its associated scene updated
- */
 @Keep
 public class SceneError {
 

@@ -21,6 +21,8 @@ import com.mapfit.android.annotations.*
 import com.mapfit.android.annotations.Annotation
 import com.mapfit.android.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.android.annotations.callback.OnMarkerClickListener
+import com.mapfit.android.annotations.callback.OnPolygonClickListener
+import com.mapfit.android.annotations.callback.OnPolylineClickListener
 import com.mapfit.android.annotations.widget.PlaceInfo
 import com.mapfit.android.geocoder.Geocoder
 import com.mapfit.android.geocoder.GeocoderCallback
@@ -84,10 +86,13 @@ class MapView(
 
     // event listeners
     private var markerClickListener: OnMarkerClickListener? = null
+    private var polylineClickListener: OnPolylineClickListener? = null
+    private var polygonClickListener: OnPolygonClickListener? = null
     private var mapClickListener: OnMapClickListener? = null
     private var mapDoubleClickListener: OnMapDoubleClickListener? = null
     private var mapLongClickListener: OnMapLongClickListener? = null
     private var mapPanListener: OnMapPanListener? = null
+    private var mapThemeLoadListener: OnMapThemeLoadListener? = null
     private var mapPinchListener: OnMapPinchListener? = null
     private var placeInfoAdapter: MapfitMap.PlaceInfoAdapter? = null
     private var onPlaceInfoClickListener: MapfitMap.OnPlaceInfoClickListener? = null
@@ -100,6 +105,7 @@ class MapView(
     private var reCentered = false
     private var sceneUpdateFlag = false
     private var animatingCompass = false
+    private var compassPivotCenter = 60f
 
     init {
         Mapfit.getApiKey()
@@ -167,11 +173,14 @@ class MapView(
 
         btnCompass.scaleType = ImageView.ScaleType.MATRIX   // required for rotation
 
+        val xPivot = (btnCompass.drawable.intrinsicWidth / 2).toFloat()
+        val yPivot = (btnCompass.drawable.intrinsicHeight / 2).toFloat()
+
+        compassPivotCenter = xPivot
+
         btnCompass.setOnClickListener {
             launch {
 
-                val xPivot = (btnCompass.drawable.bounds.width() / 2).toFloat()
-                val yPivot = (btnCompass.drawable.bounds.height() / 2).toFloat()
 
                 val currentAngle =
                     (Math.toDegrees(mapController.rotation.toDouble()) + 360) % 360
@@ -242,16 +251,23 @@ class MapView(
             setScaleResponder(scaleResponder())
             setRotateResponder(rotateResponder())
 
-            setMarkerPickListener(onAnnotationClickListener)
+            setAnnotationClickListener(onAnnotationClickListener)
 
-            setSceneLoadListener({ _, _ ->
+            setSceneLoadListener { sceneId, sceneError ->
                 mapController.reAddMarkers()
                 if (!sceneUpdateFlag) {
                     onMapReadyCallback.onMapReady(mapfitMap)
                     sceneUpdateFlag = true
                 }
-            })
 
+                mapThemeLoadListener?.let {
+                    if (sceneError == null) {
+                        it.onLoaded()
+                    } else {
+                        it.onError()
+                    }
+                }
+            }
 
             mapOptions = MapOptions(this@MapView, this)
             directionsOptions = DirectionsOptions(this)
@@ -270,13 +286,15 @@ class MapView(
                         markerClickListener?.onMarkerClicked(it)
                         showPlaceInfo(it)
                     }
+                    is Polyline -> polylineClickListener?.onPolylineClicked(it)
+                    is Polygon -> polygonClickListener?.onPolygonClicked(it)
+
                     else -> Unit
                 }
             }
         }
     }
 
-    private val compassPivotCenter = 60f
 
     private fun hideCompassButton(matrix: Matrix? = null) {
         launch(UI) {
@@ -393,15 +411,11 @@ class MapView(
             }
 
             override fun onSingleTapConfirmed(x: Float, y: Float): Boolean {
+
                 mapController.pickMarker(x, y)
-                mapClickListener?.onMapClicked(
-                    mapController.screenPositionToLatLng(
-                        PointF(
-                            x,
-                            y
-                        )
-                    )
-                )
+                mapController.pickFeature(x, y)
+
+                mapClickListener?.onMapClicked(mapController.screenPositionToLatLng(PointF(x, y)))
                 placeInfoRemoveJob = launch(UI) {
                     delay(20)
                     activePlaceInfo?.dispose()
@@ -415,12 +429,7 @@ class MapView(
     private fun doubleTapResponder(): TouchInput.DoubleTapResponder? {
         return TouchInput.DoubleTapResponder { x, y ->
             mapDoubleClickListener?.onMapDoubleClicked(
-                mapController.screenPositionToLatLng(
-                    PointF(
-                        x,
-                        y
-                    )
-                )
+                mapController.screenPositionToLatLng(PointF(x, y))
             )
             setZoomOnDoubleTap(x, y)
             activePlaceInfo?.updatePositionDelayed()
@@ -454,6 +463,18 @@ class MapView(
     }
 
     private val mapfitMap = object : MapfitMap() {
+        override fun setOnPolygonClickListener(listener: OnPolygonClickListener) {
+            polygonClickListener = listener
+        }
+
+        override fun setOnPolylineClickListener(listener: OnPolylineClickListener) {
+            polylineClickListener = listener
+        }
+
+        override fun setOnMapThemeLoadListener(listener: OnMapThemeLoadListener) {
+            mapThemeLoadListener = listener
+        }
+
         override fun getTilt(): Float = mapController.tilt
 
         override fun setTilt(angle: Float, duration: Long) {
@@ -558,10 +579,8 @@ class MapView(
         }
 
         override fun getLatLngBounds(): LatLngBounds {
-            val sw =
-                mapController.screenPositionToLatLng(PointF(0f, viewHeight?.toFloat() ?: 0f))
-            val ne =
-                mapController.screenPositionToLatLng(PointF(viewWidth?.toFloat() ?: 0f, 0f))
+            val sw = mapController.screenPositionToLatLng(PointF(0f, viewHeight?.toFloat() ?: 0f))
+            val ne = mapController.screenPositionToLatLng(PointF(viewWidth?.toFloat() ?: 0f, 0f))
             return LatLngBounds(ne ?: LatLng(), sw ?: LatLng())
         }
 
@@ -820,4 +839,3 @@ class MapView(
 
 
 }
-

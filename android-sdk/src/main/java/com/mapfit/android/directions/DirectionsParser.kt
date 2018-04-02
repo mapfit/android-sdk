@@ -12,18 +12,16 @@ import java.security.InvalidParameterException
  */
 internal class DirectionsParser {
 
-    fun parseError(response: Response?): Pair<String, Exception> {
+    fun parseError(response: Response?, rawResponseJson: JSONObject): Pair<String, Exception> {
 
         return when (response?.code()) {
             403 -> Pair("Mapfit Authorization Exception", MapfitAuthorizationException())
-            400 -> parseResponseForError(response)
+            400 -> parseResponseForError(rawResponseJson)
             else -> getDefaultException()
         }
     }
 
-    private fun parseResponseForError(response: Response): Pair<String, Exception> {
-        val errorJson = JSONObject(response.body()?.string())
-
+    private fun parseResponseForError(errorJson: JSONObject): Pair<String, Exception> {
 
         return if (errorJson.has("response_type")) {
             when (errorJson.getInt("response_type")) {

@@ -1,6 +1,7 @@
 package com.mapfit.android
 
 import android.support.annotation.FloatRange
+import android.support.annotation.RestrictTo
 import android.view.View
 import com.mapfit.android.annotations.Annotation
 import com.mapfit.android.annotations.Marker
@@ -8,6 +9,8 @@ import com.mapfit.android.annotations.Polygon
 import com.mapfit.android.annotations.Polyline
 import com.mapfit.android.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.android.annotations.callback.OnMarkerClickListener
+import com.mapfit.android.annotations.callback.OnPolygonClickListener
+import com.mapfit.android.annotations.callback.OnPolylineClickListener
 import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.geometry.LatLngBounds
 import org.jetbrains.annotations.TestOnly
@@ -194,6 +197,16 @@ abstract class MapfitMap {
     abstract fun setOnMarkerClickListener(listener: OnMarkerClickListener)
 
     /**
+     * Sets [OnPolylineClickListener] for [MapView] that polyline click events will be passed to.
+     */
+            abstract fun setOnPolylineClickListener(listener: OnPolylineClickListener)
+
+    /**
+     * Sets [OnPolygonClickListener] for [MapView] that polygon click events will be passed to.
+     */
+    abstract fun setOnPolygonClickListener(listener: OnPolygonClickListener)
+
+    /**
      * Sets [OnMapPanListener] for [MapView] that pan events will be passed to.x
      */
     abstract fun setOnMapPanListener(listener: OnMapPanListener)
@@ -286,6 +299,13 @@ abstract class MapfitMap {
     abstract fun reCenter()
 
     /**
+     * Sets a callback that's invoked when a map theme is loaded or an error has occurred.
+     *
+     * @param listener invoked when the theme is loaded or an error has occurred.
+     */
+    abstract fun setOnMapThemeLoadListener(listener: OnMapThemeLoadListener)
+
+    /**
      * Interface to be used to set custom view for Place Info.
      */
     interface PlaceInfoAdapter {
@@ -313,6 +333,7 @@ abstract class MapfitMap {
         fun onPlaceInfoClicked(marker: Marker)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @TestOnly
     internal abstract fun has(annotation: Annotation): Boolean
 

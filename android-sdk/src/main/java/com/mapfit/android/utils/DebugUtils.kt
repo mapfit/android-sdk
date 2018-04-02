@@ -10,7 +10,7 @@ import com.mapfit.android.BuildConfig
 
 
 internal fun logException(exception: Exception) {
-    if (BuildConfig.DEBUG) {
-        exception.printStackTrace()
-    }
+//    if (BuildConfig.DEBUG) {
+//        exception.printStackTrace()
+//    }
 }

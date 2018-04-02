@@ -7,6 +7,7 @@ import android.location.Location
 import android.support.annotation.FloatRange
 import android.support.annotation.RequiresPermission
 import android.support.v4.content.ContextCompat
+import android.util.Patterns
 import android.view.View
 import com.mapfit.android.MapView.Companion.ANIMATION_DURATION
 import com.mapfit.android.annotations.Anchor
@@ -121,6 +122,18 @@ class MapOptions internal constructor(
             }
         }
 
+    var customTheme: String? = null
+        set(value) {
+
+            val isUrl = value?.let { Patterns.WEB_URL.matcher(it).matches() } ?: false
+            if (isUrl) {
+                mapController.loadSceneFileAsync(value)
+            } else {
+                mapController.loadSceneFile(value)
+            }
+            field = value
+        }
+
     var compassButtonEnabled = false
         set(value) {
             mapView.btnCompass.visibility = if (value) View.VISIBLE else View.GONE
@@ -206,14 +219,14 @@ class MapOptions internal constructor(
         }
     }
 
-    internal fun getMaxZoom() = maxZoom
-
-    internal fun getMinZoom() = minZoom
-
     private fun updateScene(value: MapTheme) {
         mapController.loadSceneFile(value.toString())
         updateAttributionImage(value)
     }
+
+    internal fun getMaxZoom() = maxZoom
+
+    internal fun getMinZoom() = minZoom
 
     private fun updateAttributionImage(value: MapTheme) {
         val attributionImage = when (value) {
@@ -401,7 +414,7 @@ class MapOptions internal constructor(
                 sizeLength.await()
                     ?.takeIf { it > 30 }
                     ?.let {
-                        setSideSize(it, it)
+                        setAccuracyMarkerStyle(it, it)
                         previousAccuracyMarkerSize = it
                     }
             }
@@ -451,4 +464,3 @@ class MapOptions internal constructor(
     }
 
 }
-

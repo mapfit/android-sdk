@@ -8,12 +8,19 @@ import com.mapfit.android.MapView
 import com.mapfit.android.Mapfit
 import com.mapfit.android.MapfitMap
 import com.mapfit.android.OnMapReadyCallback
-import com.mapfit.android.annotations.Anchor
-import com.mapfit.android.geometry.LatLng
+import com.mapfit.android.annotations.MapfitMarker
+import com.mapfit.android.annotations.Marker
+import com.mapfit.android.annotations.callback.OnMarkerAddedCallback
+import com.mapfit.android.directions.Directions
+import com.mapfit.android.directions.DirectionsCallback
+import com.mapfit.android.directions.model.Route
 import com.mapfit.android.location.LocationPriority
 import com.mapfit.android.location.ProviderStatus
+import com.mapfit.android.utils.decodePolyline
 import com.mapfit.mapfitdemo.R
 import kotlinx.android.synthetic.main.activity_lab.*
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.launch
 
 
 class LabActivity : AppCompatActivity() {
@@ -34,7 +41,8 @@ class LabActivity : AppCompatActivity() {
 
                 testLocation()
 
-                placeMarker()
+                getDirections()
+                placeMarkerWithAddress()
 
                 button.setOnClickListener {
                     mapfitMap.getMapOptions()
@@ -44,16 +52,6 @@ class LabActivity : AppCompatActivity() {
                 mapfitMap.getMapOptions()
             }
         })
-    }
-
-    private fun placeMarker() {
-        val position = LatLng(40.744023, -73.993150)
-        val marker = mapfitMap.addMarker(position)
-        marker.markerOptions.flat = true
-        marker.markerOptions.anchor= Anchor.BOTTOM
-        marker.markerOptions.flat = false
-        marker.markerOptions.anchor= Anchor.BOTTOM_RIGHT
-
     }
 
     @SuppressLint("MissingPermission")
@@ -95,5 +93,65 @@ class LabActivity : AppCompatActivity() {
 //            })
     }
 
+    private fun getDirections() {
+        val originAddress = "111 Macdougal Street new york ny"
+        val destinationAddress = "119 W 24th Street new york ny"
+
+        Directions().route(
+            originAddress,
+            destinationAddress,
+            callback = object : DirectionsCallback {
+
+                override fun onSuccess(route: Route) {
+                    route.trip.legs.forEach {
+                        val leg = decodePolyline(it.shape)
+                        val polyline = mapfitMap.addPolyline(leg)
+
+                        mapfitMap.addMarker(
+                            "343 gold street brooklyn new york",
+                            true,
+                            onMarkerAddedCallback = object : OnMarkerAddedCallback {
+                                override fun onMarkerAdded(marker: Marker) {
+                                }
+
+                                override fun onError(exception: Exception) {
+                                }
+                            })
+                    }
+                }
+
+                override fun onError(message: String, e: Exception) {
+
+                }
+
+            })
+    }
+
+    private fun placeMarkerWithAddress() {
+        val flatironBuildingAddress = "175 5th Ave, New York, NY 10010"
+        val withBuildingPolygon = true
+
+        mapfitMap.addMarker(
+            flatironBuildingAddress,
+            withBuildingPolygon,
+            object : OnMarkerAddedCallback {
+                override fun onMarkerAdded(marker: Marker) {
+
+                    mapfitMap.setCenter(marker.getPosition())
+                    // let's change marker's icon!
+                    marker.setIcon(MapfitMarker.EDUCATION)
+                    launch {
+                        delay(10000)
+                        marker.setIcon(MapfitMarker.ARTS)
+                    }
+
+                }
+
+                override fun onError(exception: Exception) {
+                    // handle the exception
+                }
+            }
+        )
+    }
 
 }
