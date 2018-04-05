@@ -130,16 +130,21 @@ internal class GeocodeParser internal constructor() {
     }
 
     private fun parseBuilding(jsonObject: JSONObject): Building {
-        val coordinates = jsonObject.getJSONArray("coordinates")
-        val type = jsonObject.getSafeString("type")
+        return try {
+            val coordinates = jsonObject.getJSONArray("coordinates")
+            val type = jsonObject.getSafeString("type")
 
-        val polygon = when (type) {
-            "Polygon" -> parsePolygon(coordinates)
-            "MultiPolygon" -> parseMultiPolygon(coordinates)[0]
-            else -> listOf()
+            val polygon = when (type) {
+                "Polygon" -> parsePolygon(coordinates)
+                "MultiPolygon" -> parseMultiPolygon(coordinates)[0]
+                else -> listOf()
+            }
+
+            Building(polygon, type)
+        } catch (e: Exception) {
+            logException(e)
+            Building()
         }
-
-        return Building(polygon, type)
     }
 
     private fun parseMultiPolygon(jsonArray: JSONArray): List<List<List<LatLng>>> {
