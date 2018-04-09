@@ -33,8 +33,28 @@ class Marker internal constructor(
     private val mapController: MapController
 ) : Annotation(markerId, mapController) {
 
+    companion object {
+        private const val BUILDING_TAG = "building"
+    }
 
-    val markerOptions = MarkerOptions(this, mutableListOf(mapController))
+    val markerOptions = MarkerOptions(this)
+
+    var buildingPolygon: Polygon? = null
+        internal set(value) {
+            value?.let {
+                value.tag = BUILDING_TAG
+                subAnnotation = value
+            }
+            field = value
+        }
+        get() {
+            return if (subAnnotation?.tag.equals(BUILDING_TAG)) {
+                subAnnotation as Polygon
+            } else {
+                null
+            }
+        }
+
     internal var usingDefaultIcon: Boolean = true
     internal var placeInfoMap = HashMap<MapController, PlaceInfo?>()
     internal var address: Address? = null
@@ -105,10 +125,6 @@ class Marker internal constructor(
     }
 
     override fun initAnnotation(mapController: MapController, id: Long) {
-        if (!markerOptions.mapController.contains(mapController)) {
-            markerOptions.mapController.add(mapController)
-        }
-
         mapBindings[mapController] = id
         markerOptions.updateStyle()
         previousIcon?.let { setBitmap(it, mapController, id) }
@@ -390,13 +406,6 @@ class Marker internal constructor(
             screenPosition = it.lngLatToScreenPosition(position)
         }
         return screenPosition
-    }
-
-    /**
-     * Sets polygon as sub-annotation of the Marker.
-     */
-    internal fun setPolygon(polygon: Polygon) {
-        subAnnotation = polygon
     }
 
     internal fun hasPlaceInfoFields(): Boolean =

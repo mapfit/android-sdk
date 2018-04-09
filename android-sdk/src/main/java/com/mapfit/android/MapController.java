@@ -719,16 +719,12 @@ public class MapController implements Renderer {
      *                         object will be returned.
      */
     public MapData addDataLayer(String name, boolean generateCentroid) {
-        MapData mapData = clientTileSources.get(name);
-//        if (mapData != null) {
-//            return mapData;
-//        }
         checkPointer(mapPointer);
         long pointer = nativeAddTileSource(mapPointer, name, generateCentroid);
         if (pointer <= 0) {
             throw new RuntimeException("Unable to create new data source");
         }
-        mapData = new MapData(name, pointer, this);
+        MapData mapData = new MapData(name, pointer, this);
         clientTileSources.put(name, mapData);
         return mapData;
     }
@@ -1167,8 +1163,6 @@ public class MapController implements Renderer {
         } else {
             return 0;
         }
-
-
     }
 
     /**
@@ -1190,6 +1184,16 @@ public class MapController implements Renderer {
         polylines.remove(polylineId);
         nativeRemoveTileSource(mapPointer, polylineId);
         requestRender();
+    }
+
+    public void removeAnnotation(Annotation annotation) {
+        long annotationId = annotation.getIdForMap(this);
+
+        if (annotation instanceof Polyline) {
+            removePolyline(annotationId);
+        } else if (annotation instanceof Polygon) {
+            removePolygon(annotationId);
+        }
     }
 
     private void hideTileSource(long polylineId) {

@@ -49,17 +49,12 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
 
 
     fun addPolyline(polyline: Polyline): MapData {
-
-        val props = HashMap<String, String>()
-        props["id"] = "$id"
-
         map!!.addFeature(
             id,
             polyline.coordinates,
             null,
-            getStringMapAsArray(props)
+            polyline.polylineOptions.getProperties()
         )
-
         return this
     }
 
@@ -73,14 +68,11 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
      * @return This object, for chaining.
      */
     fun addPolygon(polygon: Polygon): MapData {
-        val props = HashMap<String, String>()
-        props["id"] = "$id"
-
         map!!.addFeature(
             id,
             polygon.coordinates,
             polygon.rings,
-            getStringMapAsArray(props)
+            polygon.polygonOptions.getProperties()
         )
         return this
     }
@@ -107,14 +99,5 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
         return this
     }
 
-    private fun getStringMapAsArray(properties: Map<String, String>): Array<String?> {
-        val out = arrayOfNulls<String>(properties.size * 2)
-        var i = 0
-        for ((key, value) in properties) {
-            out[i++] = key
-            out[i++] = value
-        }
-        return out
-    }
 
 }

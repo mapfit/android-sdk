@@ -534,8 +534,9 @@ class MapView(
                             if (withBuilding) {
                                 val polygon =
                                     mapController.addPolygon(addressList[0].building.polygon)
-                                marker.setPolygon(polygon)
+                                marker.buildingPolygon = polygon
                             }
+
                             launch(UI) {
                                 onMarkerAddedCallback?.onMarkerAdded(marker)
                             }
