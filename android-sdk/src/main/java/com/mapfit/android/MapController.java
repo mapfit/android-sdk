@@ -241,6 +241,8 @@ public class MapController implements Renderer {
         view.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         view.setPreserveEGLContextOnPause(true);
 
+        setRenderMode(1);
+
         // Set a default HTTPHandler
         httpHandler = new HttpHandler();
 
@@ -702,7 +704,7 @@ public class MapController implements Renderer {
      *             If you call {@code addDataLayer} with the same name more than once, the same {@code MapData}
      *             object will be returned.
      */
-    public MapData addDataLayer(String name) {
+    private MapData addDataLayer(String name) {
         return addDataLayer(name, false);
     }
 
@@ -718,7 +720,7 @@ public class MapController implements Renderer {
      *                         If you call {@code addDataLayer} with the same name more than once, the same {@code MapData}
      *                         object will be returned.
      */
-    public MapData addDataLayer(String name, boolean generateCentroid) {
+    private MapData addDataLayer(String name, boolean generateCentroid) {
         checkPointer(mapPointer);
         long pointer = nativeAddTileSource(mapPointer, name, generateCentroid);
         if (pointer <= 0) {
@@ -1116,6 +1118,7 @@ public class MapController implements Renderer {
                 line);
 
         polylineData.addPolyline(polyline);
+        mapDatas.put(polylineData.getId(), polylineData);
 
         polylines.put(polylineData.getId(), polyline);
         requestRender();
@@ -1126,12 +1129,13 @@ public class MapController implements Renderer {
         checkPointer(mapPointer);
         MapData polygonLayer = addDataLayer(POLYGON_LAYER_NAME);
 
-
         Polygon poly = new Polygon(
                 mapView.getContext(),
                 polygonLayer.getId(),
                 this,
                 polygon);
+
+        mapDatas.put(polygonLayer.getId(), polygonLayer);
 
         polygonLayer.addPolygon(poly);
 
@@ -1166,6 +1170,23 @@ public class MapController implements Renderer {
     }
 
     /**
+     * Re-adds the annotation to reflect style changes while reusing the [MapData].
+     *
+     * @param annotation
+     */
+    public void refreshAnnotation(Annotation annotation) {
+        MapData mapData = mapDatas.get(annotation.getIdForMap(this));
+        mapData.clear();
+
+        if (annotation instanceof Polygon) {
+            mapData.addPolygon((Polygon) annotation);
+
+        } else if (annotation instanceof Polyline) {
+            mapData.addPolyline((Polyline) annotation);
+        }
+    }
+
+    /**
      * Removes the passed in {@link Marker} from the map.
      *
      * @param markerId of the marker
@@ -1195,6 +1216,7 @@ public class MapController implements Renderer {
             removePolygon(annotationId);
         }
     }
+
 
     private void hideTileSource(long polylineId) {
         nativeRemoveTileSource(mapPointer, polylineId);
@@ -1609,6 +1631,7 @@ public class MapController implements Renderer {
     private Map<Long, Marker> markers = new HashMap<>();
     private Map<Long, Polyline> polylines = new HashMap<>();
     private Map<Long, Polygon> polygons = new HashMap<>();
+    private Map<Long, MapData> mapDatas = new HashMap<>();
     private OnAnnotationClickListener annotationClickListener;
 
     private Handler uiThreadHandler;

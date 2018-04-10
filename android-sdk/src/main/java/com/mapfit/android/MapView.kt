@@ -527,15 +527,23 @@ class MapView(
 
                         if (latLng.isEmpty()) {
                             onMarkerAddedCallback?.onError(IOException("No coordinates found for given address."))
+
                         } else {
-                            val marker = mapController.addMarker().setPosition(latLng)
-//
-                            marker.address = addressList[0]
-                            if (withBuilding) {
-                                val polygon =
-                                    mapController.addPolygon(addressList[0].building.polygon)
-                                marker.buildingPolygon = polygon
+                            val marker = mapController.addMarker()
+                            marker.apply {
+                                setPosition(latLng)
+                                this@apply.address = addressList[0]
+
+                                if (addressList.isNotEmpty() && addressList[0].building.polygon.isNotEmpty()) {
+                                    marker.buildingPolygon =
+                                            mapController.addPolygon(addressList[0].building.polygon)
+
+                                }
+
                             }
+
+
+
 
                             launch(UI) {
                                 onMarkerAddedCallback?.onMarkerAdded(marker)
@@ -544,8 +552,8 @@ class MapView(
                     }
 
                     override fun onError(message: String, e: Exception) {
-                        async(UI) {
-                            onMarkerAddedCallback.onError(e)
+                        launch(UI) {
+                            onMarkerAddedCallback?.onError(e)
                         }
                     }
                 })

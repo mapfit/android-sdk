@@ -41,11 +41,9 @@ class Marker internal constructor(
 
     var buildingPolygon: Polygon? = null
         internal set(value) {
-            value?.let {
-                value.tag = BUILDING_TAG
-                subAnnotation = value
-            }
             field = value
+            field?.let { it.tag = BUILDING_TAG }
+            subAnnotation = field
         }
         get() {
             return if (subAnnotation?.tag.equals(BUILDING_TAG)) {

@@ -25,8 +25,7 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
     fun remove() {
         map!!.removeDataLayer(this)
         id = 0
-        map =
-                null
+        map = null
     }
 
     /**

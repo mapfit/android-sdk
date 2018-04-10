@@ -1,12 +1,8 @@
 package com.mapfit.android.annotations
 
-import kotlinx.coroutines.experimental.Job
-
 abstract class PolyPointAnnotationOptions(
     private var annotation: Annotation
 ) {
-
-    private var styleUpdateJob = Job()
 
     var strokeWidth: Int = Integer.MIN_VALUE
         set(value) {
@@ -57,10 +53,10 @@ abstract class PolyPointAnnotationOptions(
         }
 
 
+    @Synchronized
     internal fun updateStyle() {
         for ((mapController, _) in annotation.mapBindings) {
-            mapController.removeAnnotation(annotation)
-            mapController.addAnnotation(annotation)
+            mapController.refreshAnnotation(annotation)
         }
     }
 
