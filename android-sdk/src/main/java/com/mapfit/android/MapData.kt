@@ -46,14 +46,15 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
         return this
     }
 
-
     fun addPolyline(polyline: Polyline): MapData {
-        map!!.addFeature(
-            id,
-            polyline.coordinates,
-            null,
-            polyline.polylineOptions.getProperties()
-        )
+        map?.let {
+            it.addFeature(
+                id,
+                polyline.coordinates,
+                null,
+                polyline.polylineOptions.getProperties(it)
+            )
+        }
         return this
     }
 
@@ -67,12 +68,14 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
      * @return This object, for chaining.
      */
     fun addPolygon(polygon: Polygon): MapData {
-        map!!.addFeature(
-            id,
-            polygon.coordinates,
-            polygon.rings,
-            polygon.polygonOptions.getProperties()
-        )
+        map?.let {
+            it.addFeature(
+                id,
+                polygon.coordinates,
+                polygon.rings,
+                polygon.polygonOptions.getProperties(it)
+            )
+        }
         return this
     }
 

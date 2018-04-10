@@ -1,5 +1,7 @@
 package com.mapfit.android.annotations
 
+import com.mapfit.android.MapController
+
 class PolygonOptions internal constructor(
     private val polygon: Polygon
 ) : PolyPointAnnotationOptions(polygon) {
@@ -12,10 +14,10 @@ class PolygonOptions internal constructor(
             }
         }
 
-    override fun getProperties(): Array<String?> {
+    override fun getProperties(mapController: MapController): Array<String?> {
         val properties = HashMap<String, String>()
 
-        properties["id"] = polygon.id.toString()
+        properties["id"] = polygon.getIdForMap(mapController).toString()
         if (fillColor.isNotBlank()) properties["polygon_color"] = fillColor
         if (strokeColor.isNotBlank()) properties["line_color"] = strokeColor
         if (strokeWidth != Int.MIN_VALUE) properties["line_width"] = strokeWidth.toString()

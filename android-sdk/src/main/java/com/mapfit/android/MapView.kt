@@ -3,6 +3,7 @@ package com.mapfit.android
 import android.animation.Animator
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.PointF
 import android.net.Uri
@@ -537,13 +538,8 @@ class MapView(
                                 if (addressList.isNotEmpty() && addressList[0].building.polygon.isNotEmpty()) {
                                     marker.buildingPolygon =
                                             mapController.addPolygon(addressList[0].building.polygon)
-
                                 }
-
                             }
-
-
-
 
                             launch(UI) {
                                 onMarkerAddedCallback?.onMarkerAdded(marker)
@@ -792,6 +788,11 @@ class MapView(
         glSurfaceView.id = R.id.glSurface
         addView(glSurfaceView)
         return glSurfaceView
+    }
+
+    @TestOnly
+    internal fun getMapSnap(callback: (bitmap: Bitmap) -> Unit) {
+        mapController.captureFrame(callback, true)
     }
 
     private fun disposeMap() {

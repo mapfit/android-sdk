@@ -1,5 +1,7 @@
 package com.mapfit.android.annotations
 
+import com.mapfit.android.MapController
+
 abstract class PolyPointAnnotationOptions(
     private var annotation: Annotation
 ) {
@@ -60,7 +62,7 @@ abstract class PolyPointAnnotationOptions(
         }
     }
 
-    internal abstract fun getProperties(): Array<String?>
+    internal abstract fun getProperties(mapController: MapController): Array<String?>
 
     internal fun getStringMapAsArray(properties: Map<String, String>): Array<String?> {
         val out = arrayOfNulls<String>(properties.size * 2)

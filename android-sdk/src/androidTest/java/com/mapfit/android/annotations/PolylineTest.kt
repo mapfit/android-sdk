@@ -1,6 +1,7 @@
 package com.mapfit.android.annotations
 
 import android.content.Context
+import android.graphics.Color
 import android.support.test.InstrumentationRegistry
 import android.support.test.annotation.UiThreadTest
 import android.support.test.espresso.Espresso
@@ -10,6 +11,7 @@ import android.support.test.runner.AndroidJUnit4
 import com.mapfit.android.*
 import com.mapfit.android.annotations.callback.OnPolylineClickListener
 import com.mapfit.android.geometry.LatLng
+import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.After
@@ -38,6 +40,8 @@ class PolylineTest {
 
     private lateinit var mapfitMap: MapfitMap
 
+    lateinit var mapView: MapView
+
     private val line by lazy {
         val list = mutableListOf<LatLng>()
 
@@ -62,7 +66,7 @@ class PolylineTest {
         MockitoAnnotations.initMocks(this)
 
         Mapfit.getInstance(mMockContext, mMockContext.getString(R.string.mapfit_debug_api_key))
-        val mapView: MapView = activityRule.activity.findViewById(R.id.mapView)
+        mapView = activityRule.activity.findViewById(R.id.mapView)
         mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
                 this@PolylineTest.mapfitMap = mapfitMap
@@ -113,6 +117,60 @@ class PolylineTest {
         polyline.addPoints(line[1])
         polyline.addPoints(line[2])
         assertTrue(polyline.points.size > line.size)
+    }
+
+    @Test
+    fun testPolylineColor() = runBlocking(UI) {
+        val polyline = mapfitMap.addPolyline(line)
+        polyline.polylineOptions.strokeColor = "#ff0000"
+        polyline.polylineOptions.strokeWidth = 5
+
+        polyline.polylineOptions.strokeOutlineColor = "#0000ff"
+        polyline.polylineOptions.strokeOutlineWidth = 85
+        polyline.polylineOptions.lineCapType = CapType.ROUND
+
+
+        mapfitMap.setLatLngBounds(polyline.getLatLngBounds(), 0.8f)
+        mapfitMap.setZoom(19f)
+
+        var redValue = 0
+        var blueValue = 0
+        var greenValue = 0
+
+        var outlineRedValue = 0
+        var outlineBlueValue = 0
+        var outlineGreenValue = 0
+
+        mapView.getMapSnap {
+            val screenPosition =
+                polyline.mapBindings.keys.first()
+                    .lngLatToScreenPosition(LatLng(40.6930532, -73.9860919))
+
+            val screenPositionOutline =
+                polyline.mapBindings.keys.first()
+                    .lngLatToScreenPosition(LatLng(40.692767, -73.978472))
+
+            val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
+            val pixelOutline =
+                it.getPixel(screenPositionOutline.x.toInt(), screenPositionOutline.y.toInt())
+
+            redValue = Color.red(pixel)
+            blueValue = Color.blue(pixel)
+            greenValue = Color.green(pixel)
+
+            outlineRedValue = Color.red(pixelOutline)
+            outlineBlueValue = Color.blue(pixelOutline)
+            outlineGreenValue = Color.green(pixelOutline)
+        }
+
+        delay(1000)
+        assertEquals(255, redValue)
+        assertEquals(0, blueValue)
+        assertEquals(0, greenValue)
+
+        assertEquals(0, outlineRedValue)
+        assertEquals(255, outlineBlueValue)
+        assertEquals(0, outlineGreenValue)
     }
 
     @Test
