@@ -34,9 +34,6 @@ public class JavaActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-//        Mapfit.getInstance(this, getString(com.mapfit.android.R.string.mapfit_debug_api_key));
-
         setContentView(R.layout.activity_main);
 
         mapView = findViewById(R.id.mapView);

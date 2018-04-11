@@ -18,9 +18,6 @@ class UserLocationActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-//        Mapfit.getInstance(this, getString(R.string.mapfit_debug_api_key))
-
         setContentView(R.layout.activity_main)
 
         mapView = findViewById(R.id.mapView)
