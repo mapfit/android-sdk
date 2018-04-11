@@ -41,7 +41,7 @@ abstract class PolyPointAnnotationOptions internal constructor(
             }
         }
 
-    var lineCapType: CapType = CapType.MITER
+    var lineCapType: CapType = CapType.BOUND
         set(value) {
             if (field != value) {
                 field = value
