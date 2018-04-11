@@ -6,7 +6,7 @@ package com.mapfit.android.annotations
 enum class CapType(private val value: String) {
     MITER("0"),
     SQUARE("2"),
-    ROUND("5");
+    ROUND("6");
 
     internal fun getValue() = value
 }
