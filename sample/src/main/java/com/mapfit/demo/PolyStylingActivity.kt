@@ -1,5 +1,6 @@
 package com.mapfit.demo
 
+import android.graphics.Paint
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.mapfit.android.MapView
@@ -60,18 +61,19 @@ class PolyStylingActivity : AppCompatActivity() {
             LatLng(40.744120, -73.992900),
             LatLng(40.743502, -73.991667),
             LatLng(40.744762, -73.990250),
-            LatLng(40.748428, -73.992085),
+            LatLng(40.745875, -73.991823),
             LatLng(40.744120, -73.992900)
         )
 
         val polygon = mapfitMap.addPolygon(listOf(poly))
 
         polygon.polygonOptions.apply {
-            strokeWidth = 15
-            strokeOutlineWidth = 15
-            strokeColor = "#5400eaea"
-            strokeOutlineColor = "#54FF0000"
-            fillColor = "#22ff2200"
+            strokeWidth = 3
+            strokeOutlineWidth = 8
+            strokeColor = "#32b3ff"
+            strokeOutlineColor = "#5932b3ff"
+            lineJoinType = JoinType.ROUND
+            fillColor = "#2732b3ff"
         }
     }
 
