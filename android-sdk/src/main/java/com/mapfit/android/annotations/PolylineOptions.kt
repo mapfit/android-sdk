@@ -6,7 +6,7 @@ class PolylineOptions internal constructor(
     private val polyline: Polyline
 ) : PolyPointAnnotationOptions(polyline) {
 
-    override fun getProperties(mapController: MapController): Array<String?> {
+     override fun getProperties(mapController: MapController): Array<String?> {
         val properties = HashMap<String, String>()
 
         properties["id"] = polyline.getIdForMap(mapController).toString()

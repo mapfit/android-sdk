@@ -1,7 +1,7 @@
 package com.mapfit.android.annotations
 
 /**
- *  Represents the shape types of the ends of features
+ *  Enumerates the shape types for the end of line shapes.
  */
 enum class CapType(private val value: String) {
     MITER("0"),

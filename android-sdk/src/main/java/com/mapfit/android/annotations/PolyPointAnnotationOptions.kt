@@ -2,7 +2,10 @@ package com.mapfit.android.annotations
 
 import com.mapfit.android.MapController
 
-abstract class PolyPointAnnotationOptions(
+/**
+ * Base abstract class for composing styling of poly point shapes e.g. [Polyline], [Polygon].
+ */
+abstract class PolyPointAnnotationOptions internal constructor(
     private var annotation: Annotation
 ) {
 
