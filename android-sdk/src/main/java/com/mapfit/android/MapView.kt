@@ -3,6 +3,7 @@ package com.mapfit.android
 import android.animation.Animator
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.PointF
 import android.net.Uri
@@ -527,15 +528,19 @@ class MapView(
 
                         if (latLng.isEmpty()) {
                             onMarkerAddedCallback?.onError(IOException("No coordinates found for given address."))
+
                         } else {
-                            val marker = mapController.addMarker().setPosition(latLng)
-//
-                            marker.address = addressList[0]
-                            if (withBuilding) {
-                                val polygon =
-                                    mapController.addPolygon(addressList[0].building.polygon)
-                                marker.setPolygon(polygon)
+                            val marker = mapController.addMarker()
+                            marker.apply {
+                                setPosition(latLng)
+                                this@apply.address = addressList[0]
+
+                                if (addressList.isNotEmpty() && addressList[0].building.polygon.isNotEmpty()) {
+                                    marker.buildingPolygon =
+                                            mapController.addPolygon(addressList[0].building.polygon)
+                                }
                             }
+
                             launch(UI) {
                                 onMarkerAddedCallback?.onMarkerAdded(marker)
                             }
@@ -543,8 +548,8 @@ class MapView(
                     }
 
                     override fun onError(message: String, e: Exception) {
-                        async(UI) {
-                            onMarkerAddedCallback.onError(e)
+                        launch(UI) {
+                            onMarkerAddedCallback?.onError(e)
                         }
                     }
                 })
@@ -783,6 +788,11 @@ class MapView(
         glSurfaceView.id = R.id.glSurface
         addView(glSurfaceView)
         return glSurfaceView
+    }
+
+    @TestOnly
+    internal fun getMapSnap(callback: (bitmap: Bitmap) -> Unit) {
+        mapController.captureFrame(callback, true)
     }
 
     private fun disposeMap() {

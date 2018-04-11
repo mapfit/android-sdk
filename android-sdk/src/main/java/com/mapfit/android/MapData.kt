@@ -25,8 +25,7 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
     fun remove() {
         map!!.removeDataLayer(this)
         id = 0
-        map =
-                null
+        map = null
     }
 
     /**
@@ -47,19 +46,15 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
         return this
     }
 
-
     fun addPolyline(polyline: Polyline): MapData {
-
-        val props = HashMap<String, String>()
-        props["id"] = "$id"
-
-        map!!.addFeature(
-            id,
-            polyline.coordinates,
-            null,
-            getStringMapAsArray(props)
-        )
-
+        map?.let {
+            it.addFeature(
+                id,
+                polyline.coordinates,
+                null,
+                polyline.polylineOptions.getProperties(it)
+            )
+        }
         return this
     }
 
@@ -73,15 +68,14 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
      * @return This object, for chaining.
      */
     fun addPolygon(polygon: Polygon): MapData {
-        val props = HashMap<String, String>()
-        props["id"] = "$id"
-
-        map!!.addFeature(
-            id,
-            polygon.coordinates,
-            polygon.rings,
-            getStringMapAsArray(props)
-        )
+        map?.let {
+            it.addFeature(
+                id,
+                polygon.coordinates,
+                polygon.rings,
+                polygon.polygonOptions.getProperties(it)
+            )
+        }
         return this
     }
 
@@ -107,14 +101,5 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
         return this
     }
 
-    private fun getStringMapAsArray(properties: Map<String, String>): Array<String?> {
-        val out = arrayOfNulls<String>(properties.size * 2)
-        var i = 0
-        for ((key, value) in properties) {
-            out[i++] = key
-            out[i++] = value
-        }
-        return out
-    }
 
 }

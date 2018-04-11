@@ -1,6 +1,7 @@
 package com.mapfit.android.annotations
 
 import android.content.Context
+import android.graphics.Color
 import android.support.test.InstrumentationRegistry
 import android.support.test.annotation.UiThreadTest
 import android.support.test.espresso.Espresso
@@ -10,6 +11,7 @@ import android.support.test.runner.AndroidJUnit4
 import com.mapfit.android.*
 import com.mapfit.android.annotations.callback.OnPolygonClickListener
 import com.mapfit.android.geometry.LatLng
+import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.After
@@ -38,15 +40,16 @@ class PolygonTest {
 
     private lateinit var mapfitMap: MapfitMap
 
-    private val line by lazy {
+    lateinit var mapView: MapView
+
+    private val poly by lazy {
         val list = mutableListOf<List<LatLng>>()
         val subList = mutableListOf<LatLng>()
 
-        subList.add(LatLng(40.693825, -73.998691))
-        subList.add(LatLng(40.6902223, -73.9770368))
-        subList.add(LatLng(40.6930532, -73.9860919))
-        subList.add(LatLng(40.7061326, -74.000769))
-        subList.add(LatLng(40.693825, -73.998691))
+        subList.add(LatLng(40.746046, -74.005882))
+        subList.add(LatLng(40.736589, -73.977800))
+        subList.add(LatLng(40.708213, -74.012489))
+        subList.add(LatLng(40.746046, -74.005882))
         list.add(subList)
         list
     }
@@ -65,7 +68,7 @@ class PolygonTest {
         MockitoAnnotations.initMocks(this)
 
         Mapfit.getInstance(mMockContext, mMockContext.getString(R.string.mapfit_debug_api_key))
-        val mapView: MapView = activityRule.activity.findViewById(R.id.mapView)
+        mapView = activityRule.activity.findViewById(R.id.mapView)
         mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
                 this@PolygonTest.mapfitMap = mapfitMap
@@ -82,7 +85,7 @@ class PolygonTest {
     @Test
     @UiThreadTest
     fun testAddRemovePolygon() {
-        val polygon = mapfitMap.addPolygon(line)
+        val polygon = mapfitMap.addPolygon(poly)
 
         assertNotNull(polygon)
         assertTrue(mapfitMap.has(polygon))
@@ -93,13 +96,41 @@ class PolygonTest {
     }
 
     @Test
-    fun testPolylineClickListener() = runBlocking {
+    fun testPolygonFillColor() = runBlocking(UI) {
+        val polygon = mapfitMap.addPolygon(poly)
+        polygon.polygonOptions.fillColor = "#ff0000"
+
+        mapfitMap.setLatLngBounds(polygon.getLatLngBounds(), 0.5f)
+        mapfitMap.setZoom(19f)
+
+        var redValue = 0
+        var blueValue = 0
+        var greenValue = 0
+
+        mapView.getMapSnap {
+            val screenPosition =
+                polygon.mapBindings.keys.first()
+                    .lngLatToScreenPosition(LatLng(40.741596, -73.994686))
+            val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
+            redValue = Color.red(pixel)
+            blueValue = Color.blue(pixel)
+            greenValue = Color.green(pixel)
+        }
+
+        delay(2000)
+        assertEquals(255, redValue)
+        assertEquals(0, blueValue)
+        assertEquals(0, greenValue)
+    }
+
+    @Test
+    fun testPolygonClickListener() = runBlocking {
         delay(400)
-        mapfitMap.setCenter(line.first().first())
-        mapfitMap.setZoom(17f)
+        mapfitMap.setCenter(LatLng(40.741596, -73.994686))
+        mapfitMap.setZoom(14f)
         mapfitMap.setOnPolygonClickListener(polygonClickListener)
 
-        val polygon = mapfitMap.addPolygon(line)
+        val polygon = mapfitMap.addPolygon(poly)
 
         clickPolygon(polygon)
 
@@ -114,7 +145,7 @@ class PolygonTest {
 
         val screenPosition =
             polygon.mapBindings.keys.first()
-                .lngLatToScreenPosition(polygon.points.first().first())
+                .lngLatToScreenPosition(LatLng(40.741596, -73.994686))
 
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
             .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt()))

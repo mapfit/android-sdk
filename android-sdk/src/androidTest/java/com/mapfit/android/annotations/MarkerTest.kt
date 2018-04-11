@@ -157,6 +157,9 @@ class MarkerTest {
                     ?: 0.0,
             0.0001
         )
+
+        // check building polygon existence
+        Assert.assertNotNull(actualMarker?.buildingPolygon)
     }
 
     @Test
