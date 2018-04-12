@@ -1,5 +1,6 @@
 package com.mapfit.android
 
+import android.graphics.Color
 import android.graphics.Point
 import android.os.SystemClock
 import android.support.test.espresso.InjectEventSecurityException
@@ -13,6 +14,9 @@ import android.support.test.espresso.matcher.ViewMatchers
 import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.View
+import com.mapfit.android.geometry.LatLng
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.runBlocking
 import org.hamcrest.Matcher
 
 

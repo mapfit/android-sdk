@@ -21,7 +21,7 @@ class PolygonOptions internal constructor(
         if (fillColor.isNotBlank()) properties["polygon_color"] = fillColor
         if (drawOrder != Int.MIN_VALUE) {
             properties["polygon_order"] = "$drawOrder"
-            properties["line_order"] = "$drawOrder"
+            properties["line_order"] = (drawOrder - 1).toString()
         }
         if (strokeColor.isNotBlank()) properties["line_color"] = strokeColor
         if (strokeWidth != Int.MIN_VALUE) properties["line_width"] = strokeWidth.toString()
