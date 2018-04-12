@@ -531,12 +531,13 @@ class MapView(
 
                         } else {
                             val marker = mapController.addMarker()
+
                             marker.apply {
                                 setPosition(latLng)
                                 this@apply.address = addressList[0]
 
                                 if (addressList.isNotEmpty() && addressList[0].building.polygon.isNotEmpty()) {
-                                    marker.buildingPolygon =
+                                    this@apply.buildingPolygon =
                                             mapController.addPolygon(addressList[0].building.polygon)
                                 }
                             }
