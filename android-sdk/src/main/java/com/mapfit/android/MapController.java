@@ -29,6 +29,7 @@ import com.mapfit.tetragon.TouchInput.Gestures;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -450,6 +451,17 @@ public class MapController implements Renderer {
         this.httpHandler = handler;
     }
 
+    /**
+     * Enables or disables the 3d buildings.
+     *
+     * @param enable
+     */
+    public void enable3dBuildings(Boolean enable) {
+        SceneUpdate sceneUpdate = new SceneUpdate("global.show_3d_buildings", enable + "");
+        List updates = new ArrayList();
+        updates.add(sceneUpdate);
+        updateSceneAsync(updates);
+    }
 
     /**
      * Set the geographic position of the center of the map view
