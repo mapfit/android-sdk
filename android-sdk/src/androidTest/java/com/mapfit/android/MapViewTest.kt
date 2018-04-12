@@ -1,6 +1,5 @@
 package com.mapfit.android
 
-import android.location.Location
 import android.support.test.annotation.UiThreadTest
 import android.support.test.espresso.Espresso.onView
 import android.support.test.espresso.IdlingRegistry
@@ -16,9 +15,7 @@ import com.mapfit.android.MapOptions.Companion.MAP_MAX_ZOOM
 import com.mapfit.android.MapOptions.Companion.MAP_MIN_ZOOM
 import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.location.LocationListener
-import com.mapfit.android.location.LocationPriority
 import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
-import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.*
@@ -30,7 +27,7 @@ import org.mockito.MockitoAnnotations
 
 
 /**
- * Instrumentation tests for [MapView] and [MapOptions] functionality.
+ * Instrumentation tests for [MapView] functionality.
  *
  * Created by dogangulcan on 1/8/18.
  */
@@ -107,7 +104,6 @@ class MapViewTest {
     @Test
     @UiThreadTest
     fun testDefaultValues() {
-        Assert.assertEquals(MapTheme.MAPFIT_DAY, mapfitMap.getMapOptions().theme)
         Assert.assertEquals(View.GONE, mapView.zoomControlsView.visibility)
         Assert.assertEquals(View.GONE, mapView.btnRecenter.visibility)
         Assert.assertEquals(View.GONE, mapView.btnCompass.visibility)
@@ -164,44 +160,6 @@ class MapViewTest {
         Assert.assertTrue(mapfitMap.getLayers().isEmpty())
     }
 
-
-    @Test
-    @UiThreadTest
-    fun testStyleChanges() {
-        mapfitMap.getMapOptions().theme = MapTheme.MAPFIT_NIGHT
-        Assert.assertEquals(MapTheme.MAPFIT_NIGHT, mapfitMap.getMapOptions().theme)
-    }
-
-    @Test
-    @UiThreadTest
-    fun testZoomControlVisibility() {
-        mapfitMap.getMapOptions().zoomControlsEnabled = true
-        Assert.assertEquals(View.VISIBLE, mapView.zoomControlsView.visibility)
-
-        mapfitMap.getMapOptions().zoomControlsEnabled = false
-        Assert.assertEquals(View.GONE, mapView.zoomControlsView.visibility)
-    }
-
-    @Test
-    @UiThreadTest
-    fun testCompassVisibility() {
-        mapfitMap.getMapOptions().compassButtonEnabled = true
-        Assert.assertEquals(View.VISIBLE, mapView.btnCompass.visibility)
-
-        mapfitMap.getMapOptions().compassButtonEnabled = false
-        Assert.assertEquals(View.GONE, mapView.btnCompass.visibility)
-    }
-
-    @Test
-    @UiThreadTest
-    fun testRecenterVisibility() {
-        mapfitMap.getMapOptions().recenterButtonEnabled = true
-        Assert.assertEquals(View.VISIBLE, mapView.btnRecenter.visibility)
-
-        mapfitMap.getMapOptions().recenterButtonEnabled = false
-        Assert.assertEquals(View.GONE, mapView.btnRecenter.visibility)
-    }
-
     @Test
     fun testMapClickListener() {
         runBlocking {
@@ -244,30 +202,6 @@ class MapViewTest {
                 .onMapLongClicked(Mockito.any(LatLng::class.java) ?: LatLng())
         }
     }
-
-
-    /**
-     * Location update is not mocked.
-     */
-    @Test
-    fun testOnUserLocationListener() {
-        runBlocking(UI) {
-            delay(400)
-            mapfitMap.getMapOptions().setUserLocationEnabled(
-                true,
-                LocationPriority.HIGH_ACCURACY,
-                locationListener
-            )
-
-            delay(15000)
-
-            verify(locationListener, atLeastOnce())
-                .onLocation(Mockito.any(Location::class.java) ?: Location(""))
-
-            mapfitMap.getMapOptions().setUserLocationEnabled(false)
-        }
-    }
-
 
     @Test
     fun testOnMapPanListener() {
