@@ -57,6 +57,11 @@ abstract class PolyPointAnnotationOptions internal constructor(
             }
         }
 
+    var drawOrder: Int = Int.MIN_VALUE
+        set(value) {
+            field = value
+            updateStyle()
+        }
 
     @Synchronized
     internal fun updateStyle() {
@@ -64,8 +69,6 @@ abstract class PolyPointAnnotationOptions internal constructor(
             mapController.refreshAnnotation(annotation)
         }
     }
-
-    internal abstract fun getProperties(mapController: MapController): Array<String?>
 
     internal fun getStringMapAsArray(properties: Map<String, String>): Array<String?> {
         val out = arrayOfNulls<String>(properties.size * 2)
@@ -76,5 +79,7 @@ abstract class PolyPointAnnotationOptions internal constructor(
         }
         return out
     }
+
+    internal abstract fun getProperties(mapController: MapController): Array<String?>
 
 }

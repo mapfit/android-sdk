@@ -19,6 +19,10 @@ class PolygonOptions internal constructor(
 
         properties["id"] = polygon.getIdForMap(mapController).toString()
         if (fillColor.isNotBlank()) properties["polygon_color"] = fillColor
+        if (drawOrder != Int.MIN_VALUE) {
+            properties["polygon_order"] = "$drawOrder"
+            properties["line_order"] = "$drawOrder"
+        }
         if (strokeColor.isNotBlank()) properties["line_color"] = strokeColor
         if (strokeWidth != Int.MIN_VALUE) properties["line_width"] = strokeWidth.toString()
         if (strokeOutlineColor.isNotBlank()) properties["line_stroke_color"] = strokeOutlineColor
