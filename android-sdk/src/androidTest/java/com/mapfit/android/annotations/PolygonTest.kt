@@ -110,7 +110,7 @@ class PolygonTest {
         mapView.getMapSnap {
             val screenPosition =
                 polygon.mapBindings.keys.first()
-                    .lngLatToScreenPosition(LatLng(40.741596, -73.994686))
+                    .lngLatToScreenPosition(LatLng(40.734839, -73.994748))
             val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
             redValue = Color.red(pixel)
             blueValue = Color.blue(pixel)
@@ -121,6 +121,68 @@ class PolygonTest {
         assertEquals(255, redValue)
         assertEquals(0, blueValue)
         assertEquals(0, greenValue)
+    }
+
+
+    @Test
+    fun testPolygonOrder() = runBlocking(UI) {
+        val polygon = mapfitMap.addPolygon(poly)
+        polygon.polygonOptions.fillColor = "#ff0000"
+        polygon.polygonOptions.strokeWidth = 15
+
+        val polygon2 = mapfitMap.addPolygon(poly)
+        polygon2.polygonOptions.fillColor = "#0000ff"
+        polygon2.polygonOptions.strokeWidth = 15
+
+        val pixelCoordinate = LatLng(40.741596, -73.994686)
+
+        mapfitMap.setLatLngBounds(polygon.getLatLngBounds(), 0.8f)
+        mapfitMap.setZoom(19f)
+
+        polygon.polygonOptions.drawOrder = 600
+        polygon2.polygonOptions.drawOrder = 400
+
+        var triple = Triple(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
+
+        mapView.getMapSnap {
+            val screenPosition = mapView.getScreenPosition(pixelCoordinate)
+            val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
+            triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
+        }
+
+        delay(2000)
+        assertEquals(255, triple.first)
+        assertEquals(0, triple.second)
+        assertEquals(0, triple.third)
+
+        polygon.polygonOptions.drawOrder = 400
+        polygon2.polygonOptions.drawOrder = 600
+
+        delay(500)
+        mapView.getMapSnap {
+            val screenPosition = mapView.getScreenPosition(pixelCoordinate)
+            val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
+            triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
+        }
+
+        delay(500)
+        assertEquals(0, triple.first)
+        assertEquals(0, triple.second)
+        assertEquals(255, triple.third)
+
+        polygon.polygonOptions.drawOrder = 800
+
+        delay(500)
+        mapView.getMapSnap {
+            val screenPosition = mapView.getScreenPosition(pixelCoordinate)
+            val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
+            triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
+        }
+
+        delay(500)
+        assertEquals(255, triple.first)
+        assertEquals(0, triple.second)
+        assertEquals(0, triple.third)
     }
 
     @Test

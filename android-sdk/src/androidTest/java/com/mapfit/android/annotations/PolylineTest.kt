@@ -121,6 +121,7 @@ class PolylineTest {
 
     @Test
     fun testPolylineColor() = runBlocking(UI) {
+        delay(500)
         val polyline = mapfitMap.addPolyline(line)
         polyline.polylineOptions.strokeColor = "#ff0000"
         polyline.polylineOptions.strokeWidth = 5
@@ -129,48 +130,94 @@ class PolylineTest {
         polyline.polylineOptions.strokeOutlineWidth = 85
         polyline.polylineOptions.lineCapType = CapType.ROUND
 
+        mapfitMap.setLatLngBounds(polyline.getLatLngBounds(), 0.8f)
+        mapfitMap.setZoom(19f)
+
+        var tripleFirst = Triple(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
+        var tripleSecond = Triple(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
+
+        mapView.getMapSnap {
+            val screenPosition = mapView.getScreenPosition(LatLng(40.6930532, -73.9860919))
+            val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
+            tripleFirst = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
+
+            val screenPosition2 = mapView.getScreenPosition(LatLng(40.692767, -73.978472))
+            val pixel2 = it.getPixel(screenPosition2.x.toInt(), screenPosition2.y.toInt())
+            tripleSecond = Triple(Color.red(pixel2), Color.green(pixel2), Color.blue(pixel2))
+
+        }
+
+        delay(2000)
+
+        assertEquals(255, tripleFirst.first)
+        assertEquals(0, tripleFirst.second)
+        assertEquals(0, tripleFirst.third)
+
+        assertEquals(0, tripleSecond.first)
+        assertEquals(0, tripleSecond.second)
+        assertEquals(255, tripleSecond.third)
+    }
+
+    @Test
+    fun testPolylineOrder() = runBlocking(UI) {
+        val polyline = mapfitMap.addPolyline(line)
+        polyline.polylineOptions.strokeColor = "#ff0000"
+        polyline.polylineOptions.strokeWidth = 15
+
+        val polyline2 = mapfitMap.addPolyline(line)
+        polyline2.polylineOptions.strokeColor = "#0000ff"
+        polyline2.polylineOptions.strokeWidth = 15
+
+        val pixelCoordinate = LatLng(40.6930532, -73.9860919)
 
         mapfitMap.setLatLngBounds(polyline.getLatLngBounds(), 0.8f)
         mapfitMap.setZoom(19f)
 
-        var redValue = 0
-        var blueValue = 0
-        var greenValue = 0
+        polyline.polylineOptions.drawOrder = 600
+        polyline2.polylineOptions.drawOrder = 400
 
-        var outlineRedValue = 0
-        var outlineBlueValue = 0
-        var outlineGreenValue = 0
+        var triple = Triple(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
 
         mapView.getMapSnap {
-            val screenPosition =
-                polyline.mapBindings.keys.first()
-                    .lngLatToScreenPosition(LatLng(40.6930532, -73.9860919))
-
-            val screenPositionOutline =
-                polyline.mapBindings.keys.first()
-                    .lngLatToScreenPosition(LatLng(40.692767, -73.978472))
-
+            val screenPosition = mapView.getScreenPosition(pixelCoordinate)
             val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
-            val pixelOutline =
-                it.getPixel(screenPositionOutline.x.toInt(), screenPositionOutline.y.toInt())
-
-            redValue = Color.red(pixel)
-            blueValue = Color.blue(pixel)
-            greenValue = Color.green(pixel)
-
-            outlineRedValue = Color.red(pixelOutline)
-            outlineBlueValue = Color.blue(pixelOutline)
-            outlineGreenValue = Color.green(pixelOutline)
+            triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
         }
 
-        delay(1000)
-        assertEquals(255, redValue)
-        assertEquals(0, blueValue)
-        assertEquals(0, greenValue)
 
-        assertEquals(0, outlineRedValue)
-        assertEquals(255, outlineBlueValue)
-        assertEquals(0, outlineGreenValue)
+        delay(2000)
+        assertEquals(255, triple.first)
+        assertEquals(0, triple.second)
+        assertEquals(0, triple.third)
+
+        polyline.polylineOptions.drawOrder = 400
+        polyline2.polylineOptions.drawOrder = 600
+
+        delay(500)
+        mapView.getMapSnap {
+            val screenPosition = mapView.getScreenPosition(pixelCoordinate)
+            val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
+            triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
+        }
+
+        delay(500)
+        assertEquals(0, triple.first)
+        assertEquals(0, triple.second)
+        assertEquals(255, triple.third)
+
+        polyline.polylineOptions.drawOrder = 800
+
+        delay(500)
+        mapView.getMapSnap {
+            val screenPosition = mapView.getScreenPosition(pixelCoordinate)
+            val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
+            triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
+        }
+
+        delay(500)
+        assertEquals(255, triple.first)
+        assertEquals(0, triple.second)
+        assertEquals(0, triple.third)
     }
 
     @Test

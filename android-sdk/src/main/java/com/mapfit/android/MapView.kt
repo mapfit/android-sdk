@@ -464,6 +464,7 @@ class MapView(
     }
 
     private val mapfitMap = object : MapfitMap() {
+
         override fun setOnPolygonClickListener(listener: OnPolygonClickListener) {
             polygonClickListener = listener
         }
@@ -693,6 +694,8 @@ class MapView(
                 mapController.setZoomEased(normalizedZoomLevel, duration.toInt())
             }
         }
+
+
     }
 
     private fun normalizeZoomLevel(zoomLevel: Float, warn: Boolean = true): Float =
@@ -848,5 +851,7 @@ class MapView(
         return HttpHandler()
     }
 
+    @TestOnly
+    internal fun getScreenPosition(latLng: LatLng) = mapController.lngLatToScreenPosition(latLng)
 
 }
