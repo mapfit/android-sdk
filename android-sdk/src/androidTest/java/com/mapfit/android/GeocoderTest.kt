@@ -7,6 +7,8 @@ import com.mapfit.android.geocoder.Geocoder
 import com.mapfit.android.geocoder.GeocoderCallback
 import com.mapfit.android.geocoder.model.Address
 import com.mapfit.android.geometry.LatLng
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -60,9 +62,8 @@ class GeocoderTest {
     }
 
     @Test
-    fun testGeocoderSuccessCallback() {
-
-        Mapfit.getInstance(context, context.getString(R.string.mapfit_debug_api_key))
+    fun testGeocoderSuccessCallback() = runBlocking {
+        instantiateMapfit(this@GeocoderTest.context)
 
         Geocoder().geocode(
             "119 w 24th st new york ny 10011",
@@ -70,7 +71,7 @@ class GeocoderTest {
             geocoderCallback
         )
 
-        Thread.sleep(1000)
+        delay(1000)
         verify(geocoderCallback, times(1))
             .onSuccess(
                 Mockito.any(List::class.java) as List<Address>? ?: listOf()
@@ -79,8 +80,7 @@ class GeocoderTest {
 
     @Test
     fun testGeocoderErrorCallback() {
-
-        Mapfit.getInstance(context, context.getString(R.string.mapfit_debug_api_key))
+        instantiateMapfit(this@GeocoderTest.context)
 
         Geocoder().geocode(
             "",
@@ -98,7 +98,7 @@ class GeocoderTest {
 
     @Test
     fun testReverseGeocoderSuccessCallback() {
-        Mapfit.getInstance(context, context.getString(R.string.mapfit_debug_api_key))
+        instantiateMapfit(this@GeocoderTest.context)
 
         Geocoder().reverseGeocode(
             LatLng(40.74405, -73.99324),

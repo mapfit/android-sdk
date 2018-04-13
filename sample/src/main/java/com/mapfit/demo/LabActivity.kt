@@ -4,15 +4,13 @@ import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.widget.Toast
 import com.mapfit.android.MapView
-import com.mapfit.android.Mapfit
 import com.mapfit.android.MapfitMap
 import com.mapfit.android.OnMapReadyCallback
+import com.mapfit.android.annotations.CapType
+import com.mapfit.android.annotations.JoinType
 import com.mapfit.android.annotations.Marker
-import com.mapfit.android.annotations.Polygon
 import com.mapfit.android.annotations.callback.OnMarkerAddedCallback
-import com.mapfit.android.annotations.callback.OnPolygonClickListener
 import com.mapfit.android.directions.Directions
 import com.mapfit.android.directions.DirectionsCallback
 import com.mapfit.android.directions.model.Route
@@ -24,6 +22,7 @@ import com.mapfit.mapfitdemo.R
 import kotlinx.android.synthetic.main.activity_lab.*
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.launch
+import java.util.*
 
 
 class LabActivity : AppCompatActivity() {
@@ -34,33 +33,24 @@ class LabActivity : AppCompatActivity() {
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        Mapfit.getInstance(this, getString(R.string.mapfit_debug_api_key))
-
-
         setContentView(R.layout.activity_lab)
+
         mapView = findViewById(R.id.mapView)
         mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
                 this@LabActivity.mapfitMap = mapfitMap
 
                 mapfitMap.setCenter(LatLng(40.744014, -73.990111))
-                mapfitMap.setZoom(15f)
+                mapfitMap.setZoom(17f)
 
-                mapfitMap.setOnPolygonClickListener(object : OnPolygonClickListener {
-                    override fun onPolygonClicked(polygon: Polygon) {
-                        Toast.makeText(this@LabActivity, "WOHOO", Toast.LENGTH_LONG).show()
-                    }
-                })
-
-                testLocation()
-
+//                testLocation()
 
                 button.setOnClickListener {
                     //                    mapfitMap.getMapOptions()
 //                        .setUserLocationEnabled(!mapfitMap.getMapOptions().getUserLocationEnabled())
-                    getDirections()
-                    getDirections2()
+//                    getDirections()
+//                    getDirections2()
+
 
                     val poly = listOf(
                         LatLng(40.744120, -73.992900),
@@ -69,20 +59,82 @@ class LabActivity : AppCompatActivity() {
                         LatLng(40.748428, -73.992085),
                         LatLng(40.744120, -73.992900)
                     )
-                    val line = listOf(LatLng(40.742729, -73.994500), LatLng(40.741546, -73.991747))
 
-                    val polygon = mapfitMap.addPolygon(listOf(poly))
 
-                    polygon.polygonOptions.apply {
+                    val red = mapfitMap.addPolygon(listOf(poly))
+
+                    red.polygonOptions.apply {
                         strokeWidth = 30
                         strokeOutlineWidth = 35
-                        strokeColor = "#5400eaea"
-                        strokeOutlineColor = "#54FF0000"
-                        fillColor = "#22ff2200"
+                        strokeColor = "#ff0000"
+                        strokeOutlineColor = "#ff0000"
+                        fillColor = "#ff0000"
                     }
+
+                    val green = mapfitMap.addPolygon(listOf(poly))
+
+                    green.polygonOptions.apply {
+                        strokeWidth = 30
+                        strokeOutlineWidth = 35
+                        strokeColor = "#00ff00"
+                        strokeOutlineColor = "#00ff00"
+                        fillColor = "#00ff00"
+                    }
+
+
+                    launch { // g g r g r
+                        red.polygonOptions.drawOrder = 400
+                        green.polygonOptions.drawOrder = 500
+
+                        delay(3000)
+                        red.polygonOptions.drawOrder = 450
+                        green.polygonOptions.drawOrder = 500
+
+                        delay(3000)
+                        red.polygonOptions.drawOrder = 450
+                        green.polygonOptions.drawOrder = 200
+
+                        delay(3000)
+                        red.polygonOptions.drawOrder = 450
+                        green.polygonOptions.drawOrder = 500
+
+                        delay(3000)
+                        red.polygonOptions.drawOrder = 450
+                        green.polygonOptions.drawOrder = 100
+
+                        delay(3000)
+                        green.polygonOptions.drawOrder = 100
+
+
+                        delay(3000)
+                        red.polygonOptions.drawOrder = 60
+
+//                        repeat(15) {
+//                            delay(200)
+//                            polygon.polygonOptions.drawOrder = polygon.polygonOptions.drawOrder + 10
+//                            polygon2.polygonOptions.drawOrder = polygon2.polygonOptions.drawOrder -
+//                                    10
+//                        }
+
+                    }
+
+
+                    val line = listOf(
+                        LatLng(40.744120, -73.992900),
+                        LatLng(40.743502, -73.991667),
+                        LatLng(40.744762, -73.990250)
+                    )
 
                     val polyline = mapfitMap.addPolyline(line)
 
+                    polyline.polylineOptions.apply {
+                        strokeWidth = 3
+                        strokeOutlineWidth = 8
+                        strokeColor = "#4353ff"
+                        strokeOutlineColor = "#4c4353ff"
+                        lineJoinType = JoinType.ROUND
+                        lineCapType = CapType.ROUND
+                    }
                     launch {
 
                         polyline.polylineOptions.apply {
@@ -92,11 +144,12 @@ class LabActivity : AppCompatActivity() {
                             strokeColor = "#00FF00"
                             strokeOutlineColor = "#123456"
                         }
-
-                        polyline.polylineOptions.strokeOutlineColor = "#545412fa"
-                        polygon.polygonOptions.strokeOutlineColor = "#545412fa"
-
-                    }
+                        }
+//
+//                        polyline.polylineOptions.strokeOutlineColor = "#545412fa"
+//                        polygon.polygonOptions.strokeOutlineColor = "#545412fa"
+//
+//                    }
 //                    launch {
 //                        delay(4000)
 //                        polyline.polylineOptions.strokeWidth = 20
@@ -116,13 +169,64 @@ class LabActivity : AppCompatActivity() {
 
 
                 }
-                placeMarkerWithAddress()
+//                placeMarkerWithAddress()
 
                 button.callOnClick()
                 mapfitMap.getMapOptions()
             }
         })
     }
+
+
+    /**
+     * Adds a polygon and styles it.
+     */
+    internal fun addStyledPolygon() {
+        val poly = mutableListOf<LatLng>()
+        poly.add(LatLng(40.744120, -73.992900))
+        poly.add(LatLng(40.743502, -73.991667))
+        poly.add(LatLng(40.744762, -73.990250))
+        poly.add(LatLng(40.748428, -73.992085))
+        poly.add(LatLng(40.744120, -73.992900))
+
+        val polyRings = ArrayList<List<LatLng>>()
+        polyRings.add(poly)
+
+        val polygon = mapfitMap.addPolygon(polyRings)
+
+        polygon.polygonOptions.apply {
+            fillColor = "#22ff2200"
+            strokeWidth = 15
+            strokeOutlineWidth = 15
+            strokeColor = "#5400eaea"
+            lineJoinType = JoinType.ROUND
+            strokeOutlineColor = "#54FF0000"
+        }
+    }
+
+    /**
+     * Adds a polygon and styles it.
+     */
+    internal fun addStyledPolyline() {
+        val line = mutableListOf<LatLng>()
+        line.add(LatLng(40.744120, -73.992900))
+        line.add(LatLng(40.743502, -73.991667))
+        line.add(LatLng(40.744762, -73.990250))
+        line.add(LatLng(40.748428, -73.992085))
+
+
+        val polyline = mapfitMap.addPolyline(line)
+
+        polyline.polylineOptions.apply {
+            strokeWidth = 15
+            strokeOutlineWidth = 15
+            lineCapType = CapType.ROUND
+            lineJoinType = JoinType.ROUND
+            strokeColor = "#5400eaea"
+            strokeOutlineColor = "#54FF0000"
+        }
+    }
+
 
     @SuppressLint("MissingPermission")
     private fun testLocation() {
@@ -251,11 +355,12 @@ class LabActivity : AppCompatActivity() {
             object : OnMarkerAddedCallback {
                 override fun onMarkerAdded(marker: Marker) {
                     marker.buildingPolygon?.polygonOptions?.apply {
-                        this@apply.strokeWidth = 20
-                        this@apply.strokeOutlineWidth = 25
-                        this@apply.strokeColor = "#5400ff00"
-                        this@apply.strokeOutlineColor = "#540000ff"
-                        this@apply.fillColor = "#54ff0000"
+                        strokeWidth = 20
+                        strokeOutlineWidth = 25
+                        strokeColor = "#5400ff00"
+                        strokeOutlineColor = "#540000ff"
+                        lineJoinType = JoinType.ROUND
+                        fillColor = "#54ff0000"
                     }
 
                     mapfitMap.setCenter(marker.getPosition())
@@ -263,7 +368,9 @@ class LabActivity : AppCompatActivity() {
                 }
 
                 override fun onError(exception: Exception) {
-                    // handle the exception
+                    if (exception != null) {
+
+                    }
                 }
             }
         )

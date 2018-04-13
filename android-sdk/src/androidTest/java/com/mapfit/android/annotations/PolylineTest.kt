@@ -82,6 +82,46 @@ class PolylineTest {
 
     @Test
     @UiThreadTest
+    fun testStrokeColor() {
+        val polyline = mapfitMap.addPolyline(line)
+        polyline.polylineOptions.strokeColor = "#ffffff"
+        assertEquals("#ffffff", polyline.polylineOptions.strokeColor)
+    }
+
+    @Test
+    @UiThreadTest
+    fun testStrokeWidth() {
+        val polyline = mapfitMap.addPolyline(line)
+        polyline.polylineOptions.strokeWidth = 50
+        assertEquals(50, polyline.polylineOptions.strokeWidth)
+    }
+
+    @Test
+    @UiThreadTest
+    fun testStrokeOutlineWidth() {
+        val polyline = mapfitMap.addPolyline(line)
+        polyline.polylineOptions.strokeOutlineWidth = 50
+        assertEquals(50, polyline.polylineOptions.strokeOutlineWidth)
+    }
+
+    @Test
+    @UiThreadTest
+    fun testCapType() {
+        val polyline = mapfitMap.addPolyline(line)
+        polyline.polylineOptions.lineCapType = CapType.ROUND
+        assertEquals(CapType.ROUND, polyline.polylineOptions.lineCapType)
+    }
+
+    @Test
+    @UiThreadTest
+    fun testJoinType() {
+        val polyline = mapfitMap.addPolyline(line)
+        polyline.polylineOptions.lineJoinType = JoinType.ROUND
+        assertEquals(JoinType.ROUND, polyline.polylineOptions.lineJoinType)
+    }
+
+    @Test
+    @UiThreadTest
     fun testAddRemovePolyline() {
         val polyline = mapfitMap.addPolyline(line)
 
@@ -162,11 +202,9 @@ class PolylineTest {
     fun testPolylineOrder() = runBlocking(UI) {
         val polyline = mapfitMap.addPolyline(line)
         polyline.polylineOptions.strokeColor = "#ff0000"
-        polyline.polylineOptions.strokeWidth = 15
 
         val polyline2 = mapfitMap.addPolyline(line)
         polyline2.polylineOptions.strokeColor = "#0000ff"
-        polyline2.polylineOptions.strokeWidth = 15
 
         val pixelCoordinate = LatLng(40.6930532, -73.9860919)
 
@@ -184,7 +222,6 @@ class PolylineTest {
             triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
         }
 
-
         delay(2000)
         assertEquals(255, triple.first)
         assertEquals(0, triple.second)
@@ -193,28 +230,28 @@ class PolylineTest {
         polyline.polylineOptions.drawOrder = 400
         polyline2.polylineOptions.drawOrder = 600
 
-        delay(500)
+        delay(1500)
         mapView.getMapSnap {
             val screenPosition = mapView.getScreenPosition(pixelCoordinate)
             val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
             triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
         }
 
-        delay(500)
+        delay(1500)
         assertEquals(0, triple.first)
         assertEquals(0, triple.second)
         assertEquals(255, triple.third)
 
         polyline.polylineOptions.drawOrder = 800
 
-        delay(500)
+        delay(1500)
         mapView.getMapSnap {
             val screenPosition = mapView.getScreenPosition(pixelCoordinate)
             val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
             triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
         }
 
-        delay(500)
+        delay(1500)
         assertEquals(255, triple.first)
         assertEquals(0, triple.second)
         assertEquals(0, triple.third)
@@ -237,8 +274,8 @@ class PolylineTest {
         ).onPolylineClicked(polyline)
     }
 
-    private fun clickOnPolyline(polyline: Polyline) {
-        Thread.sleep(500)
+    private fun clickOnPolyline(polyline: Polyline) = runBlocking {
+        delay(500)
 
         val screenPosition =
             polyline.mapBindings.keys.first()
@@ -247,7 +284,7 @@ class PolylineTest {
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
             .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt()))
 
-        Thread.sleep(1500)
+        delay(1500)
     }
 
 }

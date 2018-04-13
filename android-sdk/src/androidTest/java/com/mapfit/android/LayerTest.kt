@@ -31,7 +31,6 @@ class LayerTest {
     @Before
     @UiThreadTest
     fun init() {
-
         Mapfit.getInstance(mMockContext, mMockContext.getString(R.string.mapfit_debug_api_key))
         MockitoAnnotations.initMocks(this)
 
@@ -62,10 +61,8 @@ class LayerTest {
 
     @Test
     @UiThreadTest
-    fun
-            testAddingMarkerToLayer() {
+    fun testAddingMarkerToLayer() {
         val (marker, layer) = addLayerWithMarkerToMaps()
-
         layer.add(marker)
         Assert.assertEquals(2, marker.mapBindings.size)
     }
@@ -74,8 +71,6 @@ class LayerTest {
     @UiThreadTest
     fun testAddingLayerToSecondMap() {
         val (marker, layer) = addLayerWithMarkerToMaps()
-
-        // marker should have id's from 2 maps now
         Assert.assertEquals(2, marker.mapBindings.size)
         Assert.assertEquals(1, layer.annotations.size)
     }
@@ -84,9 +79,7 @@ class LayerTest {
     @UiThreadTest
     fun testRemovingMarkerFromLayer() {
         val (marker, layer) = addLayerWithMarkerToMaps()
-
         layer.remove(marker)
-
         Assert.assertEquals(0, marker.mapBindings.size)
         Assert.assertEquals(0, layer.annotations.size)
     }
@@ -95,9 +88,7 @@ class LayerTest {
     @UiThreadTest
     fun testRemovingMarker() {
         val (marker, layer) = addLayerWithMarkerToMaps()
-
         marker.remove()
-
         Assert.assertEquals(0, marker.mapBindings.size)
         Assert.assertEquals(0, layer.annotations.size)
     }
@@ -107,9 +98,7 @@ class LayerTest {
     @UiThreadTest
     fun testRemovingLayerFromAMap() {
         val (marker, layer) = addLayerWithMarkerToMaps()
-
         Assert.assertEquals(2, marker.mapBindings.size)
-
         mapfitMap.removeLayer(layer)
         Assert.assertEquals(1, marker.mapBindings.size)
     }
@@ -118,16 +107,13 @@ class LayerTest {
     @UiThreadTest
     fun testDisposingLayer() {
         val (marker, layer) = addLayerWithMarkerToMaps()
-
         layer.clear()
         Assert.assertEquals(0, marker.mapBindings.size)
-
     }
 
     private fun addLayerWithMarkerToMaps(): Pair<Marker, Layer> {
         val marker = createMarker()
         val layer = Layer()
-
         layer.add(marker)
         mapfitMap.addLayer(layer)
         mapfitMap2.addLayer(layer)
@@ -140,14 +126,11 @@ class LayerTest {
     fun testClear() {
         val latLng = LatLng(40.693825, -73.998691)
         val marker = mapfitMap.addMarker(latLng)
-
         val layer = Layer()
-
         layer.add(marker)
         layer.add(marker)
         layer.add(marker)
         layer.add(marker)
-
         layer.clear()
         Assert.assertTrue(layer.annotations.size == 0)
     }

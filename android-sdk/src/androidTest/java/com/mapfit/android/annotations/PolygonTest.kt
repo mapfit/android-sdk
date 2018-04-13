@@ -38,9 +38,8 @@ class PolygonTest {
     @Mock
     private lateinit var polygonClickListener: OnPolygonClickListener
 
+    private lateinit var mapView: MapView
     private lateinit var mapfitMap: MapfitMap
-
-    lateinit var mapView: MapView
 
     private val poly by lazy {
         val list = mutableListOf<List<LatLng>>()
@@ -84,6 +83,46 @@ class PolygonTest {
 
     @Test
     @UiThreadTest
+    fun testFillColor() {
+        val polygon = mapfitMap.addPolygon(poly)
+        polygon.polygonOptions.fillColor = "#000000"
+        assertEquals("#000000", polygon.polygonOptions.fillColor)
+    }
+
+    @Test
+    @UiThreadTest
+    fun testStrokeColor() {
+        val polygon = mapfitMap.addPolygon(poly)
+        polygon.polygonOptions.strokeColor = "#ffffff"
+        assertEquals("#ffffff", polygon.polygonOptions.strokeColor)
+    }
+
+    @Test
+    @UiThreadTest
+    fun testStrokeWidth() {
+        val polygon = mapfitMap.addPolygon(poly)
+        polygon.polygonOptions.strokeWidth = 50
+        assertEquals(50, polygon.polygonOptions.strokeWidth)
+    }
+
+    @Test
+    @UiThreadTest
+    fun testStrokeOutlineWidth() {
+        val polygon = mapfitMap.addPolygon(poly)
+        polygon.polygonOptions.strokeOutlineWidth = 50
+        assertEquals(50, polygon.polygonOptions.strokeOutlineWidth)
+    }
+
+    @Test
+    @UiThreadTest
+    fun testJoinType() {
+        val polygon = mapfitMap.addPolygon(poly)
+        polygon.polygonOptions.lineJoinType = JoinType.ROUND
+        assertEquals(JoinType.ROUND, polygon.polygonOptions.lineJoinType)
+    }
+
+    @Test
+    @UiThreadTest
     fun testAddRemovePolygon() {
         val polygon = mapfitMap.addPolygon(poly)
 
@@ -117,7 +156,7 @@ class PolygonTest {
             greenValue = Color.green(pixel)
         }
 
-        delay(2000)
+        delay(1000)
         assertEquals(255, redValue)
         assertEquals(0, blueValue)
         assertEquals(0, greenValue)
@@ -128,16 +167,14 @@ class PolygonTest {
     fun testPolygonOrder() = runBlocking(UI) {
         val polygon = mapfitMap.addPolygon(poly)
         polygon.polygonOptions.fillColor = "#ff0000"
-        polygon.polygonOptions.strokeWidth = 15
 
         val polygon2 = mapfitMap.addPolygon(poly)
         polygon2.polygonOptions.fillColor = "#0000ff"
-        polygon2.polygonOptions.strokeWidth = 15
 
         val pixelCoordinate = LatLng(40.741596, -73.994686)
 
-        mapfitMap.setLatLngBounds(polygon.getLatLngBounds(), 0.8f)
-        mapfitMap.setZoom(19f)
+        mapfitMap.setLatLngBounds(polygon.getLatLngBounds(), 0.5f)
+//        mapfitMap.setZoom(19f)
 
         polygon.polygonOptions.drawOrder = 600
         polygon2.polygonOptions.drawOrder = 400
@@ -150,7 +187,7 @@ class PolygonTest {
             triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
         }
 
-        delay(2000)
+        delay(1000)
         assertEquals(255, triple.first)
         assertEquals(0, triple.second)
         assertEquals(0, triple.third)
@@ -158,28 +195,28 @@ class PolygonTest {
         polygon.polygonOptions.drawOrder = 400
         polygon2.polygonOptions.drawOrder = 600
 
-        delay(500)
+        delay(1500)
         mapView.getMapSnap {
             val screenPosition = mapView.getScreenPosition(pixelCoordinate)
             val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
             triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
         }
 
-        delay(500)
+        delay(1500)
         assertEquals(0, triple.first)
         assertEquals(0, triple.second)
         assertEquals(255, triple.third)
 
         polygon.polygonOptions.drawOrder = 800
 
-        delay(500)
+        delay(1500)
         mapView.getMapSnap {
             val screenPosition = mapView.getScreenPosition(pixelCoordinate)
             val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
             triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
         }
 
-        delay(500)
+        delay(1500)
         assertEquals(255, triple.first)
         assertEquals(0, triple.second)
         assertEquals(0, triple.third)
@@ -202,8 +239,8 @@ class PolygonTest {
         ).onPolygonClicked(polygon)
     }
 
-    private fun clickPolygon(polygon: Polygon) {
-        Thread.sleep(500)
+    private fun clickPolygon(polygon: Polygon) = runBlocking {
+        delay(500)
 
         val screenPosition =
             polygon.mapBindings.keys.first()
@@ -212,7 +249,7 @@ class PolygonTest {
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
             .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt()))
 
-        Thread.sleep(1500)
+        delay(1500)
     }
 
 
