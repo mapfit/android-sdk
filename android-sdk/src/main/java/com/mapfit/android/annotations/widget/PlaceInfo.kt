@@ -136,7 +136,8 @@ class PlaceInfo internal constructor(
 
             infoView.post {
                 infoView.x = point.x - (viewWidth?.div(2) ?: 0)
-                infoView.y = point.y - (viewHeight ?: 0) + 15/* adjustment for the shadow*/
+                infoView.y = point.y - (viewHeight ?: 0) + 10 -
+                        (if (marker.hasCustomPlaceInfo) 30 else 0)/* adjustment for the shadow*/
             }
         }
     }

@@ -43,5 +43,4 @@ class UserLocationActivity : AppCompatActivity() {
         mapfitMap.getMapOptions().userLocationButtonEnabled = true
     }
 
-
 }
