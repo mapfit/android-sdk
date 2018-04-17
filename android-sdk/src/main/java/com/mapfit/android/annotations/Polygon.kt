@@ -20,6 +20,7 @@ class Polygon(
 ) : Annotation(polygonId, mapController) {
 
     val points = polygon.toMutableList()
+    val polygonOptions = PolygonOptions(this)
     internal lateinit var coordinates: DoubleArray
     internal lateinit var rings: IntArray
 
@@ -28,6 +29,9 @@ class Polygon(
         parseRings(polygon)
     }
 
+    /**
+     * Parses the given [LatLng] points to rings.
+     */
     private fun parseRings(polygon: MutableList<List<LatLng>>) {
         rings = IntArray(polygon.size)
 
@@ -78,4 +82,3 @@ class Polygon(
     }
 
 }
-

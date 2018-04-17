@@ -19,6 +19,7 @@ import com.mapfit.android.location.*
 import com.mapfit.android.utils.getBitmapFromVectorDrawable
 import com.mapfit.android.utils.isValidZoomLevel
 import com.mapfit.android.utils.rotate
+import com.mapfit.tetragon.SceneUpdate
 import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
@@ -198,6 +199,12 @@ class MapOptions internal constructor(
     var tiltEnabled = true
         set(value) {
             mapController.touchInput.tiltEnabled = value
+            field = value
+        }
+
+    var is3dBuildingsEnabled = false
+        set(value) {
+            mapController.enable3dBuildings(value)
             field = value
         }
 

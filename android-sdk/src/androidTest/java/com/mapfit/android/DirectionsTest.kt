@@ -8,6 +8,8 @@ import com.mapfit.android.directions.DirectionsCallback
 import com.mapfit.android.directions.DirectionsType
 import com.mapfit.android.directions.model.Route
 import com.mapfit.android.exceptions.MapfitConfigurationException
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -56,8 +58,8 @@ class DirectionsTest {
     }
 
     @Test
-    fun testLatLngDirections() {
-        Mapfit.getInstance(context, context.getString(R.string.mapfit_debug_api_key))
+    fun testLatLngDirections() = runBlocking {
+        instantiateMapfit(this@DirectionsTest.context)
 
         val originAddress = "111 Macdougal Street new york ny"
         val destinationAddress = "119 W 24th Street new york ny"
@@ -67,21 +69,22 @@ class DirectionsTest {
             destinationAddress = destinationAddress,
             callback = directionsCallback
         )
+        delay(1500)
 
         Mockito.verify(directionsCallback, Mockito.times(1))
             .onSuccess(ArgumentMatchers.any(Route::class.java) ?: Route())
     }
 
     @Test
-    fun testErrorDirections() {
-        Mapfit.getInstance(context, context.getString(R.string.mapfit_debug_api_key))
+    fun testErrorDirections() = runBlocking {
+        instantiateMapfit(this@DirectionsTest.context)
 
         Directions().route(
             directionsType = DirectionsType.DRIVING,
             callback = directionsCallback
         )
 
-        Thread.sleep(1500)
+        delay(1500)
 
         Mockito.verify(directionsCallback, Mockito.times(1))
             .onError(

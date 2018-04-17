@@ -8,8 +8,7 @@ import com.mapfit.android.MapController
  * Created by dogangulcan on 1/3/18.
  */
 class MarkerOptions internal constructor(
-    private var marker: Marker,
-    internal val mapController: MutableList<MapController>
+    private var marker: Marker
 ) {
 
     /**

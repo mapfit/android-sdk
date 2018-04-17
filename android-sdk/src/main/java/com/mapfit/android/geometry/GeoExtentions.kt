@@ -3,12 +3,13 @@ package com.mapfit.android.geometry
 import android.util.Log
 
 /**
+ * Extension functions for geo related classes.
+ *
  * Created by dogangulcan on 2/20/18.
  */
 
 internal fun LatLng.isValid(): Boolean {
 
-//    ^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?),\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$
     val latRegex = """^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$""".toRegex()
     val lonRegex = """^\s*[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)${'$'}""".toRegex()
 
@@ -26,5 +27,5 @@ internal fun LatLng.isValid(): Boolean {
     return isLatValid && isLonValid
 }
 
-internal fun LatLng.isEmpty(): Boolean = lat == 0.0 && lng == 0.0
+internal fun LatLng.isEmpty() = lat == 0.0 && lng == 0.0
 

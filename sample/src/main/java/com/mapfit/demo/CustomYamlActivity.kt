@@ -17,11 +17,8 @@ import kotlinx.android.synthetic.main.activity_main.*
  */
 class CustomYamlActivity : AppCompatActivity() {
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-//        Mapfit.getInstance(this, getString(R.string.mapfit_debug_api_key))
         setContentView(R.layout.activity_main)
 
         mapView.getMapAsync(
@@ -49,7 +46,5 @@ class CustomYamlActivity : AppCompatActivity() {
         // you can provide a url or a file path here. if your yaml file is in assets folder,
         // just write the filename as the example, assets prefix will be added.
         mapfitMap.getMapOptions().customTheme = "sample.yaml"
-
-
     }
 }

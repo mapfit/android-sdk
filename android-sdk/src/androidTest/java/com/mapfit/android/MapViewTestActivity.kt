@@ -6,6 +6,7 @@ import android.support.test.espresso.idling.CountingIdlingResource
 import android.support.v7.app.AppCompatActivity
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import com.mapfit.android.*
 
 /**
  * Dummy activity for testing [MapView].
@@ -20,8 +21,7 @@ class MapViewTestActivity : AppCompatActivity() {
 
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        Mapfit.getInstance(this, getString(R.string.mapfit_debug_api_key))
+        instantiateMapfit(this)
         mapView = MapView(this)
         mapView.layoutParams = FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,

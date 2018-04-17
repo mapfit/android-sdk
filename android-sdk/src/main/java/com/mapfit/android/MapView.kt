@@ -3,6 +3,7 @@ package com.mapfit.android
 import android.animation.Animator
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.PointF
 import android.net.Uri
@@ -463,6 +464,7 @@ class MapView(
     }
 
     private val mapfitMap = object : MapfitMap() {
+
         override fun setOnPolygonClickListener(listener: OnPolygonClickListener) {
             polygonClickListener = listener
         }
@@ -527,15 +529,20 @@ class MapView(
 
                         if (latLng.isEmpty()) {
                             onMarkerAddedCallback?.onError(IOException("No coordinates found for given address."))
+
                         } else {
-                            val marker = mapController.addMarker().setPosition(latLng)
-//
-                            marker.address = addressList[0]
-                            if (withBuilding) {
-                                val polygon =
-                                    mapController.addPolygon(addressList[0].building.polygon)
-                                marker.setPolygon(polygon)
+                            val marker = mapController.addMarker()
+
+                            marker.apply {
+                                setPosition(latLng)
+                                this@apply.address = addressList[0]
+
+                                if (addressList.isNotEmpty() && addressList[0].building.polygon.isNotEmpty()) {
+                                    this@apply.buildingPolygon =
+                                            mapController.addPolygon(addressList[0].building.polygon)
+                                }
                             }
+
                             launch(UI) {
                                 onMarkerAddedCallback?.onMarkerAdded(marker)
                             }
@@ -543,8 +550,8 @@ class MapView(
                     }
 
                     override fun onError(message: String, e: Exception) {
-                        async(UI) {
-                            onMarkerAddedCallback.onError(e)
+                        launch(UI) {
+                            onMarkerAddedCallback?.onError(e)
                         }
                     }
                 })
@@ -687,6 +694,8 @@ class MapView(
                 mapController.setZoomEased(normalizedZoomLevel, duration.toInt())
             }
         }
+
+
     }
 
     private fun normalizeZoomLevel(zoomLevel: Float, warn: Boolean = true): Float =
@@ -727,6 +736,8 @@ class MapView(
             val view = if (isCustomPlaceInfo()) {
                 val view = placeInfoAdapter?.getPlaceInfoView(marker)
 
+                marker.hasCustomPlaceInfo = true
+
                 view?.setOnClickListener {
                     onPlaceInfoClickListener?.onPlaceInfoClicked(marker)
                 }
@@ -755,7 +766,7 @@ class MapView(
             view?.let {
                 it.visibility = View.GONE
                 activePlaceInfo = PlaceInfo(it, marker, mapController)
-                marker.placeInfoMap.put(mapController, activePlaceInfo)
+                marker.placeInfoMap[mapController] = activePlaceInfo
                 activePlaceInfo?.show()
             }
         }
@@ -783,6 +794,11 @@ class MapView(
         glSurfaceView.id = R.id.glSurface
         addView(glSurfaceView)
         return glSurfaceView
+    }
+
+    @TestOnly
+    internal fun getMapSnap(callback: (bitmap: Bitmap) -> Unit) {
+        mapController.captureFrame(callback, true)
     }
 
     private fun disposeMap() {
@@ -837,5 +853,7 @@ class MapView(
         return HttpHandler()
     }
 
+    @TestOnly
+    internal fun getScreenPosition(latLng: LatLng) = mapController.lngLatToScreenPosition(latLng)
 
 }
