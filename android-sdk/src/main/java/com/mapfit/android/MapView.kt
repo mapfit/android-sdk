@@ -736,6 +736,8 @@ class MapView(
             val view = if (isCustomPlaceInfo()) {
                 val view = placeInfoAdapter?.getPlaceInfoView(marker)
 
+                marker.hasCustomPlaceInfo = true
+
                 view?.setOnClickListener {
                     onPlaceInfoClickListener?.onPlaceInfoClicked(marker)
                 }
@@ -764,7 +766,7 @@ class MapView(
             view?.let {
                 it.visibility = View.GONE
                 activePlaceInfo = PlaceInfo(it, marker, mapController)
-                marker.placeInfoMap.put(mapController, activePlaceInfo)
+                marker.placeInfoMap[mapController] = activePlaceInfo
                 activePlaceInfo?.show()
             }
         }

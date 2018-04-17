@@ -151,111 +151,117 @@ public class FontFileParser {
     }
 
     private void processDocument(@NonNull final XmlPullParser parser) throws XmlPullParserException, IOException {
-        final List<String> familyWeights = new ArrayList<>();
+        try {
 
-        parser.nextTag();
-        // Parse Families
-        parser.require(XmlPullParser.START_TAG, null, "familyset");
-        while (parser.next() != XmlPullParser.END_DOCUMENT) {
-            if (parser.getEventType() != XmlPullParser.START_TAG) {
-                continue;
-            }
-            if ("family".equals(parser.getName())) {
-                familyWeights.clear();
-                // Parse this family:
-                final String name = parser.getAttributeValue(null, "name");
-                //Unused : final String lang = parser.getAttributeValue(null, "lang");
 
-                // fallback fonts
-                if (name == null) {
-                    while (parser.next() != XmlPullParser.END_TAG) {
-                        if (parser.getEventType() != XmlPullParser.START_TAG) {
-                            continue;
-                        }
-                        final String tag = parser.getName();
-                        if ("font".equals(tag)) {
-                            String weightStr = parser.getAttributeValue(null, "weight");
-                            if (weightStr == null) {
-                                weightStr = "400";
-                            } else {
-                                familyWeights.add(weightStr);
-                            }
+            final List<String> familyWeights = new ArrayList<>();
 
-                            final String filename = parser.nextText();
+            parser.nextTag();
+            // Parse Families
+            parser.require(XmlPullParser.START_TAG, null, "familyset");
+            while (parser.next() != XmlPullParser.END_DOCUMENT) {
+                if (parser.getEventType() != XmlPullParser.START_TAG) {
+                    continue;
+                }
+                if ("family".equals(parser.getName())) {
+                    familyWeights.clear();
+                    // Parse this family:
+                    final String name = parser.getAttributeValue(null, "name");
+                    //Unused : final String lang = parser.getAttributeValue(null, "lang");
 
-                            // Don't use UI fonts
-                            if (filename.contains("UI-")) {
+                    // fallback fonts
+                    if (name == null) {
+                        while (parser.next() != XmlPullParser.END_TAG) {
+                            if (parser.getEventType() != XmlPullParser.START_TAG) {
                                 continue;
                             }
-                            // Sorry - not yet supported
-                            if (filename.contains("Emoji")) {
-                                continue;
-                            }
+                            final String tag = parser.getName();
+                            if ("font".equals(tag)) {
+                                String weightStr = parser.getAttributeValue(null, "weight");
+                                if (weightStr == null) {
+                                    weightStr = "400";
+                                } else {
+                                    familyWeights.add(weightStr);
+                                }
 
-                            addFallback(Integer.valueOf(weightStr), filename);
-                        } else {
-                            skip(parser);
-                        }
-                    }
+                                final String filename = parser.nextText();
 
-                } else {
-                    while (parser.next() != XmlPullParser.END_TAG) {
-                        if (parser.getEventType() != XmlPullParser.START_TAG) {
-                            continue;
-                        }
-                        final String tag = parser.getName();
-                        if ("font".equals(tag)) {
-                            String weightStr = parser.getAttributeValue(null, "weight");
-                            if (weightStr == null) {
-                                weightStr = "400";
-                            } else {
-                                familyWeights.add(weightStr);
-                            }
+                                // Don't use UI fonts
+                                if (filename.contains("UI-")) {
+                                    continue;
+                                }
+                                // Sorry - not yet supported
+                                if (filename.contains("Emoji")) {
+                                    continue;
+                                }
 
-                            String styleStr = parser.getAttributeValue(null, "style");
-                            if (styleStr == null) {
-                                styleStr = "normal";
-                            }
-
-                            final String filename = parser.nextText();
-                            final String key = name + "_" + weightStr + "_" + styleStr;
-                            fontDict.put(key, systemFontPath + filename);
-
-                            if ("sans-serif".equals(name) && "normal".equals(styleStr)) {
                                 addFallback(Integer.valueOf(weightStr), filename);
+                            } else {
+                                skip(parser);
                             }
+                        }
 
-                        } else {
-                            skip(parser);
+                    } else {
+                        while (parser.next() != XmlPullParser.END_TAG) {
+                            if (parser.getEventType() != XmlPullParser.START_TAG) {
+                                continue;
+                            }
+                            final String tag = parser.getName();
+                            if ("font".equals(tag)) {
+                                String weightStr = parser.getAttributeValue(null, "weight");
+                                if (weightStr == null) {
+                                    weightStr = "400";
+                                } else {
+                                    familyWeights.add(weightStr);
+                                }
+
+                                String styleStr = parser.getAttributeValue(null, "style");
+                                if (styleStr == null) {
+                                    styleStr = "normal";
+                                }
+
+                                final String filename = parser.nextText();
+                                final String key = name + "_" + weightStr + "_" + styleStr;
+                                fontDict.put(key, systemFontPath + filename);
+
+                                if ("sans-serif".equals(name) && "normal".equals(styleStr)) {
+                                    addFallback(Integer.valueOf(weightStr), filename);
+                                }
+
+                            } else {
+                                skip(parser);
+                            }
                         }
                     }
-                }
-            } else if ("alias".equals(parser.getName())) {
-                // Parse this alias to font to fileName
-                final String aliasName = parser.getAttributeValue(null, "name");
-                final String toName = parser.getAttributeValue(null, "to");
-                final String weightStr = parser.getAttributeValue(null, "weight");
-                final List<String> aliasWeights;
-                String fontFilename;
+                } else if ("alias".equals(parser.getName())) {
+                    // Parse this alias to font to fileName
+                    final String aliasName = parser.getAttributeValue(null, "name");
+                    final String toName = parser.getAttributeValue(null, "to");
+                    final String weightStr = parser.getAttributeValue(null, "weight");
+                    final List<String> aliasWeights;
+                    String fontFilename;
 
-                if (weightStr == null) {
-                    aliasWeights = familyWeights;
+                    if (weightStr == null) {
+                        aliasWeights = familyWeights;
+                    } else {
+                        aliasWeights = Collections.singletonList(weightStr);
+                    }
+
+                    for (final String weight : aliasWeights) {
+                        // Only 2 styles possible based on /etc/fonts.xml
+                        // Normal style
+                        fontFilename = fontDict.get(toName + "_" + weight + "_normal");
+                        fontDict.put(aliasName + "_" + weight + "_normal", fontFilename);
+                        // Italic style
+                        fontFilename = fontDict.get(toName + "_" + weight + "_italic");
+                        fontDict.put(aliasName + "_" + weight + "_italic", fontFilename);
+                    }
                 } else {
-                    aliasWeights = Collections.singletonList(weightStr);
+                    skip(parser);
                 }
-
-                for (final String weight : aliasWeights) {
-                    // Only 2 styles possible based on /etc/fonts.xml
-                    // Normal style
-                    fontFilename = fontDict.get(toName + "_" + weight + "_normal");
-                    fontDict.put(aliasName + "_" + weight + "_normal", fontFilename);
-                    // Italic style
-                    fontFilename = fontDict.get(toName + "_" + weight + "_italic");
-                    fontDict.put(aliasName + "_" + weight + "_italic", fontFilename);
-                }
-            } else {
-                skip(parser);
             }
+        } catch (Exception e) {
+            com.mapfit.android.utils.DebugUtils.logException(e);
         }
     }
 

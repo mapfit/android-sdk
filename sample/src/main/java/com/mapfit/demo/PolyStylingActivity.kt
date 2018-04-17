@@ -50,7 +50,6 @@ class PolyStylingActivity : AppCompatActivity() {
         drawDirections()
         placeMarkerWithAddress()
         addStyledPolygon()
-
     }
 
     /**

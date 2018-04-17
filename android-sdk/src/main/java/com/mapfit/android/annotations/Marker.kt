@@ -54,6 +54,7 @@ class Marker internal constructor(
         }
 
     internal var usingDefaultIcon: Boolean = true
+    internal var hasCustomPlaceInfo: Boolean = false
     internal var placeInfoMap = HashMap<MapController, PlaceInfo?>()
     internal var address: Address? = null
         set(value) {
@@ -277,7 +278,6 @@ class Marker internal constructor(
 
         val placeInfo = placeInfoMap[mapController]
         placeInfo?.apply {
-
             val markerId = getIdForMap(mapController) ?: 0
 
             if (shown) {
@@ -291,6 +291,8 @@ class Marker internal constructor(
 
             } else {
                 if (getVisibility(mapController)) {
+                    setBitmap(iconChangedWhenPlaceInfo ?: previousIcon!!, mapController, markerId)
+
                     markerOptions.placeInfoShown(shown, markerId, mapController)
 
                     placeInfoMap.remove(mapController)
@@ -299,7 +301,6 @@ class Marker internal constructor(
                         iconChangedWhenPlaceInfo = null
                     }
 
-                    setBitmap(iconChangedWhenPlaceInfo ?: previousIcon!!, mapController, markerId)
                 }
             }
         }

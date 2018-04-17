@@ -130,5 +130,4 @@ public class JavaActivity extends AppCompatActivity {
                 });
     }
 
-
 }

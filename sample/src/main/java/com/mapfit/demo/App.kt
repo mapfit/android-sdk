@@ -9,7 +9,6 @@ class App : Application(){
     override fun onCreate() {
         super.onCreate()
         Mapfit.getInstance(this, getString(R.string.mapfit_debug_api_key))
-
     }
 
 }
