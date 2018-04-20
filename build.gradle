@@ -7,7 +7,7 @@ buildscript {
     }
 
     project.ext {
-        kotlin_version = '1.2.31'
+        kotlin_version = '1.2.40'
         kotlin_coroutine_version = '0.22.5'
         support_lib_version = '27.1.0'
         okhttp_version = '3.10.0'
