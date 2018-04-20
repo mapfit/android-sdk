@@ -62,6 +62,7 @@ class MarkerOptions internal constructor(
     internal fun setDefaultMarkerSize() {
         height = 59
         width = 55
+        updateStyle()
     }
 
     private fun getStyleString() =
