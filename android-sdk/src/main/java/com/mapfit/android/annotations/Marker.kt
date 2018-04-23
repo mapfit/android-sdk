@@ -13,6 +13,7 @@ import com.mapfit.android.annotations.widget.PlaceInfo
 import com.mapfit.android.geocoder.model.Address
 import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.geometry.LatLngBounds
+import com.mapfit.android.geometry.isEmpty
 import com.mapfit.android.geometry.isValid
 import com.mapfit.android.utils.getBitmapFromDrawableID
 import com.mapfit.android.utils.getBitmapFromVectorDrawable
@@ -53,7 +54,6 @@ class Marker internal constructor(
             }
         }
 
-    internal var usingDefaultIcon: Boolean = true
     internal var hasCustomPlaceInfo: Boolean = false
     internal var placeInfoMap = HashMap<MapController, PlaceInfo?>()
     internal var address: Address? = null
@@ -127,7 +127,7 @@ class Marker internal constructor(
         mapBindings[mapController] = id
         markerOptions.updateStyle()
         previousIcon?.let { setBitmap(it, mapController, id) }
-        setPosition(position)
+        if (!position.isEmpty()) setPosition(position)
     }
 
     /**
@@ -144,9 +144,9 @@ class Marker internal constructor(
      */
     fun setPosition(latLng: LatLng): Marker {
         if (latLng.isValid()) {
-            mapBindings.forEach {
-                val markerPositionSet = it.key.setMarkerPoint(
-                    it.value,
+            mapBindings.forEach { (mapController, markerId) ->
+                val markerPositionSet = mapController.setMarkerPoint(
+                    markerId,
                     latLng.lng,
                     latLng.lat
                 )
@@ -197,7 +197,6 @@ class Marker internal constructor(
             iconPlacementJob = launch {
                 val bitmap = drawable.toBitmap(this@Marker.context)
                 setBitmap(bitmap, mapController)
-                usingDefaultIcon = false
             }
         }
         return this
@@ -217,7 +216,6 @@ class Marker internal constructor(
 
                 bitmap.let {
                     setBitmap(it, mapController)
-                    usingDefaultIcon = false
                 }
             }
         }
@@ -235,7 +233,6 @@ class Marker internal constructor(
             iconPlacementJob = launch {
                 val drawable = loadImageFromUrl(mapfitMarker.getUrl())
                 drawable.await()?.let {
-                    usingDefaultIcon = false
                     val bitmap = it.toBitmap(this@Marker.context)
                     setBitmap(bitmap, mapController)
                     markerOptions.setDefaultMarkerSize()
@@ -256,7 +253,6 @@ class Marker internal constructor(
             iconPlacementJob = launch {
                 val drawable = loadImageFromUrl(imageUrl)
                 drawable.await()?.let {
-                    usingDefaultIcon = false
                     val bitmap = it.toBitmap(this@Marker.context)
                     setBitmap(bitmap, mapController)
                 }
