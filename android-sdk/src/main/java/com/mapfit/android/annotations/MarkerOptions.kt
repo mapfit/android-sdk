@@ -16,10 +16,8 @@ class MarkerOptions internal constructor(
      */
     var height = 59
         set(value) {
-            if (!marker.usingDefaultIcon) {
-                field = value
-                updateStyle()
-            }
+            field = value
+            updateStyle()
         }
 
     /**
@@ -27,10 +25,8 @@ class MarkerOptions internal constructor(
      */
     var width = 55
         set(value) {
-            if (!marker.usingDefaultIcon) {
-                field = value
-                updateStyle()
-            }
+            field = value
+            updateStyle()
         }
 
     var flat = false
@@ -64,10 +60,9 @@ class MarkerOptions internal constructor(
 
     @Synchronized
     internal fun setDefaultMarkerSize() {
-        marker.usingDefaultIcon = false
         height = 59
         width = 55
-        marker.usingDefaultIcon = true
+        updateStyle()
     }
 
     private fun getStyleString() =
