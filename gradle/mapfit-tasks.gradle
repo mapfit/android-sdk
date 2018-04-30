@@ -1,0 +1,5 @@
+
+task cleanAssemble(dependsOn: ['clean', 'assemble', 'assembleAndroidTest']) {
+    group = 'mapfit'
+    description = "Clean and assemble project artifacts"
+}

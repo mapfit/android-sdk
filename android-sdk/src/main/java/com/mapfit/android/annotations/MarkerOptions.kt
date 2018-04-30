@@ -54,21 +54,14 @@ class MarkerOptions internal constructor(
     private val placeInfoMarkerStyle =
         "{ style: 'sdk-point-overlay', anchor: top, size: [${markerDotSide}px, ${markerDotSide}px], order: $drawOrder, interactive: true, collide: false }"
 
-    init {
-        updateStyle()
-    }
-
-    @Synchronized
     internal fun setDefaultMarkerSize() {
         height = 59
         width = 55
-        updateStyle()
     }
 
     private fun getStyleString() =
         "{ style: 'sdk-point-overlay', anchor: ${anchor.getAnchor()}, flat: $flat, size: [${width}px, ${height}px], order: $drawOrder, interactive: true, collide: false }"
 
-    @Synchronized
     internal fun updateStyle() {
         val styleString = getStyleString()
 

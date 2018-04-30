@@ -19,9 +19,7 @@ import com.mapfit.android.utils.getBitmapFromDrawableID
 import com.mapfit.android.utils.getBitmapFromVectorDrawable
 import com.mapfit.android.utils.loadImageFromUrl
 import com.mapfit.android.utils.toBitmap
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.cancelAndJoin
-import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.*
 
 /**
  * Markers are icons placed on a particular location on the map.
@@ -36,6 +34,34 @@ class Marker internal constructor(
 
     companion object {
         private const val BUILDING_TAG = "building"
+    }
+
+    private var previousIcon: Bitmap? = null
+    private var iconChangedWhenPlaceInfo: Bitmap? = null
+    private var iconPlacementJob = Job()
+    private var position: LatLng = LatLng(0.0, 0.0)
+    private val density = this@Marker.context.resources.displayMetrics.densityDpi
+    private var isInitialized = false
+    private val iconContext = newSingleThreadContext("icon_context")
+
+    private var title: String = ""
+    private var subtitle1: String = ""
+    private var subtitle2: String = ""
+
+    internal var hasCustomPlaceInfo: Boolean = false
+    internal var placeInfoMap = HashMap<MapController, PlaceInfo?>()
+    internal var address: Address? = null
+        set(value) {
+            field = value
+            if (title.isBlank() && value != null) {
+                title = value.streetAddress
+            }
+        }
+
+    init {
+        setIcon(MapfitMarker.DEFAULT)
+        initAnnotation(mapController, markerId)
+        isInitialized = true
     }
 
     val markerOptions = MarkerOptions(this)
@@ -53,26 +79,6 @@ class Marker internal constructor(
                 null
             }
         }
-
-    internal var hasCustomPlaceInfo: Boolean = false
-    internal var placeInfoMap = HashMap<MapController, PlaceInfo?>()
-    internal var address: Address? = null
-        set(value) {
-            field = value
-            if (title.isBlank() && value != null) {
-                title = value.streetAddress
-            }
-        }
-
-    private var previousIcon: Bitmap? = null
-    private var iconChangedWhenPlaceInfo: Bitmap? = null
-    private var iconPlacementJob = Job()
-    private var position: LatLng = LatLng(0.0, 0.0)
-    private val density = this@Marker.context.resources.displayMetrics.densityDpi
-
-    private var title: String = ""
-    private var subtitle1: String = ""
-    private var subtitle2: String = ""
 
     fun getTitle() = title
     fun getSubtitle1() = subtitle1
@@ -118,15 +124,15 @@ class Marker internal constructor(
         }
     }
 
-    init {
-        setIcon(MapfitMarker.DEFAULT)
-        initAnnotation(mapController, markerId)
-    }
-
     override fun initAnnotation(mapController: MapController, id: Long) {
         mapBindings[mapController] = id
-        markerOptions.updateStyle()
+        if (isInitialized) {
+            markerOptions.updateStyle()
+        }
+
+
         previousIcon?.let { setBitmap(it, mapController, id) }
+
         if (!position.isEmpty()) setPosition(position)
     }
 
@@ -192,7 +198,7 @@ class Marker internal constructor(
      * @param drawable
      */
     fun setIcon(drawable: Drawable): Marker {
-        launch {
+        runBlocking(iconContext) {
             iconPlacementJob.cancelAndJoin()
             iconPlacementJob = launch {
                 val bitmap = drawable.toBitmap(this@Marker.context)
@@ -208,19 +214,22 @@ class Marker internal constructor(
      * @param drawableId
      */
     fun setIcon(@DrawableRes drawableId: Int): Marker {
-        launch {
+        runBlocking(iconContext) {
             iconPlacementJob.cancelAndJoin()
             iconPlacementJob = launch {
-                val bitmap = getBitmapFromDrawableID(this@Marker.context, drawableId)
-                        ?: getBitmapFromVectorDrawable(this@Marker.context, drawableId)
-
-                bitmap.let {
-                    setBitmap(it, mapController)
+                val bitmap = async {
+                    getBitmapFromDrawableID(this@Marker.context, drawableId)
+                            ?: getBitmapFromVectorDrawable(this@Marker.context, drawableId)
                 }
+
+                bitmap.await()
+                    .takeIf { !iconPlacementJob.isCancelled }
+                    ?.let { setBitmap(it, mapController) }
             }
         }
         return this
     }
+
 
     /**
      * Sets the marker icon with the given [MapfitMarker].
@@ -228,15 +237,17 @@ class Marker internal constructor(
      * @param mapfitMarker
      */
     fun setIcon(@NonNull mapfitMarker: MapfitMarker): Marker {
-        launch {
+        runBlocking(iconContext) {
             iconPlacementJob.cancelAndJoin()
             iconPlacementJob = launch {
                 val drawable = loadImageFromUrl(mapfitMarker.getUrl())
-                drawable.await()?.let {
-                    val bitmap = it.toBitmap(this@Marker.context)
-                    setBitmap(bitmap, mapController)
-                    markerOptions.setDefaultMarkerSize()
-                }
+                drawable.await()
+                    ?.takeIf { !iconPlacementJob.isCancelled }
+                    ?.let {
+                        val bitmap = it.toBitmap(this@Marker.context)
+                        setBitmap(bitmap, mapController)
+                        markerOptions.setDefaultMarkerSize()
+                    }
             }
         }
         return this
@@ -248,14 +259,16 @@ class Marker internal constructor(
      * @param imageUrl
      */
     fun setIcon(imageUrl: String): Marker {
-        launch {
+        runBlocking(iconContext) {
             iconPlacementJob.cancelAndJoin()
             iconPlacementJob = launch {
                 val drawable = loadImageFromUrl(imageUrl)
-                drawable.await()?.let {
-                    val bitmap = it.toBitmap(this@Marker.context)
-                    setBitmap(bitmap, mapController)
-                }
+                drawable.await()
+                    ?.takeIf { !iconPlacementJob.isCancelled }
+                    ?.let {
+                        val bitmap = it.toBitmap(this@Marker.context)
+                        setBitmap(bitmap, mapController)
+                    }
             }
         }
         return this
@@ -310,7 +323,6 @@ class Marker internal constructor(
         mapController: MapController,
         markerId: Long = 0
     ) {
-
         val width = bitmap.getScaledWidth(density)
         val height = bitmap.getScaledHeight(density)
 
