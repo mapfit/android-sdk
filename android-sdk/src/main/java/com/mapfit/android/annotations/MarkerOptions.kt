@@ -99,7 +99,7 @@ class MarkerOptions {
     }
 
     /**
-     * An Object related with the [Marker]. Setting related object of marker as a tag makes it
+     * Sets the given object related with the [Marker]. Setting related object of marker as a tag makes it
      * easier to reach the object rather than storing a Map data structure.
      *
      * @param tag any object related to the marker
