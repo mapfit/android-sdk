@@ -1,15 +1,14 @@
 package com.mapfit.demo
 
-import android.graphics.Paint
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.mapfit.android.MapView
-import com.mapfit.android.Mapfit
 import com.mapfit.android.MapfitMap
 import com.mapfit.android.OnMapReadyCallback
 import com.mapfit.android.annotations.CapType
 import com.mapfit.android.annotations.JoinType
 import com.mapfit.android.annotations.Marker
+import com.mapfit.android.annotations.MarkerOptions
 import com.mapfit.android.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.android.directions.Directions
 import com.mapfit.android.directions.DirectionsCallback
@@ -66,7 +65,7 @@ class PolyStylingActivity : AppCompatActivity() {
 
         val polygon = mapfitMap.addPolygon(listOf(poly))
 
-        polygon.polygonOptions.apply {
+        polygon!!.polygonOptions.apply {
             strokeWidth = 3
             strokeOutlineWidth = 8
             strokeColor = "#32b3ff"
@@ -93,7 +92,7 @@ class PolyStylingActivity : AppCompatActivity() {
                         val leg = decodePolyline(it.shape)
                         val polyline = mapfitMap.addPolyline(leg)
 
-                        polyline.polylineOptions.apply {
+                        polyline!!.polylineOptions.apply {
                             strokeColor = "#ffabff9e"
                             strokeWidth = 20
                             lineCapType = CapType.ROUND
@@ -111,11 +110,13 @@ class PolyStylingActivity : AppCompatActivity() {
      */
     fun placeMarkerWithAddress() {
         val flatironBuildingAddress = "175 5th Ave, New York, NY 10010"
-        val withBuildingPolygon = true
+
+        val markerOptions = MarkerOptions()
+            .streetAddress(flatironBuildingAddress)
+            .addBuildingPolygon(true)
 
         mapfitMap.addMarker(
-            flatironBuildingAddress,
-            withBuildingPolygon,
+            markerOptions,
             object : OnMarkerAddedCallback {
                 override fun onMarkerAdded(marker: Marker) {
 

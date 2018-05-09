@@ -12,6 +12,7 @@ import com.mapfit.android.OnMapDoubleClickListener;
 import com.mapfit.android.OnMapReadyCallback;
 import com.mapfit.android.annotations.MapfitMarker;
 import com.mapfit.android.annotations.Marker;
+import com.mapfit.android.annotations.MarkerOptions;
 import com.mapfit.android.annotations.Polyline;
 import com.mapfit.android.annotations.callback.OnMarkerAddedCallback;
 import com.mapfit.android.directions.Directions;
@@ -106,16 +107,19 @@ public class JavaActivity extends AppCompatActivity {
 
     private void placeMarker() {
         LatLng position = new LatLng(40.744023, -73.993150);
-        Marker marker = mapfitMap.addMarker(position);
+        Marker marker = mapfitMap.addMarker(new MarkerOptions().position(position));
     }
 
     private void placeMarkerWithAddress() {
         String flatironBuildingAddress = "175 5th Ave, New York, NY 10010";
-        boolean withBuildingPolygon = true;
+
+        MarkerOptions markerOptions = new MarkerOptions()
+                .streetAddress(flatironBuildingAddress)
+                .addBuildingPolygon(true)
+                .icon(MapfitMarker.EDUCATION);
 
         mapfitMap.addMarker(
-                flatironBuildingAddress,
-                withBuildingPolygon,
+                markerOptions,
                 new OnMarkerAddedCallback() {
                     @Override
                     public void onMarkerAdded(@NotNull Marker marker) {
