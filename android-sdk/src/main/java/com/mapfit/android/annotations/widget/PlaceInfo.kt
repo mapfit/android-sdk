@@ -48,13 +48,13 @@ class PlaceInfo internal constructor(
 
     internal fun updatePlaceInfo() {
         titleView.text =
-                if (marker.getTitle().isBlank()) {
-                    marker.address?.streetAddress ?: marker.getTitle()
+                if (marker.title.isBlank()) {
+                    marker.address?.streetAddress ?: marker.title
                 } else {
-                    marker.getTitle()
+                    marker.title
                 }
-        subtitle1View.text = marker.getSubtitle1()
-        subtitle2View.text = marker.getSubtitle2()
+        subtitle1View.text = marker.subtitle1
+        subtitle2View.text = marker.subtitle2
     }
 
     fun show() {
@@ -124,9 +124,11 @@ class PlaceInfo internal constructor(
         if (infoView.parent != null) {
             (infoView.parent as ViewGroup).removeView(infoView)
         }
+
         if (!removed) {
             marker.placeInfoState(false, mapController)
         }
+
         infoView.visibility = View.GONE
     }
 
