@@ -11,6 +11,7 @@ import android.util.Patterns
 import android.view.View
 import com.mapfit.android.MapView.Companion.ANIMATION_DURATION
 import com.mapfit.android.annotations.Anchor
+import com.mapfit.android.annotations.MarkerOptions
 import com.mapfit.android.compass.CompassListener
 import com.mapfit.android.compass.CompassProvider
 import com.mapfit.android.geometry.LatLng
@@ -19,7 +20,6 @@ import com.mapfit.android.location.*
 import com.mapfit.android.utils.getBitmapFromVectorDrawable
 import com.mapfit.android.utils.isValidZoomLevel
 import com.mapfit.android.utils.rotate
-import com.mapfit.tetragon.SceneUpdate
 import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
@@ -58,62 +58,52 @@ class MapOptions internal constructor(
      * Marker for user location.
      */
     private val userMarker by lazy {
-        mapController.addMarker().apply {
-            setIcon(R.drawable.mf_user_loc)
-            markerOptions.apply {
-                anchor = Anchor.CENTER
-                drawOrder = 2110
-                flat = true
-            }
-        }
+        val markerOptions = MarkerOptions()
+            .icon(R.drawable.mf_user_loc)
+            .anchor(Anchor.CENTER)
+            .flat(true)
+            .drawOrder(2110)
+
+        mapController.addMarker(markerOptions)
     }
 
     /**
      * Marker for user location accuracy.
      */
     private val accuracyMarker by lazy {
-        mapController.addMarker().apply {
-            setIcon(R.drawable.mf_accuracy_circle)
-            markerOptions.anchor = Anchor.CENTER
-            markerOptions.drawOrder = 2100
-            markerOptions.flat = true
-        }
+        val markerOptions = MarkerOptions()
+            .icon(R.drawable.mf_accuracy_circle)
+            .anchor(Anchor.CENTER)
+            .flat(true)
+            .drawOrder(2100)
+
+        mapController.addMarker(markerOptions)
     }
 
     /**
      * Marker for user location accuracy.
      */
     private val orientationMarker by lazy {
-        mapController.addMarker().apply {
-            orientationIconBitmap = getBitmapFromVectorDrawable(
-                mapView.context,
-                R.drawable.mf_user_direction
-            )
+        val markerOptions = MarkerOptions()
+            .anchor(Anchor.CENTER)
+            .flat(true)
+            .drawOrder(2105)
 
-            orientationIconBitmap?.let {
-                setBitmap(it, mapController, mapBindings[mapController] ?: 0)
-                orientationMarkerSize = orientationIconBitmap?.getScaledWidth(screenDensity) ?: 0
-            }
+        orientationIconBitmap = getBitmapFromVectorDrawable(
+            mapView.context,
+            R.drawable.mf_user_direction
+        )
 
-            markerOptions.apply {
-                anchor = Anchor.CENTER
-                drawOrder = 2105
-                flat = true
-            }
-
-
+        orientationIconBitmap?.let {
+            markerOptions.icon(it)
+            orientationMarkerSize = orientationIconBitmap?.getScaledWidth(screenDensity) ?: 0
         }
-    }
 
-    companion object {
-        const val MAP_MIN_ZOOM = 1.0
-        const val MAP_MAX_ZOOM = 20.0
+        mapController.addMarker(markerOptions)
     }
 
     internal fun getLastLocation() =
-        mapfitLocationProvider.lastLocation?.let {
-            LatLng(it.latitude, it.longitude)
-        }
+        mapfitLocationProvider.lastLocation?.let { LatLng(it.latitude, it.longitude) }
 
     var theme: MapTheme? = null
         set(value) {
@@ -125,7 +115,6 @@ class MapOptions internal constructor(
 
     var customTheme: String? = null
         set(value) {
-
             val isUrl = value?.let { Patterns.WEB_URL.matcher(it).matches() } ?: false
             if (isUrl) {
                 mapController.loadSceneFileAsync(value)
@@ -172,7 +161,7 @@ class MapOptions internal constructor(
             field = value
         }
 
-    private var cameraType: CameraType = CameraType.PERSPECTIVE
+    var cameraType: CameraType = CameraType.PERSPECTIVE
         set(value) {
             mapController.cameraType = MapController.CameraType.valueOf(value.name)
             field = value
@@ -404,7 +393,7 @@ class MapOptions internal constructor(
      */
     internal fun resizeAccuracyCircle() = launch {
         if (accuracyMarker.visibility) {
-            accuracyMarker.markerOptions.apply {
+            accuracyMarker.apply {
                 val sizeLength = async {
                     mapfitLocationProvider.lastLocation?.latitude?.let {
 
@@ -464,10 +453,16 @@ class MapOptions internal constructor(
         )
     }
 
-    private enum class CameraType {
+    enum class CameraType {
         PERSPECTIVE,
         ISOMETRIC,
         FLAT
     }
+
+    companion object {
+        const val MAP_MIN_ZOOM = 1.0
+        const val MAP_MAX_ZOOM = 20.0
+    }
+
 
 }
