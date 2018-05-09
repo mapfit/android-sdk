@@ -1,3 +1,5 @@
+@file:JvmName("CommonUtils")
+
 package com.mapfit.android.utils
 
 import android.content.Context
