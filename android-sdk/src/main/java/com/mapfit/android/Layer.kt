@@ -77,7 +77,7 @@ class Layer {
         boundsBuilder: LatLngBounds.Builder
     ) {
         when (it) {
-            is Marker -> boundsBuilder.include(it.getPosition())
+            is Marker -> boundsBuilder.include(it.position)
             is Polyline -> it.points.forEach { boundsBuilder.include(it) }
             is Polygon -> it.polygon.forEach { it.forEach { boundsBuilder.include(it) } }
         }
