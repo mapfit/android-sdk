@@ -474,7 +474,7 @@ class Marker internal constructor(
 
     internal fun geocode(callback: OnMarkerAddedCallback?) = launch {
         Geocoder().geocode(
-            markerOptions.streetAddress,
+            streetAddress,
             markerOptions.buildingPolygon,
             object : GeocoderCallback {
                 override fun onSuccess(addressList: List<Address>) {
