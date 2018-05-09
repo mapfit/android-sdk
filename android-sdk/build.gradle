@@ -3,12 +3,13 @@ apply plugin: 'kotlin-android'
 apply plugin: "org.jetbrains.kotlin.android.extensions"
 
 project.ext {
-    mapfitSdkVersion = '1.2'
-    mapfitSdkVersionCode = 4
+    mapfitSdkVersion = '1.2.2'
+    mapfitSdkVersionCode = 7
 }
 
 android {
     compileSdkVersion 27
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         minSdkVersion 16
@@ -102,7 +103,6 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
     implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
     implementation "com.squareup.moshi:moshi-kotlin:$moshi_version"
-
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.json:json:20140107'
     testImplementation "org.mockito:mockito-core:$mockito_version"
@@ -125,3 +125,4 @@ kotlin {
 }
 
 apply from: file("${rootDir}/gradle/jcenter-push.gradle")
+apply from: file("${rootDir}/gradle/mapfit-tasks.gradle")

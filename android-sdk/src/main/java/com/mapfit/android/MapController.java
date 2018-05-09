@@ -11,6 +11,7 @@ import android.util.DisplayMetrics;
 
 import com.mapfit.android.annotations.Annotation;
 import com.mapfit.android.annotations.Marker;
+import com.mapfit.android.annotations.MarkerOptions;
 import com.mapfit.android.annotations.OnAnnotationClickListener;
 import com.mapfit.android.annotations.Polygon;
 import com.mapfit.android.annotations.Polyline;
@@ -1098,26 +1099,18 @@ public class MapController implements Renderer {
      *
      * @return Newly created {@link Marker} object.
      */
-    public Marker addMarker() {
+    public Marker addMarker(MarkerOptions markerOptions) {
         checkPointer(mapPointer);
         long markerId = nativeMarkerAdd(mapPointer);
-        Marker marker = new Marker(mapView.getContext(), markerId, this);
+        Marker marker = new Marker(mapView.getContext(),
+                markerOptions,
+                markerId,
+                this);
 
         markers.put(markerId, marker);
         return marker;
     }
 
-    public Marker addMarkerAsFeature(LatLng latLng) {
-        checkPointer(mapPointer);
-
-        MapData pointData = addDataLayer("mz_default_point");
-        Marker marker = new Marker(mapView.getContext(), pointData.getId(), this);
-        marker.setPosition(latLng);
-        pointData.addPoint(marker);
-
-        markers.put(pointData.getId(), marker);
-        return marker;
-    }
 
     public Polyline addPolyline(List<LatLng> line) {
         checkPointer(mapPointer);

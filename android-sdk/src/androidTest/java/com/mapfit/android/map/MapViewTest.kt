@@ -109,8 +109,8 @@ class MapViewTest {
         mapfitMap.setCenter(latLng)
 
         val actualLatLng = mapfitMap.getCenter()
-        Assert.assertEquals(latLng.lat, actualLatLng.lat, 0.0000001)
-        Assert.assertEquals(latLng.lng, actualLatLng.lng, 0.0000001)
+        Assert.assertEquals(latLng.lat, actualLatLng?.lat ?: 0.0, 0.0000001)
+        Assert.assertEquals(latLng.lng, actualLatLng?.lng ?: 0.0, 0.0000001)
     }
 
     @Test

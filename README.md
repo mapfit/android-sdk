@@ -16,10 +16,10 @@ allprojects {
 }
 ```
 
-In your module level `build.gradle` file, add depencency as follows
+In your module level `build.gradle` file, add depencency as follows.
 ```
 dependencies {
-    	implementation 'com.mapfit:android-sdk:1.1'
+    	implementation 'com.mapfit:android-sdk:1.2.2'
 }
 ```
 

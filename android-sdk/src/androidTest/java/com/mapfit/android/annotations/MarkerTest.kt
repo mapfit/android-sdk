@@ -81,12 +81,12 @@ class MarkerTest {
     @Test
     @UiThreadTest
     fun testDefaults() {
-        val marker = mapfitMap.addMarker(latLng)
+        val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
         Assert.assertTrue(marker.visibility)
         Assert.assertTrue(marker.tag.isBlank())
-        Assert.assertTrue(marker.getTitle().isBlank())
-        Assert.assertTrue(marker.getSubtitle1().isBlank())
-        Assert.assertTrue(marker.getSubtitle2().isBlank())
+        Assert.assertTrue(marker.title.isBlank())
+        Assert.assertTrue(marker.subtitle1.isBlank())
+        Assert.assertTrue(marker.subtitle2.isBlank())
         Assert.assertNull(marker.address)
         Assert.assertNotSame(0L, marker.id)
     }
@@ -95,25 +95,25 @@ class MarkerTest {
     @UiThreadTest
     fun testMarkerPosition() {
         // initial position
-        val marker = mapfitMap.addMarker(latLng)
-        Assert.assertEquals(latLng, marker.getPosition())
+        val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
+        Assert.assertEquals(latLng, marker.position)
 
         // valid position
         val latLng2 = LatLng(42.693825, -63.998691)
-        marker.setPosition(latLng2)
-        Assert.assertEquals(latLng2, marker.getPosition())
+        marker.position = latLng2
+        Assert.assertEquals(latLng2, marker.position)
 
         // invalid position
         val latLng3 = LatLng(412.693825, -653.998691)
-        marker.setPosition(latLng3)
-        Assert.assertEquals(latLng2, marker.getPosition())
+        marker.position = latLng3
+        Assert.assertEquals(latLng2, marker.position)
     }
 
 
     @Test
     @UiThreadTest
     fun testAddRemoveMarker() {
-        val marker = mapfitMap.addMarker(LatLng())
+        val marker = mapfitMap.addMarker(MarkerOptions().position(LatLng()))
         Assert.assertNotNull(marker)
 
         mapfitMap.removeMarker(marker)
@@ -124,7 +124,7 @@ class MarkerTest {
     @Test
     @UiThreadTest
     fun testAddRemoveMarkerFromItself() {
-        val marker = mapfitMap.addMarker(LatLng())
+        val marker = mapfitMap.addMarker(MarkerOptions().position(LatLng()))
         Assert.assertNotNull(marker)
 
         Layer().add(marker)
@@ -142,13 +142,23 @@ class MarkerTest {
         runBlocking {
             delay(500)
 
-            val expectedMarker = mapfitMap.addMarker(LatLng(40.74405, -73.99324))
+            val expectedMarker =
+                mapfitMap.addMarker(
+                    MarkerOptions().position(
+                        LatLng(
+                            40.74405,
+                            -73.99324
+                        )
+                    )
+                )
 
             var actualMarker: Marker? = null
 
             mapfitMap.addMarker(
-                "119 w 24th st new york ny 10011",
-                true,
+                MarkerOptions().streetAddress(
+                    "119 w 24th st new york ny 10011",
+                    true
+                ).addBuildingPolygon(true),
                 object : OnMarkerAddedCallback {
                     override fun onMarkerAdded(marker: Marker) {
                         actualMarker = marker
@@ -161,21 +171,19 @@ class MarkerTest {
 
             delay(1500)
             Assert.assertEquals(
-                expectedMarker.getPosition().lat,
-                actualMarker?.getPosition()?.lat
-                        ?: 0.0,
+                expectedMarker.position.lat,
+                actualMarker?.position?.lat ?: 0.0,
                 0.0001
             )
             Assert.assertEquals(
-                expectedMarker.getPosition().lng,
-                actualMarker?.getPosition()?.lng
+                expectedMarker.position.lng,
+                actualMarker?.position?.lng
                         ?: 0.0,
                 0.0001
             )
 
             // check building polygon existence
             Assert.assertNotNull(actualMarker?.buildingPolygon)
-            Assert.assertTrue(actualMarker!!.getTitle().isNotBlank())
         }
     }
 
@@ -188,7 +196,7 @@ class MarkerTest {
             delay(500)
 
             mapfitMap.setOnMarkerClickListener(onMarkerClickListener)
-            val marker = mapfitMap.addMarker(latLng)
+            val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
             clickOnMarker(marker)
 
             verify(onMarkerClickListener, times(1)).onMarkerClicked(marker)
@@ -199,7 +207,7 @@ class MarkerTest {
     fun testPlaceInfoOpenClose() = runBlocking {
         delay(500)
 
-        val marker = mapfitMap.addMarker(latLng).setTitle("title")
+        val marker = mapfitMap.addMarker(MarkerOptions().position(latLng).title("title"))
 
         clickOnMarker(marker)
 
@@ -222,7 +230,7 @@ class MarkerTest {
         runBlocking {
             delay(500)
 
-            val marker = mapfitMap.addMarker(latLng).setTitle("title")
+            val marker = mapfitMap.addMarker(MarkerOptions().position(latLng).title("title"))
 
             mapfitMap.setOnPlaceInfoClickListener(onPlaceInfoClickListener)
 
@@ -238,7 +246,7 @@ class MarkerTest {
         runBlocking {
             delay(500)
 
-            val marker = mapfitMap.addMarker(latLng).setTitle("title")
+            val marker = mapfitMap.addMarker(MarkerOptions().position(latLng).title("title"))
 
             mapfitMap.setPlaceInfoAdapter(placeInfoAdapter)
 

@@ -4,10 +4,8 @@ import android.graphics.PointF
 import android.support.annotation.FloatRange
 import android.support.annotation.RestrictTo
 import android.view.View
+import com.mapfit.android.annotations.*
 import com.mapfit.android.annotations.Annotation
-import com.mapfit.android.annotations.Marker
-import com.mapfit.android.annotations.Polygon
-import com.mapfit.android.annotations.Polyline
 import com.mapfit.android.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.android.annotations.callback.OnMarkerClickListener
 import com.mapfit.android.annotations.callback.OnPolygonClickListener
@@ -22,14 +20,10 @@ import org.jetbrains.annotations.TestOnly
  *
  * Created by dogangulcan on 12/19/17.
  */
-abstract class MapfitMap {
-
-    /**
-     * Sets the map center to the input coordinate values.
-     *
-     * @param latLng coordinates
-     */
-    abstract fun setCenter(latLng: LatLng)
+class MapfitMap internal constructor(
+    private val mapView: MapView,
+    private val mapController: MapController
+) {
 
     /**
      * Sets the map center to the input coordinate values and the duration of the entering animation
@@ -37,57 +31,77 @@ abstract class MapfitMap {
      * @param latLng coordinates
      * @param duration for centering animation
      */
-    abstract fun setCenter(latLng: LatLng, duration: Long = 0)
+    @JvmOverloads
+    fun setCenter(latLng: LatLng, duration: Long = 0) {
+        when (duration) {
+            0L -> mapController.position = latLng
+            else -> mapController.setPositionEased(
+                latLng,
+                duration.toInt(),
+                MapView.DEFAULT_EASE,
+                true
+            )
+        }
+
+        mapView.updatePlaceInfoPosition(true)
+    }
 
     /**
      * Sets the map center to the input layer's coordinate values.
      *
      * @param layer the map will center accordingly to
      */
-    protected abstract fun setCenterWithLayer(layer: Layer)
+    fun setCenterWithLayer(layer: Layer) {
+        mapController.position = layer.getLatLngBounds().center
+        mapView.updatePlaceInfoPosition(true)
+    }
 
     /**
      * Add the specified input layer to the map. All annotations in the layer will be added to the map.
      *
      * @param layer to add to the map
      */
-    abstract fun addLayer(layer: Layer)
+    fun addLayer(layer: Layer) {
+        if (!mapView.layers.contains(layer)) {
+            mapView.layers.add(layer)
+            layer.addMap(mapController)
+        }
+    }
 
     /**
      * Returns the list of layers bound to the map view.
      *
      * @return layers on the map as list
      */
-    abstract fun getLayers(): List<Layer>
+    fun getLayers() = mapView.layers
 
     /**
      * Returns the center coordinates of the map.
      *
      * @return [LatLng]
      */
-    abstract fun getCenter(): LatLng
+    fun getCenter(): LatLng? = mapController.position
 
     /**
-     * Adds the marker to the map at the input coordinate position. Returns marker for styling and
-     * place info customization.
+     * Adds the marker to the map at the input coordinate position or address with Geocoding.
      *
-     * @return marker that is added to the given coordinates
+     * @param markerOptions options and settings for the marker
+     * @param onMarkerAddedCallback optional callback for adding marker
+     * @return marker that is added or will be added to the given position or address
      */
-    abstract fun addMarker(latLng: LatLng): Marker
+    @JvmOverloads
+    fun addMarker(
+        markerOptions: MarkerOptions,
+        onMarkerAddedCallback: OnMarkerAddedCallback? = null
+    ): Marker {
+        val marker = mapController.addMarker(markerOptions)
 
-    /**
-     * Adds the marker to the map at the coordinate position returned by geocoding the input
-     * address. Returns marker for styling and place info customization.
-     *
-     * @param address an address such as "119w 24th st NY" venue names are shouldn't be given
-     * @param withBuilding flag for building polygon
-     * @param onMarkerAddedCallback for response and errors
-     */
-    abstract fun addMarker(
-        address: String,
-        withBuilding: Boolean = true,
-        onMarkerAddedCallback: OnMarkerAddedCallback
-    )
+        if (markerOptions.geocode || markerOptions.buildingPolygon) {
+            marker.geocode(onMarkerAddedCallback)
+        }
+
+        return marker
+    }
 
     /**
      * Removes the marker from the map.
@@ -95,49 +109,54 @@ abstract class MapfitMap {
      * @param marker to be removed
      * @return isRemoved
      */
-    abstract fun removeMarker(marker: Marker)
+    fun removeMarker(marker: Marker) = marker.remove(mapController)
 
     /**
      * Adds the polyline to the map. Returns polyline for styling.
      *
      * @return polyline
      */
-    abstract fun addPolyline(line: List<LatLng>): Polyline
+    fun addPolyline(line: List<LatLng>): Polyline = mapController.addPolyline(line)
 
     /**
      * Removes given [Polyline] from the [MapView].
      *
      * @param polyline to be removed
      */
-    abstract fun removePolyline(polyline: Polyline)
+    fun removePolyline(polyline: Polyline) = polyline.remove(mapController)
 
     /**
      * Removes the polyline from the map.
      *
      * @return polygon
      */
-    abstract fun addPolygon(polygon: List<List<LatLng>>): Polygon
+    fun addPolygon(polygon: List<List<LatLng>>): Polygon = mapController.addPolygon(polygon)
 
     /**
      * Removes the polygon from the map.
      *
      * @param polygon to be removed
      */
-    abstract fun removePolygon(polygon: Polygon)
+    fun removePolygon(polygon: Polygon) = polygon.remove(mapController)
 
     /**
      * Removes the specified input layer from the map.
      *
      * @param layer to be removed
      */
-    abstract fun removeLayer(layer: Layer)
+    fun removeLayer(layer: Layer) {
+        layer.annotations.forEach {
+            it.mapBindings[mapController]?.let { id ->
+                if (it is Marker && mapView.activePlaceInfo?.marker == it) {
+                    mapView.activePlaceInfo?.dispose(true)
+                }
+                mapController.removeMarker(id)
+                it.mapBindings.remove(mapController)
+            }
+        }
 
-    /**
-     * Sets the current zoom level of the map.
-     *
-     * @param zoomLevel Zoom level for the view
-     */
-    abstract fun setZoom(zoomLevel: Float)
+        mapView.layers.remove(layer)
+    }
 
     /**
      * Sets the current zoom level of the map and the duration of the zoom animation.
@@ -145,14 +164,25 @@ abstract class MapfitMap {
      * @param zoomLevel Zoom level for the view
      * @param duration optional duration for zooming in milliseconds
      */
-    abstract fun setZoom(zoomLevel: Float, duration: Long = 0)
+    @JvmOverloads
+    fun setZoom(
+        zoomLevel: Float,
+        duration: Long = 0
+    ) {
+        val normalizedZoomLevel = mapView.normalizeZoomLevel(zoomLevel)
+
+        when (duration) {
+            0L -> mapController.zoom = normalizedZoomLevel
+            else -> mapController.setZoomEased(normalizedZoomLevel, duration.toInt())
+        }
+    }
 
     /**
      * Returns the current zoom level of the map.
      *
      * @return current zoom level of the map
      */
-    abstract fun getZoom(): Float
+    fun getZoom() = mapController.zoom
 
     /**
      * Sets the map bounds using the [LatLngBounds] - the southwest and northeast corners of the
@@ -161,70 +191,101 @@ abstract class MapfitMap {
      * @param bounds
      * @param padding between map and bounds as percentage. For 10% padding, you can pass 0.1f.
      */
-    abstract fun setLatLngBounds(
+    fun setLatLngBounds(
         bounds: LatLngBounds,
         @FloatRange(
             from = 0.0,
             to = 1.0
         )
         padding: Float
-    )
+    ) {
+        mapController.setLatLngBounds(bounds, padding)
+        mapView.updatePlaceInfoPosition(true)
+    }
 
     /**
      * Returns the bounding coordinates for the map.
      *
      * @return latLngBounds
      */
-    abstract fun getLatLngBounds(): LatLngBounds
+    fun getLatLngBounds(): LatLngBounds {
+        val sw =
+            mapController.screenPositionToLatLng(
+                PointF(0f, mapView.viewHeight?.toFloat() ?: 0f)
+            )
+        val ne =
+            mapController.screenPositionToLatLng(
+                PointF(mapView.viewWidth?.toFloat() ?: 0f, 0f)
+            )
+        return LatLngBounds(ne ?: LatLng(), sw ?: LatLng())
+    }
 
     /**
      * Sets [OnMapClickListener] for [MapView] that single click events will be passed to.
      */
-    abstract fun setOnMapClickListener(listener: OnMapClickListener)
+    fun setOnMapClickListener(listener: OnMapClickListener) {
+        mapView.mapClickListener = listener
+    }
 
     /**
      * Sets [OnMapDoubleClickListener] for [MapView] that double click events will be passed to.
      */
-    abstract fun setOnMapDoubleClickListener(listener: OnMapDoubleClickListener)
+    fun setOnMapDoubleClickListener(listener: OnMapDoubleClickListener) {
+        mapView.mapDoubleClickListener = listener
+    }
 
     /**
      * Sets [OnMapLongClickListener] for [MapView] that long click events will be passed to.
      */
-    abstract fun setOnMapLongClickListener(listener: OnMapLongClickListener)
+    fun setOnMapLongClickListener(listener: OnMapLongClickListener) {
+        mapView.mapLongClickListener = listener
+    }
 
     /**
      * Sets [OnMarkerClickListener] for [MapView] that marker click events will be passed to.
      */
-    abstract fun setOnMarkerClickListener(listener: OnMarkerClickListener)
+    fun setOnMarkerClickListener(listener: OnMarkerClickListener) {
+        mapView.markerClickListener = listener
+    }
 
     /**
      * Sets [OnPolylineClickListener] for [MapView] that polyline click events will be passed to.
      */
-    abstract fun setOnPolylineClickListener(listener: OnPolylineClickListener)
+    fun setOnPolylineClickListener(listener: OnPolylineClickListener) {
+        mapView.polylineClickListener = listener
+    }
 
     /**
      * Sets [OnPolygonClickListener] for [MapView] that polygon click events will be passed to.
      */
-    abstract fun setOnPolygonClickListener(listener: OnPolygonClickListener)
+    fun setOnPolygonClickListener(listener: OnPolygonClickListener) {
+        mapView.polygonClickListener = listener
+    }
 
     /**
      * Sets [OnMapPanListener] for [MapView] that pan events will be passed to.x
      */
-    abstract fun setOnMapPanListener(listener: OnMapPanListener)
+    fun setOnMapPanListener(listener: OnMapPanListener) {
+        mapView.mapPanListener = listener
+    }
 
     /**
      * Sets [OnMapPinchListener] for [MapView] that pan events will be passed to.x
 
      * @param listener pinch events will be passed to
      */
-    abstract fun setOnMapPinchListener(listener: OnMapPinchListener)
+    fun setOnMapPinchListener(listener: OnMapPinchListener) {
+        mapView.mapPinchListener = listener
+    }
 
     /**
      * Enables customization of the place info view, which is displayed when a marker is tapped.
      *
      * @param adapter the callback to be invoked to obtain your custom place info.
      */
-    abstract fun setPlaceInfoAdapter(adapter: PlaceInfoAdapter)
+    fun setPlaceInfoAdapter(adapter: PlaceInfoAdapter) {
+        mapView.placeInfoAdapter = adapter
+    }
 
     /**
      * Sets a callback that's invoked when the user clicks on an info window.
@@ -232,20 +293,22 @@ abstract class MapfitMap {
      * @param listener The callback that's invoked when the user clicks on an info window.
      *                 To unset the callback, use null.
      */
-    abstract fun setOnPlaceInfoClickListener(listener: OnPlaceInfoClickListener)
+    fun setOnPlaceInfoClickListener(listener: OnPlaceInfoClickListener) {
+        mapView.onPlaceInfoClickListener = listener
+    }
 
     /**
      * MapOptions can be used to changing options for the map. For instance, setting maximum zoom
      * level or turning zoom controls off.
      */
-    abstract fun getMapOptions(): MapOptions
+    fun getMapOptions() = mapView.mapOptions
 
     /**
      * Returns [DirectionsOptions] to interact with DirectionsAPI to drawing directions.
      *
      * @return [DirectionsOptions]
      */
-    abstract fun getDirectionsOptions(): DirectionsOptions
+    fun getDirectionsOptions() = mapView.directionsOptions
 
 
     /**
@@ -253,14 +316,7 @@ abstract class MapfitMap {
      *
      *@return counter-clockwise rotation in radians. North is 0
      */
-    abstract fun getRotation(): Float
-
-    /**
-     * Sets the current rotation level of the map.
-     *
-     * @param rotation in radians
-     */
-    abstract fun setRotation(rotation: Float)
+    fun getRotation() = mapController.rotation
 
     /**
      * Sets the current rotation level of the map and the duration of the rotation animation.
@@ -268,16 +324,16 @@ abstract class MapfitMap {
      * @param rotation in radians
      * @param duration duration of the rotation in milliseconds
      */
-    abstract fun setRotation(rotation: Float, duration: Long = 0)
-
-
-    /**
-     * Sets the current tilt level of the map.
-     *
-     * @param angle in radians; 0 is straight down
-     */
-    abstract fun setTilt(angle: Float)
-
+    @JvmOverloads
+    fun setRotation(
+        rotation: Float,
+        duration: Long = 0
+    ) {
+        when (duration) {
+            0L -> mapController.rotation = rotation
+            else -> mapController.setRotationEased(rotation, duration.toInt(), MapView.DEFAULT_EASE)
+        }
+    }
 
     /**
      * Sets the current tilt level of the map and the duration of the tilt animation.
@@ -285,26 +341,40 @@ abstract class MapfitMap {
      * @param angle in radians, 0 is straight down
      * @param duration duration of the tilting in milliseconds
      */
-    abstract fun setTilt(angle: Float, duration: Long)
+    @JvmOverloads
+    fun setTilt(
+        angle: Float,
+        duration: Long = 0
+    ) {
+        when (duration) {
+            0L -> mapController.tilt = angle
+            else -> mapController.setTiltEased(angle, duration, MapView.DEFAULT_EASE)
+        }
+    }
 
     /**
      * Returns the current tilt level of the map.
      *
      * @return tilt angle in radians, 0 is to straight down
      */
-    abstract fun getTilt(): Float
+    fun getTilt() = mapController.tilt
 
     /**
      * Map will be re-centered to the last position it is centered.
      */
-    abstract fun reCenter()
+    fun reCenter() {
+        mapController.reCenter()
+        mapView.updatePlaceInfoPosition(true)
+    }
 
     /**
      * Sets a callback that's invoked when a map theme is loaded or an error has occurred.
      *
      * @param listener invoked when the theme is loaded or an error has occurred.
      */
-    abstract fun setOnMapThemeLoadListener(listener: OnMapThemeLoadListener)
+    fun setOnMapThemeLoadListener(listener: OnMapThemeLoadListener) {
+        mapView.mapThemeLoadListener = listener
+    }
 
     /**
      * Interface to be used to set custom view for Place Info.
@@ -336,6 +406,6 @@ abstract class MapfitMap {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @TestOnly
-    internal abstract fun has(annotation: Annotation): Boolean
+    internal fun has(annotation: Annotation) = mapController.contains(annotation)
 
 }

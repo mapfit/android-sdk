@@ -36,13 +36,16 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
      */
     fun addPoint(marker: Marker): MapData {
         val coordinates = DoubleArray(2)
-        coordinates[0] = marker.getPosition().lng
-        coordinates[1] = marker.getPosition().lat
+        coordinates[0] = marker.position.lng
+        coordinates[1] = marker.position.lat
 
         map!!.addFeature(
             id,
-            coordinates, null, null
+            coordinates,
+            null,
+            null
         )
+
         return this
     }
 

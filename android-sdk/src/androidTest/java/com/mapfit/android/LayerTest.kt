@@ -4,6 +4,7 @@ import android.support.test.InstrumentationRegistry
 import android.support.test.annotation.UiThreadTest
 import android.support.test.runner.AndroidJUnit4
 import com.mapfit.android.annotations.Marker
+import com.mapfit.android.annotations.MarkerOptions
 import com.mapfit.android.geometry.LatLng
 import junit.framework.Assert
 import org.junit.After
@@ -125,7 +126,7 @@ class LayerTest {
     @UiThreadTest
     fun testClear() {
         val latLng = LatLng(40.693825, -73.998691)
-        val marker = mapfitMap.addMarker(latLng)
+        val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
         val layer = Layer()
         layer.add(marker)
         layer.add(marker)
@@ -135,7 +136,7 @@ class LayerTest {
         Assert.assertTrue(layer.annotations.size == 0)
     }
 
-    private fun createMarker() = mapfitMap.addMarker(latLng)
+    private fun createMarker() = mapfitMap.addMarker(MarkerOptions().position(latLng))
 
 
 }
