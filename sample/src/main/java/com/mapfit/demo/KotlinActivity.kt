@@ -6,6 +6,7 @@ import com.mapfit.android.*
 import com.mapfit.android.annotations.MapfitMarker
 import com.mapfit.android.annotations.Marker
 import com.mapfit.android.annotations.MarkerOptions
+import com.mapfit.android.annotations.PolylineOptions
 import com.mapfit.android.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.android.directions.Directions
 import com.mapfit.android.directions.DirectionsCallback
@@ -82,7 +83,7 @@ class KotlinActivity : AppCompatActivity() {
                 override fun onSuccess(route: Route) {
                     route.trip.legs.forEach {
                         val leg = decodePolyline(it.shape)
-                        val polyline = mapfitMap.addPolyline(leg)
+                        val polyline = mapfitMap.addPolyline(PolylineOptions().points(leg))
                     }
                 }
 
