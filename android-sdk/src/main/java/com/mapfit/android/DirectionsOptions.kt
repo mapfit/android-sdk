@@ -1,6 +1,7 @@
 package com.mapfit.android
 
 import com.mapfit.android.annotations.Polyline
+import com.mapfit.android.annotations.PolylineOptions
 import com.mapfit.android.directions.Directions
 import com.mapfit.android.directions.DirectionsCallback
 import com.mapfit.android.directions.DirectionsType
@@ -112,7 +113,7 @@ class DirectionsOptions internal constructor(private val mapController: MapContr
         val legs = mutableListOf<Polyline>()
         route.trip.legs.forEach {
             val line = decodePolyline(it.shape)
-            val polyline = mapController.addPolyline(line)
+            val polyline = mapController.addPolyline(PolylineOptions().points(line))
             legs.add(polyline)
             routeDrawn = true
         }
