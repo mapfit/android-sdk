@@ -12,6 +12,7 @@ abstract class PolyPointAnnotationOptions<out T> {
     internal var strokeOutlineWidth: Int = Integer.MIN_VALUE
     internal var lineJoinType: JoinType = JoinType.MITER
     internal var drawOrder: Int = Integer.MIN_VALUE
+    internal var tag: Any? = null
 
     /**
      * Sets stroke width of the line.
@@ -75,5 +76,15 @@ abstract class PolyPointAnnotationOptions<out T> {
         return this as T
     }
 
+    /**
+     * Sets the given object related with the poly shapes. Setting related object of poly shape as a tag makes it
+     * easier to reach the object rather than storing a Map data structure.
+     *
+     * @param tag any object related to the poly shape
+     */
+    fun tag(tag: Any): T {
+        this.tag = tag
+        return this as T
+    }
 
 }

@@ -81,6 +81,7 @@ class Polygon(
     internal lateinit var rings: IntArray
 
     init {
+        tag = polygonOptions.tag
         parseRings(points)
         initAnnotation(mapController, polygonId)
     }

@@ -17,7 +17,7 @@ class MarkerOptions {
     internal var streetAddress = ""
     internal var position = LatLng(0.0, 0.0)
     internal var flat = false
-    internal var tag = Any()
+    internal var tag: Any? = null
     internal var buildingPolygon = false
     internal var buildingPolygonOptions: PolygonOptions? = null
     internal var interactive = true
