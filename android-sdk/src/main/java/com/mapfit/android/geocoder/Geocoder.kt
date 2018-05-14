@@ -7,6 +7,7 @@ import com.mapfit.android.geocoder.Geocoder.HttpHandler.httpClient
 import com.mapfit.android.geometry.LatLng
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.launch
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import java.io.IOException
@@ -86,18 +87,23 @@ class Geocoder {
     ) {
         httpClient.newCall(request).enqueue(object : Callback {
             override fun onResponse(call: Call?, response: Response?) {
-                if (response != null && response.isSuccessful) {
-                    async(UI) {
+                launch {
+                    if (response != null && response.isSuccessful) {
                         val addressList = async {
                             response.body()?.string()?.let {
                                 geocodeParser.parseGeocodeResponse(it)
                             }
                         }
-                        addressList.await()?.let { callback.onSuccess(it) }
+
+                        addressList.await().let {
+                            launch(UI) { callback.onSuccess(it ?: emptyList()) }
+                        }
+
+                    } else {
+                        val (message, exception) = geocodeParser.parseError(response)
+                        launch(UI) { callback.onError(message, exception) }
                     }
-                } else {
-                    val (message, exception) = geocodeParser.parseError(response)
-                    callback.onError(message, exception)
+
                 }
             }
 
