@@ -26,7 +26,7 @@ import org.mockito.MockitoAnnotations
 
 
 /**
- * Instrumentation tests for [Marker] functionality.
+ * Instrumentation tests for [Polyline] functionality.
  *
  * Created by dogangulcan on 1/17/18.
  */
@@ -83,47 +83,44 @@ class PolylineTest {
     @Test
     @UiThreadTest
     fun testStrokeColor() {
-        val polyline = mapfitMap.addPolyline(line)
-        polyline.polylineOptions.strokeColor = "#ffffff"
-        assertEquals("#ffffff", polyline.polylineOptions.strokeColor)
+        val polyline = mapfitMap.addPolyline(PolylineOptions().points(line).strokeColor("#ffffff"))
+        assertEquals("#ffffff", polyline.strokeColor)
     }
 
     @Test
     @UiThreadTest
     fun testStrokeWidth() {
-        val polyline = mapfitMap.addPolyline(line)
-        polyline.polylineOptions.strokeWidth = 50
-        assertEquals(50, polyline.polylineOptions.strokeWidth)
+        val polyline = mapfitMap.addPolyline(PolylineOptions().points(line).strokeWidth(50))
+        assertEquals(50, polyline.strokeWidth)
     }
 
     @Test
     @UiThreadTest
     fun testStrokeOutlineWidth() {
-        val polyline = mapfitMap.addPolyline(line)
-        polyline.polylineOptions.strokeOutlineWidth = 50
-        assertEquals(50, polyline.polylineOptions.strokeOutlineWidth)
+        val polyline = mapfitMap.addPolyline(PolylineOptions().points(line).strokeOutlineWidth(50))
+        assertEquals(50, polyline.strokeOutlineWidth)
     }
 
     @Test
     @UiThreadTest
     fun testCapType() {
-        val polyline = mapfitMap.addPolyline(line)
-        polyline.polylineOptions.lineCapType = CapType.ROUND
-        assertEquals(CapType.ROUND, polyline.polylineOptions.lineCapType)
+        val polyline =
+            mapfitMap.addPolyline(PolylineOptions().points(line).lineCapType(CapType.ROUND))
+        assertEquals(CapType.ROUND, polyline.lineCapType)
     }
 
     @Test
     @UiThreadTest
     fun testJoinType() {
-        val polyline = mapfitMap.addPolyline(line)
-        polyline.polylineOptions.lineJoinType = JoinType.ROUND
-        assertEquals(JoinType.ROUND, polyline.polylineOptions.lineJoinType)
+        val polyline =
+            mapfitMap.addPolyline(PolylineOptions().points(line).lineJoinType(JoinType.ROUND))
+        assertEquals(JoinType.ROUND, polyline.lineJoinType)
     }
 
     @Test
     @UiThreadTest
     fun testAddRemovePolyline() {
-        val polyline = mapfitMap.addPolyline(line)
+        val polyline = mapfitMap.addPolyline(PolylineOptions().points(line))
 
         assertNotNull(polyline)
         assertTrue(mapfitMap.has(polyline))
@@ -131,7 +128,7 @@ class PolylineTest {
         mapfitMap.removePolyline(polyline)
         assertFalse(mapfitMap.has(polyline))
 
-        val polyline2 = mapfitMap.addPolyline(line)
+        val polyline2 = mapfitMap.addPolyline(PolylineOptions().points(line))
         polyline2.remove()
         assertFalse(mapfitMap.has(polyline2))
     }
@@ -139,8 +136,8 @@ class PolylineTest {
     @Test
     @UiThreadTest
     fun testAddRemoveDifferentPolyline() {
-        val polyline = mapfitMap.addPolyline(line)
-        val polyline2 = mapfitMap.addPolyline(line)
+        val polyline = mapfitMap.addPolyline(PolylineOptions().points(line))
+        val polyline2 = mapfitMap.addPolyline(PolylineOptions().points(line))
 
         assertTrue(mapfitMap.has(polyline))
         assertTrue(mapfitMap.has(polyline2))
@@ -153,7 +150,7 @@ class PolylineTest {
     @Test
     @UiThreadTest
     fun testExtendingPolyline() {
-        val polyline = mapfitMap.addPolyline(line)
+        val polyline = mapfitMap.addPolyline(PolylineOptions().points(line))
         polyline.addPoints(line[1])
         polyline.addPoints(line[2])
         assertTrue(polyline.points.size > line.size)
@@ -162,13 +159,15 @@ class PolylineTest {
     @Test
     fun testPolylineColor() = runBlocking(UI) {
         delay(500)
-        val polyline = mapfitMap.addPolyline(line)
-        polyline.polylineOptions.strokeColor = "#ff0000"
-        polyline.polylineOptions.strokeWidth = 5
-
-        polyline.polylineOptions.strokeOutlineColor = "#0000ff"
-        polyline.polylineOptions.strokeOutlineWidth = 85
-        polyline.polylineOptions.lineCapType = CapType.ROUND
+        val polyline = mapfitMap.addPolyline(
+            PolylineOptions()
+                .points(line)
+                .strokeColor("#ff0000")
+                .strokeWidth(5)
+                .strokeOutlineColor("#0000ff")
+                .strokeOutlineWidth(85)
+                .lineCapType(CapType.ROUND)
+        )
 
         mapfitMap.setLatLngBounds(polyline.getLatLngBounds(), 0.8f)
         mapfitMap.setZoom(19f)
@@ -200,19 +199,33 @@ class PolylineTest {
 
     @Test
     fun testPolylineOrder() = runBlocking(UI) {
-        val polyline = mapfitMap.addPolyline(line)
-        polyline.polylineOptions.strokeColor = "#ff0000"
+        val polyline = mapfitMap.addPolyline(
+            PolylineOptions()
+                .points(line)
+                .strokeColor("#ff0000")
+                .strokeWidth(15)
+//                .drawOrder(600)
+        )
 
-        val polyline2 = mapfitMap.addPolyline(line)
-        polyline2.polylineOptions.strokeColor = "#0000ff"
+        polyline.drawOrder = (600)
+
+        val polyline2 = mapfitMap.addPolyline(
+            PolylineOptions()
+                .points(line)
+                .strokeColor("#0000ff")
+                .strokeWidth(15)
+//                .drawOrder(400)
+        )
+        polyline2.drawOrder = (400)
+
 
         val pixelCoordinate = LatLng(40.6930532, -73.9860919)
 
         mapfitMap.setLatLngBounds(polyline.getLatLngBounds(), 0.8f)
         mapfitMap.setZoom(19f)
 
-        polyline.polylineOptions.drawOrder = 600
-        polyline2.polylineOptions.drawOrder = 400
+        polyline.drawOrder = 600
+        polyline2.drawOrder = 400
 
         var triple = Triple(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
 
@@ -227,8 +240,8 @@ class PolylineTest {
         assertEquals(0, triple.second)
         assertEquals(0, triple.third)
 
-        polyline.polylineOptions.drawOrder = 400
-        polyline2.polylineOptions.drawOrder = 600
+        polyline.drawOrder = 400
+        polyline2.drawOrder = 600
 
         delay(1500)
         mapView.getMapSnap {
@@ -242,7 +255,7 @@ class PolylineTest {
         assertEquals(0, triple.second)
         assertEquals(255, triple.third)
 
-        polyline.polylineOptions.drawOrder = 800
+        polyline.drawOrder = 800
 
         delay(1500)
         mapView.getMapSnap {
@@ -264,7 +277,7 @@ class PolylineTest {
         mapfitMap.setZoom(17f)
         mapfitMap.setOnPolylineClickListener(polylineClickListener)
 
-        val polyline = mapfitMap.addPolyline(line)
+        val polyline = mapfitMap.addPolyline(PolylineOptions().points(line))
 
         clickOnPolyline(polyline)
 
