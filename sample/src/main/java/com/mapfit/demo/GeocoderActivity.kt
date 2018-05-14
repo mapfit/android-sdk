@@ -7,6 +7,7 @@ import com.mapfit.android.MapView
 import com.mapfit.android.MapfitMap
 import com.mapfit.android.OnMapReadyCallback
 import com.mapfit.android.annotations.MarkerOptions
+import com.mapfit.android.annotations.PolygonOptions
 import com.mapfit.android.geocoder.Geocoder
 import com.mapfit.android.geocoder.GeocoderCallback
 import com.mapfit.android.geocoder.model.Address
@@ -60,7 +61,10 @@ class GeocoderActivity : AppCompatActivity() {
                     }
 
                     val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
-                    val polygon = mapfitMap.addPolygon(addressList[0].building.polygon)
+                    val polygon =
+                        mapfitMap.addPolygon(
+                            PolygonOptions().points(addressList[0].building.polygon)
+                        )
                 }
             })
     }
@@ -83,7 +87,10 @@ class GeocoderActivity : AppCompatActivity() {
                     }
 
                     val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
-                    val polygon = mapfitMap.addPolygon(addressList[0].building.polygon)
+                    val polygon =
+                        mapfitMap.addPolygon(
+                            PolygonOptions().points(addressList[0].building.polygon)
+                        )
                 }
             })
     }

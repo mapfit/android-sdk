@@ -14,6 +14,7 @@ import com.mapfit.android.annotations.MapfitMarker;
 import com.mapfit.android.annotations.Marker;
 import com.mapfit.android.annotations.MarkerOptions;
 import com.mapfit.android.annotations.Polyline;
+import com.mapfit.android.annotations.PolylineOptions;
 import com.mapfit.android.annotations.callback.OnMarkerAddedCallback;
 import com.mapfit.android.directions.Directions;
 import com.mapfit.android.directions.DirectionsCallback;
@@ -93,8 +94,10 @@ public class JavaActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(@NotNull Route route) {
                         for (Leg leg : route.getTrip().getLegs()) {
-                            List<LatLng> line = MapfitUtils.decodePolyline(leg.getShape());
-                            Polyline polyline = mapfitMap.addPolyline(line);
+                            List<LatLng> points = MapfitUtils.decodePolyline(leg.getShape());
+                            Polyline polyline = mapfitMap
+                                    .addPolyline(new PolylineOptions()
+                                            .points(points));
                         }
                     }
 

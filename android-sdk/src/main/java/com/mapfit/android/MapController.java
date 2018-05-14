@@ -14,7 +14,9 @@ import com.mapfit.android.annotations.Marker;
 import com.mapfit.android.annotations.MarkerOptions;
 import com.mapfit.android.annotations.OnAnnotationClickListener;
 import com.mapfit.android.annotations.Polygon;
+import com.mapfit.android.annotations.PolygonOptions;
 import com.mapfit.android.annotations.Polyline;
+import com.mapfit.android.annotations.PolylineOptions;
 import com.mapfit.android.geometry.LatLng;
 import com.mapfit.android.geometry.LatLngBounds;
 import com.mapfit.android.utils.DebugUtils;
@@ -1112,39 +1114,40 @@ public class MapController implements Renderer {
     }
 
 
-    public Polyline addPolyline(List<LatLng> line) {
+    public Polyline addPolyline(PolylineOptions polylineOptions) {
         checkPointer(mapPointer);
         MapData polylineData = addDataLayer(POLYLINE_LAYER_NAME);
 
         Polyline polyline = new Polyline(
                 mapView.getContext(),
                 polylineData.getId(),
-                this,
-                line);
+                polylineOptions,
+                this
+        );
 
         polylineData.addPolyline(polyline);
         mapDatas.put(polylineData.getId(), polylineData);
-
         polylines.put(polylineData.getId(), polyline);
+
         requestRender();
         return polyline;
     }
 
-    public Polygon addPolygon(List<List<LatLng>> polygon) {
+    public Polygon addPolygon(PolygonOptions polygonOptions) {
         checkPointer(mapPointer);
         MapData polygonLayer = addDataLayer(POLYGON_LAYER_NAME);
 
         Polygon poly = new Polygon(
                 mapView.getContext(),
                 polygonLayer.getId(),
-                this,
-                polygon);
-
-        mapDatas.put(polygonLayer.getId(), polygonLayer);
+                polygonOptions,
+                this
+        );
 
         polygonLayer.addPolygon(poly);
-
+        mapDatas.put(polygonLayer.getId(), polygonLayer);
         polygons.put(polygonLayer.getId(), poly);
+
         requestRender();
         return poly;
     }

@@ -116,7 +116,7 @@ class MapfitMap internal constructor(
      *
      * @return polyline
      */
-    fun addPolyline(line: List<LatLng>): Polyline = mapController.addPolyline(line)
+    fun addPolyline(polylineOptions: PolylineOptions): Polyline = mapController.addPolyline(polylineOptions)
 
     /**
      * Removes given [Polyline] from the [MapView].
@@ -128,9 +128,10 @@ class MapfitMap internal constructor(
     /**
      * Removes the polyline from the map.
      *
+     * @param polygonOptions
      * @return polygon
      */
-    fun addPolygon(polygon: List<List<LatLng>>): Polygon = mapController.addPolygon(polygon)
+    fun addPolygon(polygonOptions: PolygonOptions): Polygon = mapController.addPolygon(polygonOptions)
 
     /**
      * Removes the polygon from the map.

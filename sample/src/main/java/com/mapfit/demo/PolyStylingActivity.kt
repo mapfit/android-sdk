@@ -5,10 +5,10 @@ import android.support.v7.app.AppCompatActivity
 import com.mapfit.android.MapView
 import com.mapfit.android.MapfitMap
 import com.mapfit.android.OnMapReadyCallback
-import com.mapfit.android.annotations.CapType
-import com.mapfit.android.annotations.JoinType
 import com.mapfit.android.annotations.Marker
 import com.mapfit.android.annotations.MarkerOptions
+import com.mapfit.android.annotations.PolygonOptions
+import com.mapfit.android.annotations.PolylineOptions
 import com.mapfit.android.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.android.directions.Directions
 import com.mapfit.android.directions.DirectionsCallback
@@ -63,16 +63,16 @@ class PolyStylingActivity : AppCompatActivity() {
             LatLng(40.744120, -73.992900)
         )
 
-        val polygon = mapfitMap.addPolygon(listOf(poly))
+        val polygon = mapfitMap.addPolygon(PolygonOptions().points(listOf(poly)))
 
-        polygon!!.polygonOptions.apply {
-            strokeWidth = 3
-            strokeOutlineWidth = 8
-            strokeColor = "#32b3ff"
-            strokeOutlineColor = "#5932b3ff"
-            lineJoinType = JoinType.ROUND
-            fillColor = "#2732b3ff"
-        }
+//        polygon!!.polygonOptions.apply {
+//            strokeWidth = 3
+//            strokeOutlineWidth = 8
+//            strokeColor = "#32b3ff"
+//            strokeOutlineColor = "#5932b3ff"
+//            lineJoinType = JoinType.ROUND
+//            fillColor = "#2732b3ff"
+//        }
     }
 
     /**
@@ -90,13 +90,13 @@ class PolyStylingActivity : AppCompatActivity() {
                 override fun onSuccess(route: Route) {
                     route.trip.legs.forEach {
                         val leg = decodePolyline(it.shape)
-                        val polyline = mapfitMap.addPolyline(leg)
+                        val polyline = mapfitMap.addPolyline(PolylineOptions().points(leg))
 
-                        polyline!!.polylineOptions.apply {
-                            strokeColor = "#ffabff9e"
-                            strokeWidth = 20
-                            lineCapType = CapType.ROUND
-                        }
+//                        polyline!!.polylineOptions.apply {
+//                            strokeColor = "#ffabff9e"
+//                            strokeWidth = 20
+//                            lineCapType = CapType.ROUND
+//                        }
                     }
                 }
 
@@ -121,14 +121,14 @@ class PolyStylingActivity : AppCompatActivity() {
                 override fun onMarkerAdded(marker: Marker) {
 
                     // here we style the building polygon if there is one
-                    marker.buildingPolygon?.polygonOptions?.apply {
-                        strokeWidth = 20
-                        strokeOutlineWidth = 25
-                        strokeColor = "#5400ff00"
-                        strokeOutlineColor = "#540000ff"
-                        fillColor = "#54ff0000"
-                        lineJoinType = JoinType.ROUND
-                    }
+//                    marker.buildingPolygon?.polygonOptions?.apply {
+//                        strokeWidth = 20
+//                        strokeOutlineWidth = 25
+//                        strokeColor = "#5400ff00"
+//                        strokeOutlineColor = "#540000ff"
+//                        fillColor = "#54ff0000"
+//                        lineJoinType = JoinType.ROUND
+//                    }
 
                 }
 

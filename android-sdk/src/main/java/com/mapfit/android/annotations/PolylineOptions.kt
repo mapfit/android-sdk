@@ -1,25 +1,35 @@
 package com.mapfit.android.annotations
 
-import com.mapfit.android.MapController
+import com.mapfit.android.geometry.LatLng
 
-class PolylineOptions internal constructor(
-    private val polyline: Polyline
-) : PolyPointAnnotationOptions(polyline) {
+class PolylineOptions : PolyPointAnnotationOptions<PolylineOptions>() {
 
-    override fun getProperties(mapController: MapController): Array<String?> {
-        val properties = HashMap<String, String>()
+    internal var points = emptyList<LatLng>()
+    internal var lineCapType: CapType = CapType.BOUND
 
-        properties["id"] = polyline.getIdForMap(mapController).toString()
-        if (strokeColor.isNotBlank()) properties["line_color"] = strokeColor
-        if (drawOrder != Int.MIN_VALUE) properties["line_order"] = "$drawOrder"
-        if (strokeWidth != Int.MIN_VALUE) properties["line_width"] = "$strokeWidth"
-        if (strokeOutlineColor.isNotBlank()) properties["line_stroke_color"] = strokeOutlineColor
-        if (strokeOutlineWidth != Int.MIN_VALUE) properties["line_stroke_width"] =
-                "$strokeOutlineWidth"
-        properties["line_cap"] = lineCapType.getValue()
-        properties["line_join"] = lineJoinType.getValue()
-
-        return getStringMapAsArray(properties)
+    init {
+        drawOrder = 503
     }
+
+    /**
+     * Sets the points for the polyline.
+     *
+     * @param line
+     */
+    fun points(points: List<LatLng>): PolylineOptions {
+        this.points = points
+        return this
+    }
+
+    /**
+     * Sets the shape type for the end of the lines.
+     *
+     * @param capType
+     */
+    fun lineCapType(capType: CapType): PolylineOptions {
+        this.lineCapType = capType
+        return this
+    }
+
 
 }

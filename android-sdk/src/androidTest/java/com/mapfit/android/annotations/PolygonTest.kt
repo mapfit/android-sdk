@@ -26,7 +26,7 @@ import org.mockito.MockitoAnnotations
 
 
 /**
- * Instrumentation tests for [Marker] functionality.
+ * Instrumentation tests for [Polygon] functionality.
  *
  * Created by dogangulcan on 1/17/18.
  */
@@ -83,48 +83,44 @@ class PolygonTest {
 
     @Test
     @UiThreadTest
-    fun testFillColor() {
-        val polygon = mapfitMap.addPolygon(poly)
-        polygon.polygonOptions.fillColor = "#000000"
-        assertEquals("#000000", polygon.polygonOptions.fillColor)
+    fun testSetFillColor() {
+        val polygon = mapfitMap.addPolygon(PolygonOptions().points(poly).fillColor("#000000"))
+        assertEquals("#000000", polygon.fillColor)
     }
 
     @Test
     @UiThreadTest
-    fun testStrokeColor() {
-        val polygon = mapfitMap.addPolygon(poly)
-        polygon.polygonOptions.strokeColor = "#ffffff"
-        assertEquals("#ffffff", polygon.polygonOptions.strokeColor)
+    fun testSetStrokeColor() {
+        val polygon = mapfitMap.addPolygon(PolygonOptions().points(poly).strokeColor("#ffffff"))
+        assertEquals("#ffffff", polygon.strokeColor)
     }
 
     @Test
     @UiThreadTest
-    fun testStrokeWidth() {
-        val polygon = mapfitMap.addPolygon(poly)
-        polygon.polygonOptions.strokeWidth = 50
-        assertEquals(50, polygon.polygonOptions.strokeWidth)
+    fun testSetStrokeWidth() {
+        val polygon = mapfitMap.addPolygon(PolygonOptions().points(poly).strokeWidth(50))
+        assertEquals(50, polygon.strokeWidth)
     }
 
     @Test
     @UiThreadTest
-    fun testStrokeOutlineWidth() {
-        val polygon = mapfitMap.addPolygon(poly)
-        polygon.polygonOptions.strokeOutlineWidth = 50
-        assertEquals(50, polygon.polygonOptions.strokeOutlineWidth)
+    fun testSetStrokeOutlineWidth() {
+        val polygon = mapfitMap.addPolygon(PolygonOptions().points(poly).strokeOutlineWidth(50))
+        assertEquals(50, polygon.strokeOutlineWidth)
     }
 
     @Test
     @UiThreadTest
-    fun testJoinType() {
-        val polygon = mapfitMap.addPolygon(poly)
-        polygon.polygonOptions.lineJoinType = JoinType.ROUND
-        assertEquals(JoinType.ROUND, polygon.polygonOptions.lineJoinType)
+    fun testSetJoinType() {
+        val polygon =
+            mapfitMap.addPolygon(PolygonOptions().points(poly).lineJoinType(JoinType.ROUND))
+        assertEquals(JoinType.ROUND, polygon.lineJoinType)
     }
 
     @Test
     @UiThreadTest
     fun testAddRemovePolygon() {
-        val polygon = mapfitMap.addPolygon(poly)
+        val polygon = mapfitMap.addPolygon(PolygonOptions().points(poly))
 
         assertNotNull(polygon)
         assertTrue(mapfitMap.has(polygon))
@@ -136,8 +132,10 @@ class PolygonTest {
 
     @Test
     fun testPolygonFillColor() = runBlocking(UI) {
-        val polygon = mapfitMap.addPolygon(poly)
-        polygon.polygonOptions.fillColor = "#ff0000"
+        val polygon = mapfitMap.addPolygon(
+            PolygonOptions().points(poly)
+                .fillColor("#ff0000")
+        )
 
         mapfitMap.setLatLngBounds(polygon.getLatLngBounds(), 0.5f)
         mapfitMap.setZoom(19f)
@@ -165,19 +163,16 @@ class PolygonTest {
 
     @Test
     fun testPolygonOrder() = runBlocking(UI) {
-        val polygon = mapfitMap.addPolygon(poly)
-        polygon.polygonOptions.fillColor = "#ff0000"
+        val polygon = mapfitMap.addPolygon(PolygonOptions().points(poly).fillColor("#ff0000"))
 
-        val polygon2 = mapfitMap.addPolygon(poly)
-        polygon2.polygonOptions.fillColor = "#0000ff"
+        val polygon2 = mapfitMap.addPolygon(PolygonOptions().points(poly).fillColor("#0000ff"))
 
         val pixelCoordinate = LatLng(40.741596, -73.994686)
 
         mapfitMap.setLatLngBounds(polygon.getLatLngBounds(), 0.5f)
-//        mapfitMap.setZoom(19f)
 
-        polygon.polygonOptions.drawOrder = 600
-        polygon2.polygonOptions.drawOrder = 400
+        polygon.drawOrder = 600
+        polygon2.drawOrder = 400
 
         var triple = Triple(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
 
@@ -187,13 +182,13 @@ class PolygonTest {
             triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
         }
 
-        delay(1000)
+        delay(1500)
         assertEquals(255, triple.first)
         assertEquals(0, triple.second)
         assertEquals(0, triple.third)
 
-        polygon.polygonOptions.drawOrder = 400
-        polygon2.polygonOptions.drawOrder = 600
+        polygon.drawOrder = 400
+        polygon2.drawOrder = 600
 
         delay(1500)
         mapView.getMapSnap {
@@ -207,7 +202,7 @@ class PolygonTest {
         assertEquals(0, triple.second)
         assertEquals(255, triple.third)
 
-        polygon.polygonOptions.drawOrder = 800
+        polygon.drawOrder = 800
 
         delay(1500)
         mapView.getMapSnap {
@@ -229,7 +224,7 @@ class PolygonTest {
         mapfitMap.setZoom(14f)
         mapfitMap.setOnPolygonClickListener(polygonClickListener)
 
-        val polygon = mapfitMap.addPolygon(poly)
+        val polygon = mapfitMap.addPolygon(PolygonOptions().points(poly))
 
         clickPolygon(polygon)
 

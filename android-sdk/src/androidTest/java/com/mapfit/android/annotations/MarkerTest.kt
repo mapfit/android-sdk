@@ -20,8 +20,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
+import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
 
 
@@ -67,6 +66,8 @@ class MarkerTest {
         mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
             override fun onMapReady(mapfitMap: MapfitMap) {
                 this@MarkerTest.mapfitMap = mapfitMap
+                mapfitMap.setOnMarkerClickListener(onMarkerClickListener)
+
             }
         })
     }
@@ -77,17 +78,18 @@ class MarkerTest {
         Mapfit.dispose()
     }
 
-
     @Test
     @UiThreadTest
     fun testDefaults() {
         val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
         Assert.assertTrue(marker.visibility)
-        Assert.assertTrue(marker.tag.isBlank())
+        Assert.assertTrue(marker.streetAddress.isBlank())
         Assert.assertTrue(marker.title.isBlank())
         Assert.assertTrue(marker.subtitle1.isBlank())
         Assert.assertTrue(marker.subtitle2.isBlank())
+        Assert.assertEquals(Anchor.TOP, marker.anchor)
         Assert.assertNull(marker.address)
+        Assert.assertNull(marker.tag)
         Assert.assertNotSame(0L, marker.id)
     }
 
@@ -135,6 +137,60 @@ class MarkerTest {
 
         Assert.assertTrue(marker.mapBindings.size == 0)
         Assert.assertTrue(marker.layers.size == 0)
+    }
+
+    @Test
+    fun testMapfitIcon() {
+        runBlocking {
+
+            delay(500)
+
+            mapfitMap.setCenter(latLng)
+
+            val marker = mapfitMap.addMarker(
+                MarkerOptions()
+                    .position(latLng)
+                    .icon(MapfitMarker.ARTS)
+            )
+
+            clickOnMarker(marker)
+            verify(onMarkerClickListener, times(1)).onMarkerClicked(marker)
+        }
+    }
+
+    @Test
+    fun testUrlIcon() {
+        runBlocking {
+            delay(500)
+
+            mapfitMap.setCenter(latLng)
+
+            val marker = mapfitMap.addMarker(
+                MarkerOptions()
+                    .position(latLng)
+                    .icon("http://cdn.mapfit.com/v2-4/assets/images/markers/pngs/lighttheme/arts.png")
+            )
+
+            clickOnMarker(marker)
+            verify(onMarkerClickListener, times(1)).onMarkerClicked(marker)
+        }
+    }
+
+    @Test
+    fun testInteractivity() {
+        runBlocking {
+            delay(500)
+
+            val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
+
+            marker.interactive = false
+            clickOnMarker(marker)
+            verify(onMarkerClickListener, never()).onMarkerClicked(marker)
+
+            marker.interactive = true
+            clickOnMarker(marker)
+            verify(onMarkerClickListener, times(1)).onMarkerClicked(marker)
+        }
     }
 
     @Test
@@ -195,7 +251,6 @@ class MarkerTest {
             mapfitMap.setCenter(latLng)
             delay(500)
 
-            mapfitMap.setOnMarkerClickListener(onMarkerClickListener)
             val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
             clickOnMarker(marker)
 
@@ -262,14 +317,14 @@ class MarkerTest {
         val screenPosition = marker.getScreenPosition(map)
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
             .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt() - 30))
-        delay(1500)
+        delay(1000)
     }
 
     private fun clickOnPlaceInfo(marker: Marker) = runBlocking {
         val screenPosition = marker.getScreenPosition(marker.mapBindings.keys.first())
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
             .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt() - 250))
-        delay(1500)
+        delay(1000)
     }
 
 

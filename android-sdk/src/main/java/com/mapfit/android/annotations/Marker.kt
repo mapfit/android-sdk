@@ -33,7 +33,6 @@ class Marker internal constructor(
     private val mapController: MapController
 ) : Annotation(markerId, mapController) {
 
-
     private var previousIcon: Bitmap? = null
     private var iconChangedWhenPlaceInfo: Bitmap? = null
     private var iconPlacementJob = Job()
@@ -49,13 +48,13 @@ class Marker internal constructor(
             updateStyle()
         }
 
-    var drawOrder = markerOptions.drawOrder
+    var width = markerOptions.width
         set(value) {
             field = value
             updateStyle()
         }
 
-    var width = markerOptions.width
+    var drawOrder = markerOptions.drawOrder
         set(value) {
             field = value
             updateStyle()
@@ -79,11 +78,6 @@ class Marker internal constructor(
             updateStyle()
         }
 
-    /**
-     * Sets the position of marker to the given [LatLng].
-     *
-     * @param latLng
-     */
     var position = markerOptions.position
         set(value) {
             if (value.isValid()) {
@@ -133,6 +127,8 @@ class Marker internal constructor(
         }
 
     init {
+        tag = markerOptions.tag
+
         val icon = markerOptions.getIcon()
 
         when (icon) {
@@ -249,7 +245,7 @@ class Marker internal constructor(
     /**
      * Sets the given bitmap as marker icon of the Marker.
      */
-    internal fun setBitmap(
+    private fun setBitmap(
         bitmap: Bitmap,
         mapController: MapController? = null,
         markerId: Long = 0
@@ -356,6 +352,21 @@ class Marker internal constructor(
         }
     }
 
+    /**
+     * Sets the width and height of the marker icon.
+     *
+     * @param width in pixels
+     * @param height in pixels
+     */
+    fun setSize(width: Int, height: Int) {
+        val styleString = getStyleString(width, height)
+
+        mapBindings.forEach {
+            it.key.setMarkerStylingFromString(it.value, styleString)
+            it.key.setMarkerDrawOrder(it.value, drawOrder)
+        }
+    }
+
     private fun placeInfoShown(
         isShown: Boolean,
         markerId: Long,
@@ -369,27 +380,10 @@ class Marker internal constructor(
         }
     }
 
-    private fun getPlaceInfoMarkerStyle() =
-        "{ style: 'sdk-point-overlay', " +
-                "anchor: top, " +
-                "size: [11px, 11px], " +
-                "order: $drawOrder, " +
-                "interactive: true, " +
-                "collide: false }"
-
     private fun setDefaultMarkerSize() {
         height = 59
         width = 55
     }
-
-    private fun getStyleString() =
-        "{ style: 'sdk-point-overlay', " +
-                "anchor: ${anchor.getAnchor()}," +
-                "flat: $flat, " +
-                "size: [${width}px, ${height}px]," +
-                "order: $drawOrder, " +
-                "interactive: true, " +
-                "collide: false }"
 
     private fun updateStyle() {
         val styleString = getStyleString()
@@ -399,6 +393,32 @@ class Marker internal constructor(
             it.key.setMarkerDrawOrder(it.value, drawOrder)
         }
     }
+
+    private fun getPlaceInfoMarkerStyle() =
+        "{ style: 'sdk-point-overlay', " +
+                "anchor: top, " +
+                "size: [11px, 11px], " +
+                "order: $drawOrder, " +
+                "interactive: true, " +
+                "collide: false }"
+
+    private fun getStyleString() =
+        "{ style: 'sdk-point-overlay', " +
+                "anchor: ${anchor.getAnchor()}," +
+                "flat: $flat, " +
+                "size: [${width}px, ${height}px]," +
+                "order: $drawOrder, " +
+                "interactive: $interactive, " +
+                "collide: false }"
+
+    private fun getStyleString(width: Int, height: Int) =
+        "{ style: 'sdk-point-overlay', " +
+                "anchor: ${anchor.getAnchor()}," +
+                "flat: $flat, " +
+                "size: [${width}px, ${height}px]," +
+                "order: $drawOrder, " +
+                "interactive: $interactive, " +
+                "collide: false }"
 
     private fun updatePlaceInfoFields() = placeInfoMap.values.forEach { it?.updatePlaceInfo() }
 
@@ -474,7 +494,7 @@ class Marker internal constructor(
 
     internal fun geocode(callback: OnMarkerAddedCallback?) = launch {
         Geocoder().geocode(
-            markerOptions.streetAddress,
+            streetAddress,
             markerOptions.buildingPolygon,
             object : GeocoderCallback {
                 override fun onSuccess(addressList: List<Address>) {
@@ -493,7 +513,10 @@ class Marker internal constructor(
 
                             if (addressList.isNotEmpty() && addressList.first().building.polygon.isNotEmpty()) {
                                 buildingPolygon =
-                                        mapController.addPolygon(addressList.first().building.polygon)
+                                        mapController.addPolygon(
+                                            PolygonOptions()
+                                                .points(addressList.first().building.polygon)
+                                        )
                             }
 
                             launch(UI) { callback?.onMarkerAdded(this@Marker) }

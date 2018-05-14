@@ -55,7 +55,7 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
                 id,
                 polyline.coordinates,
                 null,
-                polyline.polylineOptions.getProperties(it)
+                polyline.getProperties(polyline.getIdForMap(it).toString())
             )
         }
         return this
@@ -76,7 +76,7 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
                 id,
                 polygon.coordinates,
                 polygon.rings,
-                polygon.polygonOptions.getProperties(it)
+                polygon.getProperties(polygon.getIdForMap(it).toString())
             )
         }
         return this
