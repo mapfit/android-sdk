@@ -79,7 +79,7 @@ class Layer {
         when (it) {
             is Marker -> boundsBuilder.include(it.position)
             is Polyline -> it.points.forEach { boundsBuilder.include(it) }
-            is Polygon -> it.polygon.forEach { it.forEach { boundsBuilder.include(it) } }
+            is Polygon -> it.points.forEach { it.forEach { boundsBuilder.include(it) } }
         }
 
         it.subAnnotation?.let { addBounds(it, boundsBuilder) }
