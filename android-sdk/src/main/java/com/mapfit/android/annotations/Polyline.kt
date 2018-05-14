@@ -13,12 +13,68 @@ import com.mapfit.android.geometry.LatLngBounds
 class Polyline(
     internal val context: Context,
     private val polylineId: Long,
-    mapController: MapController,
-    private val line: MutableList<LatLng>
-) : Annotation(polylineId, mapController) {
+    polylineOptions: PolylineOptions,
+    mapController: MapController
+) : Annotation(polylineId, mapController), PolyFeature {
 
-    val points = line.toMutableList()
-    val polylineOptions = PolylineOptions(this)
+    val points = polylineOptions.points.toMutableList()
+
+    var strokeWidth = polylineOptions.strokeWidth
+        set(value) {
+            if (field != value) {
+                field = value
+                refreshPolyline()
+            }
+        }
+
+    var strokeColor = polylineOptions.strokeColor
+        set(value) {
+            if (field != value) {
+                field = value
+                refreshPolyline()
+            }
+        }
+
+    var strokeOutlineColor = polylineOptions.strokeOutlineColor
+        set(value) {
+            if (field != value) {
+                field = value
+                refreshPolyline()
+            }
+        }
+
+    var strokeOutlineWidth = polylineOptions.strokeOutlineWidth
+        set(value) {
+            if (field != value) {
+                field = value
+                refreshPolyline()
+            }
+        }
+
+    var lineCapType = polylineOptions.lineCapType
+        set(value) {
+            if (field != value) {
+                field = value
+                refreshPolyline()
+            }
+        }
+
+    var lineJoinType = polylineOptions.lineJoinType
+        set(value) {
+            if (field != value) {
+                field = value
+                refreshPolyline()
+            }
+        }
+
+    var drawOrder = polylineOptions.drawOrder
+        set(value) {
+            if (field != value) {
+                field = value
+                refreshPolyline()
+            }
+        }
+
     internal val coordinates by lazy {
         val coordinates = DoubleArray(points.size * 2)
         var i = 0
@@ -44,8 +100,19 @@ class Polyline(
 
     private fun refreshPolyline() {
         mapBindings.forEach {
-            it.key.addPolyline(points)
             it.key.removePolyline(it.value)
+
+            it.key.addPolyline(
+                PolylineOptions()
+                    .points(points)
+                    .strokeWidth(strokeWidth)
+                    .strokeColor(strokeColor)
+                    .drawOrder(drawOrder)
+                    .strokeOutlineColor(strokeOutlineColor)
+                    .strokeOutlineWidth(strokeOutlineWidth)
+                    .lineCapType(lineCapType)
+                    .lineJoinType(lineJoinType)
+            )
         }
     }
 
@@ -71,8 +138,27 @@ class Polyline(
 
     override fun getLatLngBounds(): LatLngBounds {
         val builder = LatLngBounds.Builder()
-        line.forEach { builder.include(it) }
+        points.forEach { builder.include(it) }
         return builder.build()
+    }
+
+    override fun getProperties(idForMap: String): Array<String?> {
+        val properties = HashMap<String, String>()
+
+        properties["id"] = idForMap
+        if (drawOrder != Int.MIN_VALUE) {
+            properties["polygon_order"] = "$drawOrder"
+            properties["line_order"] = (drawOrder - 1).toString()
+        }
+        if (strokeColor.isNotBlank()) properties["line_color"] = strokeColor
+        if (strokeWidth != Int.MIN_VALUE) properties["line_width"] = strokeWidth.toString()
+        if (strokeOutlineColor.isNotBlank()) properties["line_stroke_color"] = strokeOutlineColor
+        if (strokeOutlineWidth != Int.MIN_VALUE) properties["line_stroke_width"] =
+                strokeOutlineWidth.toString()
+        properties["line_cap"] = lineCapType.getValue()
+        properties["line_join"] = lineJoinType.getValue()
+
+        return getStringMapAsArray(properties)
     }
 
 }

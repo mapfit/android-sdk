@@ -1,37 +1,34 @@
 package com.mapfit.android.annotations
 
-import com.mapfit.android.MapController
+import com.mapfit.android.geometry.LatLng
 
-class PolygonOptions internal constructor(
-    private val polygon: Polygon
-) : PolyPointAnnotationOptions(polygon) {
+class PolygonOptions : PolyPointAnnotationOptions<PolygonOptions>() {
 
-    var fillColor: String = ""
-        set(value) {
-            if (field != value) {
-                field = value
-                updateStyle()
-            }
-        }
+    internal var points = emptyList<List<LatLng>>()
+    internal var fillColor: String = ""
 
-    override fun getProperties(mapController: MapController): Array<String?> {
-        val properties = HashMap<String, String>()
+    init {
+        drawOrder = 501
+    }
 
-        properties["id"] = polygon.getIdForMap(mapController).toString()
-        if (fillColor.isNotBlank()) properties["polygon_color"] = fillColor
-        if (drawOrder != Int.MIN_VALUE) {
-            properties["polygon_order"] = "$drawOrder"
-            properties["line_order"] = (drawOrder - 1).toString()
-        }
-        if (strokeColor.isNotBlank()) properties["line_color"] = strokeColor
-        if (strokeWidth != Int.MIN_VALUE) properties["line_width"] = strokeWidth.toString()
-        if (strokeOutlineColor.isNotBlank()) properties["line_stroke_color"] = strokeOutlineColor
-        if (strokeOutlineWidth != Int.MIN_VALUE) properties["line_stroke_width"] =
-                strokeOutlineWidth.toString()
-        properties["line_cap"] = lineCapType.getValue()
-        properties["line_join"] = lineJoinType.getValue()
+    /**
+     * Sets the points of the polygon.
+     *
+     * @param points list of polygon rings
+     */
+    fun points(points: List<List<LatLng>>): PolygonOptions {
+        this.points = points
+        return this
+    }
 
-        return getStringMapAsArray(properties)
+    /**
+     * Sets the fill color of the polygon.
+     *
+     * @param color as hex like "#ff00ff"
+     */
+    fun fillColor(color: String): PolygonOptions {
+        this.fillColor = color
+        return this
     }
 
 }
