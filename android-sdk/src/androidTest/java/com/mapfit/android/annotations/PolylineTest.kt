@@ -204,20 +204,16 @@ class PolylineTest {
                 .points(line)
                 .strokeColor("#ff0000")
                 .strokeWidth(15)
-//                .drawOrder(600)
+                .drawOrder(600)
         )
-
-        polyline.drawOrder = (600)
 
         val polyline2 = mapfitMap.addPolyline(
             PolylineOptions()
                 .points(line)
                 .strokeColor("#0000ff")
                 .strokeWidth(15)
-//                .drawOrder(400)
+                .drawOrder(400)
         )
-        polyline2.drawOrder = (400)
-
 
         val pixelCoordinate = LatLng(40.6930532, -73.9860919)
 
@@ -273,11 +269,18 @@ class PolylineTest {
     @Test
     fun testPolylineClickListener() = runBlocking {
         delay(400)
-        mapfitMap.setCenter(line.first())
-        mapfitMap.setZoom(17f)
-        mapfitMap.setOnPolylineClickListener(polylineClickListener)
 
-        val polyline = mapfitMap.addPolyline(PolylineOptions().points(line))
+        val polyline = mapfitMap.addPolyline(
+            PolylineOptions()
+                .points(line)
+                .strokeWidth(10)
+        )
+
+        mapfitMap.apply {
+            setCenter(LatLng(40.693825, -73.998695))
+            setZoom(17f)
+            setOnPolylineClickListener(polylineClickListener)
+        }
 
         clickOnPolyline(polyline)
 
@@ -285,6 +288,38 @@ class PolylineTest {
             polylineClickListener,
             Mockito.times(1)
         ).onPolylineClicked(polyline)
+    }
+
+    @Test
+    fun testCustomYamlLayer() = runBlocking(UI) {
+        delay(400)
+
+        mapfitMap.getMapOptions().customTheme = "mapfit-custom-test.yaml"
+
+        delay(2000)
+
+        val polyline = mapfitMap.addPolyline(
+            PolylineOptions()
+                .points(line)
+                .layerName("my_custom_line")
+        )
+
+        mapfitMap.setLatLngBounds(polyline.getLatLngBounds(), 0.8f)
+        mapfitMap.setZoom(19f)
+
+        var triple = Triple(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
+
+        mapView.getMapSnap {
+            val screenPosition = mapView.getScreenPosition(LatLng(40.6930532, -73.9860919))
+            val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
+            triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
+        }
+
+        delay(1500)
+
+        assertEquals(255, triple.first)
+        assertEquals(0, triple.second)
+        assertEquals(0, triple.third)
     }
 
     private fun clickOnPolyline(polyline: Polyline) = runBlocking {

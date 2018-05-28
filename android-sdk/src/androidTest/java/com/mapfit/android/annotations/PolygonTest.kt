@@ -160,7 +160,6 @@ class PolygonTest {
         assertEquals(0, greenValue)
     }
 
-
     @Test
     fun testPolygonOrder() = runBlocking(UI) {
         val polygon = mapfitMap.addPolygon(PolygonOptions().points(poly).fillColor("#ff0000"))
@@ -212,6 +211,38 @@ class PolygonTest {
         }
 
         delay(1500)
+        assertEquals(255, triple.first)
+        assertEquals(0, triple.second)
+        assertEquals(0, triple.third)
+    }
+
+    @Test
+    fun testCustomYamlLayer() = runBlocking(UI) {
+        delay(400)
+
+        mapfitMap.getMapOptions().customTheme = "mapfit-custom-test.yaml"
+
+        delay(2000)
+
+        val polyline = mapfitMap.addPolygon(
+            PolygonOptions()
+                .points(poly)
+                .layerName("my_custom_polygon")
+        )
+
+        mapfitMap.setLatLngBounds(polyline.getLatLngBounds(), 0.8f)
+        mapfitMap.setZoom(19f)
+
+        var triple = Triple(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
+
+        mapView.getMapSnap {
+            val screenPosition = mapView.getScreenPosition(LatLng(40.741596, -73.994686))
+            val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
+            triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
+        }
+
+        delay(1500)
+
         assertEquals(255, triple.first)
         assertEquals(0, triple.second)
         assertEquals(0, triple.third)
