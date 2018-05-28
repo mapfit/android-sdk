@@ -116,7 +116,8 @@ class MapfitMap internal constructor(
      *
      * @return polyline
      */
-    fun addPolyline(polylineOptions: PolylineOptions): Polyline = mapController.addPolyline(polylineOptions)
+    fun addPolyline(polylineOptions: PolylineOptions): Polyline =
+        mapController.addPolyline(polylineOptions)
 
     /**
      * Removes given [Polyline] from the [MapView].
@@ -131,7 +132,8 @@ class MapfitMap internal constructor(
      * @param polygonOptions
      * @return polygon
      */
-    fun addPolygon(polygonOptions: PolygonOptions): Polygon = mapController.addPolygon(polygonOptions)
+    fun addPolygon(polygonOptions: PolygonOptions): Polygon =
+        mapController.addPolygon(polygonOptions)
 
     /**
      * Removes the polygon from the map.
@@ -376,6 +378,22 @@ class MapfitMap internal constructor(
     fun setOnMapThemeLoadListener(listener: OnMapThemeLoadListener) {
         mapView.mapThemeLoadListener = listener
     }
+
+    /**
+     * Returns [LatLng] for the given screen position.
+     *
+     * @param pointF screen position
+     * @return [LatLng]
+     */
+    fun screenPositionToLatLng(pointF: PointF) = mapController.screenPositionToLatLng(pointF)
+
+    /**
+     * Returns the screen position for the given [LatLng] coordinate.
+     *
+     * @param latLng coordinate
+     * @return [PointF]
+     */
+    fun latLngToScreenPosition(latLng: LatLng) = mapController.latLngToScreenPosition(latLng)
 
     /**
      * Interface to be used to set custom view for Place Info.
