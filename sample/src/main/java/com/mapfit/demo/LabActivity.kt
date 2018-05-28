@@ -69,9 +69,9 @@ class LabActivity : AppCompatActivity() {
                     }
 
                     override fun onError() {
-                        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
                     }
                 })
+
 
                 mapfitMap.addMarker(
                     MarkerOptions()
@@ -106,7 +106,7 @@ class LabActivity : AppCompatActivity() {
                         .drawOrder(1000)
                 )
 
-                mapfitMap.setOnPolygonClickListener(object:OnPolygonClickListener{
+                mapfitMap.setOnPolygonClickListener(object : OnPolygonClickListener {
                     override fun onPolygonClicked(polygon: Polygon) {
                         Toast.makeText(
                             this@LabActivity,
