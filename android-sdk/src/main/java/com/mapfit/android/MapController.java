@@ -704,7 +704,7 @@ public class MapController implements Renderer {
      * @return Position in pixels from the top-left corner of the map area (the point
      * may not lie within the viewable screen area)
      */
-    public PointF lngLatToScreenPosition(LatLng lngLat) {
+    public PointF latLngToScreenPosition(LatLng lngLat) {
         double[] tmp = {lngLat.getLng(), lngLat.getLat()};
         checkPointer(mapPointer);
         nativeLngLatToScreenPosition(mapPointer, tmp);

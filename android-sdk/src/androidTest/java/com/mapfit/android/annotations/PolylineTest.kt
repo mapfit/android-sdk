@@ -345,7 +345,7 @@ class PolylineTest {
 
         val screenPosition =
             polyline.mapBindings.keys.first()
-                .lngLatToScreenPosition(polyline.points[2])
+                .latLngToScreenPosition(polyline.points[2])
 
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
             .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt()))

@@ -481,7 +481,7 @@ class Marker internal constructor(
     internal fun getScreenPosition(mapController: MapController): PointF {
         var screenPosition = PointF()
         mapBindings.filter { it.key == mapController }.keys.forEach {
-            screenPosition = it.lngLatToScreenPosition(position)
+            screenPosition = it.latLngToScreenPosition(position)
         }
         return screenPosition
     }

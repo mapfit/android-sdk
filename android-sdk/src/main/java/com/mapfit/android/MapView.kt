@@ -31,7 +31,6 @@ import com.mapfit.tetragon.CachePolicy
 import com.mapfit.tetragon.ConfigChooser
 import com.mapfit.tetragon.HttpHandler
 import com.mapfit.tetragon.TouchInput
-import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
 import okhttp3.CacheControl
@@ -40,6 +39,7 @@ import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 import java.util.concurrent.TimeUnit
+import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
 
 
 /**
@@ -615,6 +615,6 @@ class MapView(
     }
 
     @TestOnly
-    internal fun getScreenPosition(latLng: LatLng) = mapController.lngLatToScreenPosition(latLng)
+    internal fun getScreenPosition(latLng: LatLng) = mapController.latLngToScreenPosition(latLng)
 
 }

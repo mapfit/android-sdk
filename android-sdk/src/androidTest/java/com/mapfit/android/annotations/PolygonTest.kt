@@ -148,7 +148,7 @@ class PolygonTest {
         mapView.getMapSnap {
             val screenPosition =
                 polygon.mapBindings.keys.first()
-                    .lngLatToScreenPosition(LatLng(40.734839, -73.994748))
+                    .latLngToScreenPosition(LatLng(40.734839, -73.994748))
             val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
             redValue = Color.red(pixel)
             blueValue = Color.blue(pixel)
@@ -293,7 +293,7 @@ class PolygonTest {
 
         val screenPosition =
             polygon.mapBindings.keys.first()
-                .lngLatToScreenPosition(LatLng(40.741596, -73.994686))
+                .latLngToScreenPosition(LatLng(40.741596, -73.994686))
 
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
             .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt()))
