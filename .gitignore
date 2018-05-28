@@ -16,3 +16,4 @@ android-sdk/src/debug/
 appcompat-v7/
 gradle/gradle-wrapper.properties
 mapfit_local.properties
+/sample/src/debug/res/values/local_properties.xml

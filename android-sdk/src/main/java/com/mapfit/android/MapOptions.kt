@@ -20,6 +20,7 @@ import com.mapfit.android.location.*
 import com.mapfit.android.utils.getBitmapFromVectorDrawable
 import com.mapfit.android.utils.isValidZoomLevel
 import com.mapfit.android.utils.rotate
+import com.mapfit.tetragon.SceneUpdate
 import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
@@ -108,7 +109,7 @@ class MapOptions internal constructor(
     var theme: MapTheme? = null
         set(value) {
             if (field == null || field != value) {
-                value?.let { updateScene(value) }
+                value?.let { loadScene(value) }
                 field = value
             }
         }
@@ -215,7 +216,17 @@ class MapOptions internal constructor(
         }
     }
 
-    private fun updateScene(value: MapTheme) {
+    /**
+     * Applies SceneUpdates to the current scene asynchronously. When the updates are finished,
+     * [OnMapThemeLoadListener] will be triggered if set.
+     *
+     * @param sceneUpdates list of the updates
+     */
+    fun updateScene(sceneUpdates: List<SceneUpdate>) {
+        mapController.updateSceneAsync(sceneUpdates)
+    }
+
+    private fun loadScene(value: MapTheme) {
         mapController.loadSceneFile(value.toString())
         updateAttributionImage(value)
     }
