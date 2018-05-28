@@ -20,6 +20,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
@@ -251,18 +252,40 @@ class PolygonTest {
     @Test
     fun testPolygonClickListener() = runBlocking {
         delay(400)
-        mapfitMap.setCenter(LatLng(40.741596, -73.994686))
-        mapfitMap.setZoom(14f)
-        mapfitMap.setOnPolygonClickListener(polygonClickListener)
+
+        mapfitMap.apply {
+            setCenter(LatLng(40.741596, -73.994686))
+            setZoom(14f)
+            setOnPolygonClickListener(polygonClickListener)
+        }
 
         val polygon = mapfitMap.addPolygon(PolygonOptions().points(poly))
 
         clickPolygon(polygon)
 
-        Mockito.verify(
-            polygonClickListener,
-            Mockito.times(1)
-        ).onPolygonClicked(polygon)
+        Mockito.verify(polygonClickListener).onPolygonClicked(polygon)
+    }
+
+    @Test
+    fun testPolygonObject() = runBlocking {
+        delay(400)
+        mapfitMap.setCenter(LatLng(40.741596, -73.994686))
+        mapfitMap.setZoom(14f)
+        mapfitMap.setOnPolygonClickListener(polygonClickListener)
+
+        val polygon = mapfitMap.addPolygon(
+            PolygonOptions()
+                .points(poly)
+                .tag(5)
+        )
+
+        val captor = ArgumentCaptor.forClass(Polygon::class.java)
+
+        clickPolygon(polygon)
+
+        Mockito.verify(polygonClickListener).onPolygonClicked(capture(captor) ?: polygon)
+
+        assertEquals(5, captor.value.tag)
     }
 
     private fun clickPolygon(polygon: Polygon) = runBlocking {

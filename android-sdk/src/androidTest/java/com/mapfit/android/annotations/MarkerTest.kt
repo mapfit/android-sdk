@@ -15,12 +15,15 @@ import junit.framework.Assert
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito.*
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 
@@ -111,7 +114,6 @@ class MarkerTest {
         Assert.assertEquals(latLng2, marker.position)
     }
 
-
     @Test
     @UiThreadTest
     fun testAddRemoveMarker() {
@@ -140,122 +142,132 @@ class MarkerTest {
     }
 
     @Test
-    fun testMapfitIcon() {
-        runBlocking {
+    fun testMapfitIcon() = runBlocking {
 
-            delay(500)
+        delay(500)
 
-            mapfitMap.setCenter(latLng)
+        mapfitMap.setCenter(latLng)
 
-            val marker = mapfitMap.addMarker(
-                MarkerOptions()
-                    .position(latLng)
-                    .icon(MapfitMarker.ARTS)
-            )
+        val marker = mapfitMap.addMarker(
+            MarkerOptions()
+                .position(latLng)
+                .icon(MapfitMarker.ARTS)
+        )
 
-            clickOnMarker(marker)
-            verify(onMarkerClickListener, times(1)).onMarkerClicked(marker)
-        }
+        clickOnMarker(marker)
+        verify(onMarkerClickListener).onMarkerClicked(marker)
     }
 
     @Test
-    fun testUrlIcon() {
-        runBlocking {
-            delay(500)
+    fun testUrlIcon() = runBlocking {
+        delay(500)
 
-            mapfitMap.setCenter(latLng)
+        mapfitMap.setCenter(latLng)
 
-            val marker = mapfitMap.addMarker(
-                MarkerOptions()
-                    .position(latLng)
-                    .icon("http://cdn.mapfit.com/v2-4/assets/images/markers/pngs/lighttheme/arts.png")
-            )
+        val marker = mapfitMap.addMarker(
+            MarkerOptions()
+                .position(latLng)
+                .icon("http://cdn.mapfit.com/v2-4/assets/images/markers/pngs/lighttheme/arts.png")
+        )
 
-            clickOnMarker(marker)
-            verify(onMarkerClickListener, times(1)).onMarkerClicked(marker)
-        }
+        clickOnMarker(marker)
+        verify(onMarkerClickListener).onMarkerClicked(marker)
     }
 
     @Test
-    fun testInteractivity() {
-        runBlocking {
-            delay(500)
+    fun testInteractivity() = runBlocking {
+        delay(500)
 
-            val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
+        val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
 
-            marker.interactive = false
-            clickOnMarker(marker)
-            verify(onMarkerClickListener, never()).onMarkerClicked(marker)
+        marker.interactive = false
+        clickOnMarker(marker)
+        verify(onMarkerClickListener, never()).onMarkerClicked(marker)
 
-            marker.interactive = true
-            clickOnMarker(marker)
-            verify(onMarkerClickListener, times(1)).onMarkerClicked(marker)
-        }
+        marker.interactive = true
+        clickOnMarker(marker)
+        verify(onMarkerClickListener).onMarkerClicked(marker)
     }
 
     @Test
-    fun testAddMarkerWithAddress() {
-        runBlocking {
-            delay(500)
+    fun testAddMarkerWithAddress() = runBlocking {
+        delay(500)
 
-            val expectedMarker =
-                mapfitMap.addMarker(
-                    MarkerOptions().position(
-                        LatLng(
-                            40.74405,
-                            -73.99324
-                        )
+        val expectedMarker =
+            mapfitMap.addMarker(
+                MarkerOptions().position(
+                    LatLng(
+                        40.74405,
+                        -73.99324
                     )
                 )
-
-            var actualMarker: Marker? = null
-
-            mapfitMap.addMarker(
-                MarkerOptions().streetAddress(
-                    "119 w 24th st new york ny 10011",
-                    true
-                ).addBuildingPolygon(true),
-                object : OnMarkerAddedCallback {
-                    override fun onMarkerAdded(marker: Marker) {
-                        actualMarker = marker
-                    }
-
-                    override fun onError(exception: Exception) {
-
-                    }
-                })
-
-            delay(1500)
-            Assert.assertEquals(
-                expectedMarker.position.lat,
-                actualMarker?.position?.lat ?: 0.0,
-                0.0001
-            )
-            Assert.assertEquals(
-                expectedMarker.position.lng,
-                actualMarker?.position?.lng
-                        ?: 0.0,
-                0.0001
             )
 
-            // check building polygon existence
-            Assert.assertNotNull(actualMarker?.buildingPolygon)
-        }
+        var actualMarker: Marker? = null
+
+        mapfitMap.addMarker(
+            MarkerOptions().streetAddress(
+                "119 w 24th st new york ny 10011",
+                true
+            ).addBuildingPolygon(true),
+            object : OnMarkerAddedCallback {
+                override fun onMarkerAdded(marker: Marker) {
+                    actualMarker = marker
+                }
+
+                override fun onError(exception: Exception) {
+
+                }
+            })
+
+        delay(1500)
+        Assert.assertEquals(
+            expectedMarker.position.lat,
+            actualMarker?.position?.lat ?: 0.0,
+            0.0001
+        )
+        Assert.assertEquals(
+            expectedMarker.position.lng,
+            actualMarker?.position?.lng
+                    ?: 0.0,
+            0.0001
+        )
+
+        // check building polygon existence
+        Assert.assertNotNull(actualMarker?.buildingPolygon)
     }
 
     @Test
-    fun testMarkerClickListener() {
-        runBlocking {
-            delay(500)
+    fun testMarkerClickListener() = runBlocking {
+        delay(400)
+        mapfitMap.setCenter(latLng)
+        delay(400)
 
-            mapfitMap.setCenter(latLng)
-            delay(500)
+        val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
+        clickOnMarker(marker)
 
-            val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
-            clickOnMarker(marker)
+        verify(onMarkerClickListener).onMarkerClicked(marker)
+    }
 
-            verify(onMarkerClickListener, times(1)).onMarkerClicked(marker)
-        }
+    @Test
+    fun testMarkerObject() = runBlocking {
+        delay(400)
+        mapfitMap.setCenter(latLng)
+        delay(400)
+
+        val marker = mapfitMap.addMarker(
+            MarkerOptions()
+                .tag(5)
+                .position(latLng)
+        )
+
+        val captor = ArgumentCaptor.forClass(Marker::class.java)
+
+        clickOnMarker(marker)
+
+        verify(onMarkerClickListener).onMarkerClicked(capture(captor) ?: marker)
+
+        assertEquals(5, captor.value.tag)
     }
 
     @Test
@@ -281,19 +293,17 @@ class MarkerTest {
     }
 
     @Test
-    fun testDefaultPlaceInfoClickListener() {
-        runBlocking {
-            delay(500)
+    fun testDefaultPlaceInfoClickListener() = runBlocking {
+        delay(500)
 
-            val marker = mapfitMap.addMarker(MarkerOptions().position(latLng).title("title"))
+        val marker = mapfitMap.addMarker(MarkerOptions().position(latLng).title("title"))
 
-            mapfitMap.setOnPlaceInfoClickListener(onPlaceInfoClickListener)
+        mapfitMap.setOnPlaceInfoClickListener(onPlaceInfoClickListener)
 
-            clickOnMarker(marker)
-            clickOnPlaceInfo(marker)
+        clickOnMarker(marker)
+        clickOnPlaceInfo(marker)
 
-            verify(onPlaceInfoClickListener, times(1)).onPlaceInfoClicked(marker)
-        }
+        verify(onPlaceInfoClickListener).onPlaceInfoClicked(marker)
     }
 
     @Test
@@ -307,7 +317,7 @@ class MarkerTest {
 
             clickOnMarker(marker)
 
-            verify(placeInfoAdapter, times(1)).getPlaceInfoView(marker)
+            verify(placeInfoAdapter).getPlaceInfoView(marker)
         }
     }
 

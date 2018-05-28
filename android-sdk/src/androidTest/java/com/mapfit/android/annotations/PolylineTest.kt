@@ -20,6 +20,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
@@ -43,12 +44,12 @@ class PolylineTest {
     lateinit var mapView: MapView
 
     private val line by lazy {
-        val list = mutableListOf<LatLng>()
-
-        list.add(LatLng(40.693825, -73.998691))
-        list.add(LatLng(40.6902223, -73.9770368))
-        list.add(LatLng(40.6930532, -73.9860919))
-        list.add(LatLng(40.7061326, -74.000769))
+        val list = mutableListOf<LatLng>().apply {
+            add(LatLng(40.693825, -73.998691))
+            add(LatLng(40.6902223, -73.9770368))
+            add(LatLng(40.6930532, -73.9860919))
+            add(LatLng(40.7061326, -74.000769))
+        }
         list
     }
 
@@ -270,24 +271,41 @@ class PolylineTest {
     fun testPolylineClickListener() = runBlocking {
         delay(400)
 
-        val polyline = mapfitMap.addPolyline(
-            PolylineOptions()
-                .points(line)
-                .strokeWidth(10)
-        )
+        val polyline = mapfitMap.addPolyline(PolylineOptions().points(line))
 
         mapfitMap.apply {
-            setCenter(LatLng(40.693825, -73.998695))
-            setZoom(17f)
+            setCenter(polyline.points.first())
+            setZoom(14f)
             setOnPolylineClickListener(polylineClickListener)
         }
 
         clickOnPolyline(polyline)
 
-        Mockito.verify(
-            polylineClickListener,
-            Mockito.times(1)
-        ).onPolylineClicked(polyline)
+        Mockito.verify(polylineClickListener).onPolylineClicked(polyline)
+    }
+
+    @Test
+    fun testPolylineObject() = runBlocking {
+        delay(400)
+
+        val polyline = mapfitMap.addPolyline(
+            PolylineOptions()
+                .points(line)
+                .tag(5)
+        )
+
+        mapfitMap.apply {
+            setCenter(polyline.points.first())
+            setZoom(14f)
+        }
+
+        val captor = ArgumentCaptor.forClass(Polyline::class.java)
+
+        clickOnPolyline(polyline)
+
+        Mockito.verify(polylineClickListener).onPolylineClicked(capture(captor) ?: polyline)
+
+        assertEquals(5, captor.value.tag)
     }
 
     @Test
@@ -327,7 +345,7 @@ class PolylineTest {
 
         val screenPosition =
             polyline.mapBindings.keys.first()
-                .lngLatToScreenPosition(polyline.points.first())
+                .lngLatToScreenPosition(polyline.points[2])
 
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
             .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt()))
