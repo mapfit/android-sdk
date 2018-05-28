@@ -1120,7 +1120,7 @@ public class MapController implements Renderer {
         String layerName = polylineOptions.getLayerName();
 
         if (TextUtils.isEmpty(layerName)) {
-            layerName = POLYGON_LAYER_NAME;
+            layerName = POLYLINE_LAYER_NAME;
         }
 
         MapData polylineData = addDataLayer(layerName);
@@ -1151,19 +1151,19 @@ public class MapController implements Renderer {
 
         MapData polygonLayer = addDataLayer(layerName);
 
-        Polygon poly = new Polygon(
+        Polygon polygon = new Polygon(
                 mapView.getContext(),
                 polygonLayer.getId(),
                 polygonOptions,
                 this
         );
 
-        polygonLayer.addPolygon(poly);
+        polygonLayer.addPolygon(polygon);
         mapDatas.put(polygonLayer.getId(), polygonLayer);
-        polygons.put(polygonLayer.getId(), poly);
+        polygons.put(polygonLayer.getId(), polygon);
 
         requestRender();
-        return poly;
+        return polygon;
     }
 
     public long addAnnotation(Annotation annotation) {
