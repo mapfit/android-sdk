@@ -12,6 +12,7 @@ import android.view.View
 import com.mapfit.android.*
 import com.mapfit.android.location.LocationListener
 import com.mapfit.android.location.LocationPriority
+import com.mapfit.tetragon.SceneUpdate
 import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
@@ -156,6 +157,20 @@ class MapOptionsTest {
     fun test3dBuildings() = runBlocking {
 
         mapfitMap.getMapOptions().is3dBuildingsEnabled = true
+
+        delay(500)
+
+        Mockito.verify(onMapThemeLoadListener, only()).onLoaded()
+        Mockito.verify(onMapThemeLoadListener, never()).onError()
+    }
+
+
+    @Test
+    @UiThreadTest
+    fun testSceneUpdate() = runBlocking {
+
+        val sceneUpdate = SceneUpdate("global.building_fill", "#ffffff")
+        mapfitMap.getMapOptions().updateScene(listOf(sceneUpdate))
 
         delay(500)
 
