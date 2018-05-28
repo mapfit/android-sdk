@@ -15,6 +15,7 @@ import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.View
 import org.hamcrest.Matcher
+import org.mockito.ArgumentCaptor
 
 
 /**
@@ -281,3 +282,10 @@ private fun injectMotionEventToUiController(uiController: UiController, event: M
         throw IllegalStateException("Error performing event " + event)
     }
 }
+
+
+/**
+ * Returns ArgumentCaptor.capture() as nullable type to avoid java.lang.IllegalStateException
+ * when null is returned.
+ */
+fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
