@@ -14,6 +14,9 @@ import com.mapfit.android.MapView
 import com.mapfit.android.MapViewTestActivity
 import com.mapfit.android.MapfitMap
 import com.mapfit.android.geometry.LatLng
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.delay
+import kotlinx.coroutines.experimental.runBlocking
 import org.junit.*
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
@@ -31,6 +34,7 @@ class MapViewTest {
     private lateinit var mapView: MapView
 
     private lateinit var mapfitMap: MapfitMap
+    private val latLng = LatLng(40.7441855, -73.995394)
 
     @Rule
     @JvmField
@@ -105,7 +109,6 @@ class MapViewTest {
     @Test
     @UiThreadTest
     fun testSetCenter() {
-        val latLng = LatLng(40.7441855, -73.995394)
         mapfitMap.setCenter(latLng)
 
         val actualLatLng = mapfitMap.getCenter()
@@ -138,6 +141,18 @@ class MapViewTest {
 
         mapfitMap.removeLayer(layer)
         Assert.assertTrue(mapfitMap.getLayers().isEmpty())
+    }
+
+    @Test
+    fun testScreenPositionToLatLng() = runBlocking(UI) {
+        mapfitMap.setCenter(latLng)
+
+        delay(400)
+        val screenPosition = mapfitMap.latLngToScreenPosition(latLng)
+        val coordinates = mapfitMap.screenPositionToLatLng(screenPosition)
+
+        Assert.assertEquals(latLng.lat, coordinates.lat, 0.0001)
+        Assert.assertEquals(latLng.lng, coordinates.lng, 0.0001)
     }
 
 }
