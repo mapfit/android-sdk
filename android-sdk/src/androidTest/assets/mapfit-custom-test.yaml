@@ -1,0 +1,101 @@
+# Mapfit Day Theme
+# Last updated Mar 19, 2018
+
+import:
+    - mapfit-base-theme.yaml
+
+global:
+
+    ####### ALL COLOR VARIABLES #######
+
+    # TEXT
+    text_fill:	                    rgba(90, 95, 105, 1)
+    text_outline:	                  rgba(255, 255, 255,.75)
+    text_fill_neighborhoods:        rgba(143, 156, 179, 1)
+    text_fill_water:	              rgba(71, 123, 198, 1)
+    text_outline_water:	            rgba(255, 255, 255,.75)
+    text_fill_parks:	              rgba(67, 162, 84, 1)
+    text_outline_parks:	            rgba(189, 222, 197, 1)
+    text_beach_fill:                rgba(153, 144, 92, 1)
+    text_beach_outline:             rgba(255, 255, 255,.75)
+    text_highway_fill:              rgba(109, 51, 4, 1)
+    text_highway_outline:           rgba(255, 255, 255,.75)
+    text_highway_exits:	            rgba(237, 152, 6, 1)
+    text_signs_fill:                rgba(255, 255, 255, 1)
+
+    # ROADS
+    highway_fill:	                  rgba(255, 224, 115, 1)
+    highway_outline:	              rgba(255, 202, 112,1)
+    road_fill:	                    rgba(255, 255, 255,1)
+    road_outline:	                  rgba(223, 223, 223,1)
+    tunnel_fill:                    rgba(223, 223, 223,1)
+    tunnel_outline:                 rgba(223, 223, 223,1)
+    road_directional_arrows_fill:   rgba(240, 240, 240,1)
+    pedestrian_path_fill:	          rgba(255, 255, 255,1)
+    pedestrian_path_outline:        rgba(255, 255, 255,1)
+    pedestrian_steps_fill:          rgba(242, 242, 242,1)
+    roads_in_park_fill:           	rgba(189, 222, 197,1)
+    roads_in_cemetary_fill:       	rgba(255, 255, 255,1)
+
+    # WATER
+    ocean_fill:	                    rgba(137, 208, 255,1)
+    water_fill:	                    rgba(137, 208, 255,1)
+
+    # LAND
+    map_background_fill:            rgba(255, 255, 255,1)
+    land_fill:	                    rgba(242, 242, 242,1)
+    parks_fill:	                    rgba(184, 233, 164,1)
+    cemetary_fill:	                rgba(205, 238, 193,1)
+    protected_area_fill:	          rgba(238, 237, 235,1)
+    special_parks_fill:	            rgba(162, 223, 139,1)
+    stadium_fill:	                  rgba(191, 176, 142,1)
+    playground_fill:	              rgba(215, 204, 176,1)
+    beach_fill:	                    rgba(235, 235, 201,1)
+    military_fill:                  rgba(207, 209, 221,1)
+
+    # BUILDINGS
+    building_fill:	                rgba(235, 235, 235,1)
+    building_outline:	              rgba(230, 230, 230,1)
+
+    # AIRPORTS
+    airport_road_fill:	            rgba(192, 195, 214,1)
+    airport_land_fill:	            rgba(207, 209, 221,1)
+
+    # EDUCATION
+    university_fill:	              rgba(238, 227, 180,1)
+    school_fill:	                  rgba(242, 242, 242,1)
+
+    # HOSPITALS
+    hospital_fill:	                rgba(231, 204, 213,1)
+
+    # FEATURES
+    ferry_fill:	                    rgba(124, 170, 203,1)
+    railways_fill:	                rgba(223, 223, 223,1)
+    special_pedestrian_area_fill:	  rgba(249, 246, 241,1)
+    parking_fill:                   rgba(249, 246, 241,1)
+    urbanization_fill:              rgba(217, 196, 165,1)
+    winter_sports_area_fill:      	rgba(236, 235, 232,1)
+    tourism_area_fill:            	rgba(249, 246, 241,1)
+
+    # BOUNDARIES
+    region_boundary_fill:	          rgba(153, 153, 153,1)
+    city_wall_fill:	                rgba(217, 196, 165,1)
+
+
+    ####### ALL SHOW/HIDE VARIABLES #######
+
+    show_transit:                   false                # public transit visibility
+    show_3d_buildings:              false                # 3D building visibility
+    show_special_areas:             true                 # show commercial, retail, pedestrian areas
+    show_parking_areas:             true                 # show parking areas
+
+
+# CAMERA OPTIONS (IF 3D BUILDINGS ARE ON)
+
+cameras:
+    master:
+        type: perspective           # choose between perspective, isometric, or flat
+
+textures:
+    pois:
+        url: https://cdn.mapfit.com/v2-2/themes/images/refill@2x.png
