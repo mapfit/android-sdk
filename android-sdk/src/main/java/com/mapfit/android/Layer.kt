@@ -17,7 +17,6 @@ class Layer {
 
     private val maps = mutableListOf<MapController>()
 
-
     var visibility = true
         set(value) {
             if (field != value) {

@@ -13,7 +13,7 @@ import com.mapfit.android.geometry.LatLngBounds
 class Polyline(
     internal val context: Context,
     private val polylineId: Long,
-    polylineOptions: PolylineOptions,
+    private val polylineOptions: PolylineOptions,
     mapController: MapController
 ) : Annotation(polylineId, mapController), PolyFeature {
 
@@ -101,19 +101,7 @@ class Polyline(
 
     private fun refreshPolyline() {
         mapBindings.forEach {
-            it.key.removePolyline(it.value)
-
-            it.key.addPolyline(
-                PolylineOptions()
-                    .points(points)
-                    .strokeWidth(strokeWidth)
-                    .strokeColor(strokeColor)
-                    .drawOrder(drawOrder)
-                    .strokeOutlineColor(strokeOutlineColor)
-                    .strokeOutlineWidth(strokeOutlineWidth)
-                    .lineCapType(lineCapType)
-                    .lineJoinType(lineJoinType)
-            )
+            it.key.refreshAnnotation(this)
         }
     }
 
@@ -161,6 +149,8 @@ class Polyline(
 
         return getStringMapAsArray(properties)
     }
+
+    override fun getLayerName() = polylineOptions.layerName
 
 }
 

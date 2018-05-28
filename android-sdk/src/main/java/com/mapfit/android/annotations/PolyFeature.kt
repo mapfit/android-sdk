@@ -7,6 +7,8 @@ internal interface PolyFeature {
 
     fun getProperties(idForMap: String): Array<String?>
 
+    fun getLayerName(): String
+
     fun getStringMapAsArray(properties: Map<String, String>): Array<String?> {
         val out = arrayOfNulls<String>(properties.size * 2)
         var i = 0

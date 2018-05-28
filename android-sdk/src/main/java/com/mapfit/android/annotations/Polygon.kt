@@ -15,7 +15,7 @@ import com.mapfit.android.geometry.LatLngBounds
 class Polygon(
     internal val context: Context,
     polygonId: Long,
-    polygonOptions: PolygonOptions,
+    private val polygonOptions: PolygonOptions,
     mapController: MapController
 ) : Annotation(polygonId, mapController), PolyFeature {
 
@@ -114,20 +114,7 @@ class Polygon(
 
     private fun refreshPolygon() {
         mapBindings.forEach {
-            it.key.removePolygon(it.value)
-
-            it.key.addPolygon(
-                PolygonOptions()
-                    .points(points)
-                    .fillColor(fillColor)
-                    .strokeWidth(strokeWidth)
-                    .strokeColor(strokeColor)
-                    .drawOrder(drawOrder)
-                    .strokeOutlineColor(strokeOutlineColor)
-                    .strokeOutlineWidth(strokeOutlineWidth)
-                    .lineJoinType(lineJoinType)
-            )
-
+            it.key.refreshAnnotation(this)
         }
     }
 
@@ -163,7 +150,7 @@ class Polygon(
         if (fillColor.isNotBlank()) properties["polygon_color"] = fillColor
         if (drawOrder != Int.MIN_VALUE) {
             properties["polygon_order"] = "$drawOrder"
-            properties["line_order"] = (drawOrder - 1).toString()
+            properties["line_order"] = (drawOrder + 1).toString()
         }
         if (strokeColor.isNotBlank()) properties["line_color"] = strokeColor
         if (strokeWidth != Int.MIN_VALUE) properties["line_width"] = strokeWidth.toString()
@@ -174,5 +161,7 @@ class Polygon(
 
         return getStringMapAsArray(properties)
     }
+
+    override fun getLayerName() = polygonOptions.layerName
 
 }

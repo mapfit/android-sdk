@@ -7,6 +7,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLSurfaceView.Renderer;
 import android.os.Handler;
 import android.support.annotation.Keep;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 
 import com.mapfit.android.annotations.Annotation;
@@ -1113,10 +1114,16 @@ public class MapController implements Renderer {
         return marker;
     }
 
-
     public Polyline addPolyline(PolylineOptions polylineOptions) {
         checkPointer(mapPointer);
-        MapData polylineData = addDataLayer(POLYLINE_LAYER_NAME);
+
+        String layerName = polylineOptions.getLayerName();
+
+        if (TextUtils.isEmpty(layerName)) {
+            layerName = POLYGON_LAYER_NAME;
+        }
+
+        MapData polylineData = addDataLayer(layerName);
 
         Polyline polyline = new Polyline(
                 mapView.getContext(),
@@ -1135,7 +1142,14 @@ public class MapController implements Renderer {
 
     public Polygon addPolygon(PolygonOptions polygonOptions) {
         checkPointer(mapPointer);
-        MapData polygonLayer = addDataLayer(POLYGON_LAYER_NAME);
+
+        String layerName = polygonOptions.getLayerName();
+
+        if (TextUtils.isEmpty(layerName)) {
+            layerName = POLYGON_LAYER_NAME;
+        }
+
+        MapData polygonLayer = addDataLayer(layerName);
 
         Polygon poly = new Polygon(
                 mapView.getContext(),
@@ -1161,13 +1175,25 @@ public class MapController implements Renderer {
             return markerId;
 
         } else if (annotation instanceof Polyline) {
-            MapData lineLayer = addDataLayer(POLYLINE_LAYER_NAME);
+            String layerName = ((Polyline) annotation).getLayerName();
+
+            if (TextUtils.isEmpty(layerName)) {
+                layerName = POLYLINE_LAYER_NAME;
+            }
+
+            MapData lineLayer = addDataLayer(layerName);
             lineLayer.addPolyline((Polyline) annotation);
             polylines.put(lineLayer.getId(), (Polyline) annotation);
             return lineLayer.getId();
 
         } else if (annotation instanceof Polygon) {
-            MapData polygonLayer = addDataLayer(POLYGON_LAYER_NAME);
+            String layerName = ((Polygon) annotation).getLayerName();
+
+            if (TextUtils.isEmpty(layerName)) {
+                layerName = POLYGON_LAYER_NAME;
+            }
+
+            MapData polygonLayer = addDataLayer(layerName);
             polygonLayer.addPolygon((Polygon) annotation);
             polygons.put(polygonLayer.getId(), (Polygon) annotation);
             return polygonLayer.getId();
@@ -1225,14 +1251,19 @@ public class MapController implements Renderer {
         }
     }
 
-
     private void hideTileSource(long polylineId) {
         nativeRemoveTileSource(mapPointer, polylineId);
     }
 
     private void showPolyline(long polylineId) {
         Polyline polyline = polylines.get(polylineId);
-        MapData polylineData = addDataLayer(POLYLINE_LAYER_NAME);
+
+        String layerName = polyline.getLayerName();
+        if (TextUtils.isEmpty(layerName)) {
+            layerName = POLYLINE_LAYER_NAME;
+        }
+
+        MapData polylineData = addDataLayer(layerName);
         polylineData.addPolyline(polyline);
         polylines.remove(polylineId);
         polylines.put(polylineData.getId(), polyline);
@@ -1240,7 +1271,13 @@ public class MapController implements Renderer {
 
     private void showPolygon(long polygonId) {
         Polygon polygon = polygons.get(polygonId);
-        MapData polygonData = addDataLayer(POLYGON_LAYER_NAME);
+
+        String layerName = polygon.getLayerName();
+        if (TextUtils.isEmpty(layerName)) {
+            layerName = POLYGON_LAYER_NAME;
+        }
+
+        MapData polygonData = addDataLayer(layerName);
         polygonData.addPolygon(polygon);
         polygons.remove(polygonId);
         polygons.put(polygonData.getId(), polygon);
@@ -1261,7 +1298,6 @@ public class MapController implements Renderer {
         checkPointer(mapPointer);
         nativeMarkerRemoveAll(mapPointer);
     }
-
 
     protected void reAddMarkers() {
         HashMap<Long, Marker> tempMarkers = new HashMap<>();

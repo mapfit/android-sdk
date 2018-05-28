@@ -8,7 +8,7 @@ class PolygonOptions : PolyPointAnnotationOptions<PolygonOptions>() {
     internal var fillColor: String = ""
 
     init {
-        drawOrder = 501
+        drawOrder = 502
     }
 
     /**

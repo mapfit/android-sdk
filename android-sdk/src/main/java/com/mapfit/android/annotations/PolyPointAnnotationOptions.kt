@@ -13,6 +13,7 @@ abstract class PolyPointAnnotationOptions<out T> {
     internal var lineJoinType: JoinType = JoinType.MITER
     internal var drawOrder: Int = Integer.MIN_VALUE
     internal var tag: Any? = null
+    var layerName: String = ""
 
     /**
      * Sets stroke width of the line.
@@ -54,7 +55,6 @@ abstract class PolyPointAnnotationOptions<out T> {
         return this as T
     }
 
-
     /**
      * Sets the shape type of the joints in multi-segment lines.
      *
@@ -84,6 +84,16 @@ abstract class PolyPointAnnotationOptions<out T> {
      */
     fun tag(tag: Any): T {
         this.tag = tag
+        return this as T
+    }
+
+    /**
+     * Sets the poly shape style with the style name that should existing in the YAML file.
+     *
+     * @param layerName
+     */
+    fun layerName(layerName: String): T {
+        this.layerName = layerName
         return this as T
     }
 
