@@ -12,7 +12,7 @@
 /mapfit-gl/
 /sample/src/main/java/com/mapfit/demo/LabActivity.kt
 /sample/src/main/java/com/mapfit/demo/LabJavaActivity.java
-android-sdk/src/debug/res/values/
+android-sdk/src/debug/
 appcompat-v7/
 gradle/gradle-wrapper.properties
 mapfit_local.properties
