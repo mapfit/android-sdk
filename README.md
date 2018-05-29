@@ -44,7 +44,7 @@ Mapfit.getInstance(context, YOUR_API_KEY)
 
 #### Java
 ```java
-Mapfit.getInstance(this, YOUR_API_KEY);
+Mapfit.getInstance(context, YOUR_API_KEY);
 ```
 
 ## Setup MapView and add your first Marker
