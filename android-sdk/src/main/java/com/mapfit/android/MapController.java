@@ -288,9 +288,6 @@ public class MapController implements Renderer {
         if (mapPointer <= 0) {
             throw new RuntimeException("Unable to create a native Map object! There may be insufficient memory available.");
         }
-
-//        setSimultaneousGestureAllowed(Gestures.SCALE, Gestures.ROTATE, true);
-//        setSimultaneousGestureAllowed(Gestures.SCALE, Gestures.SHOVE, true);
     }
 
     private static final String POLYGON_LAYER_NAME = "mz_default_polygon";
@@ -357,8 +354,6 @@ public class MapController implements Renderer {
         String[] updateStrings = bundleSceneUpdates(sceneUpdates);
         checkPointer(mapPointer);
         int sceneId = nativeLoadScene(mapPointer, path, updateStrings);
-        removeAllMarkers();
-        requestRender();
         return sceneId;
     }
 
@@ -377,8 +372,6 @@ public class MapController implements Renderer {
         String[] updateStrings = bundleSceneUpdates(sceneUpdates);
         checkPointer(mapPointer);
         int sceneId = nativeLoadSceneAsync(mapPointer, path, updateStrings);
-        removeAllMarkers();
-        requestRender();
         return sceneId;
     }
 
@@ -397,8 +390,6 @@ public class MapController implements Renderer {
         String[] updateStrings = bundleSceneUpdates(sceneUpdates);
         checkPointer(mapPointer);
         int sceneId = nativeLoadSceneYaml(mapPointer, yaml, resourceRoot, updateStrings);
-        removeAllMarkers();
-        requestRender();
         return sceneId;
     }
 
@@ -417,8 +408,6 @@ public class MapController implements Renderer {
         String[] updateStrings = bundleSceneUpdates(sceneUpdates);
         checkPointer(mapPointer);
         int sceneId = nativeLoadSceneYamlAsync(mapPointer, yaml, resourceRoot, updateStrings);
-        removeAllMarkers();
-        requestRender();
         return sceneId;
     }
 
@@ -437,11 +426,7 @@ public class MapController implements Renderer {
         if (sceneUpdates == null || sceneUpdates.size() == 0) {
             throw new IllegalArgumentException("sceneUpdates can not be null or empty in queueSceneUpdates");
         }
-
-        removeAllMarkers();
-
         String[] updateStrings = bundleSceneUpdates(sceneUpdates);
-
         return nativeUpdateScene(mapPointer, updateStrings);
     }
 
@@ -1299,14 +1284,16 @@ public class MapController implements Renderer {
         nativeMarkerRemoveAll(mapPointer);
     }
 
-    protected void reAddMarkers() {
-        HashMap<Long, Marker> tempMarkers = new HashMap<>();
-        for (Marker marker : markers.values()) {
-            long markerId = nativeMarkerAdd(mapPointer);
-            marker.initAnnotation(this, markerId);
-            tempMarkers.put(markerId, marker);
+    private void reAddMarkers() {
+        if (markers.size() > 0) {
+            HashMap<Long, Marker> tempMarkers = new HashMap<>();
+            for (Marker marker : markers.values()) {
+                long markerId = nativeMarkerAdd(mapPointer);
+                marker.initAnnotation(this, markerId);
+                tempMarkers.put(markerId, marker);
+            }
+            markers = tempMarkers;
         }
-        markers = tempMarkers;
     }
 
     /**
@@ -1783,10 +1770,14 @@ public class MapController implements Renderer {
     @Keep
     public void sceneReadyCallback(final int sceneId, final SceneError error) {
         final SceneLoadListener cb = sceneLoadListener;
+
         if (cb != null) {
             uiThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    // re-adding markers to the new scene.
+                    reAddMarkers();
+
                     cb.onSceneReady(sceneId, error);
                 }
             });
