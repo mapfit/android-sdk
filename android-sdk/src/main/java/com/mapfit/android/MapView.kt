@@ -245,7 +245,6 @@ class MapView(
             setAnnotationClickListener(onAnnotationClickListener)
 
             setSceneLoadListener { _, sceneError ->
-                //                mapController.reAddMarkers()
 
                 if (!sceneUpdateFlag) {
                     onMapReadyCallback.onMapReady(mapfitMap)
