@@ -31,6 +31,7 @@ import com.mapfit.tetragon.CachePolicy
 import com.mapfit.tetragon.ConfigChooser
 import com.mapfit.tetragon.HttpHandler
 import com.mapfit.tetragon.TouchInput
+import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
 import okhttp3.CacheControl
@@ -39,7 +40,6 @@ import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.TestOnly
 import java.io.File
 import java.util.concurrent.TimeUnit
-import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
 
 
 /**
@@ -90,8 +90,8 @@ class MapView(
     internal var placeInfoAdapter: MapfitMap.PlaceInfoAdapter? = null
     internal var onPlaceInfoClickListener: MapfitMap.OnPlaceInfoClickListener? = null
 
-    internal var viewHeight: Int? = null
     internal var viewWidth: Int? = null
+    internal var viewHeight: Int? = null
 
     internal var activePlaceInfo: PlaceInfo? = null
     private var placeInfoRemoveJob = Job()
@@ -106,11 +106,6 @@ class MapView(
         Mapfit.getApiKey()
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
-
-        post {
-            viewHeight = height
-            viewWidth = width
-        }
     }
 
     @JvmOverloads
@@ -250,7 +245,6 @@ class MapView(
             setAnnotationClickListener(onAnnotationClickListener)
 
             setSceneLoadListener { _, sceneError ->
-//                mapController.reAddMarkers()
 
                 if (!sceneUpdateFlag) {
                     onMapReadyCallback.onMapReady(mapfitMap)
@@ -616,5 +610,11 @@ class MapView(
 
     @TestOnly
     internal fun getScreenPosition(latLng: LatLng) = mapController.latLngToScreenPosition(latLng)
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        viewHeight = h
+        viewWidth = w
+    }
 
 }

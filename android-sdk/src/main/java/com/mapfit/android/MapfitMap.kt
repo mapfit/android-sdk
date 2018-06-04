@@ -32,7 +32,10 @@ class MapfitMap internal constructor(
      * @param duration for centering animation
      */
     @JvmOverloads
-    fun setCenter(latLng: LatLng, duration: Long = 0) {
+    fun setCenter(
+        latLng: LatLng,
+        duration: Long = 0
+    ) {
         when (duration) {
             0L -> mapController.position = latLng
             else -> mapController.setPositionEased(
@@ -54,6 +57,29 @@ class MapfitMap internal constructor(
     fun setCenterWithLayer(layer: Layer) {
         mapController.position = layer.getLatLngBounds().center
         mapView.updatePlaceInfoPosition(true)
+    }
+
+    /**
+     * Sets the map center to the input coordinate with given offsets.
+     *
+     * @param latLng coordinate
+     * @param offsetX x axis offset in pixels
+     * @param offsetY y xis offset in pixels
+     * @param duration for the animation
+     */
+    @JvmOverloads
+    fun setCenterWithOffset(
+        latLng: LatLng,
+        offsetX: Int = 0,
+        offsetY: Int = 0,
+        duration: Long = 0
+    ) {
+        val screenPosition = latLngToScreenPosition(latLng)
+
+        val centerX = screenPosition.x.plus(offsetX)
+        val centerY = screenPosition.y.plus(offsetY)
+
+        setCenter(screenPositionToLatLng(PointF(centerX, centerY)), duration)
     }
 
     /**
@@ -385,7 +411,8 @@ class MapfitMap internal constructor(
      * @param pointF screen position
      * @return [LatLng]
      */
-    fun screenPositionToLatLng(pointF: PointF): LatLng = mapController.screenPositionToLatLng(pointF)
+    fun screenPositionToLatLng(pointF: PointF): LatLng =
+        mapController.screenPositionToLatLng(pointF)
 
     /**
      * Returns the screen position for the given [LatLng] coordinate.
@@ -393,7 +420,8 @@ class MapfitMap internal constructor(
      * @param latLng coordinate
      * @return [PointF]
      */
-    fun latLngToScreenPosition(latLng: LatLng): PointF = mapController.latLngToScreenPosition(latLng)
+    fun latLngToScreenPosition(latLng: LatLng): PointF =
+        mapController.latLngToScreenPosition(latLng)
 
     /**
      * Interface to be used to set custom view for Place Info.

@@ -118,6 +118,20 @@ class MapViewTest {
 
     @Test
     @UiThreadTest
+    fun testSetCenterWithOffset() = runBlocking {
+        mapfitMap.setCenterWithOffset(latLng, 300, 300)
+
+        delay(1000)
+
+        val expectedCenter = LatLng(5.5425180, 113.0572059)
+        val actualCenter = mapfitMap.getCenter() ?: LatLng()
+
+        Assert.assertEquals(expectedCenter.lat, actualCenter.lat, 0.00005)
+        Assert.assertEquals(expectedCenter.lng, actualCenter.lng, 0.00005)
+    }
+
+    @Test
+    @UiThreadTest
     fun testSetTilt() {
         val tilt = 64f
         mapfitMap.setTilt(tilt)

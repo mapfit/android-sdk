@@ -110,8 +110,8 @@ class MapOptions internal constructor(
         set(value) {
             if (field == null || field != value) {
                 value?.let { loadScene(value) }
-                field = value
             }
+            field = value
         }
 
     var customTheme: String? = null
@@ -122,6 +122,7 @@ class MapOptions internal constructor(
             } else {
                 mapController.loadSceneFile(value)
             }
+            theme = null
             field = value
         }
 

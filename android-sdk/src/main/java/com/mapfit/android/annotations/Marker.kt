@@ -250,8 +250,6 @@ class Marker internal constructor(
         mapController: MapController? = null,
         markerId: Long = 0
     ) {
-
-
         val width = bitmap.getScaledWidth(density)
         val height = bitmap.getScaledHeight(density)
 
@@ -499,13 +497,13 @@ class Marker internal constructor(
             object : GeocoderCallback {
                 override fun onSuccess(addressList: List<Address>) {
                     if (addressList.isEmpty()) {
-                        callback?.onError(IOException("No address is found."))
+                        callback?.onError(Exception("No address is found."))
 
                     } else {
                         val latLng = addressList.first().getPrimaryEntrance()
 
                         if (latLng.isEmpty()) {
-                            callback?.onError(IOException("No entrance found for given address."))
+                            callback?.onError(Exception("No entrance found for given address."))
 
                         } else {
                             position = latLng
