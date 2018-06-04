@@ -8,3 +8,5 @@
 .externalNativeBuild
 /mapfit-gl/
 mapfit_local.properties
+sample/src/main/java/com/mapfit/demo/LabActivity.kt
+mapfit-gl
