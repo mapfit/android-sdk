@@ -218,13 +218,13 @@ class MapfitMap internal constructor(
      * bounding box.
      *
      * @param bounds
-     * @param padding between map and bounds as percentage. For 10% padding, you can pass 0.9f
+     * @param padding between map and bounds as percentage. For 10% padding, you can pass 0.1f
      * @param duration of the centering and zooming animation
      */
     @JvmOverloads
     fun setLatLngBounds(
         bounds: LatLngBounds,
-        padding: Float = 1f,
+        padding: Float = 0f,
         duration: Long = 0
     ) {
         mapController.setLatLngBounds(bounds, padding, duration)
