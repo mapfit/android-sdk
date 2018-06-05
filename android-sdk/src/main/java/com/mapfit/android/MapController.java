@@ -491,7 +491,7 @@ public class MapController implements Renderer {
         nativeSetPositionEased(mapPointer, position.getLng(), position.getLat(), seconds, ease.ordinal());
     }
 
-    public void setLatLngBounds(final LatLngBounds latlngBounds, final float padding) {
+    public void setLatLngBounds(final LatLngBounds latlngBounds, final float padding, final long duration) {
         mapView.post(new Runnable() {
             @Override
             public void run() {
@@ -499,8 +499,14 @@ public class MapController implements Renderer {
                         mapView.getWidth(),
                         mapView.getHeight(),
                         padding);
-                setZoom(pair.component2());
-                setPosition(pair.component1());
+
+                if (duration <= 0) {
+                    setZoom(pair.component2());
+                    setPosition(pair.component1());
+                } else {
+                    setZoomEased(pair.component2(), (int) duration);
+                    setPositionEased(pair.component1(), (int) duration);
+                }
             }
         });
     }
