@@ -41,6 +41,18 @@ class MapViewTestActivity : AppCompatActivity() {
         })
     }
 
+    fun initWithCustomYaml() {
+        idlingResource.increment()
+        mapView.getMapAsync(
+            "https://cdn.mapfit.com/v2-3/themes/mapfit-night.yaml",
+            onMapReadyCallback = object : OnMapReadyCallback {
+                override fun onMapReady(mapfitMap: MapfitMap) {
+                    this@MapViewTestActivity.mapfitMap = mapfitMap
+                    idlingResource.decrement()
+                }
+            })
+    }
+
     val onMapPinchListener = object : OnMapPinchListener {
         override fun onMapPinch() {
             idlingResource.decrement()
