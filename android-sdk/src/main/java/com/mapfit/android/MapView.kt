@@ -108,14 +108,97 @@ class MapView(
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
     }
 
+    /**
+     * Instantiates the MapView and the controller asynchronously and returns the [MapfitMap]
+     * to the given callback. This method must be invoked to display the map.
+     *
+     * @param mapTheme
+     * @param onMapReadyCallback
+     */
     @JvmOverloads
-    fun getMapAsync(mapTheme: MapTheme = MapTheme.MAPFIT_DAY, @NotNull onMapReadyCallback: OnMapReadyCallback) {
+    fun getMapAsync(
+        mapTheme: MapTheme = MapTheme.MAPFIT_DAY,
+        @NotNull onMapReadyCallback: OnMapReadyCallback
+    ) {
+        initMapAsync(mapTheme = mapTheme, onMapReadyCallback = onMapReadyCallback)
+    }
+
+    /**
+     * Instantiates the MapView and the controller asynchronously and returns the [MapfitMap]
+     * to the given callback. This method must be invoked to display the map.
+     *
+     * @param customTheme url or file path of the yaml file
+     */
+    fun getMapAsync(customTheme: String, @NotNull onMapReadyCallback: OnMapReadyCallback) {
+        initMapAsync(customTheme = customTheme, onMapReadyCallback = onMapReadyCallback)
+    }
+
+    private fun initMapAsync(
+        customTheme: String = "",
+        mapTheme: MapTheme = MapTheme.MAPFIT_DAY,
+        @NotNull onMapReadyCallback: OnMapReadyCallback
+    ) {
         if (::mapController.isInitialized) {
             onMapReadyCallback.onMapReady(mapfitMap)
         }
 
-        initMapController(mapTheme, onMapReadyCallback)
+        initMapController(customTheme, mapTheme, onMapReadyCallback)
         initUiControls()
+    }
+
+    private fun initMapController(
+        customTheme: String = "",
+        mapTheme: MapTheme,
+        onMapReadyCallback: OnMapReadyCallback
+    ) {
+        mapController = MapController(getGLSurfaceView())
+
+        mapfitMap = MapfitMap(
+            this,
+            mapController
+        )
+
+        mapController.apply {
+            setHttpHandler(getHttpHandler())
+
+            init()
+
+            setTapResponder(singleTapResponder())
+            setDoubleTapResponder(doubleTapResponder())
+            setLongPressResponder(longClickResponder())
+            setPanResponder(panResponder())
+            setShoveResponder(shoveResponder())
+            setScaleResponder(scaleResponder())
+            setRotateResponder(rotateResponder())
+
+            setAnnotationClickListener(onAnnotationClickListener)
+
+            setSceneLoadListener { _, sceneError ->
+
+                if (!sceneUpdateFlag) {
+                    onMapReadyCallback.onMapReady(mapfitMap)
+                    sceneUpdateFlag = true
+                }
+
+                mapThemeLoadListener?.let {
+                    if (sceneError == null) {
+                        it.onLoaded()
+                    } else {
+                        it.onError()
+                    }
+                }
+            }
+
+            mapOptions = MapOptions(this@MapView, this)
+            directionsOptions = DirectionsOptions(this)
+
+            if (customTheme.isBlank()) {
+                mapOptions.theme = mapTheme
+            } else {
+                mapOptions.customTheme = customTheme
+            }
+
+        }
     }
 
     private fun initUiControls() {
@@ -221,51 +304,6 @@ class MapView(
         reCentered = recenter
     }
 
-    private fun initMapController(mapTheme: MapTheme, onMapReadyCallback: OnMapReadyCallback) {
-        mapController = MapController(getGLSurfaceView())
-
-        mapfitMap = MapfitMap(
-            this,
-            mapController
-        )
-
-        mapController.apply {
-            setHttpHandler(getHttpHandler())
-
-            init()
-
-            setTapResponder(singleTapResponder())
-            setDoubleTapResponder(doubleTapResponder())
-            setLongPressResponder(longClickResponder())
-            setPanResponder(panResponder())
-            setShoveResponder(shoveResponder())
-            setScaleResponder(scaleResponder())
-            setRotateResponder(rotateResponder())
-
-            setAnnotationClickListener(onAnnotationClickListener)
-
-            setSceneLoadListener { _, sceneError ->
-
-                if (!sceneUpdateFlag) {
-                    onMapReadyCallback.onMapReady(mapfitMap)
-                    sceneUpdateFlag = true
-                }
-
-                mapThemeLoadListener?.let {
-                    if (sceneError == null) {
-                        it.onLoaded()
-                    } else {
-                        it.onError()
-                    }
-                }
-            }
-
-            mapOptions = MapOptions(this@MapView, this)
-            directionsOptions = DirectionsOptions(this)
-            mapOptions.theme = mapTheme
-
-        }
-    }
 
     private val onAnnotationClickListener = object : OnAnnotationClickListener {
         override fun onAnnotationClicked(annotation: Annotation) {
