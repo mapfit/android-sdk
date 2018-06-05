@@ -58,7 +58,7 @@ class MapViewUiControlsTest {
             mapView = activityRule.activity.mapView
         })
 
-        activityRule.activity.init()
+        activityRule.activity.initWithCustomYaml()
     }
 
     @After
