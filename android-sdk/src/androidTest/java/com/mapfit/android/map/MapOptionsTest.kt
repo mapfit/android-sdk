@@ -2,8 +2,11 @@ package com.mapfit.android.map
 
 import android.location.Location
 import android.support.test.annotation.UiThreadTest
+import android.support.test.espresso.Espresso
 import android.support.test.espresso.IdlingRegistry
+import android.support.test.espresso.action.ViewActions
 import android.support.test.espresso.idling.CountingIdlingResource
+import android.support.test.espresso.matcher.ViewMatchers
 import android.support.test.filters.LargeTest
 import android.support.test.rule.ActivityTestRule
 import android.support.test.rule.GrantPermissionRule
@@ -21,8 +24,7 @@ import org.junit.*
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.never
-import org.mockito.Mockito.only
+import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
 
 
@@ -44,6 +46,13 @@ class MapOptionsTest {
 
     @Mock
     private lateinit var onMapThemeLoadListener: OnMapThemeLoadListener
+
+    @Mock
+    private lateinit var onMapPanListener: OnMapPanListener
+
+    @Mock
+    private lateinit var onMapPinchListener: OnMapPinchListener
+
 
     @Rule
     @JvmField
@@ -72,6 +81,8 @@ class MapOptionsTest {
             mapfitMap = activityRule.activity.mapfitMap
             mapView = activityRule.activity.mapView
             mapfitMap.setOnMapThemeLoadListener(onMapThemeLoadListener)
+            mapfitMap.setOnMapPinchListener(onMapPinchListener)
+            mapfitMap.setOnMapPanListener(onMapPanListener)
         })
 
         activityRule.activity.init()
@@ -164,7 +175,6 @@ class MapOptionsTest {
         Mockito.verify(onMapThemeLoadListener, never()).onError()
     }
 
-
     @Test
     @UiThreadTest
     fun testSceneUpdate() = runBlocking {
@@ -176,6 +186,42 @@ class MapOptionsTest {
 
         Mockito.verify(onMapThemeLoadListener, only()).onLoaded()
         Mockito.verify(onMapThemeLoadListener, never()).onError()
+    }
+
+    @Test
+    fun testGestures() = runBlocking {
+        delay(500)
+
+        Assert.assertTrue(mapfitMap.getMapOptions().panEnabled)
+        Assert.assertTrue(mapfitMap.getMapOptions().rotateEnabled)
+        Assert.assertTrue(mapfitMap.getMapOptions().pinchEnabled)
+        Assert.assertTrue(mapfitMap.getMapOptions().tiltEnabled)
+
+        mapfitMap.getMapOptions().gesturesEnabled = false
+        Assert.assertFalse(mapfitMap.getMapOptions().panEnabled)
+        Assert.assertFalse(mapfitMap.getMapOptions().rotateEnabled)
+        Assert.assertFalse(mapfitMap.getMapOptions().pinchEnabled)
+        Assert.assertFalse(mapfitMap.getMapOptions().tiltEnabled)
+
+        Espresso.onView(ViewMatchers.withId(R.id.glSurface)).perform(ViewActions.swipeDown())
+        Espresso.onView(ViewMatchers.withId(R.id.glSurface)).perform(pinchIn())
+        delay(300)
+
+        Mockito.verify(onMapPanListener, never()).onMapPan()
+        Mockito.verify(onMapPinchListener, never()).onMapPinch()
+
+        mapfitMap.getMapOptions().gesturesEnabled = true
+        Assert.assertTrue(mapfitMap.getMapOptions().panEnabled)
+        Assert.assertTrue(mapfitMap.getMapOptions().rotateEnabled)
+        Assert.assertTrue(mapfitMap.getMapOptions().pinchEnabled)
+        Assert.assertTrue(mapfitMap.getMapOptions().tiltEnabled)
+
+        Espresso.onView(ViewMatchers.withId(R.id.glSurface)).perform(ViewActions.swipeDown())
+        Espresso.onView(ViewMatchers.withId(R.id.glSurface)).perform(pinchIn())
+        delay(300)
+
+        Mockito.verify(onMapPanListener, atLeastOnce()).onMapPan()
+        Mockito.verify(onMapPinchListener, atLeastOnce()).onMapPinch()
     }
 
 
