@@ -169,6 +169,15 @@ class MapOptions internal constructor(
             field = value
         }
 
+    var gesturesEnabled = true
+        set(value) {
+            panEnabled = value
+            pinchEnabled = value
+            rotateEnabled = value
+            tiltEnabled = value
+            field = value
+        }
+
     var panEnabled = true
         set(value) {
             mapController.touchInput.panEnabled = value
@@ -465,16 +474,15 @@ class MapOptions internal constructor(
         )
     }
 
-    enum class CameraType {
-        PERSPECTIVE,
-        ISOMETRIC,
-        FLAT
-    }
-
     companion object {
         const val MAP_MIN_ZOOM = 1.0
         const val MAP_MAX_ZOOM = 20.0
     }
 
+    enum class CameraType {
+        PERSPECTIVE,
+        ISOMETRIC,
+        FLAT
+    }
 
 }
