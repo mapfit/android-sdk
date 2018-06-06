@@ -2,9 +2,7 @@
 
 package com.mapfit.android.geometry
 
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
+import android.graphics.PointF
 
 
 /**
@@ -71,21 +69,43 @@ fun midPoint(first: LatLng, second: LatLng): LatLng {
 }
 
 /**
- * Calculates and returns earth radius for given latitude.
+ * Calculates and returns the screen position for the LatLng value.
  *
- * @param lat
- * @return earth radius
+ * @param zoomLevel
  */
-fun getEarthRadiusForLat(lat: Double): Double {
-    val a = 6378137.0 // semi major radius
-    val b = 6356752.314245 // semi minor radius
+fun LatLng.toPointF(zoomLevel: Float): PointF {
+    val worldWidth = toWorldWidthPixels(zoomLevel)
 
-    val an = sqrt(a) * cos(lat)
-    val bn = sqrt(b) * sin(lat)
-    val ad = a * cos(lat)
-    val bd = b * sin(lat)
+    val x = lng / 360 + .5
+    val siny = Math.sin(Math.toRadians(lat))
+    val y = 0.5 * Math.log((1 + siny) / (1 - siny)) / -(2 * Math.PI) + .5
 
-    return sqrt(sqrt(an) + sqrt(bn) / (sqrt(ad) + sqrt(bd)))
+    return PointF((x * worldWidth).toFloat(), (y * worldWidth).toFloat())
 }
+
+/**
+ * Calculates and returns the LatLng value for the screen position.
+ *
+ * @param zoomLevel
+ */
+fun PointF.toLatLng(zoomLevel: Float): LatLng {
+    val worldWidth = toWorldWidthPixels(zoomLevel)
+
+    val x = x / worldWidth - 0.5
+    val lng = x * 360
+
+    val y = .5 - y / worldWidth
+    val lat = 90 - Math.toDegrees(Math.atan(Math.exp(-y * 2.0 * Math.PI)) * 2)
+
+    return LatLng(lat, lng)
+}
+
+/**
+ * Calculates world width for the given zoom level.
+ *
+ * @param zoomLevel
+ */
+fun toWorldWidthPixels(zoomLevel: Float) = (256 * Math.pow(2.0, zoomLevel.toDouble())).toFloat()
+
 
 

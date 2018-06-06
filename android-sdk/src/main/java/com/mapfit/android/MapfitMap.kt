@@ -1,7 +1,7 @@
 package com.mapfit.android
 
+import android.content.res.Resources
 import android.graphics.PointF
-import android.support.annotation.FloatRange
 import android.support.annotation.RestrictTo
 import android.view.View
 import com.mapfit.android.annotations.*
@@ -12,6 +12,8 @@ import com.mapfit.android.annotations.callback.OnPolygonClickListener
 import com.mapfit.android.annotations.callback.OnPolylineClickListener
 import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.geometry.LatLngBounds
+import com.mapfit.android.geometry.toLatLng
+import com.mapfit.android.geometry.toPointF
 import org.jetbrains.annotations.TestOnly
 
 
@@ -70,16 +72,20 @@ class MapfitMap internal constructor(
     @JvmOverloads
     fun setCenterWithOffset(
         latLng: LatLng,
-        offsetX: Int = 0,
-        offsetY: Int = 0,
+        offsetX: Float = 0f,
+        offsetY: Float = 0f,
         duration: Long = 0
     ) {
-        val screenPosition = latLngToScreenPosition(latLng)
+        val screenPosition = latLng.toPointF(mapController.zoom)
 
-        val centerX = screenPosition.x.plus(offsetX)
-        val centerY = screenPosition.y.plus(offsetY)
+        screenPosition.offset(
+            offsetX / (Resources.getSystem()?.displayMetrics?.density ?: 1f),
+            offsetY / (Resources.getSystem()?.displayMetrics?.density ?: 1f)
+        )
 
-        setCenter(screenPositionToLatLng(PointF(centerX, centerY)), duration)
+        val geoPosition = screenPosition.toLatLng(mapController.zoom)
+
+        setCenter(geoPosition, duration)
     }
 
     /**
