@@ -3,7 +3,6 @@ package com.mapfit.android
 import android.animation.Animator
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.PointF
 import android.net.Uri
@@ -25,12 +24,10 @@ import com.mapfit.android.annotations.callback.OnPolygonClickListener
 import com.mapfit.android.annotations.callback.OnPolylineClickListener
 import com.mapfit.android.annotations.widget.PlaceInfo
 import com.mapfit.android.geometry.LatLng
+import com.mapfit.android.geometry.toLatLng
 import com.mapfit.android.utils.logWarning
 import com.mapfit.android.utils.startActivitySafe
-import com.mapfit.tetragon.CachePolicy
-import com.mapfit.tetragon.ConfigChooser
-import com.mapfit.tetragon.HttpHandler
-import com.mapfit.tetragon.TouchInput
+import com.mapfit.tetragon.*
 import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
@@ -173,24 +170,26 @@ class MapView(
 
             setAnnotationClickListener(onAnnotationClickListener)
 
-            setSceneLoadListener { _, sceneError ->
-
-                if (!sceneUpdateFlag) {
-                    onMapReadyCallback.onMapReady(mapfitMap)
-                    sceneUpdateFlag = true
-                }
-
-                mapThemeLoadListener?.let {
-                    if (sceneError == null) {
-                        it.onLoaded()
-                    } else {
-                        it.onError()
+            setSceneLoadListener(object : MapController.SceneLoadListener {
+                override fun onSceneReady(sceneId: Int, sceneError: SceneError?) {
+                    if (!sceneUpdateFlag) {
+                        onMapReadyCallback.onMapReady(mapfitMap)
+                        sceneUpdateFlag = true
                     }
-                }
-            }
 
-            mapOptions = MapOptions(this@MapView, this)
-            directionsOptions = DirectionsOptions(this)
+                    mapThemeLoadListener?.let {
+                        if (sceneError == null) {
+                            it.onLoaded()
+                        } else {
+                            it.onError()
+                        }
+                    }
+
+                }
+            })
+
+            mapOptions = MapOptions(this@MapView, mapController)
+            directionsOptions = DirectionsOptions(mapController)
 
             if (customTheme.isBlank()) {
                 mapOptions.theme = mapTheme
@@ -304,7 +303,6 @@ class MapView(
         reCentered = recenter
     }
 
-
     private val onAnnotationClickListener = object : OnAnnotationClickListener {
         override fun onAnnotationClicked(annotation: Annotation) {
             annotation.let {
@@ -323,7 +321,6 @@ class MapView(
             }
         }
     }
-
 
     private fun hideCompassButton(matrix: Matrix? = null) {
         launch(UI) {
@@ -357,11 +354,14 @@ class MapView(
     private var scaledMin = false
     private var max = false
     private var min = false
-
     private var scaleFlingJob = Job()
 
     private fun scaleResponder() = TouchInput.ScaleResponder { _, _, scale, _ ->
         var consumed = false
+
+        if (!::mapOptions.isInitialized) {
+            return@ScaleResponder consumed
+        }
 
         scaledMax = mapController.zoom * scale > mapOptions.getMaxZoom() // will exceed
         scaledMin = mapController.zoom * scale < mapOptions.getMinZoom() // will exceed
@@ -443,7 +443,7 @@ class MapView(
                 mapController.pickMarker(x, y)
                 mapController.pickFeature(x, y)
 
-                mapClickListener?.onMapClicked(mapController.screenPositionToLatLng(PointF(x, y)))
+                mapClickListener?.onMapClicked(PointF(x, y).toLatLng(mapController.zoom))
                 placeInfoRemoveJob = launch(UI) {
                     delay(20)
                     activePlaceInfo?.dispose()
@@ -590,7 +590,7 @@ class MapView(
     }
 
     @TestOnly
-    internal fun getMapSnap(callback: (bitmap: Bitmap) -> Unit) {
+    internal fun getMapSnap(callback: MapController.FrameCaptureCallback) {
         mapController.captureFrame(callback, true)
     }
 

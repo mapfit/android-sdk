@@ -21,7 +21,7 @@ import com.mapfit.android.directions.DirectionsCallback;
 import com.mapfit.android.directions.model.Leg;
 import com.mapfit.android.directions.model.Route;
 import com.mapfit.android.geometry.LatLng;
-import com.mapfit.android.utils.MapfitUtils;
+import com.mapfit.android.utils.PolyUtils;
 import com.mapfit.mapfitdemo.R;
 
 import org.jetbrains.annotations.NotNull;
@@ -94,7 +94,7 @@ public class JavaActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(@NotNull Route route) {
                         for (Leg leg : route.getTrip().getLegs()) {
-                            List<LatLng> points = MapfitUtils.decodePolyline(leg.getShape());
+                            List<LatLng> points = PolyUtils.decodePolyline(leg.getShape());
                             Polyline polyline = mapfitMap
                                     .addPolyline(new PolylineOptions()
                                             .points(points));

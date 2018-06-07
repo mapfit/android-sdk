@@ -118,9 +118,9 @@ class MapOptions internal constructor(
         set(value) {
             val isUrl = value?.let { Patterns.WEB_URL.matcher(it).matches() } ?: false
             if (isUrl) {
-                mapController.loadSceneFileAsync(value)
+                mapController.loadSceneFileAsync(value ?: "")
             } else {
-                mapController.loadSceneFile(value)
+                mapController.loadSceneFile(value ?: "")
             }
             theme = null
             field = value
