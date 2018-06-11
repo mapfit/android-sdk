@@ -207,7 +207,7 @@ public class MapController implements Renderer {
         requestRender();
     }
 
-    private Bitmap capture() {
+    public Bitmap capture() {
         int w = mapView.getWidth();
         int h = mapView.getHeight();
 
@@ -561,7 +561,7 @@ public class MapController implements Renderer {
      *
      * @return Zoom level; lower values show more area
      */
-    float getZoom() {
+    public float getZoom() {
         checkPointer(mapPointer);
         return nativeGetZoom(mapPointer);
     }
