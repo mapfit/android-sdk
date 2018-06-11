@@ -62,7 +62,9 @@ class MapfitMap internal constructor(
     }
 
     /**
-     * Sets the map center to the input coordinate with given offsets.
+     * Sets the map center to the input coordinate with given offsets. The calculations made use
+     * current zoom level. If you set zoom directly after calling setCenterWithOffset, center will
+     * be off.
      *
      * @param latLng coordinate
      * @param offsetX x axis offset in pixels
