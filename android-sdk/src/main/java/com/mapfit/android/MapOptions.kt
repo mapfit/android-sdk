@@ -7,7 +7,6 @@ import android.location.Location
 import android.support.annotation.FloatRange
 import android.support.annotation.RequiresPermission
 import android.support.v4.content.ContextCompat
-import android.util.Patterns
 import android.view.View
 import com.mapfit.android.MapView.Companion.ANIMATION_DURATION
 import com.mapfit.android.annotations.Anchor
@@ -116,12 +115,7 @@ class MapOptions internal constructor(
 
     var customTheme: String? = null
         set(value) {
-            val isUrl = value?.let { Patterns.WEB_URL.matcher(it).matches() } ?: false
-            if (isUrl) {
-                mapController.loadSceneFileAsync(value ?: "")
-            } else {
-                mapController.loadSceneFile(value ?: "")
-            }
+            mapController.loadSceneFileAsync(value ?: "")
             theme = null
             field = value
         }
@@ -237,7 +231,7 @@ class MapOptions internal constructor(
     }
 
     private fun loadScene(value: MapTheme) {
-        mapController.loadSceneFile(value.toString())
+        mapController.loadSceneFileAsync(value.toString())
         updateAttributionImage(value)
     }
 
@@ -281,7 +275,7 @@ class MapOptions internal constructor(
             }
         }
 
-        mapView.getAttributionImage().setImageResource(attributionImage)
+        mapView.attributionImage.setImageResource(attributionImage)
     }
 
     /**
