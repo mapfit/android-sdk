@@ -9,13 +9,13 @@ import android.net.Uri
 import android.opengl.GLSurfaceView
 import android.support.v7.app.AppCompatDelegate
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.RotateAnimation
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import com.mapfit.android.annotations.*
 import com.mapfit.android.annotations.Annotation
@@ -27,7 +27,10 @@ import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.geometry.toLatLng
 import com.mapfit.android.utils.logWarning
 import com.mapfit.android.utils.startActivitySafe
-import com.mapfit.tetragon.*
+import com.mapfit.tetragon.CachePolicy
+import com.mapfit.tetragon.ConfigChooser
+import com.mapfit.tetragon.HttpHandler
+import com.mapfit.tetragon.TouchInput
 import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
@@ -61,16 +64,18 @@ class MapView(
 
     // Views
     private val controlsView: View by lazy {
-        LayoutInflater.from(context).inflate(R.layout.mf_overlay_map_controls, this, false)
+        LayoutInflater.from(context).inflate(R.layout.mf_overlay_map_controls, null)
     }
-    private val placeInfoFrame = FrameLayout(context)
-    private val attributionImage: ImageView = controlsView.findViewById(R.id.imgAttribution)
     internal val zoomControlsView: RelativeLayout by lazy {
-        controlsView.findViewById<RelativeLayout>(R.id.zoomControls)
+        controlsView.findViewById<RelativeLayout>(
+            R.id.zoomControls
+        )
     }
-
-    @JvmSynthetic
-    internal fun getAttributionImage(): ImageView = attributionImage
+    internal val btnRecenter: ImageView by lazy { controlsView.findViewById<ImageView>(R.id.btnRecenter) }
+    internal val btnCompass: ImageView by lazy { controlsView.findViewById<ImageView>(R.id.btnCompass) }
+    internal val btnUserLocation: ImageView by lazy { controlsView.findViewById<ImageView>(R.id.btnUserLocation) }
+    internal val attributionImage: ImageView by lazy { controlsView.findViewById<ImageView>(R.id.imgAttribution) }
+    private val placeInfoFrame by lazy { FrameLayout(context) }
 
     internal val layers = mutableListOf<Layer>()
 
@@ -137,17 +142,18 @@ class MapView(
     ) {
         if (::mapController.isInitialized) {
             onMapReadyCallback.onMapReady(mapfitMap)
+        } else {
+            initMapController(customTheme, mapTheme, onMapReadyCallback)
+            initUiControls()
         }
-
-        initMapController(customTheme, mapTheme, onMapReadyCallback)
-        initUiControls()
     }
 
     private fun initMapController(
         customTheme: String = "",
-        mapTheme: MapTheme,
-        onMapReadyCallback: OnMapReadyCallback
-    ) {
+        mapTheme: MapTheme? = null,
+        onMapReadyCallback: OnMapReadyCallback? = null,
+        async: Boolean = true
+    ): MapfitMap {
         mapController = MapController(getGLSurfaceView())
 
         mapfitMap = MapfitMap(
@@ -170,34 +176,37 @@ class MapView(
 
             setAnnotationClickListener(onAnnotationClickListener)
 
-            setSceneLoadListener(object : MapController.SceneLoadListener {
-                override fun onSceneReady(sceneId: Int, sceneError: SceneError?) {
-                    if (!sceneUpdateFlag) {
-                        onMapReadyCallback.onMapReady(mapfitMap)
-                        sceneUpdateFlag = true
-                    }
-
-                    mapThemeLoadListener?.let {
-                        if (sceneError == null) {
-                            it.onLoaded()
-                        } else {
-                            it.onError()
-                        }
-                    }
-
+            setSceneLoadListener { _, sceneError ->
+                if (!sceneUpdateFlag) {
+                    onMapReadyCallback?.onMapReady(mapfitMap)
+                    sceneUpdateFlag = true
                 }
-            })
+
+                mapThemeLoadListener?.let {
+                    if (sceneError == null) {
+                        it.onLoaded()
+                    } else {
+                        it.onError()
+                    }
+                }
+            }
 
             mapOptions = MapOptions(this@MapView, mapController)
             directionsOptions = DirectionsOptions(mapController)
 
-            if (customTheme.isBlank()) {
-                mapOptions.theme = mapTheme
-            } else {
-                mapOptions.customTheme = customTheme
-            }
+            if (async) {
+                if (customTheme.isBlank()) {
+                    mapOptions.theme = mapTheme
+                } else {
+                    mapOptions.customTheme = customTheme
+                }
 
+            } else {
+                mapController.loadSceneFile(customTheme)
+            }
         }
+
+        return mapfitMap
     }
 
     private fun initUiControls() {
@@ -315,7 +324,6 @@ class MapView(
                     }
                     is Polyline -> polylineClickListener?.onPolylineClicked(it)
                     is Polygon -> polygonClickListener?.onPolygonClicked(it)
-
                     else -> Unit
                 }
             }
@@ -434,12 +442,10 @@ class MapView(
     private fun singleTapResponder(): TouchInput.TapResponder {
         return object : TouchInput.TapResponder {
             override fun onSingleTapUp(x: Float, y: Float): Boolean {
-                Log.e("onSingleTapUp!!!", "")
                 return true
             }
 
             override fun onSingleTapConfirmed(x: Float, y: Float): Boolean {
-
                 mapController.pickMarker(x, y)
                 mapController.pickFeature(x, y)
 
@@ -514,7 +520,6 @@ class MapView(
 
     private fun showPlaceInfo(marker: Marker) {
         if (marker.hasPlaceInfoFields()) {
-
             if (activePlaceInfo != null
                 && activePlaceInfo?.marker == marker
                 && activePlaceInfo?.getVisibility()!!
@@ -545,7 +550,7 @@ class MapView(
             } else {
                 val view =
                     LayoutInflater.from(context)
-                        .inflate(R.layout.mf_widget_place_info, placeInfoFrame)
+                        .inflate(R.layout.mf_widget_place_info, placeInfoFrame,true)
 
                 val child = (view as FrameLayout).getChildAt(0)
                 child.tag = "default"
@@ -587,11 +592,6 @@ class MapView(
         glSurfaceView.id = R.id.glSurface
         addView(glSurfaceView)
         return glSurfaceView
-    }
-
-    @TestOnly
-    internal fun getMapSnap(callback: MapController.FrameCaptureCallback) {
-        mapController.captureFrame(callback, true)
     }
 
     private fun disposeMap() {
@@ -646,13 +646,24 @@ class MapView(
         return HttpHandler()
     }
 
-    @TestOnly
-    internal fun getScreenPosition(latLng: LatLng) = mapController.latLngToScreenPosition(latLng)
-
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         viewHeight = h
         viewWidth = w
+    }
+
+    @TestOnly
+    internal fun getScreenPosition(latLng: LatLng) = mapController.latLngToScreenPosition(latLng)
+
+    @TestOnly
+    internal fun getMap(scenePath: String) = initMapController(scenePath, async = false)
+
+    @TestOnly
+    internal fun getMapSnap(
+        callback: MapController.FrameCaptureCallback,
+        waitForCompleteView: Boolean = true
+    ) {
+        mapController.captureFrame(callback, waitForCompleteView)
     }
 
 }
