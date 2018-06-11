@@ -2,6 +2,7 @@ package com.mapfit.android
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.annotation.UiThreadTest
+import android.support.test.espresso.idling.CountingIdlingResource
 import android.support.test.runner.AndroidJUnit4
 import com.mapfit.android.annotations.Marker
 import com.mapfit.android.annotations.MarkerOptions
@@ -28,24 +29,14 @@ class LayerTest {
     private val mMockContext = InstrumentationRegistry.getContext()
     private val latLng = LatLng(40.693825, -73.998691)
 
-
     @Before
     @UiThreadTest
     fun init() {
         Mapfit.getInstance(mMockContext, mMockContext.getString(R.string.mapfit_debug_api_key))
         MockitoAnnotations.initMocks(this)
 
-        MapView(mMockContext).getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
-            override fun onMapReady(mapfitMap: MapfitMap) {
-                this@LayerTest.mapfitMap = mapfitMap
-            }
-        })
-
-        MapView(mMockContext).getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
-            override fun onMapReady(mapfitMap: MapfitMap) {
-                this@LayerTest.mapfitMap2 = mapfitMap
-            }
-        })
+        mapfitMap = MapView(mMockContext).getMap(MapTheme.MAPFIT_DAY.toString())
+        mapfitMap2 = MapView(mMockContext).getMap(MapTheme.MAPFIT_DAY.toString())
     }
 
     @After

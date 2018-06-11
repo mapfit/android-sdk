@@ -1,17 +1,16 @@
 package com.mapfit.android.annotations
 
-import android.content.Context
 import android.graphics.Color
-import android.support.test.InstrumentationRegistry
 import android.support.test.annotation.UiThreadTest
 import android.support.test.espresso.Espresso
+import android.support.test.espresso.IdlingRegistry
+import android.support.test.espresso.idling.CountingIdlingResource
 import android.support.test.espresso.matcher.ViewMatchers
 import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
 import com.mapfit.android.*
 import com.mapfit.android.annotations.callback.OnPolygonClickListener
 import com.mapfit.android.geometry.LatLng
-import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.After
@@ -34,13 +33,12 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class PolygonTest {
 
-    private val mMockContext: Context = InstrumentationRegistry.getContext()
-
     @Mock
     private lateinit var polygonClickListener: OnPolygonClickListener
 
     private lateinit var mapView: MapView
     private lateinit var mapfitMap: MapfitMap
+    private var idlingResource = CountingIdlingResource("polygon_idling_resource")
 
     private val poly by lazy {
         val list = mutableListOf<List<LatLng>>()
@@ -67,19 +65,18 @@ class PolygonTest {
     fun init() {
         MockitoAnnotations.initMocks(this)
 
-        Mapfit.getInstance(mMockContext, mMockContext.getString(R.string.mapfit_debug_api_key))
         mapView = activityRule.activity.findViewById(R.id.mapView)
-        mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
-            override fun onMapReady(mapfitMap: MapfitMap) {
-                this@PolygonTest.mapfitMap = mapfitMap
-            }
-        })
+        mapfitMap = mapView.getMap(MapTheme.MAPFIT_DAY.toString())
+        mapfitMap.setOnPolygonClickListener(polygonClickListener)
+
+        IdlingRegistry.getInstance().register(idlingResource)
     }
 
     @After
     @UiThreadTest
     fun dispose() {
         Mapfit.dispose()
+        IdlingRegistry.getInstance().unregister(idlingResource)
     }
 
     @Test
@@ -132,20 +129,21 @@ class PolygonTest {
     }
 
     @Test
-    fun testPolygonFillColor() = runBlocking(UI) {
+    fun testPolygonFillColor() {
         val polygon = mapfitMap.addPolygon(
-            PolygonOptions().points(poly)
+            PolygonOptions()
+                .points(poly)
                 .fillColor("#ff0000")
         )
 
-        mapfitMap.setLatLngBounds(polygon.getLatLngBounds(), 0.5f)
-        mapfitMap.setZoom(19f)
+        mapfitMap.setLatLngBounds(polygon.getLatLngBounds())
 
-        var redValue = 0
-        var blueValue = 0
-        var greenValue = 0
+        var redValue = Int.MIN_VALUE
+        var blueValue = Int.MIN_VALUE
+        var greenValue = Int.MIN_VALUE
 
-        mapView.getMapSnap {
+        idlingResource.increment()
+        mapView.getMapSnap(MapController.FrameCaptureCallback {
             val screenPosition =
                 polygon.mapBindings.keys.first()
                     .latLngToScreenPosition(LatLng(40.734839, -73.994748))
@@ -153,36 +151,48 @@ class PolygonTest {
             redValue = Color.red(pixel)
             blueValue = Color.blue(pixel)
             greenValue = Color.green(pixel)
-        }
+            idlingResource.decrement()
+        })
 
-        delay(1000)
+        suspendViaGLSurface()
         assertEquals(255, redValue)
         assertEquals(0, blueValue)
         assertEquals(0, greenValue)
     }
 
     @Test
-    fun testPolygonOrder() = runBlocking(UI) {
-        val polygon = mapfitMap.addPolygon(PolygonOptions().points(poly).fillColor("#ff0000"))
+    fun testPolygonOrder() {
+        val polygon =
+            mapfitMap.addPolygon(
+                PolygonOptions()
+                    .points(poly)
+                    .fillColor("#ff0000")
+                    .drawOrder(600)
+            )
 
-        val polygon2 = mapfitMap.addPolygon(PolygonOptions().points(poly).fillColor("#0000ff"))
+        val polygon2 = mapfitMap.addPolygon(
+            PolygonOptions()
+                .points(poly)
+                .fillColor("#0000ff")
+                .drawOrder(400)
+        )
 
         val pixelCoordinate = LatLng(40.741596, -73.994686)
 
         mapfitMap.setLatLngBounds(polygon.getLatLngBounds(), 0.5f)
 
-        polygon.drawOrder = 600
-        polygon2.drawOrder = 400
-
         var triple = Triple(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
 
-        mapView.getMapSnap {
+        idlingResource.increment()
+        mapView.getMapSnap(MapController.FrameCaptureCallback {
             val screenPosition = mapView.getScreenPosition(pixelCoordinate)
             val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
             triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
-        }
 
-        delay(1500)
+            idlingResource.decrement()
+        })
+
+        suspendViaGLSurface()
         assertEquals(255, triple.first)
         assertEquals(0, triple.second)
         assertEquals(0, triple.third)
@@ -190,40 +200,55 @@ class PolygonTest {
         polygon.drawOrder = 400
         polygon2.drawOrder = 600
 
-        delay(1500)
-        mapView.getMapSnap {
+        idlingResource.increment()
+        mapView.getMapSnap(MapController.FrameCaptureCallback {
             val screenPosition = mapView.getScreenPosition(pixelCoordinate)
             val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
             triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
-        }
+            idlingResource.decrement()
 
-        delay(1500)
+        })
+
+        suspendViaGLSurface()
         assertEquals(0, triple.first)
         assertEquals(0, triple.second)
         assertEquals(255, triple.third)
 
         polygon.drawOrder = 800
 
-        delay(1500)
-        mapView.getMapSnap {
+        idlingResource.increment()
+        mapView.getMapSnap(MapController.FrameCaptureCallback {
             val screenPosition = mapView.getScreenPosition(pixelCoordinate)
             val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
             triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
-        }
+            idlingResource.decrement()
+        })
 
-        delay(1500)
+        suspendViaGLSurface()
         assertEquals(255, triple.first)
         assertEquals(0, triple.second)
         assertEquals(0, triple.third)
     }
 
     @Test
-    fun testCustomYamlLayer() = runBlocking(UI) {
-        delay(400)
+    fun testCustomYamlLayer() {
+        mapfitMap.setOnMapThemeLoadListener(object : OnMapThemeLoadListener {
+            override fun onLoaded() {
+                idlingResource.decrement()
+            }
 
+            override fun onError() {
+                idlingResource.decrement()
+            }
+        })
+
+        // mapfit-custom-test yaml has an import yaml inside and that causes onLoaded to be
+        // called twice
+        idlingResource.increment()
+        idlingResource.increment()
         mapfitMap.getMapOptions().customTheme = "mapfit-custom-test.yaml"
 
-        delay(2000)
+        suspendViaGLSurface()
 
         val polyline = mapfitMap.addPolygon(
             PolygonOptions()
@@ -236,27 +261,25 @@ class PolygonTest {
 
         var triple = Triple(Int.MIN_VALUE, Int.MIN_VALUE, Int.MIN_VALUE)
 
-        mapView.getMapSnap {
+        idlingResource.increment()
+        mapView.getMapSnap(MapController.FrameCaptureCallback {
             val screenPosition = mapView.getScreenPosition(LatLng(40.741596, -73.994686))
             val pixel = it.getPixel(screenPosition.x.toInt(), screenPosition.y.toInt())
             triple = Triple(Color.red(pixel), Color.green(pixel), Color.blue(pixel))
-        }
+            idlingResource.decrement()
+        })
 
-        delay(1500)
-
+        suspendViaGLSurface()
         assertEquals(255, triple.first)
         assertEquals(0, triple.second)
         assertEquals(0, triple.third)
     }
 
     @Test
-    fun testPolygonClickListener() = runBlocking {
-        delay(400)
-
+    fun testPolygonClickListener() {
         mapfitMap.apply {
             setCenter(LatLng(40.741596, -73.994686))
             setZoom(14f)
-            setOnPolygonClickListener(polygonClickListener)
         }
 
         val polygon = mapfitMap.addPolygon(PolygonOptions().points(poly))
@@ -267,11 +290,11 @@ class PolygonTest {
     }
 
     @Test
-    fun testPolygonObject() = runBlocking {
-        delay(400)
-        mapfitMap.setCenter(LatLng(40.741596, -73.994686))
-        mapfitMap.setZoom(14f)
-        mapfitMap.setOnPolygonClickListener(polygonClickListener)
+    fun testPolygonObject() {
+        mapfitMap.apply {
+            setCenter(LatLng(40.741596, -73.994686))
+            setZoom(14f)
+        }
 
         val polygon = mapfitMap.addPolygon(
             PolygonOptions()
@@ -289,8 +312,7 @@ class PolygonTest {
     }
 
     private fun clickPolygon(polygon: Polygon) = runBlocking {
-        delay(500)
-
+        delay(200)
         val screenPosition =
             polygon.mapBindings.keys.first()
                 .latLngToScreenPosition(LatLng(40.741596, -73.994686))

@@ -15,14 +15,16 @@ import com.mapfit.android.*
  */
 class MapViewTestActivity : AppCompatActivity() {
 
-    val idlingResource by lazy { CountingIdlingResource("dummy_resource", true) }
+    val idlingResource = CountingIdlingResource("dummy_resource", true)
     lateinit var mapfitMap: MapfitMap
     lateinit var mapView: MapView
 
     override fun onCreate(@Nullable savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         instantiateMapfit(this)
+
         mapView = MapView(this)
+
         mapView.layoutParams = FrameLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
@@ -39,24 +41,6 @@ class MapViewTestActivity : AppCompatActivity() {
                 idlingResource.decrement()
             }
         })
-    }
-
-    fun initWithCustomYaml() {
-        idlingResource.increment()
-        mapView.getMapAsync(
-            "https://cdn.mapfit.com/v2-3/themes/mapfit-night.yaml",
-            onMapReadyCallback = object : OnMapReadyCallback {
-                override fun onMapReady(mapfitMap: MapfitMap) {
-                    this@MapViewTestActivity.mapfitMap = mapfitMap
-                    idlingResource.decrement()
-                }
-            })
-    }
-
-    val onMapPinchListener = object : OnMapPinchListener {
-        override fun onMapPinch() {
-            idlingResource.decrement()
-        }
     }
 
     override fun onDestroy() {

@@ -3,7 +3,6 @@ package com.mapfit.android.map
 import android.location.Location
 import android.support.test.annotation.UiThreadTest
 import android.support.test.espresso.Espresso
-import android.support.test.espresso.IdlingRegistry
 import android.support.test.espresso.action.ViewActions
 import android.support.test.espresso.idling.CountingIdlingResource
 import android.support.test.espresso.matcher.ViewMatchers
@@ -16,7 +15,6 @@ import com.mapfit.android.*
 import com.mapfit.android.location.LocationListener
 import com.mapfit.android.location.LocationPriority
 import com.mapfit.tetragon.SceneUpdate
-import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
@@ -74,23 +72,20 @@ class MapOptionsTest {
     fun init() {
         MockitoAnnotations.initMocks(this)
 
-        idlingResource = activityRule.activity.idlingResource
-        IdlingRegistry.getInstance().register(idlingResource)
-
-        idlingResource.registerIdleTransitionCallback({
-            mapfitMap = activityRule.activity.mapfitMap
-            mapView = activityRule.activity.mapView
+        mapView = activityRule.activity.findViewById(R.id.mapView)
+        mapfitMap = mapView.getMap(MapTheme.MAPFIT_DAY.toString())
+        mapfitMap.apply {
             mapfitMap.setOnMapThemeLoadListener(onMapThemeLoadListener)
             mapfitMap.setOnMapPinchListener(onMapPinchListener)
             mapfitMap.setOnMapPanListener(onMapPanListener)
-        })
+        }
 
-        activityRule.activity.init()
     }
 
     @After
     fun cleanup() {
-        IdlingRegistry.getInstance().unregister(idlingResource)
+        Mapfit.dispose()
+
     }
 
     @Test
@@ -98,12 +93,6 @@ class MapOptionsTest {
     fun testInitValuesExistence() {
         Assert.assertNotNull(mapView)
         Assert.assertNotNull(mapfitMap)
-    }
-
-    @Test
-    @UiThreadTest
-    fun testDefaultValues() {
-        Assert.assertEquals(MapTheme.MAPFIT_DAY, mapfitMap.getMapOptions().theme)
     }
 
     @Test
@@ -148,7 +137,6 @@ class MapOptionsTest {
      */
     @Test
     fun testOnUserLocationListener() = runBlocking(UI) {
-        delay(400)
         mapfitMap.getMapOptions().setUserLocationEnabled(
             true,
             LocationPriority.HIGH_ACCURACY,
@@ -178,7 +166,6 @@ class MapOptionsTest {
     @Test
     @UiThreadTest
     fun testSceneUpdate() = runBlocking {
-
         val sceneUpdate = SceneUpdate("global.building_fill", "#ffffff")
         mapfitMap.getMapOptions().updateScene(listOf(sceneUpdate))
 
@@ -190,8 +177,6 @@ class MapOptionsTest {
 
     @Test
     fun testGestures() = runBlocking {
-        delay(500)
-
         Assert.assertTrue(mapfitMap.getMapOptions().panEnabled)
         Assert.assertTrue(mapfitMap.getMapOptions().rotateEnabled)
         Assert.assertTrue(mapfitMap.getMapOptions().pinchEnabled)

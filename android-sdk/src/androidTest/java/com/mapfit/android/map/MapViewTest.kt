@@ -1,18 +1,14 @@
 package com.mapfit.android.map
 
 import android.support.test.annotation.UiThreadTest
-import android.support.test.espresso.IdlingRegistry
 import android.support.test.espresso.idling.CountingIdlingResource
 import android.support.test.filters.LargeTest
 import android.support.test.rule.ActivityTestRule
 import android.support.test.rule.GrantPermissionRule
 import android.support.test.runner.AndroidJUnit4
-import com.mapfit.android.Layer
+import com.mapfit.android.*
 import com.mapfit.android.MapOptions.Companion.MAP_MAX_ZOOM
 import com.mapfit.android.MapOptions.Companion.MAP_MIN_ZOOM
-import com.mapfit.android.MapView
-import com.mapfit.android.MapViewTestActivity
-import com.mapfit.android.MapfitMap
 import com.mapfit.android.geometry.LatLng
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
@@ -32,7 +28,6 @@ import org.mockito.MockitoAnnotations
 class MapViewTest {
 
     private lateinit var mapView: MapView
-
     private lateinit var mapfitMap: MapfitMap
     private val latLng = LatLng(40.7441855, -73.995394)
 
@@ -49,27 +44,19 @@ class MapViewTest {
     val grantPermissionRule: GrantPermissionRule =
         GrantPermissionRule.grant(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
-    private lateinit var idlingResource: CountingIdlingResource
-
     @Before
     @UiThreadTest
     fun init() {
         MockitoAnnotations.initMocks(this)
 
-        idlingResource = activityRule.activity.idlingResource
-        IdlingRegistry.getInstance().register(idlingResource)
-
-        idlingResource.registerIdleTransitionCallback({
-            mapfitMap = activityRule.activity.mapfitMap
-            mapView = activityRule.activity.mapView
-        })
-
-        activityRule.activity.init()
+        mapView = activityRule.activity.findViewById(R.id.mapView)
+        mapfitMap = mapView.getMap(MapTheme.MAPFIT_DAY.toString())
     }
 
     @After
+    @UiThreadTest
     fun cleanup() {
-        IdlingRegistry.getInstance().unregister(idlingResource)
+        Mapfit.dispose()
     }
 
     @Test
@@ -118,16 +105,15 @@ class MapViewTest {
 
     @Test
     @UiThreadTest
-    fun testSetCenterWithOffset() = runBlocking {
-        mapfitMap.setCenterWithOffset(latLng, 300, 300)
+    fun testSetCenterWithOffset() {
+        mapfitMap.setZoom(14f)
+        mapfitMap.setCenterWithOffset(latLng, 300f, 300f)
 
-        delay(1000)
-
-        val expectedCenter = LatLng(5.5425180, 113.0572059)
+        val expectedCenter = LatLng(40.738608074618185, -73.9880383014679)
         val actualCenter = mapfitMap.getCenter() ?: LatLng()
 
-        Assert.assertEquals(expectedCenter.lat, actualCenter.lat, 0.00005)
-        Assert.assertEquals(expectedCenter.lng, actualCenter.lng, 0.00005)
+        Assert.assertEquals(expectedCenter.lat, actualCenter.lat, 0.005)
+        Assert.assertEquals(expectedCenter.lng, actualCenter.lng, 0.005)
     }
 
     @Test
@@ -158,10 +144,9 @@ class MapViewTest {
     }
 
     @Test
-    fun testScreenPositionToLatLng() = runBlocking(UI) {
+    @UiThreadTest
+    fun testScreenPositionToLatLng() {
         mapfitMap.setCenter(latLng)
-
-        delay(400)
         val screenPosition = mapfitMap.latLngToScreenPosition(latLng)
         val coordinates = mapfitMap.screenPositionToLatLng(screenPosition)
 
