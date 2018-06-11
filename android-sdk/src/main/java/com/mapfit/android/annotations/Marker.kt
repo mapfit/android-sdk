@@ -123,7 +123,7 @@ class Marker internal constructor(
             subAnnotation = field
         }
         get() {
-            return subAnnotation as Polygon
+            return subAnnotation as Polygon?
         }
 
     init {
