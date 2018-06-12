@@ -127,7 +127,7 @@ class Marker internal constructor(
         }
 
     init {
-        tag = markerOptions.tag
+        data = markerOptions.data
 
         val icon = markerOptions.getIcon()
 

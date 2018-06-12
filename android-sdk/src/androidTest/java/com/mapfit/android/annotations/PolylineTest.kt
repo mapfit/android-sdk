@@ -288,7 +288,7 @@ class PolylineTest {
         val polyline = mapfitMap.addPolyline(
             PolylineOptions()
                 .points(line)
-                .tag(5)
+                .data(5)
         )
 
         mapfitMap.apply {
@@ -302,7 +302,7 @@ class PolylineTest {
 
         Mockito.verify(polylineClickListener).onPolylineClicked(capture(captor) ?: polyline)
 
-        assertEquals(5, captor.value.tag)
+        assertEquals(5, captor.value.data)
     }
 
     @Test

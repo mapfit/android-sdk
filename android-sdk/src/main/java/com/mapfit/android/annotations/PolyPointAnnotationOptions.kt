@@ -12,7 +12,7 @@ abstract class PolyPointAnnotationOptions<out T> {
     internal var strokeOutlineWidth: Int = Integer.MIN_VALUE
     internal var lineJoinType: JoinType = JoinType.MITER
     internal var drawOrder: Int = Integer.MIN_VALUE
-    internal var tag: Any? = null
+    internal var data: Any? = null
     var layerName: String = ""
 
     /**
@@ -82,8 +82,8 @@ abstract class PolyPointAnnotationOptions<out T> {
      *
      * @param tag any object related to the poly shape
      */
-    fun tag(tag: Any): T {
-        this.tag = tag
+    fun data(data: Any): T {
+        this.data = data
         return this as T
     }
 

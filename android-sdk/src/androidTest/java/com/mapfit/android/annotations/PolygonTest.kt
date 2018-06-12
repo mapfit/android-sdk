@@ -299,7 +299,7 @@ class PolygonTest {
         val polygon = mapfitMap.addPolygon(
             PolygonOptions()
                 .points(poly)
-                .tag(5)
+                .data(5)
         )
 
         val captor = ArgumentCaptor.forClass(Polygon::class.java)
@@ -308,7 +308,7 @@ class PolygonTest {
 
         Mockito.verify(polygonClickListener).onPolygonClicked(capture(captor) ?: polygon)
 
-        assertEquals(5, captor.value.tag)
+        assertEquals(5, captor.value.data)
     }
 
     private fun clickPolygon(polygon: Polygon) = runBlocking {

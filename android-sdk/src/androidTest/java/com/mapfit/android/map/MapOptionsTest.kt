@@ -3,6 +3,7 @@ package com.mapfit.android.map
 import android.location.Location
 import android.support.test.annotation.UiThreadTest
 import android.support.test.espresso.Espresso
+import android.support.test.espresso.IdlingRegistry
 import android.support.test.espresso.action.ViewActions
 import android.support.test.espresso.idling.CountingIdlingResource
 import android.support.test.espresso.matcher.ViewMatchers
@@ -12,8 +13,10 @@ import android.support.test.rule.GrantPermissionRule
 import android.support.test.runner.AndroidJUnit4
 import android.view.View
 import com.mapfit.android.*
+import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.location.LocationListener
 import com.mapfit.android.location.LocationPriority
+import com.mapfit.android.location.ProviderStatus
 import com.mapfit.tetragon.SceneUpdate
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
@@ -40,9 +43,6 @@ class MapOptionsTest {
     private lateinit var mapfitMap: MapfitMap
 
     @Mock
-    private lateinit var locationListener: LocationListener
-
-    @Mock
     private lateinit var onMapThemeLoadListener: OnMapThemeLoadListener
 
     @Mock
@@ -65,7 +65,7 @@ class MapOptionsTest {
     val grantPermissionRule: GrantPermissionRule =
         GrantPermissionRule.grant(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
-    private lateinit var idlingResource: CountingIdlingResource
+    private val idlingResource = CountingIdlingResource("map_options_resource")
 
     @Before
     @UiThreadTest
@@ -80,12 +80,13 @@ class MapOptionsTest {
             mapfitMap.setOnMapPanListener(onMapPanListener)
         }
 
+        IdlingRegistry.getInstance().register(idlingResource)
     }
 
     @After
     fun cleanup() {
         Mapfit.dispose()
-
+        IdlingRegistry.getInstance().unregister(idlingResource)
     }
 
     @Test
@@ -136,17 +137,29 @@ class MapOptionsTest {
      * Location update is not mocked.
      */
     @Test
-    fun testOnUserLocationListener() = runBlocking(UI) {
+    fun testOnUserLocationListener() {
+        var loc: Location? = null
+        idlingResource.increment()
+
+        val locationListener = object : LocationListener {
+            override fun onLocation(location: Location) {
+                loc = location
+                idlingResource.decrement()
+            }
+
+            override fun onProviderStatus(status: ProviderStatus) {
+                idlingResource.decrement()
+            }
+        }
+
         mapfitMap.getMapOptions().setUserLocationEnabled(
             true,
             LocationPriority.HIGH_ACCURACY,
             locationListener
         )
 
-        delay(7000)
-
-        Mockito.verify(locationListener, Mockito.atLeastOnce())
-            .onLocation(Mockito.any(Location::class.java) ?: Location(""))
+        suspendViaGLSurface()
+        Assert.assertNotNull(loc)
 
         mapfitMap.getMapOptions().setUserLocationEnabled(false)
     }
@@ -154,7 +167,6 @@ class MapOptionsTest {
     @Test
     @UiThreadTest
     fun test3dBuildings() = runBlocking {
-
         mapfitMap.getMapOptions().is3dBuildingsEnabled = true
 
         delay(500)

@@ -17,7 +17,7 @@ class MarkerOptions {
     internal var streetAddress = ""
     internal var position = LatLng(0.0, 0.0)
     internal var flat = false
-    internal var tag: Any? = null
+    internal var data: Any? = null
     internal var buildingPolygon = false
     internal var buildingPolygonOptions: PolygonOptions? = null
     internal var interactive = true
@@ -99,13 +99,13 @@ class MarkerOptions {
     }
 
     /**
-     * Sets the given object related with the [Marker]. Setting related object of marker as a tag makes it
+     * Sets the given object related with the [Marker]. Setting related object of marker as it's data makes it
      * easier to reach the object rather than storing a Map data structure.
      *
-     * @param tag any object related to the marker
+     * @param data any object related to the marker
      */
-    fun tag(tag: Any): MarkerOptions {
-        this.tag = tag
+    fun data(data: Any): MarkerOptions {
+        this.data = data
         return this
     }
 

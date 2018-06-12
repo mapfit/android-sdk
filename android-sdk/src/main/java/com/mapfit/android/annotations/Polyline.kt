@@ -86,7 +86,7 @@ class Polyline(
     }
 
     init {
-        tag = polylineOptions.tag
+        data = polylineOptions.data
         initAnnotation(mapController, polylineId)
     }
 

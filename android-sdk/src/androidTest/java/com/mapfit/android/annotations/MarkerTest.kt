@@ -94,7 +94,7 @@ class MarkerTest {
         Assert.assertTrue(marker.subtitle2.isBlank())
         Assert.assertEquals(Anchor.TOP, marker.anchor)
         Assert.assertNull(marker.address)
-        Assert.assertNull(marker.tag)
+        Assert.assertNull(marker.data)
         Assert.assertNotSame(0L, marker.id)
     }
 
@@ -239,7 +239,7 @@ class MarkerTest {
     fun testMarkerObject() {
         val marker = mapfitMap.addMarker(
             MarkerOptions()
-                .tag(5)
+                .data(5)
                 .position(latLng)
         )
 
@@ -249,7 +249,7 @@ class MarkerTest {
 
         verify(onMarkerClickListener).onMarkerClicked(capture(captor) ?: marker)
 
-        assertEquals(5, captor.value.tag)
+        assertEquals(5, captor.value.data)
     }
 
     @Test
