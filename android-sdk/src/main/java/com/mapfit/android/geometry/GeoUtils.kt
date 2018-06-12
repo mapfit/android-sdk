@@ -77,8 +77,8 @@ fun LatLng.toPointF(zoomLevel: Float): PointF {
     val worldWidth = toWorldWidthPixels(zoomLevel)
 
     val x = lng / 360 + .5
-    val siny = Math.sin(Math.toRadians(lat))
-    val y = 0.5 * Math.log((1 + siny) / (1 - siny)) / -(2 * Math.PI) + .5
+    val sinY = Math.sin(Math.toRadians(lat))
+    val y = 0.5 * Math.log((1 + sinY) / (1 - sinY)) / -(2 * Math.PI) + .5
 
     return PointF((x * worldWidth).toFloat(), (y * worldWidth).toFloat())
 }
