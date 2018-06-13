@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import com.mapfit.android.MapView;
-import com.mapfit.android.Mapfit;
 import com.mapfit.android.MapfitMap;
 import com.mapfit.android.OnMapClickListener;
 import com.mapfit.android.OnMapDoubleClickListener;
