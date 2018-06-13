@@ -24,7 +24,6 @@ import com.mapfit.android.utils.loadImageFromUrl
 import com.mapfit.android.utils.toBitmap
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.android.UI
-import java.io.IOException
 
 class Marker internal constructor(
     private val context: Context,
@@ -509,12 +508,14 @@ class Marker internal constructor(
                             position = latLng
                             address = addressList.first()
 
-                            if (addressList.isNotEmpty() && addressList.first().building.polygon.isNotEmpty()) {
-                                buildingPolygon =
-                                        mapController.addPolygon(
-                                            PolygonOptions()
-                                                .points(addressList.first().building.polygon)
-                                        )
+                            if (addressList.isNotEmpty()
+                                && addressList.first().building.polygon.isNotEmpty()
+                            ) {
+                                val polygonOptions =
+                                    markerOptions.buildingPolygonOptions ?: PolygonOptions()
+                                polygonOptions.points(addressList.first().building.polygon)
+
+                                buildingPolygon = mapController.addPolygon(polygonOptions)
                             }
 
                             launch(UI) { callback?.onMarkerAdded(this@Marker) }
