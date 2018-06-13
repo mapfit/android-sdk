@@ -1,7 +1,6 @@
 package com.mapfit.android.map
 
 import android.support.test.annotation.UiThreadTest
-import android.support.test.espresso.idling.CountingIdlingResource
 import android.support.test.filters.LargeTest
 import android.support.test.rule.ActivityTestRule
 import android.support.test.rule.GrantPermissionRule
@@ -10,9 +9,6 @@ import com.mapfit.android.*
 import com.mapfit.android.MapOptions.Companion.MAP_MAX_ZOOM
 import com.mapfit.android.MapOptions.Companion.MAP_MIN_ZOOM
 import com.mapfit.android.geometry.LatLng
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.delay
-import kotlinx.coroutines.experimental.runBlocking
 import org.junit.*
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
@@ -109,7 +105,8 @@ class MapViewTest {
         mapfitMap.setZoom(14f)
         mapfitMap.setCenterWithOffset(latLng, 300f, 300f)
 
-        val expectedCenter = LatLng(40.738608074618185, -73.9880383014679)
+        // for 3x screen res
+        val expectedCenter = LatLng(40.7215752566295, -73.9880383014679)
         val actualCenter = mapfitMap.getCenter() ?: LatLng()
 
         Assert.assertEquals(expectedCenter.lat, actualCenter.lat, 0.005)

@@ -15,7 +15,6 @@ import android.view.ViewGroup
 import android.view.animation.RotateAnimation
 import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import com.mapfit.android.annotations.*
 import com.mapfit.android.annotations.Annotation
@@ -387,7 +386,7 @@ class MapView(
             updatePlaceInfoPosition(false)
         }
 
-        if (mapOptions.userLocationButtonEnabled) resizeAccuracyMarker()
+        if (mapOptions.isUserLocationButtonEnabled) resizeAccuracyMarker()
 
         launch {
             scaleFlingJob.cancelAndJoin()

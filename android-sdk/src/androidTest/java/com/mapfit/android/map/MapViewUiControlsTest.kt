@@ -68,28 +68,28 @@ class MapViewUiControlsTest {
     @Test
     @UiThreadTest
     fun testCompassButton() {
-        mapfitMap.getMapOptions().compassButtonEnabled = true
+        mapfitMap.getMapOptions().isCompassButtonEnabled = true
         Assert.assertEquals(View.VISIBLE, mapView.btnCompass.visibility)
     }
 
     @Test
     @UiThreadTest
     fun testZoomControls() {
-        mapfitMap.getMapOptions().zoomControlsEnabled = true
+        mapfitMap.getMapOptions().isZoomControlsEnabled = true
         Assert.assertEquals(View.VISIBLE, mapView.zoomControlsView.visibility)
     }
 
     @Test
     @UiThreadTest
     fun testRecenterButton() {
-        mapfitMap.getMapOptions().recenterButtonEnabled = true
+        mapfitMap.getMapOptions().isRecenterButtonEnabled = true
         Assert.assertEquals(View.VISIBLE, mapView.btnRecenter.visibility)
     }
 
     @Test
     @UiThreadTest
     fun testUserLocationButton() {
-        mapfitMap.getMapOptions().userLocationButtonEnabled = true
+        mapfitMap.getMapOptions().isUserLocationButtonEnabled = true
         Assert.assertEquals(View.VISIBLE, mapView.btnUserLocation.visibility)
     }
 

@@ -2,6 +2,7 @@ package com.mapfit.android
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.res.Resources
 import android.graphics.Bitmap
 import android.location.Location
 import android.support.annotation.FloatRange
@@ -53,6 +54,49 @@ class MapOptions internal constructor(
     private var minZoom: Float = 1f
     private val screenDensity = mapView.context.resources.displayMetrics.densityDpi
     private var userLocationEnabled: Boolean = false
+    private var previousAngle = 0f
+    private var difference = 0f
+    private val locationListener = object : LocationListener {
+        override fun onLocation(location: Location) {
+            launch {
+                val userLocation = LatLng(location.latitude, location.longitude)
+
+                when (location.accuracy) {
+                    in 0..10 -> accuracyMarker.visibility = false
+                    else -> {
+                        accuracyMarker.visibility = true
+                    }
+                }
+
+                if (!userLocation.isEmpty()) {
+                    userMarker.setPositionEased(userLocation, ANIMATION_DURATION)
+                    accuracyMarker.setPositionEased(userLocation, ANIMATION_DURATION)
+                    orientationMarker.setPositionEased(userLocation, ANIMATION_DURATION)
+                }
+
+                userMarker.visibility = !userLocation.isEmpty()
+                accuracyMarker.visibility = !userLocation.isEmpty()
+                orientationMarker.visibility = !userLocation.isEmpty()
+            }
+
+            listener?.onLocation(location)
+        }
+
+        override fun onProviderStatus(status: ProviderStatus) {
+            listener?.onProviderStatus(status)
+        }
+    }
+    private val compassListener = object : CompassListener {
+        override fun onOrientationChanged(angle: Float) {
+            difference = abs(previousAngle - angle)
+
+            /* if the difference between previous and current angle is significant. */
+            if (difference > 0.8) {
+                rotateUserDirection(angle)
+                previousAngle = angle
+            }
+        }
+    }
 
     /**
      * Marker for user location.
@@ -119,23 +163,26 @@ class MapOptions internal constructor(
             theme = null
             field = value
         }
-
-    var compassButtonEnabled = false
+    
+    var cameraType: CameraType = CameraType.PERSPECTIVE
+        set(value) {
+            mapController.cameraType = MapController.CameraType.valueOf(value.name)
+            field = value
+        }
+    
+    var isCompassButtonEnabled = false
         set(value) {
             mapView.btnCompass.visibility = if (value) View.VISIBLE else View.GONE
             field = value
         }
 
-    var recenterButtonEnabled = false
+    var isRecenterButtonEnabled = false
         set(value) {
             mapView.btnRecenter.visibility = if (value) View.VISIBLE else View.GONE
             field = value
         }
 
-    /**
-     * Toggle for user's current location button. The map will be centered on button click.
-     */
-    var userLocationButtonEnabled = true
+    var isUserLocationButtonEnabled = true
         set(value) {
             mapView.btnUserLocation.setImageResource(
                 if (!userLocationEnabled || !mapfitLocationProvider.isLocationPermissionGranted()) {
@@ -151,46 +198,40 @@ class MapOptions internal constructor(
             field = value
         }
 
-    var zoomControlsEnabled = true
+    var isZoomControlsEnabled = true
         set(value) {
             mapView.zoomControlsView.visibility = if (value) View.VISIBLE else View.GONE
             field = value
         }
 
-    var cameraType: CameraType = CameraType.PERSPECTIVE
+    var isGestureEnabled = true
         set(value) {
-            mapController.cameraType = MapController.CameraType.valueOf(value.name)
+            isPanEnabled = value
+            isPinchEnabled = value
+            isRotateEnabled = value
+            isTiltEnabled = value
             field = value
         }
 
-    var gesturesEnabled = true
-        set(value) {
-            panEnabled = value
-            pinchEnabled = value
-            rotateEnabled = value
-            tiltEnabled = value
-            field = value
-        }
-
-    var panEnabled = true
+    var isPanEnabled = true
         set(value) {
             mapController.touchInput.panEnabled = value
             field = value
         }
 
-    var pinchEnabled = true
+    var isPinchEnabled = true
         set(value) {
             mapController.touchInput.pinchEnabled = value
             field = value
         }
 
-    var rotateEnabled = true
+    var isRotateEnabled = true
         set(value) {
             mapController.touchInput.rotationEnabled = value
             field = value
         }
 
-    var tiltEnabled = true
+    var isTiltEnabled = true
         set(value) {
             mapController.touchInput.tiltEnabled = value
             field = value
@@ -199,6 +240,12 @@ class MapOptions internal constructor(
     var is3dBuildingsEnabled = false
         set(value) {
             mapController.enable3dBuildings(value)
+            field = value
+        }
+
+    var isTransitLayerEnabled = false
+        set(value) {
+            mapController.enableTransitLayer(value)
             field = value
         }
 
@@ -230,54 +277,6 @@ class MapOptions internal constructor(
         mapController.updateSceneAsync(sceneUpdates)
     }
 
-    private fun loadScene(value: MapTheme) {
-        mapController.loadSceneFileAsync(value.toString())
-        updateAttributionImage(value)
-    }
-
-    internal fun getMaxZoom() = maxZoom
-
-    internal fun getMinZoom() = minZoom
-
-    private fun updateAttributionImage(value: MapTheme) {
-        val attributionImage = when (value) {
-            MapTheme.MAPFIT_GRAYSCALE,
-            MapTheme.MAPFIT_DAY -> {
-                mapView.btnLegal?.setTextColor(
-                    ContextCompat.getColor(
-                        mapView.context,
-                        R.color.dark_text
-                    )
-                )
-                mapView.btnBuildYourMap?.setTextColor(
-                    ContextCompat.getColor(
-                        mapView.context,
-                        R.color.dark_text
-                    )
-                )
-                R.drawable.mf_watermark_light
-            }
-
-            MapTheme.MAPFIT_NIGHT -> {
-                mapView.btnLegal?.setTextColor(
-                    ContextCompat.getColor(
-                        mapView.context,
-                        R.color.light_text
-                    )
-                )
-                mapView.btnBuildYourMap?.setTextColor(
-                    ContextCompat.getColor(
-                        mapView.context,
-                        R.color.light_text
-                    )
-                )
-                R.drawable.mf_watermark_dark
-            }
-        }
-
-        mapView.attributionImage.setImageResource(attributionImage)
-    }
-
     /**
      * Enables user location updates and put marker on the map. You MUST have
      * [Manifest.permission.ACCESS_FINE_LOCATION] before enabling. User's location marker will be
@@ -298,7 +297,7 @@ class MapOptions internal constructor(
         this.listener = listener
         userLocationEnabled = enable
 
-        if (enable && userLocationButtonEnabled) {
+        if (enable && isUserLocationButtonEnabled) {
             mapView.btnUserLocation.setImageResource(R.drawable.mf_current_location)
             mapView.btnUserLocation.isEnabled = true
         }
@@ -312,7 +311,7 @@ class MapOptions internal constructor(
                 locationListener = locationListener
             )
 
-            if (userLocationButtonEnabled) {
+            if (isUserLocationButtonEnabled) {
                 mapView.btnUserLocation.setImageResource(R.drawable.mf_current_location)
                 mapView.btnUserLocation.isEnabled = true
             }
@@ -338,50 +337,9 @@ class MapOptions internal constructor(
      */
     fun getUserLocationEnabled() = userLocationEnabled
 
-    private val locationListener = object : LocationListener {
-        override fun onLocation(location: Location) {
-            launch {
-                val userLocation = LatLng(location.latitude, location.longitude)
+    internal fun getMaxZoom() = maxZoom
 
-                when (location.accuracy) {
-                    in 0..10 -> accuracyMarker.visibility = false
-                    else -> {
-                        accuracyMarker.visibility = true
-                    }
-                }
-
-                if (!userLocation.isEmpty()) {
-                    userMarker.setPositionEased(userLocation, ANIMATION_DURATION)
-                    accuracyMarker.setPositionEased(userLocation, ANIMATION_DURATION)
-                    orientationMarker.setPositionEased(userLocation, ANIMATION_DURATION)
-                }
-
-                userMarker.visibility = !userLocation.isEmpty()
-                accuracyMarker.visibility = !userLocation.isEmpty()
-                orientationMarker.visibility = !userLocation.isEmpty()
-            }
-
-            listener?.onLocation(location)
-        }
-
-        override fun onProviderStatus(status: ProviderStatus) {
-            listener?.onProviderStatus(status)
-        }
-    }
-
-    private var previousAngle = 0f
-    private var difference = 0f
-    private val compassListener = object : CompassListener {
-        override fun onOrientationChanged(angle: Float) {
-            difference = abs(previousAngle - angle)
-
-            /* if the difference between previous and current angle is significant. */
-            if (difference > 0.8) {
-                rotateUserDirection(angle)
-                previousAngle = angle
-            }
-        }
-    }
+    internal fun getMinZoom() = minZoom
 
     /**
      * Rotates and sets users' orientation marker accordingly to the given angle.
@@ -432,6 +390,27 @@ class MapOptions internal constructor(
         }
     }
 
+    /**
+     *  Returns the offset to fix misplacement caused by vanishing point for [MapTheme]s.
+     *
+     *  @return default X and Y axis offset in pixels
+     */
+    internal fun getVanishingPointOffset(): Pair<Float, Float> {
+        val offsetX = if (customTheme.isNullOrEmpty()) {
+            VANISHING_POINT_OFFSET_X
+        } else {
+            0f
+        }.div(Resources.getSystem()?.displayMetrics?.density ?: 1f)
+
+        val offsetY = if (customTheme.isNullOrEmpty()) {
+            VANISHING_POINT_OFFSET_Y
+        } else {
+            0f
+        }.div(Resources.getSystem()?.displayMetrics?.density ?: 1f)
+
+        return Pair(offsetX, offsetY)
+    }
+
     private fun setOrientationBitmap(
         bitmap: Bitmap
     ) {
@@ -468,9 +447,55 @@ class MapOptions internal constructor(
         )
     }
 
+    private fun updateAttributionImage(value: MapTheme) {
+        val attributionImage = when (value) {
+            MapTheme.MAPFIT_GRAYSCALE,
+            MapTheme.MAPFIT_DAY -> {
+                mapView.btnLegal?.setTextColor(
+                    ContextCompat.getColor(
+                        mapView.context,
+                        R.color.dark_text
+                    )
+                )
+                mapView.btnBuildYourMap?.setTextColor(
+                    ContextCompat.getColor(
+                        mapView.context,
+                        R.color.dark_text
+                    )
+                )
+                R.drawable.mf_watermark_light
+            }
+
+            MapTheme.MAPFIT_NIGHT -> {
+                mapView.btnLegal?.setTextColor(
+                    ContextCompat.getColor(
+                        mapView.context,
+                        R.color.light_text
+                    )
+                )
+                mapView.btnBuildYourMap?.setTextColor(
+                    ContextCompat.getColor(
+                        mapView.context,
+                        R.color.light_text
+                    )
+                )
+                R.drawable.mf_watermark_dark
+            }
+        }
+
+        mapView.attributionImage.setImageResource(attributionImage)
+    }
+
+    private fun loadScene(value: MapTheme) {
+        mapController.loadSceneFileAsync(value.toString())
+        updateAttributionImage(value)
+    }
+
     companion object {
         const val MAP_MIN_ZOOM = 1.0
         const val MAP_MAX_ZOOM = 20.0
+        const val VANISHING_POINT_OFFSET_Y = 125f
+        const val VANISHING_POINT_OFFSET_X = 0f
     }
 
     enum class CameraType {
