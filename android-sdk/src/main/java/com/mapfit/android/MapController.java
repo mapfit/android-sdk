@@ -42,6 +42,7 @@ import java.util.Map;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import kotlin.Pair;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -453,6 +454,18 @@ public class MapController implements Renderer {
     }
 
     /**
+     * Enables or disables the 3d buildings.
+     *
+     * @param enable
+     */
+    public void enableTransitLayer(Boolean enable) {
+        SceneUpdate sceneUpdate = new SceneUpdate("global.transit_layer", enable + "");
+        List updates = new ArrayList();
+        updates.add(sceneUpdate);
+        updateSceneAsync(updates);
+    }
+
+    /**
      * Set the geographic position of the center of the map view
      *
      * @param position LngLat of the position to set
@@ -491,14 +504,17 @@ public class MapController implements Renderer {
         nativeSetPositionEased(mapPointer, position.getLng(), position.getLat(), seconds, ease.ordinal());
     }
 
-    public void setLatLngBounds(final LatLngBounds latlngBounds, final float padding, final long duration) {
+    public void setLatLngBounds(final LatLngBounds latlngBounds,
+                                final float padding,
+                                final long duration,
+                                final Pair<Float, Float> vanishingPointOffset) {
         mapView.post(new Runnable() {
             @Override
             public void run() {
                 kotlin.Pair<LatLng, Float> pair = latlngBounds.getVisibleBounds(
                         mapView.getWidth(),
                         mapView.getHeight(),
-                        padding);
+                        padding,vanishingPointOffset);
 
                 if (duration <= 0) {
                     setZoom(pair.component2());

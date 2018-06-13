@@ -79,10 +79,12 @@ class MapfitMap internal constructor(
         duration: Long = 0
     ) {
         val screenPosition = latLng.toPointF(mapController.zoom)
+        val vanishingPointOffset = mapView.mapOptions.getVanishingPointOffset()
 
         screenPosition.offset(
-            offsetX / (Resources.getSystem()?.displayMetrics?.density ?: 1f),
-            offsetY / (Resources.getSystem()?.displayMetrics?.density ?: 1f)
+            (offsetX / (Resources.getSystem()?.displayMetrics?.density
+                    ?: 1f)) + vanishingPointOffset.first,
+            offsetY + vanishingPointOffset.second
         )
 
         val geoPosition = screenPosition.toLatLng(mapController.zoom)
@@ -120,7 +122,7 @@ class MapfitMap internal constructor(
      * Adds the marker to the map at the input coordinate position or address with Geocoding.
      *
      * @param markerOptions options and settings for the marker
-     * @param onMarkerAddedCallback optional callback for adding marker
+     * @param onMarkerAddedCallback will only be invoked if marker is being Geocoded
      * @return marker that is added or will be added to the given position or address
      */
     @JvmOverloads
@@ -235,7 +237,12 @@ class MapfitMap internal constructor(
         padding: Float = 0f,
         duration: Long = 0
     ) {
-        mapController.setLatLngBounds(bounds, padding, duration)
+        mapController.setLatLngBounds(
+            bounds,
+            padding,
+            duration,
+            mapView.mapOptions.getVanishingPointOffset()
+        )
         mapView.updatePlaceInfoPosition(true)
     }
 
@@ -451,7 +458,7 @@ class MapfitMap internal constructor(
         /**
          * Called when the user clicks on a place info.
          *
-         * @param marker The marker of the place info that is clicked on.
+         * @param marker The marker is clicked on.
          */
         fun onPlaceInfoClicked(marker: Marker)
     }

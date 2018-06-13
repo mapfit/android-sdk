@@ -62,9 +62,15 @@ class LatLngBounds(
      * @param viewWidth of the MapView
      * @param viewHeight of the MapView
      * @param padding padding for the bounds
+     * @param vanishingPointOffset if scene camera is having vanishing point
      * @return center point and zoom level
      */
-    fun getVisibleBounds(viewWidth: Int, viewHeight: Int, padding: Float): Pair<LatLng, Float> {
+    fun getVisibleBounds(
+        viewWidth: Int,
+        viewHeight: Int,
+        padding: Float,
+        vanishingPointOffset: Pair<Float, Float> = Pair(0f, 0f)
+    ): Pair<LatLng, Float> {
         val reversePadding = if ((1 - padding) == 0f) 1f else (1 - padding)
 
         val latFraction = (latRad(northEast.lat) - latRad(southWest.lat)) / Math.PI
@@ -72,9 +78,18 @@ class LatLngBounds(
         val lngFraction = (if (lngDiff < 0) lngDiff + 360 else lngDiff) / 360
         val latZoom = zoom(viewHeight.toDouble(), reversePadding, latFraction)
         val lngZoom = zoom(viewWidth.toDouble(), reversePadding, lngFraction)
-        val zoom = Math.min(Math.min(latZoom, lngZoom), MapOptions.MAP_MAX_ZOOM)
+        val zoom = Math.min(Math.min(latZoom, lngZoom), MapOptions.MAP_MAX_ZOOM).toFloat()
 
-        return Pair(center, zoom.toFloat())
+        val normalizedCenter =
+            if (vanishingPointOffset.first > 0 || vanishingPointOffset.second > 0) {
+                val correctedCenter = center.toPointF(zoom)
+                correctedCenter.offset(vanishingPointOffset.first, vanishingPointOffset.second)
+                correctedCenter.toLatLng(zoom)
+            } else {
+                center
+            }
+
+        return Pair(normalizedCenter, zoom)
     }
 
     private fun latRad(lat: Double): Double {
