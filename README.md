@@ -19,7 +19,7 @@ allprojects {
 In your module level `build.gradle` file, add depencency as follows.
 ```
 dependencies {
-    	implementation 'com.mapfit:android-sdk:1.2.2'
+    	implementation 'com.mapfit:android-sdk:2.0.1'
 }
 ```
 
@@ -76,3 +76,9 @@ mapView.getMapAsync(new OnMapReadyCallback() {
 ```
 
 If you are looking for detailed documentation, see [Mapfit Documentation](https://mapfit-android.readme.io/docs)
+
+
+## License
+Copyright (c) 2018 Mapfit, Inc.
+All Rights Reserved.
+
