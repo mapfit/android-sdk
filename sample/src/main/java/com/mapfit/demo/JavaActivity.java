@@ -61,9 +61,9 @@ public class JavaActivity extends AppCompatActivity {
         setEventListeners();
 
         // enable ui controls
-        mapfitMap.getMapOptions().setRecenterButtonEnabled(true);
-        mapfitMap.getMapOptions().setZoomControlsEnabled(true);
-        mapfitMap.getMapOptions().setCompassButtonEnabled(true);
+        mapfitMap.getMapOptions().setRecenterButtonVisible(true);
+        mapfitMap.getMapOptions().setZoomControlVisible(true);
+        mapfitMap.getMapOptions().setCompassButtonVisible(true);
     }
 
     private void setEventListeners() {

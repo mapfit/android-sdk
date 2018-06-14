@@ -104,30 +104,30 @@ class MapOptionsTest {
     @Test
     @UiThreadTest
     fun testZoomControlVisibility() {
-        mapfitMap.getMapOptions().isZoomControlsEnabled = true
+        mapfitMap.getMapOptions().isZoomControlVisible = true
         Assert.assertEquals(View.VISIBLE, mapView.zoomControlsView.visibility)
 
-        mapfitMap.getMapOptions().isZoomControlsEnabled = false
+        mapfitMap.getMapOptions().isZoomControlVisible = false
         Assert.assertEquals(View.GONE, mapView.zoomControlsView.visibility)
     }
 
     @Test
     @UiThreadTest
     fun testCompassVisibility() {
-        mapfitMap.getMapOptions().isCompassButtonEnabled = true
+        mapfitMap.getMapOptions().isCompassButtonVisible = true
         Assert.assertEquals(View.VISIBLE, mapView.btnCompass.visibility)
 
-        mapfitMap.getMapOptions().isCompassButtonEnabled = false
+        mapfitMap.getMapOptions().isCompassButtonVisible = false
         Assert.assertEquals(View.GONE, mapView.btnCompass.visibility)
     }
 
     @Test
     @UiThreadTest
     fun testRecenterVisibility() {
-        mapfitMap.getMapOptions().isRecenterButtonEnabled = true
+        mapfitMap.getMapOptions().isRecenterButtonVisible = true
         Assert.assertEquals(View.VISIBLE, mapView.btnRecenter.visibility)
 
-        mapfitMap.getMapOptions().isRecenterButtonEnabled = false
+        mapfitMap.getMapOptions().isRecenterButtonVisible = false
         Assert.assertEquals(View.GONE, mapView.btnRecenter.visibility)
     }
 
@@ -192,7 +192,7 @@ class MapOptionsTest {
         Assert.assertTrue(mapfitMap.getMapOptions().isPinchEnabled)
         Assert.assertTrue(mapfitMap.getMapOptions().isTiltEnabled)
 
-        mapfitMap.getMapOptions().isGestureEnabled = false
+        mapfitMap.getMapOptions().gesturesEnabled = false
         Assert.assertFalse(mapfitMap.getMapOptions().isPanEnabled)
         Assert.assertFalse(mapfitMap.getMapOptions().isRotateEnabled)
         Assert.assertFalse(mapfitMap.getMapOptions().isPinchEnabled)
@@ -205,7 +205,7 @@ class MapOptionsTest {
         Mockito.verify(onMapPanListener, never()).onMapPan()
         Mockito.verify(onMapPinchListener, never()).onMapPinch()
 
-        mapfitMap.getMapOptions().isGestureEnabled = true
+        mapfitMap.getMapOptions().gesturesEnabled = true
         Assert.assertTrue(mapfitMap.getMapOptions().isPanEnabled)
         Assert.assertTrue(mapfitMap.getMapOptions().isRotateEnabled)
         Assert.assertTrue(mapfitMap.getMapOptions().isPinchEnabled)

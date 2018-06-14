@@ -386,7 +386,7 @@ class MapView(
             updatePlaceInfoPosition(false)
         }
 
-        if (mapOptions.isUserLocationButtonEnabled) resizeAccuracyMarker()
+        if (mapOptions.isUserLocationButtonVisible) resizeAccuracyMarker()
 
         launch {
             scaleFlingJob.cancelAndJoin()

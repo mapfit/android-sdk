@@ -38,7 +38,7 @@ class KotlinActivity : AppCompatActivity() {
 
         mapfitMap.setCenter(LatLng(40.74405, -73.99324))
         mapfitMap.setZoom(14f)
-        mapfitMap.getMapOptions().isUserLocationButtonEnabled = true
+        mapfitMap.getMapOptions().isUserLocationButtonVisible = true
 
         placeMarker()
         placeMarkerWithAddress()
@@ -46,9 +46,9 @@ class KotlinActivity : AppCompatActivity() {
         setEventListeners()
 
         // enable ui controls
-        mapfitMap.getMapOptions().isRecenterButtonEnabled = true
-        mapfitMap.getMapOptions().isZoomControlsEnabled = true
-        mapfitMap.getMapOptions().isCompassButtonEnabled = true
+        mapfitMap.getMapOptions().isRecenterButtonVisible = true
+        mapfitMap.getMapOptions().isZoomControlVisible = true
+        mapfitMap.getMapOptions().isCompassButtonVisible = true
     }
 
     private fun setEventListeners() {

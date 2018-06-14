@@ -163,26 +163,26 @@ class MapOptions internal constructor(
             theme = null
             field = value
         }
-    
+
     var cameraType: CameraType = CameraType.PERSPECTIVE
         set(value) {
             mapController.cameraType = MapController.CameraType.valueOf(value.name)
             field = value
         }
-    
-    var isCompassButtonEnabled = false
+
+    var isCompassButtonVisible = false
         set(value) {
             mapView.btnCompass.visibility = if (value) View.VISIBLE else View.GONE
             field = value
         }
 
-    var isRecenterButtonEnabled = false
+    var isRecenterButtonVisible = false
         set(value) {
             mapView.btnRecenter.visibility = if (value) View.VISIBLE else View.GONE
             field = value
         }
 
-    var isUserLocationButtonEnabled = true
+    var isUserLocationButtonVisible = true
         set(value) {
             mapView.btnUserLocation.setImageResource(
                 if (!userLocationEnabled || !mapfitLocationProvider.isLocationPermissionGranted()) {
@@ -198,13 +198,13 @@ class MapOptions internal constructor(
             field = value
         }
 
-    var isZoomControlsEnabled = true
+    var isZoomControlVisible = true
         set(value) {
             mapView.zoomControlsView.visibility = if (value) View.VISIBLE else View.GONE
             field = value
         }
 
-    var isGestureEnabled = true
+    var gesturesEnabled = true
         set(value) {
             isPanEnabled = value
             isPinchEnabled = value
@@ -297,7 +297,7 @@ class MapOptions internal constructor(
         this.listener = listener
         userLocationEnabled = enable
 
-        if (enable && isUserLocationButtonEnabled) {
+        if (enable && isUserLocationButtonVisible) {
             mapView.btnUserLocation.setImageResource(R.drawable.mf_current_location)
             mapView.btnUserLocation.isEnabled = true
         }
@@ -311,7 +311,7 @@ class MapOptions internal constructor(
                 locationListener = locationListener
             )
 
-            if (isUserLocationButtonEnabled) {
+            if (isUserLocationButtonVisible) {
                 mapView.btnUserLocation.setImageResource(R.drawable.mf_current_location)
                 mapView.btnUserLocation.isEnabled = true
             }
