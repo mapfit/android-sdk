@@ -31,7 +31,7 @@ import org.mockito.MockitoAnnotations
  */
 @RunWith(AndroidJUnit4::class)
 @LargeTest
-class MapListeners {
+class MapListenersTest {
 
     private lateinit var mapView: MapView
 
@@ -60,32 +60,30 @@ class MapListeners {
         true
     )
 
-    private lateinit var idlingResource: CountingIdlingResource
-
     @Before
     @UiThreadTest
     fun init() {
         MockitoAnnotations.initMocks(this)
 
-        idlingResource = activityRule.activity.idlingResource
-        IdlingRegistry.getInstance().register(idlingResource)
+        mapView = activityRule.activity.findViewById(R.id.mapView)
+        mapfitMap = mapView.getMap(MapTheme.MAPFIT_DAY.toString())
+        mapfitMap.apply {
+            setOnMapClickListener(onMapClickListener)
+            setOnMapDoubleClickListener(onMapDoubleClickListener)
+            setOnMapLongClickListener(onMapLongClickListener)
+            setOnMapPanListener(onMapPanListener)
+            setOnMapPinchListener(onMapPinchListener)
+        }
 
-        idlingResource.registerIdleTransitionCallback({
-            mapfitMap = activityRule.activity.mapfitMap
-            mapView = activityRule.activity.mapView
-        })
-
-        activityRule.activity.init()
     }
 
     @After
     fun cleanup() {
-        IdlingRegistry.getInstance().unregister(idlingResource)
+        Mapfit.dispose()
     }
 
     @Test
     fun testMapClickListener() = runBlocking {
-        delay(400)
         mapfitMap.setOnMapClickListener(onMapClickListener)
 
         onView(withId(R.id.glSurface)).perform(click())
@@ -97,7 +95,6 @@ class MapListeners {
 
     @Test
     fun testOnMapDoubleClickListener() = runBlocking {
-        delay(400)
         mapfitMap.setOnMapDoubleClickListener(onMapDoubleClickListener)
 
         onView(withId(R.id.glSurface)).perform(doubleClick())
@@ -109,7 +106,6 @@ class MapListeners {
 
     @Test
     fun testOnMapLongClickListener() = runBlocking {
-        delay(400)
         mapfitMap.setOnMapLongClickListener(onMapLongClickListener)
 
         onView(withId(R.id.glSurface)).perform(longClick())
@@ -121,7 +117,6 @@ class MapListeners {
 
     @Test
     fun testOnMapPanListener() = runBlocking {
-        delay(400)
         mapfitMap.setOnMapPanListener(onMapPanListener)
 
         onView(withId(R.id.glSurface)).perform(swipeDown())
@@ -132,7 +127,6 @@ class MapListeners {
 
     @Test
     fun testOnMapPinchListener() = runBlocking {
-        delay(400)
         mapfitMap.setOnMapPinchListener(onMapPinchListener)
 
         onView(withId(R.id.glSurface)).perform(pinchIn())

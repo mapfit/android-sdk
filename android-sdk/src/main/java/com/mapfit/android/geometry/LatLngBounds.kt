@@ -1,7 +1,7 @@
 package com.mapfit.android.geometry
 
 import android.content.res.Resources
-import kotlin.math.ln
+import com.mapfit.android.MapOptions
 
 
 /**
@@ -15,7 +15,7 @@ class LatLngBounds(
 ) {
 
     val center: LatLng by lazy {
-        getCenterLatLng(listOf(northEast, southWest))
+        midPoint(northEast, southWest)
     }
 
     private val mapSideLength by lazy {
@@ -57,25 +57,49 @@ class LatLngBounds(
     }
 
     /**
-     * INTERNAL USAGE ONLY.
+     * Calculates visible bounds of the map.
+     *
+     * @param viewWidth of the MapView
+     * @param viewHeight of the MapView
+     * @param padding padding for the bounds
+     * @param vanishingPointOffset if scene camera is having vanishing point
+     * @return center point and zoom level
      */
-    fun getVisibleBounds(viewWidth: Int, viewHeight: Int, padding: Float): Pair<LatLng, Float> {
+    fun getVisibleBounds(
+        viewWidth: Int,
+        viewHeight: Int,
+        padding: Float,
+        vanishingPointOffset: Pair<Float, Float> = Pair(0f, 0f)
+    ): Pair<LatLng, Float> {
+        val reversePadding = if ((1 - padding) == 0f) 1f else (1 - padding)
 
-        fun zoom(mapPx: Int, fraction: Double): Double =
-            ln((mapPx / mapSideLength / fraction) * padding) / 0.69314718056
-
-        val latFraction =
-            (StrictMath.toRadians(northEast.lat) - StrictMath.toRadians((southWest.lat))) / Math.PI
-
+        val latFraction = (latRad(northEast.lat) - latRad(southWest.lat)) / Math.PI
         val lngDiff = northEast.lng - southWest.lng
-        val lngFraction = (if (lngDiff < 0) (lngDiff + 360) else lngDiff) / 360
+        val lngFraction = (if (lngDiff < 0) lngDiff + 360 else lngDiff) / 360
+        val latZoom = zoom(viewHeight.toDouble(), reversePadding, latFraction)
+        val lngZoom = zoom(viewWidth.toDouble(), reversePadding, lngFraction)
+        val zoom = Math.min(Math.min(latZoom, lngZoom), MapOptions.MAP_MAX_ZOOM).toFloat()
 
-        val latZoom = zoom(viewHeight, latFraction)
-        val lngZoom = zoom(viewWidth, lngFraction)
+        val normalizedCenter =
+            if (vanishingPointOffset.first > 0 || vanishingPointOffset.second > 0) {
+                val correctedCenter = center.toPointF(zoom)
+                correctedCenter.offset(vanishingPointOffset.first, vanishingPointOffset.second)
+                correctedCenter.toLatLng(zoom)
+            } else {
+                center
+            }
 
-        val result = Math.min(latZoom, lngZoom)
+        return Pair(normalizedCenter, zoom)
+    }
 
-        return Pair(center, result.toFloat())
+    private fun latRad(lat: Double): Double {
+        val sin = Math.sin(lat * Math.PI / 180)
+        val radX2 = Math.log((1 + sin) / (1 - sin)) / 2
+        return Math.max(Math.min(radX2, Math.PI), -Math.PI) / 2
+    }
+
+    private fun zoom(mapPx: Double, padding: Float, fraction: Double): Double {
+        return Math.log((mapPx / mapSideLength.toDouble() / fraction) * padding) / .693147180559945309417
     }
 
 }

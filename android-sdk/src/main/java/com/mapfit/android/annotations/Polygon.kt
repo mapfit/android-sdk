@@ -15,18 +15,75 @@ import com.mapfit.android.geometry.LatLngBounds
 class Polygon(
     internal val context: Context,
     polygonId: Long,
-    mapController: MapController,
-    internal val polygon: MutableList<List<LatLng>>
-) : Annotation(polygonId, mapController) {
+    private val polygonOptions: PolygonOptions,
+    mapController: MapController
+) : Annotation(polygonId, mapController), PolyFeature {
 
-    val points = polygon.toMutableList()
-    val polygonOptions = PolygonOptions(this)
+    val points = polygonOptions.points.toMutableList()
+
+    var fillColor = polygonOptions.fillColor
+        set(value) {
+            if (field != value) {
+                field = value
+                refreshPolygon()
+            }
+        }
+
+    var strokeWidth = polygonOptions.strokeWidth
+        set(value) {
+            if (field != value) {
+                field = value
+                refreshPolygon()
+            }
+        }
+
+    var strokeColor = polygonOptions.strokeColor
+        set(value) {
+            if (field != value) {
+                field = value
+                refreshPolygon()
+            }
+        }
+
+    var strokeOutlineColor = polygonOptions.strokeOutlineColor
+        set(value) {
+            if (field != value) {
+                field = value
+                refreshPolygon()
+            }
+        }
+
+    var strokeOutlineWidth = polygonOptions.strokeOutlineWidth
+        set(value) {
+            if (field != value) {
+                field = value
+                refreshPolygon()
+            }
+        }
+
+    var lineJoinType = polygonOptions.lineJoinType
+        set(value) {
+            if (field != value) {
+                field = value
+                refreshPolygon()
+            }
+        }
+
+    var drawOrder = polygonOptions.drawOrder
+        set(value) {
+            if (field != value) {
+                field = value
+                refreshPolygon()
+            }
+        }
+
     internal lateinit var coordinates: DoubleArray
     internal lateinit var rings: IntArray
 
     init {
+        data = polygonOptions.data
+        parseRings(points)
         initAnnotation(mapController, polygonId)
-        parseRings(polygon)
     }
 
     /**
@@ -55,9 +112,15 @@ class Polygon(
         mapBindings[mapController] = id
     }
 
+    private fun refreshPolygon() {
+        mapBindings.forEach {
+            it.key.refreshAnnotation(this)
+        }
+    }
+
     override fun getLatLngBounds(): LatLngBounds {
         val builder = LatLngBounds.Builder()
-        polygon.forEach { it.forEach { builder.include(it) } }
+        points.forEach { it.forEach { builder.include(it) } }
         return builder.build()
     }
 
@@ -65,7 +128,6 @@ class Polygon(
      * Removes the polygon from the map(s) it is added to.
      */
     override fun remove() {
-
         mapBindings.forEach {
             it.key.removePolygon(it.value)
         }
@@ -80,5 +142,26 @@ class Polygon(
         }
         mapBindings.remove(mapController)
     }
+
+    override fun getProperties(idForMap: String): Array<String?> {
+        val properties = HashMap<String, String>()
+
+        properties["id"] = idForMap
+        if (fillColor.isNotBlank()) properties["polygon_color"] = fillColor
+        if (drawOrder != Int.MIN_VALUE) {
+            properties["polygon_order"] = "$drawOrder"
+            properties["line_order"] = (drawOrder + 1).toString()
+        }
+        if (strokeColor.isNotBlank()) properties["line_color"] = strokeColor
+        if (strokeWidth != Int.MIN_VALUE) properties["line_width"] = strokeWidth.toString()
+        if (strokeOutlineColor.isNotBlank()) properties["line_stroke_color"] = strokeOutlineColor
+        if (strokeOutlineWidth != Int.MIN_VALUE) properties["line_stroke_width"] =
+                strokeOutlineWidth.toString()
+        properties["line_join"] = lineJoinType.getValue()
+
+        return getStringMapAsArray(properties)
+    }
+
+    override fun getLayerName() = polygonOptions.layerName
 
 }

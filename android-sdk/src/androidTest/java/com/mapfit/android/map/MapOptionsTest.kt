@@ -2,8 +2,11 @@ package com.mapfit.android.map
 
 import android.location.Location
 import android.support.test.annotation.UiThreadTest
+import android.support.test.espresso.Espresso
 import android.support.test.espresso.IdlingRegistry
+import android.support.test.espresso.action.ViewActions
 import android.support.test.espresso.idling.CountingIdlingResource
+import android.support.test.espresso.matcher.ViewMatchers
 import android.support.test.filters.LargeTest
 import android.support.test.rule.ActivityTestRule
 import android.support.test.rule.GrantPermissionRule
@@ -12,16 +15,15 @@ import android.view.View
 import com.mapfit.android.*
 import com.mapfit.android.location.LocationListener
 import com.mapfit.android.location.LocationPriority
-import kotlinx.android.synthetic.main.mf_overlay_map_controls.view.*
-import kotlinx.coroutines.experimental.android.UI
+import com.mapfit.android.location.ProviderStatus
+import com.mapfit.tetragon.SceneUpdate
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.*
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito
-import org.mockito.Mockito.never
-import org.mockito.Mockito.only
+import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
 
 
@@ -39,10 +41,14 @@ class MapOptionsTest {
     private lateinit var mapfitMap: MapfitMap
 
     @Mock
-    private lateinit var locationListener: LocationListener
+    private lateinit var onMapThemeLoadListener: OnMapThemeLoadListener
 
     @Mock
-    private lateinit var onMapThemeLoadListener: OnMapThemeLoadListener
+    private lateinit var onMapPanListener: OnMapPanListener
+
+    @Mock
+    private lateinit var onMapPinchListener: OnMapPinchListener
+
 
     @Rule
     @JvmField
@@ -57,27 +63,27 @@ class MapOptionsTest {
     val grantPermissionRule: GrantPermissionRule =
         GrantPermissionRule.grant(android.Manifest.permission.ACCESS_FINE_LOCATION)
 
-    private lateinit var idlingResource: CountingIdlingResource
+    private val idlingResource = CountingIdlingResource("map_options_resource")
 
     @Before
     @UiThreadTest
     fun init() {
         MockitoAnnotations.initMocks(this)
 
-        idlingResource = activityRule.activity.idlingResource
-        IdlingRegistry.getInstance().register(idlingResource)
-
-        idlingResource.registerIdleTransitionCallback({
-            mapfitMap = activityRule.activity.mapfitMap
-            mapView = activityRule.activity.mapView
+        mapView = activityRule.activity.findViewById(R.id.mapView)
+        mapfitMap = mapView.getMap(MapTheme.MAPFIT_DAY.toString())
+        mapfitMap.apply {
             mapfitMap.setOnMapThemeLoadListener(onMapThemeLoadListener)
-        })
+            mapfitMap.setOnMapPinchListener(onMapPinchListener)
+            mapfitMap.setOnMapPanListener(onMapPanListener)
+        }
 
-        activityRule.activity.init()
+        IdlingRegistry.getInstance().register(idlingResource)
     }
 
     @After
     fun cleanup() {
+        Mapfit.dispose()
         IdlingRegistry.getInstance().unregister(idlingResource)
     }
 
@@ -90,12 +96,6 @@ class MapOptionsTest {
 
     @Test
     @UiThreadTest
-    fun testDefaultValues() {
-        Assert.assertEquals(MapTheme.MAPFIT_DAY, mapfitMap.getMapOptions().theme)
-    }
-
-    @Test
-    @UiThreadTest
     fun testStyleChanges() {
         mapfitMap.getMapOptions().theme = MapTheme.MAPFIT_NIGHT
         Assert.assertEquals(MapTheme.MAPFIT_NIGHT, mapfitMap.getMapOptions().theme)
@@ -104,30 +104,30 @@ class MapOptionsTest {
     @Test
     @UiThreadTest
     fun testZoomControlVisibility() {
-        mapfitMap.getMapOptions().zoomControlsEnabled = true
+        mapfitMap.getMapOptions().isZoomControlVisible = true
         Assert.assertEquals(View.VISIBLE, mapView.zoomControlsView.visibility)
 
-        mapfitMap.getMapOptions().zoomControlsEnabled = false
+        mapfitMap.getMapOptions().isZoomControlVisible = false
         Assert.assertEquals(View.GONE, mapView.zoomControlsView.visibility)
     }
 
     @Test
     @UiThreadTest
     fun testCompassVisibility() {
-        mapfitMap.getMapOptions().compassButtonEnabled = true
+        mapfitMap.getMapOptions().isCompassButtonVisible = true
         Assert.assertEquals(View.VISIBLE, mapView.btnCompass.visibility)
 
-        mapfitMap.getMapOptions().compassButtonEnabled = false
+        mapfitMap.getMapOptions().isCompassButtonVisible = false
         Assert.assertEquals(View.GONE, mapView.btnCompass.visibility)
     }
 
     @Test
     @UiThreadTest
     fun testRecenterVisibility() {
-        mapfitMap.getMapOptions().recenterButtonEnabled = true
+        mapfitMap.getMapOptions().isRecenterButtonVisible = true
         Assert.assertEquals(View.VISIBLE, mapView.btnRecenter.visibility)
 
-        mapfitMap.getMapOptions().recenterButtonEnabled = false
+        mapfitMap.getMapOptions().isRecenterButtonVisible = false
         Assert.assertEquals(View.GONE, mapView.btnRecenter.visibility)
     }
 
@@ -135,18 +135,29 @@ class MapOptionsTest {
      * Location update is not mocked.
      */
     @Test
-    fun testOnUserLocationListener() = runBlocking(UI) {
-        delay(400)
+    fun testOnUserLocationListener() {
+        var loc: Location? = null
+        idlingResource.increment()
+
+        val locationListener = object : LocationListener {
+            override fun onLocation(location: Location) {
+                loc = location
+                idlingResource.decrement()
+            }
+
+            override fun onProviderStatus(status: ProviderStatus) {
+                idlingResource.decrement()
+            }
+        }
+
         mapfitMap.getMapOptions().setUserLocationEnabled(
             true,
             LocationPriority.HIGH_ACCURACY,
             locationListener
         )
 
-        delay(7000)
-
-        Mockito.verify(locationListener, Mockito.atLeastOnce())
-            .onLocation(Mockito.any(Location::class.java) ?: Location(""))
+        suspendViaGLSurface()
+        Assert.assertNotNull(loc)
 
         mapfitMap.getMapOptions().setUserLocationEnabled(false)
     }
@@ -154,13 +165,58 @@ class MapOptionsTest {
     @Test
     @UiThreadTest
     fun test3dBuildings() = runBlocking {
-
         mapfitMap.getMapOptions().is3dBuildingsEnabled = true
 
         delay(500)
 
         Mockito.verify(onMapThemeLoadListener, only()).onLoaded()
         Mockito.verify(onMapThemeLoadListener, never()).onError()
+    }
+
+    @Test
+    @UiThreadTest
+    fun testSceneUpdate() = runBlocking {
+        val sceneUpdate = SceneUpdate("global.building_fill", "#ffffff")
+        mapfitMap.getMapOptions().updateScene(listOf(sceneUpdate))
+
+        delay(500)
+
+        Mockito.verify(onMapThemeLoadListener, only()).onLoaded()
+        Mockito.verify(onMapThemeLoadListener, never()).onError()
+    }
+
+    @Test
+    fun testGestures() = runBlocking {
+        Assert.assertTrue(mapfitMap.getMapOptions().isPanEnabled)
+        Assert.assertTrue(mapfitMap.getMapOptions().isRotateEnabled)
+        Assert.assertTrue(mapfitMap.getMapOptions().isPinchEnabled)
+        Assert.assertTrue(mapfitMap.getMapOptions().isTiltEnabled)
+
+        mapfitMap.getMapOptions().gesturesEnabled = false
+        Assert.assertFalse(mapfitMap.getMapOptions().isPanEnabled)
+        Assert.assertFalse(mapfitMap.getMapOptions().isRotateEnabled)
+        Assert.assertFalse(mapfitMap.getMapOptions().isPinchEnabled)
+        Assert.assertFalse(mapfitMap.getMapOptions().isTiltEnabled)
+
+        Espresso.onView(ViewMatchers.withId(R.id.glSurface)).perform(ViewActions.swipeDown())
+        Espresso.onView(ViewMatchers.withId(R.id.glSurface)).perform(pinchIn())
+        delay(300)
+
+        Mockito.verify(onMapPanListener, never()).onMapPan()
+        Mockito.verify(onMapPinchListener, never()).onMapPinch()
+
+        mapfitMap.getMapOptions().gesturesEnabled = true
+        Assert.assertTrue(mapfitMap.getMapOptions().isPanEnabled)
+        Assert.assertTrue(mapfitMap.getMapOptions().isRotateEnabled)
+        Assert.assertTrue(mapfitMap.getMapOptions().isPinchEnabled)
+        Assert.assertTrue(mapfitMap.getMapOptions().isTiltEnabled)
+
+        Espresso.onView(ViewMatchers.withId(R.id.glSurface)).perform(ViewActions.swipeDown())
+        Espresso.onView(ViewMatchers.withId(R.id.glSurface)).perform(pinchIn())
+        delay(300)
+
+        Mockito.verify(onMapPanListener, atLeastOnce()).onMapPan()
+        Mockito.verify(onMapPinchListener, atLeastOnce()).onMapPinch()
     }
 
 

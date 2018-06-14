@@ -27,7 +27,7 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.TlsVersion;
 
-import static com.mapfit.android.utils.CommonUtilsKt.isNetworkAvailable;
+import static com.mapfit.android.utils.CommonUtils.isNetworkAvailable;
 
 /**
  * FIXME: Rename to UrlHandler.

@@ -14,6 +14,8 @@ import android.support.annotation.RequiresPermission
 import android.support.v4.content.ContextCompat
 import com.mapfit.android.Mapfit
 import com.mapfit.android.utils.logError
+import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.launch
 
 /**
  * Location API for accessing accurate device location.
@@ -75,13 +77,15 @@ internal class MapfitLocationProvider(context: Context) {
                 }
             }
 
-            locationManager.requestLocationUpdates(
-                locationRequest.interval,
-                locationRequest.minimumDisplacement,
-                getLocationCriteria(locationRequest.locationPriority),
-                locationCallback,
-                null
-            )
+            launch(UI) {
+                locationManager.requestLocationUpdates(
+                    locationRequest.interval,
+                    locationRequest.minimumDisplacement,
+                    getLocationCriteria(locationRequest.locationPriority),
+                    locationCallback,
+                    null
+                )
+            }
 
             listenerMap[locationListener] = locationCallback
         } else {

@@ -7,13 +7,17 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLSurfaceView.Renderer;
 import android.os.Handler;
 import android.support.annotation.Keep;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 
 import com.mapfit.android.annotations.Annotation;
 import com.mapfit.android.annotations.Marker;
+import com.mapfit.android.annotations.MarkerOptions;
 import com.mapfit.android.annotations.OnAnnotationClickListener;
 import com.mapfit.android.annotations.Polygon;
+import com.mapfit.android.annotations.PolygonOptions;
 import com.mapfit.android.annotations.Polyline;
+import com.mapfit.android.annotations.PolylineOptions;
 import com.mapfit.android.geometry.LatLng;
 import com.mapfit.android.geometry.LatLngBounds;
 import com.mapfit.android.utils.DebugUtils;
@@ -38,6 +42,7 @@ import java.util.Map;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import kotlin.Pair;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
@@ -203,7 +208,7 @@ public class MapController implements Renderer {
         requestRender();
     }
 
-    private Bitmap capture() {
+    public Bitmap capture() {
         int w = mapView.getWidth();
         int h = mapView.getHeight();
 
@@ -284,9 +289,6 @@ public class MapController implements Renderer {
         if (mapPointer <= 0) {
             throw new RuntimeException("Unable to create a native Map object! There may be insufficient memory available.");
         }
-
-//        setSimultaneousGestureAllowed(Gestures.SCALE, Gestures.ROTATE, true);
-//        setSimultaneousGestureAllowed(Gestures.SCALE, Gestures.SHOVE, true);
     }
 
     private static final String POLYGON_LAYER_NAME = "mz_default_polygon";
@@ -353,8 +355,6 @@ public class MapController implements Renderer {
         String[] updateStrings = bundleSceneUpdates(sceneUpdates);
         checkPointer(mapPointer);
         int sceneId = nativeLoadScene(mapPointer, path, updateStrings);
-        removeAllMarkers();
-        requestRender();
         return sceneId;
     }
 
@@ -373,8 +373,6 @@ public class MapController implements Renderer {
         String[] updateStrings = bundleSceneUpdates(sceneUpdates);
         checkPointer(mapPointer);
         int sceneId = nativeLoadSceneAsync(mapPointer, path, updateStrings);
-        removeAllMarkers();
-        requestRender();
         return sceneId;
     }
 
@@ -393,8 +391,6 @@ public class MapController implements Renderer {
         String[] updateStrings = bundleSceneUpdates(sceneUpdates);
         checkPointer(mapPointer);
         int sceneId = nativeLoadSceneYaml(mapPointer, yaml, resourceRoot, updateStrings);
-        removeAllMarkers();
-        requestRender();
         return sceneId;
     }
 
@@ -413,8 +409,6 @@ public class MapController implements Renderer {
         String[] updateStrings = bundleSceneUpdates(sceneUpdates);
         checkPointer(mapPointer);
         int sceneId = nativeLoadSceneYamlAsync(mapPointer, yaml, resourceRoot, updateStrings);
-        removeAllMarkers();
-        requestRender();
         return sceneId;
     }
 
@@ -433,11 +427,7 @@ public class MapController implements Renderer {
         if (sceneUpdates == null || sceneUpdates.size() == 0) {
             throw new IllegalArgumentException("sceneUpdates can not be null or empty in queueSceneUpdates");
         }
-
-        removeAllMarkers();
-
         String[] updateStrings = bundleSceneUpdates(sceneUpdates);
-
         return nativeUpdateScene(mapPointer, updateStrings);
     }
 
@@ -458,6 +448,18 @@ public class MapController implements Renderer {
      */
     public void enable3dBuildings(Boolean enable) {
         SceneUpdate sceneUpdate = new SceneUpdate("global.show_3d_buildings", enable + "");
+        List updates = new ArrayList();
+        updates.add(sceneUpdate);
+        updateSceneAsync(updates);
+    }
+
+    /**
+     * Enables or disables the 3d buildings.
+     *
+     * @param enable
+     */
+    public void enableTransitLayer(Boolean enable) {
+        SceneUpdate sceneUpdate = new SceneUpdate("global.transit_layer", enable + "");
         List updates = new ArrayList();
         updates.add(sceneUpdate);
         updateSceneAsync(updates);
@@ -502,16 +504,25 @@ public class MapController implements Renderer {
         nativeSetPositionEased(mapPointer, position.getLng(), position.getLat(), seconds, ease.ordinal());
     }
 
-    public void setLatLngBounds(final LatLngBounds latlngBounds, final float padding) {
+    public void setLatLngBounds(final LatLngBounds latlngBounds,
+                                final float padding,
+                                final long duration,
+                                final Pair<Float, Float> vanishingPointOffset) {
         mapView.post(new Runnable() {
             @Override
             public void run() {
                 kotlin.Pair<LatLng, Float> pair = latlngBounds.getVisibleBounds(
                         mapView.getWidth(),
                         mapView.getHeight(),
-                        padding);
-                setZoom(pair.component2());
-                setPosition(pair.component1());
+                        padding,vanishingPointOffset);
+
+                if (duration <= 0) {
+                    setZoom(pair.component2());
+                    setPosition(pair.component1());
+                } else {
+                    setZoomEased(pair.component2(), (int) duration);
+                    setPositionEased(pair.component1(), (int) duration);
+                }
             }
         });
     }
@@ -566,7 +577,7 @@ public class MapController implements Renderer {
      *
      * @return Zoom level; lower values show more area
      */
-    float getZoom() {
+    public float getZoom() {
         checkPointer(mapPointer);
         return nativeGetZoom(mapPointer);
     }
@@ -700,7 +711,7 @@ public class MapController implements Renderer {
      * @return Position in pixels from the top-left corner of the map area (the point
      * may not lie within the viewable screen area)
      */
-    public PointF lngLatToScreenPosition(LatLng lngLat) {
+    public PointF latLngToScreenPosition(LatLng lngLat) {
         double[] tmp = {lngLat.getLng(), lngLat.getLat()};
         checkPointer(mapPointer);
         nativeLngLatToScreenPosition(mapPointer, tmp);
@@ -1098,62 +1109,68 @@ public class MapController implements Renderer {
      *
      * @return Newly created {@link Marker} object.
      */
-    public Marker addMarker() {
+    public Marker addMarker(MarkerOptions markerOptions) {
         checkPointer(mapPointer);
         long markerId = nativeMarkerAdd(mapPointer);
-        Marker marker = new Marker(mapView.getContext(), markerId, this);
+        Marker marker = new Marker(mapView.getContext(),
+                markerOptions,
+                markerId,
+                this);
 
         markers.put(markerId, marker);
         return marker;
     }
 
-    public Marker addMarkerAsFeature(LatLng latLng) {
+    public Polyline addPolyline(PolylineOptions polylineOptions) {
         checkPointer(mapPointer);
 
-        MapData pointData = addDataLayer("mz_default_point");
-        Marker marker = new Marker(mapView.getContext(), pointData.getId(), this);
-        marker.setPosition(latLng);
-        pointData.addPoint(marker);
+        String layerName = polylineOptions.getLayerName();
 
-        markers.put(pointData.getId(), marker);
-        return marker;
-    }
+        if (TextUtils.isEmpty(layerName)) {
+            layerName = POLYLINE_LAYER_NAME;
+        }
 
-    public Polyline addPolyline(List<LatLng> line) {
-        checkPointer(mapPointer);
-        MapData polylineData = addDataLayer(POLYLINE_LAYER_NAME);
+        MapData polylineData = addDataLayer(layerName);
 
         Polyline polyline = new Polyline(
                 mapView.getContext(),
                 polylineData.getId(),
-                this,
-                line);
+                polylineOptions,
+                this
+        );
 
         polylineData.addPolyline(polyline);
         mapDatas.put(polylineData.getId(), polylineData);
-
         polylines.put(polylineData.getId(), polyline);
+
         requestRender();
         return polyline;
     }
 
-    public Polygon addPolygon(List<List<LatLng>> polygon) {
+    public Polygon addPolygon(PolygonOptions polygonOptions) {
         checkPointer(mapPointer);
-        MapData polygonLayer = addDataLayer(POLYGON_LAYER_NAME);
 
-        Polygon poly = new Polygon(
+        String layerName = polygonOptions.getLayerName();
+
+        if (TextUtils.isEmpty(layerName)) {
+            layerName = POLYGON_LAYER_NAME;
+        }
+
+        MapData polygonLayer = addDataLayer(layerName);
+
+        Polygon polygon = new Polygon(
                 mapView.getContext(),
                 polygonLayer.getId(),
-                this,
-                polygon);
+                polygonOptions,
+                this
+        );
 
+        polygonLayer.addPolygon(polygon);
         mapDatas.put(polygonLayer.getId(), polygonLayer);
+        polygons.put(polygonLayer.getId(), polygon);
 
-        polygonLayer.addPolygon(poly);
-
-        polygons.put(polygonLayer.getId(), poly);
         requestRender();
-        return poly;
+        return polygon;
     }
 
     public long addAnnotation(Annotation annotation) {
@@ -1165,13 +1182,25 @@ public class MapController implements Renderer {
             return markerId;
 
         } else if (annotation instanceof Polyline) {
-            MapData lineLayer = addDataLayer(POLYLINE_LAYER_NAME);
+            String layerName = ((Polyline) annotation).getLayerName();
+
+            if (TextUtils.isEmpty(layerName)) {
+                layerName = POLYLINE_LAYER_NAME;
+            }
+
+            MapData lineLayer = addDataLayer(layerName);
             lineLayer.addPolyline((Polyline) annotation);
             polylines.put(lineLayer.getId(), (Polyline) annotation);
             return lineLayer.getId();
 
         } else if (annotation instanceof Polygon) {
-            MapData polygonLayer = addDataLayer(POLYGON_LAYER_NAME);
+            String layerName = ((Polygon) annotation).getLayerName();
+
+            if (TextUtils.isEmpty(layerName)) {
+                layerName = POLYGON_LAYER_NAME;
+            }
+
+            MapData polygonLayer = addDataLayer(layerName);
             polygonLayer.addPolygon((Polygon) annotation);
             polygons.put(polygonLayer.getId(), (Polygon) annotation);
             return polygonLayer.getId();
@@ -1229,14 +1258,19 @@ public class MapController implements Renderer {
         }
     }
 
-
     private void hideTileSource(long polylineId) {
         nativeRemoveTileSource(mapPointer, polylineId);
     }
 
     private void showPolyline(long polylineId) {
         Polyline polyline = polylines.get(polylineId);
-        MapData polylineData = addDataLayer(POLYLINE_LAYER_NAME);
+
+        String layerName = polyline.getLayerName();
+        if (TextUtils.isEmpty(layerName)) {
+            layerName = POLYLINE_LAYER_NAME;
+        }
+
+        MapData polylineData = addDataLayer(layerName);
         polylineData.addPolyline(polyline);
         polylines.remove(polylineId);
         polylines.put(polylineData.getId(), polyline);
@@ -1244,7 +1278,13 @@ public class MapController implements Renderer {
 
     private void showPolygon(long polygonId) {
         Polygon polygon = polygons.get(polygonId);
-        MapData polygonData = addDataLayer(POLYGON_LAYER_NAME);
+
+        String layerName = polygon.getLayerName();
+        if (TextUtils.isEmpty(layerName)) {
+            layerName = POLYGON_LAYER_NAME;
+        }
+
+        MapData polygonData = addDataLayer(layerName);
         polygonData.addPolygon(polygon);
         polygons.remove(polygonId);
         polygons.put(polygonData.getId(), polygon);
@@ -1266,15 +1306,16 @@ public class MapController implements Renderer {
         nativeMarkerRemoveAll(mapPointer);
     }
 
-
-    protected void reAddMarkers() {
-        HashMap<Long, Marker> tempMarkers = new HashMap<>();
-        for (Marker marker : markers.values()) {
-            long markerId = nativeMarkerAdd(mapPointer);
-            marker.initAnnotation(this, markerId);
-            tempMarkers.put(markerId, marker);
+    private void reAddMarkers() {
+        if (markers.size() > 0) {
+            HashMap<Long, Marker> tempMarkers = new HashMap<>();
+            for (Marker marker : markers.values()) {
+                long markerId = nativeMarkerAdd(mapPointer);
+                marker.initAnnotation(this, markerId);
+                tempMarkers.put(markerId, marker);
+            }
+            markers = tempMarkers;
         }
-        markers = tempMarkers;
     }
 
     /**
@@ -1751,10 +1792,14 @@ public class MapController implements Renderer {
     @Keep
     public void sceneReadyCallback(final int sceneId, final SceneError error) {
         final SceneLoadListener cb = sceneLoadListener;
+
         if (cb != null) {
             uiThreadHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    // re-adding markers to the new scene.
+                    reAddMarkers();
+
                     cb.onSceneReady(sceneId, error);
                 }
             });

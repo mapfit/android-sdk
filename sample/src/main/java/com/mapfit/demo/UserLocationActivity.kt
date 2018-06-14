@@ -40,7 +40,7 @@ class UserLocationActivity : AppCompatActivity() {
             // location permission is not granted. You should user for location permission gracefully.
         }
 
-        mapfitMap.getMapOptions().userLocationButtonEnabled = true
+        mapfitMap.getMapOptions().isUserLocationButtonVisible = true
     }
 
 }

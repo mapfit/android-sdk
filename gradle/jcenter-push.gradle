@@ -12,6 +12,7 @@ publish {
     userOrg = 'mapfit'
     groupId = 'com.mapfit'
     artifactId = 'android-sdk'
+    desc = "Mapfit Android SDK"
     publishVersion = project.mapfitSdkVersion
     website = 'https://github.com/mapfit/android-sdk'
     dryRun = false

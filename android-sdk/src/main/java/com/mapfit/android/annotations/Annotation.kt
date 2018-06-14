@@ -19,7 +19,7 @@ abstract class Annotation(
 
     internal val mapBindings = HashMap<MapController, Long>()
     internal val layers = mutableListOf<Layer>()
-    internal var tag = ""
+    var data: Any? = null
 
     var visibility: Boolean = true
         set(value) {

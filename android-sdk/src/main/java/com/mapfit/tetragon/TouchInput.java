@@ -374,9 +374,7 @@ public class TouchInput implements OnTouchListener, OnScaleGestureListener,
         if (!g.isMultiTouch()) {
             // Return false if a multitouch gesture has finished within a time threshold
             long t = SystemClock.uptimeMillis() - lastMultiTouchEndTime;
-            if (t < MULTITOUCH_BUFFER_TIME) {
-                return false;
-            }
+            return t >= MULTITOUCH_BUFFER_TIME;
         }
         return true;
     }
@@ -411,10 +409,8 @@ public class TouchInput implements OnTouchListener, OnScaleGestureListener,
 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
-        if (isDetectionAllowed(Gestures.TAP) && tapResponder != null) {
-            return tapResponder.onSingleTapConfirmed(e.getX(), e.getY());
-        }
-        return false;
+        return isDetectionAllowed(Gestures.TAP) && tapResponder != null
+                && tapResponder.onSingleTapConfirmed(e.getX(), e.getY());
     }
 
     @Override
@@ -429,16 +425,13 @@ public class TouchInput implements OnTouchListener, OnScaleGestureListener,
     public boolean onDoubleTapEvent(MotionEvent e) {
         int action = e.getActionMasked();
         long time = e.getEventTime() - e.getDownTime();
-        if (action != MotionEvent.ACTION_UP || time > DOUBLE_TAP_TIMEOUT) {
-            // The detector sends back only the first 'down' and the second 'up' so we only need to
-            // respond when we receive an 'up' action. We also discard the gesture if the second tap
-            // lasts longer than the permitted duration between taps.
-            return false;
-        }
-        if (isDetectionAllowed(Gestures.DOUBLE_TAP) && doubleTapResponder != null) {
-            return doubleTapResponder.onDoubleTap(e.getX(), e.getY());
-        }
-        return false;
+        // The detector sends back only the first 'down' and the second 'up' so we only need to
+// respond when we receive an 'up' action. We also discard the gesture if the second tap
+// lasts longer than the permitted duration between taps.
+        return action == MotionEvent.ACTION_UP && time <= DOUBLE_TAP_TIMEOUT
+                && isDetectionAllowed(Gestures.DOUBLE_TAP)
+                && doubleTapResponder != null
+                && doubleTapResponder.onDoubleTap(e.getX(), e.getY());
     }
 
     // GestureDetector.OnGestureListener implementation
@@ -463,10 +456,8 @@ public class TouchInput implements OnTouchListener, OnScaleGestureListener,
 
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
-        if (isDetectionAllowed(Gestures.TAP) && tapResponder != null) {
-            return tapResponder.onSingleTapUp(e.getX(), e.getY());
-        }
-        return false;
+        return isDetectionAllowed(Gestures.TAP) && tapResponder != null
+                && tapResponder.onSingleTapUp(e.getX(), e.getY());
     }
 
     @Override
@@ -503,10 +494,8 @@ public class TouchInput implements OnTouchListener, OnScaleGestureListener,
 
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        if (isDetectionAllowed(Gestures.PAN) && panResponder != null) {
-            return panResponder.onFling(e2.getX(), e2.getY(), velocityX, velocityY);
-        }
-        return false;
+        return isDetectionAllowed(Gestures.PAN) && panResponder != null
+                && panResponder.onFling(e2.getX(), e2.getY(), velocityX, velocityY);
     }
 
     // RotateGestureDetector.OnRotateGestureListener implementation
@@ -571,10 +560,8 @@ public class TouchInput implements OnTouchListener, OnScaleGestureListener,
 
     @Override
     public boolean onShove(ShoveGestureDetector detector) {
-        if (isDetectionAllowed(Gestures.SHOVE) && shoveResponder != null) {
-            return shoveResponder.onShove(detector.getShovePixelsDelta());
-        }
-        return false;
+        return isDetectionAllowed(Gestures.SHOVE) && shoveResponder != null
+                && shoveResponder.onShove(detector.getShovePixelsDelta());
     }
 
     @Override

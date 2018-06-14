@@ -1,9 +1,9 @@
 package com.mapfit.android.annotations
 
-import android.content.Context
-import android.support.test.InstrumentationRegistry
 import android.support.test.annotation.UiThreadTest
 import android.support.test.espresso.Espresso
+import android.support.test.espresso.IdlingRegistry
+import android.support.test.espresso.idling.CountingIdlingResource
 import android.support.test.espresso.matcher.ViewMatchers
 import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
@@ -15,12 +15,14 @@ import junit.framework.Assert
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
-import org.mockito.Mockito.times
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
@@ -33,9 +35,9 @@ import org.mockito.MockitoAnnotations
 @RunWith(AndroidJUnit4::class)
 class MarkerTest {
 
-    private val mMockContext: Context = InstrumentationRegistry.getContext()
 
     private lateinit var mapfitMap: MapfitMap
+    private lateinit var mapView: MapView
 
     @Mock
     private lateinit var onMarkerClickListener: OnMarkerClickListener
@@ -47,6 +49,8 @@ class MarkerTest {
     private lateinit var placeInfoAdapter: MapfitMap.PlaceInfoAdapter
 
     private val latLng = LatLng(40.693825, -73.998691)
+
+    private var idlingResource = CountingIdlingResource("marker_idling_resource")
 
     @Rule
     @JvmField
@@ -60,60 +64,61 @@ class MarkerTest {
     @UiThreadTest
     fun init() {
         MockitoAnnotations.initMocks(this)
+        mapView = activityRule.activity.findViewById(R.id.mapView)
 
-        Mapfit.getInstance(mMockContext, mMockContext.getString(R.string.mapfit_debug_api_key))
-        val mapView: MapView = activityRule.activity.findViewById(R.id.mapView)
+        mapfitMap = mapView.getMap(MapTheme.MAPFIT_DAY.toString())
+        mapfitMap.apply {
+            setOnMarkerClickListener(onMarkerClickListener)
+            setOnPlaceInfoClickListener(onPlaceInfoClickListener)
+            setCenter(latLng)
+        }
 
-        mapView.getMapAsync(onMapReadyCallback = object : OnMapReadyCallback {
-            override fun onMapReady(mapfitMap: MapfitMap) {
-                this@MarkerTest.mapfitMap = mapfitMap
-            }
-        })
+        IdlingRegistry.getInstance().register(idlingResource)
     }
 
     @After
     @UiThreadTest
     fun dispose() {
         Mapfit.dispose()
+        IdlingRegistry.getInstance().unregister(idlingResource)
     }
-
 
     @Test
     @UiThreadTest
     fun testDefaults() {
-        val marker = mapfitMap.addMarker(latLng)
+        val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
         Assert.assertTrue(marker.visibility)
-        Assert.assertTrue(marker.tag.isBlank())
-        Assert.assertTrue(marker.getTitle().isBlank())
-        Assert.assertTrue(marker.getSubtitle1().isBlank())
-        Assert.assertTrue(marker.getSubtitle2().isBlank())
+        Assert.assertTrue(marker.streetAddress.isBlank())
+        Assert.assertTrue(marker.title.isBlank())
+        Assert.assertTrue(marker.subtitle1.isBlank())
+        Assert.assertTrue(marker.subtitle2.isBlank())
+        Assert.assertEquals(Anchor.TOP, marker.anchor)
         Assert.assertNull(marker.address)
+        Assert.assertNull(marker.data)
         Assert.assertNotSame(0L, marker.id)
     }
 
     @Test
     @UiThreadTest
     fun testMarkerPosition() {
-        // initial position
-        val marker = mapfitMap.addMarker(latLng)
-        Assert.assertEquals(latLng, marker.getPosition())
+        val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
+        Assert.assertEquals(latLng, marker.position)
 
         // valid position
         val latLng2 = LatLng(42.693825, -63.998691)
-        marker.setPosition(latLng2)
-        Assert.assertEquals(latLng2, marker.getPosition())
+        marker.position = latLng2
+        Assert.assertEquals(latLng2, marker.position)
 
         // invalid position
         val latLng3 = LatLng(412.693825, -653.998691)
-        marker.setPosition(latLng3)
-        Assert.assertEquals(latLng2, marker.getPosition())
+        marker.position = latLng3
+        Assert.assertEquals(latLng2, marker.position)
     }
-
 
     @Test
     @UiThreadTest
     fun testAddRemoveMarker() {
-        val marker = mapfitMap.addMarker(LatLng())
+        val marker = mapfitMap.addMarker(MarkerOptions().position(LatLng()))
         Assert.assertNotNull(marker)
 
         mapfitMap.removeMarker(marker)
@@ -124,7 +129,7 @@ class MarkerTest {
     @Test
     @UiThreadTest
     fun testAddRemoveMarkerFromItself() {
-        val marker = mapfitMap.addMarker(LatLng())
+        val marker = mapfitMap.addMarker(MarkerOptions().position(LatLng()))
         Assert.assertNotNull(marker)
 
         Layer().add(marker)
@@ -138,68 +143,118 @@ class MarkerTest {
     }
 
     @Test
+    fun testMapfitIcon() {
+        val marker = mapfitMap.addMarker(
+            MarkerOptions()
+                .position(latLng)
+                .icon(MapfitMarker.ARTS)
+        )
+
+        clickOnMarker(marker)
+        verify(onMarkerClickListener).onMarkerClicked(marker)
+    }
+
+    @Test
+    fun testUrlIcon() = runBlocking {
+        val marker = mapfitMap.addMarker(
+            MarkerOptions()
+                .position(latLng)
+                .icon("http://cdn.mapfit.com/v2-4/assets/images/markers/pngs/lighttheme/arts.png")
+        )
+
+        clickOnMarker(marker)
+        verify(onMarkerClickListener).onMarkerClicked(marker)
+    }
+
+    @Test
+    fun testInteractivity() {
+        val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
+
+        marker.interactive = false
+        clickOnMarker(marker)
+        verify(onMarkerClickListener, never()).onMarkerClicked(marker)
+
+        marker.interactive = true
+        clickOnMarker(marker)
+        verify(onMarkerClickListener).onMarkerClicked(marker)
+    }
+
+    @Test
     fun testAddMarkerWithAddress() {
-        runBlocking {
-            delay(500)
-
-            val expectedMarker = mapfitMap.addMarker(LatLng(40.74405, -73.99324))
-
-            var actualMarker: Marker? = null
-
+        val expectedMarker =
             mapfitMap.addMarker(
+                MarkerOptions().position(
+                    LatLng(
+                        40.74405,
+                        -73.99324
+                    )
+                )
+            )
+
+        var actualMarker: Marker? = null
+        idlingResource.increment()
+
+        mapfitMap.addMarker(
+            MarkerOptions().streetAddress(
                 "119 w 24th st new york ny 10011",
-                true,
-                object : OnMarkerAddedCallback {
-                    override fun onMarkerAdded(marker: Marker) {
-                        actualMarker = marker
-                    }
+                true
+            ).addBuildingPolygon(true),
+            object : OnMarkerAddedCallback {
+                override fun onMarkerAdded(marker: Marker) {
+                    actualMarker = marker
+                    idlingResource.decrement()
+                }
 
-                    override fun onError(exception: Exception) {
+                override fun onError(exception: Exception) {
 
-                    }
-                })
+                }
+            })
 
-            delay(1500)
-            Assert.assertEquals(
-                expectedMarker.getPosition().lat,
-                actualMarker?.getPosition()?.lat
-                        ?: 0.0,
-                0.0001
-            )
-            Assert.assertEquals(
-                expectedMarker.getPosition().lng,
-                actualMarker?.getPosition()?.lng
-                        ?: 0.0,
-                0.0001
-            )
+        suspendViaGLSurface()
 
-            // check building polygon existence
-            Assert.assertNotNull(actualMarker?.buildingPolygon)
-            Assert.assertTrue(actualMarker!!.getTitle().isNotBlank())
-        }
+        Assert.assertEquals(
+            expectedMarker.position.lat,
+            actualMarker?.position?.lat ?: 0.0,
+            0.0001
+        )
+        Assert.assertEquals(
+            expectedMarker.position.lng,
+            actualMarker?.position?.lng
+                    ?: 0.0,
+            0.0001
+        )
+
+        Assert.assertNotNull(actualMarker?.buildingPolygon)
     }
 
     @Test
     fun testMarkerClickListener() {
-        runBlocking {
-            delay(500)
+        val marker = mapfitMap.addMarker(MarkerOptions().position(latLng))
+        clickOnMarker(marker)
 
-            mapfitMap.setCenter(latLng)
-            delay(500)
+        verify(onMarkerClickListener).onMarkerClicked(marker)
+    }
 
-            mapfitMap.setOnMarkerClickListener(onMarkerClickListener)
-            val marker = mapfitMap.addMarker(latLng)
-            clickOnMarker(marker)
+    @Test
+    fun testMarkerObject() {
+        val marker = mapfitMap.addMarker(
+            MarkerOptions()
+                .data(5)
+                .position(latLng)
+        )
 
-            verify(onMarkerClickListener, times(1)).onMarkerClicked(marker)
-        }
+        val captor = ArgumentCaptor.forClass(Marker::class.java)
+
+        clickOnMarker(marker)
+
+        verify(onMarkerClickListener).onMarkerClicked(capture(captor) ?: marker)
+
+        assertEquals(5, captor.value.data)
     }
 
     @Test
     fun testPlaceInfoOpenClose() = runBlocking {
-        delay(500)
-
-        val marker = mapfitMap.addMarker(latLng).setTitle("title")
+        val marker = mapfitMap.addMarker(MarkerOptions().position(latLng).title("title"))
 
         clickOnMarker(marker)
 
@@ -210,46 +265,39 @@ class MarkerTest {
 
         val map = marker.mapBindings.keys.first()
         val screenPosition = marker.getScreenPosition(map)
+
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
             .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt() + 50))
-        delay(500)
 
+        delay(200)
         Assert.assertTrue(marker.placeInfoMap.values.isEmpty())
     }
 
     @Test
     fun testDefaultPlaceInfoClickListener() {
-        runBlocking {
-            delay(500)
+        mapfitMap.setZoom(15f)
+        val marker = mapfitMap.addMarker(MarkerOptions().position(latLng).title("title"))
 
-            val marker = mapfitMap.addMarker(latLng).setTitle("title")
+        clickOnMarker(marker)
 
-            mapfitMap.setOnPlaceInfoClickListener(onPlaceInfoClickListener)
+        clickOnPlaceInfo(marker)
 
-            clickOnMarker(marker)
-            clickOnPlaceInfo(marker)
-
-            verify(onPlaceInfoClickListener, times(1)).onPlaceInfoClicked(marker)
-        }
+        verify(onPlaceInfoClickListener).onPlaceInfoClicked(marker)
     }
 
     @Test
     fun testPlaceInfoAdapter() {
-        runBlocking {
-            delay(500)
+        val marker = mapfitMap.addMarker(MarkerOptions().position(latLng).title("title"))
 
-            val marker = mapfitMap.addMarker(latLng).setTitle("title")
+        mapfitMap.setPlaceInfoAdapter(placeInfoAdapter)
 
-            mapfitMap.setPlaceInfoAdapter(placeInfoAdapter)
+        clickOnMarker(marker)
 
-            clickOnMarker(marker)
-
-            verify(placeInfoAdapter, times(1)).getPlaceInfoView(marker)
-        }
+        verify(placeInfoAdapter).getPlaceInfoView(marker)
     }
 
     private fun clickOnMarker(marker: Marker) = runBlocking {
-        delay(500)
+        delay(200)
         val map = marker.mapBindings.keys.first()
         val screenPosition = marker.getScreenPosition(map)
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
@@ -258,12 +306,16 @@ class MarkerTest {
     }
 
     private fun clickOnPlaceInfo(marker: Marker) = runBlocking {
+        delay(200)
+        val placeInfo = marker.placeInfoMap.values.first()
+        Assert.assertTrue(placeInfo!!.getVisibility())
+
         val screenPosition = marker.getScreenPosition(marker.mapBindings.keys.first())
         Espresso.onView(ViewMatchers.withId(R.id.glSurface))
             .perform(clickOn(screenPosition.x.toInt(), screenPosition.y.toInt() - 250))
         delay(1500)
     }
-
-
 }
+
+
 

@@ -17,7 +17,6 @@ class Layer {
 
     private val maps = mutableListOf<MapController>()
 
-
     var visibility = true
         set(value) {
             if (field != value) {
@@ -77,9 +76,9 @@ class Layer {
         boundsBuilder: LatLngBounds.Builder
     ) {
         when (it) {
-            is Marker -> boundsBuilder.include(it.getPosition())
+            is Marker -> boundsBuilder.include(it.position)
             is Polyline -> it.points.forEach { boundsBuilder.include(it) }
-            is Polygon -> it.polygon.forEach { it.forEach { boundsBuilder.include(it) } }
+            is Polygon -> it.points.forEach { it.forEach { boundsBuilder.include(it) } }
         }
 
         it.subAnnotation?.let { addBounds(it, boundsBuilder) }

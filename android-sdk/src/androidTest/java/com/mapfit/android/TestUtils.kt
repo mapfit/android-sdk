@@ -3,6 +3,7 @@ package com.mapfit.android
 import android.content.Context
 import android.graphics.Point
 import android.os.SystemClock
+import android.support.test.espresso.Espresso
 import android.support.test.espresso.InjectEventSecurityException
 import android.support.test.espresso.UiController
 import android.support.test.espresso.ViewAction
@@ -10,11 +11,13 @@ import android.support.test.espresso.action.CoordinatesProvider
 import android.support.test.espresso.action.GeneralClickAction
 import android.support.test.espresso.action.Press
 import android.support.test.espresso.action.Tap
+import android.support.test.espresso.assertion.ViewAssertions
 import android.support.test.espresso.matcher.ViewMatchers
 import android.view.InputDevice
 import android.view.MotionEvent
 import android.view.View
 import org.hamcrest.Matcher
+import org.mockito.ArgumentCaptor
 
 
 /**
@@ -280,4 +283,20 @@ private fun injectMotionEventToUiController(uiController: UiController, event: M
     if (!injectEventSucceeded) {
         throw IllegalStateException("Error performing event " + event)
     }
+}
+
+
+/**
+ * Returns ArgumentCaptor.capture() as nullable type to avoid java.lang.IllegalStateException
+ * when null is returned.
+ */
+fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
+
+
+fun suspendViaGLSurface() {
+    Espresso.onView(ViewMatchers.withId(R.id.glSurface)).check(
+        ViewAssertions.matches(
+            ViewMatchers.isDisplayed()
+        )
+    )
 }

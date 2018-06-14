@@ -5,6 +5,8 @@ import android.support.v7.app.AppCompatActivity
 import com.mapfit.android.*
 import com.mapfit.android.annotations.MapfitMarker
 import com.mapfit.android.annotations.Marker
+import com.mapfit.android.annotations.MarkerOptions
+import com.mapfit.android.annotations.PolylineOptions
 import com.mapfit.android.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.android.directions.Directions
 import com.mapfit.android.directions.DirectionsCallback
@@ -36,7 +38,7 @@ class KotlinActivity : AppCompatActivity() {
 
         mapfitMap.setCenter(LatLng(40.74405, -73.99324))
         mapfitMap.setZoom(14f)
-        mapfitMap.getMapOptions().userLocationButtonEnabled = true
+        mapfitMap.getMapOptions().isUserLocationButtonVisible = true
 
         placeMarker()
         placeMarkerWithAddress()
@@ -44,9 +46,9 @@ class KotlinActivity : AppCompatActivity() {
         setEventListeners()
 
         // enable ui controls
-        mapfitMap.getMapOptions().recenterButtonEnabled = true
-        mapfitMap.getMapOptions().zoomControlsEnabled = true
-        mapfitMap.getMapOptions().compassButtonEnabled = true
+        mapfitMap.getMapOptions().isRecenterButtonVisible = true
+        mapfitMap.getMapOptions().isZoomControlVisible = true
+        mapfitMap.getMapOptions().isCompassButtonVisible = true
     }
 
     private fun setEventListeners() {
@@ -66,8 +68,7 @@ class KotlinActivity : AppCompatActivity() {
 
     private fun placeMarker() {
         val position = LatLng(40.744023, -73.993150)
-        val marker = mapfitMap.addMarker(position)
-
+        val marker = mapfitMap.addMarker(MarkerOptions().position(position))
     }
 
     private fun getDirections() {
@@ -82,7 +83,7 @@ class KotlinActivity : AppCompatActivity() {
                 override fun onSuccess(route: Route) {
                     route.trip.legs.forEach {
                         val leg = decodePolyline(it.shape)
-                        val polyline = mapfitMap.addPolyline(leg)
+                        val polyline = mapfitMap.addPolyline(PolylineOptions().points(leg))
                     }
                 }
 
@@ -95,15 +96,17 @@ class KotlinActivity : AppCompatActivity() {
 
     private fun placeMarkerWithAddress() {
         val flatironBuildingAddress = "175 5th Ave, New York, NY 10010"
-        val withBuildingPolygon = true
+
+        val markerOptions = MarkerOptions()
+            .streetAddress(flatironBuildingAddress)
+            .addBuildingPolygon(true)
+            .icon(MapfitMarker.EDUCATION)
 
         mapfitMap.addMarker(
-            flatironBuildingAddress,
-            withBuildingPolygon,
+            markerOptions,
             object : OnMarkerAddedCallback {
                 override fun onMarkerAdded(marker: Marker) {
-                    // let's change marker's icon!
-                    marker.setIcon(MapfitMarker.EDUCATION)
+                    // marker is added to the map!
                 }
 
                 override fun onError(exception: Exception) {

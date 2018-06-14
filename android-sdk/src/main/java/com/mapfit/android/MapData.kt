@@ -36,13 +36,16 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
      */
     fun addPoint(marker: Marker): MapData {
         val coordinates = DoubleArray(2)
-        coordinates[0] = marker.getPosition().lng
-        coordinates[1] = marker.getPosition().lat
+        coordinates[0] = marker.position.lng
+        coordinates[1] = marker.position.lat
 
         map!!.addFeature(
             id,
-            coordinates, null, null
+            coordinates,
+            null,
+            null
         )
+
         return this
     }
 
@@ -52,7 +55,7 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
                 id,
                 polyline.coordinates,
                 null,
-                polyline.polylineOptions.getProperties(it)
+                polyline.getProperties(polyline.getIdForMap(it).toString())
             )
         }
         return this
@@ -73,7 +76,7 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
                 id,
                 polygon.coordinates,
                 polygon.rings,
-                polygon.polygonOptions.getProperties(it)
+                polygon.getProperties(polygon.getIdForMap(it).toString())
             )
         }
         return this

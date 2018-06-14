@@ -1,4 +1,4 @@
-@file:JvmName("MapfitUtils")
+@file:JvmName("PolyUtils")
 
 package com.mapfit.android.utils
 

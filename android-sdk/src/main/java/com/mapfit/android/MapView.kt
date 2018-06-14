@@ -3,14 +3,12 @@ package com.mapfit.android
 import android.animation.Animator
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.PointF
 import android.net.Uri
 import android.opengl.GLSurfaceView
 import android.support.v7.app.AppCompatDelegate
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,17 +18,12 @@ import android.widget.ImageView
 import android.widget.RelativeLayout
 import com.mapfit.android.annotations.*
 import com.mapfit.android.annotations.Annotation
-import com.mapfit.android.annotations.callback.OnMarkerAddedCallback
 import com.mapfit.android.annotations.callback.OnMarkerClickListener
 import com.mapfit.android.annotations.callback.OnPolygonClickListener
 import com.mapfit.android.annotations.callback.OnPolylineClickListener
 import com.mapfit.android.annotations.widget.PlaceInfo
-import com.mapfit.android.geocoder.Geocoder
-import com.mapfit.android.geocoder.GeocoderCallback
-import com.mapfit.android.geocoder.model.Address
 import com.mapfit.android.geometry.LatLng
-import com.mapfit.android.geometry.LatLngBounds
-import com.mapfit.android.geometry.isEmpty
+import com.mapfit.android.geometry.toLatLng
 import com.mapfit.android.utils.logWarning
 import com.mapfit.android.utils.startActivitySafe
 import com.mapfit.tetragon.CachePolicy
@@ -45,7 +38,6 @@ import okhttp3.HttpUrl
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.TestOnly
 import java.io.File
-import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 
@@ -61,72 +53,159 @@ class MapView(
 
     companion object {
         internal const val ANIMATION_DURATION = 200
+        internal val DEFAULT_EASE = MapController.EaseType.CUBIC
         private const val ZOOM_STEP_LEVEL = 1
-        private val DEFAULT_EASE = MapController.EaseType.CUBIC
     }
 
     private lateinit var mapController: MapController
-    private lateinit var mapOptions: MapOptions
-    private lateinit var directionsOptions: DirectionsOptions
-    private val geocoder = Geocoder()
+    internal lateinit var mapOptions: MapOptions
+    internal lateinit var directionsOptions: DirectionsOptions
 
     // Views
     private val controlsView: View by lazy {
-        LayoutInflater.from(context).inflate(R.layout.mf_overlay_map_controls, this, false)
+        LayoutInflater.from(context).inflate(R.layout.mf_overlay_map_controls, null)
     }
-    private val placeInfoFrame = FrameLayout(context)
-    private val attributionImage: ImageView = controlsView.findViewById(R.id.imgAttribution)
     internal val zoomControlsView: RelativeLayout by lazy {
-        controlsView.findViewById<RelativeLayout>(R.id.zoomControls)
+        controlsView.findViewById<RelativeLayout>(
+            R.id.zoomControls
+        )
     }
+    internal val btnRecenter: ImageView by lazy { controlsView.findViewById<ImageView>(R.id.btnRecenter) }
+    internal val btnCompass: ImageView by lazy { controlsView.findViewById<ImageView>(R.id.btnCompass) }
+    internal val btnUserLocation: ImageView by lazy { controlsView.findViewById<ImageView>(R.id.btnUserLocation) }
+    internal val attributionImage: ImageView by lazy { controlsView.findViewById<ImageView>(R.id.imgAttribution) }
+    private val placeInfoFrame by lazy { FrameLayout(context) }
 
-    @JvmSynthetic
-    internal fun getAttributionImage(): ImageView = attributionImage
-
-    private val layers = mutableListOf<Layer>()
+    internal val layers = mutableListOf<Layer>()
 
     // event listeners
-    private var markerClickListener: OnMarkerClickListener? = null
-    private var polylineClickListener: OnPolylineClickListener? = null
-    private var polygonClickListener: OnPolygonClickListener? = null
-    private var mapClickListener: OnMapClickListener? = null
-    private var mapDoubleClickListener: OnMapDoubleClickListener? = null
-    private var mapLongClickListener: OnMapLongClickListener? = null
-    private var mapPanListener: OnMapPanListener? = null
-    private var mapThemeLoadListener: OnMapThemeLoadListener? = null
-    private var mapPinchListener: OnMapPinchListener? = null
-    private var placeInfoAdapter: MapfitMap.PlaceInfoAdapter? = null
-    private var onPlaceInfoClickListener: MapfitMap.OnPlaceInfoClickListener? = null
+    internal var markerClickListener: OnMarkerClickListener? = null
+    internal var polylineClickListener: OnPolylineClickListener? = null
+    internal var polygonClickListener: OnPolygonClickListener? = null
+    internal var mapClickListener: OnMapClickListener? = null
+    internal var mapDoubleClickListener: OnMapDoubleClickListener? = null
+    internal var mapLongClickListener: OnMapLongClickListener? = null
+    internal var mapPanListener: OnMapPanListener? = null
+    internal var mapThemeLoadListener: OnMapThemeLoadListener? = null
+    internal var mapPinchListener: OnMapPinchListener? = null
+    internal var placeInfoAdapter: MapfitMap.PlaceInfoAdapter? = null
+    internal var onPlaceInfoClickListener: MapfitMap.OnPlaceInfoClickListener? = null
 
-    private var viewHeight: Int? = null
-    private var viewWidth: Int? = null
+    internal var viewWidth: Int? = null
+    internal var viewHeight: Int? = null
 
-    private var activePlaceInfo: PlaceInfo? = null
+    internal var activePlaceInfo: PlaceInfo? = null
     private var placeInfoRemoveJob = Job()
     private var reCentered = false
     private var sceneUpdateFlag = false
     private var animatingCompass = false
     private var compassPivotCenter = 60f
 
+    private lateinit var mapfitMap: MapfitMap
+
     init {
         Mapfit.getApiKey()
 
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true)
+    }
 
-        post {
-            viewHeight = height
-            viewWidth = width
+    /**
+     * Instantiates the MapView and the controller asynchronously and returns the [MapfitMap]
+     * to the given callback. This method must be invoked to display the map.
+     *
+     * @param mapTheme
+     * @param onMapReadyCallback
+     */
+    @JvmOverloads
+    fun getMapAsync(
+        mapTheme: MapTheme = MapTheme.MAPFIT_DAY,
+        @NotNull onMapReadyCallback: OnMapReadyCallback
+    ) {
+        initMapAsync(mapTheme = mapTheme, onMapReadyCallback = onMapReadyCallback)
+    }
+
+    /**
+     * Instantiates the MapView and the controller asynchronously and returns the [MapfitMap]
+     * to the given callback. This method must be invoked to display the map.
+     *
+     * @param customTheme url or file path of the yaml file
+     */
+    fun getMapAsync(customTheme: String, @NotNull onMapReadyCallback: OnMapReadyCallback) {
+        initMapAsync(customTheme = customTheme, onMapReadyCallback = onMapReadyCallback)
+    }
+
+    private fun initMapAsync(
+        customTheme: String = "",
+        mapTheme: MapTheme = MapTheme.MAPFIT_DAY,
+        @NotNull onMapReadyCallback: OnMapReadyCallback
+    ) {
+        if (::mapController.isInitialized) {
+            onMapReadyCallback.onMapReady(mapfitMap)
+        } else {
+            initMapController(customTheme, mapTheme, onMapReadyCallback)
+            initUiControls()
         }
     }
 
-    @JvmOverloads
-    fun getMapAsync(mapTheme: MapTheme = MapTheme.MAPFIT_DAY, @NotNull onMapReadyCallback: OnMapReadyCallback) {
-        if (::mapController.isInitialized) {
-            onMapReadyCallback.onMapReady(mapfitMap)
+    private fun initMapController(
+        customTheme: String = "",
+        mapTheme: MapTheme? = null,
+        onMapReadyCallback: OnMapReadyCallback? = null,
+        async: Boolean = true
+    ): MapfitMap {
+        mapController = MapController(getGLSurfaceView())
+
+        mapfitMap = MapfitMap(
+            this,
+            mapController
+        )
+
+        mapController.apply {
+            setHttpHandler(getHttpHandler())
+
+            init()
+
+            setTapResponder(singleTapResponder())
+            setDoubleTapResponder(doubleTapResponder())
+            setLongPressResponder(longClickResponder())
+            setPanResponder(panResponder())
+            setShoveResponder(shoveResponder())
+            setScaleResponder(scaleResponder())
+            setRotateResponder(rotateResponder())
+
+            setAnnotationClickListener(onAnnotationClickListener)
+
+            setSceneLoadListener { _, sceneError ->
+                if (!sceneUpdateFlag) {
+                    onMapReadyCallback?.onMapReady(mapfitMap)
+                    sceneUpdateFlag = true
+                }
+
+                mapThemeLoadListener?.let {
+                    if (sceneError == null) {
+                        it.onLoaded()
+                    } else {
+                        it.onError()
+                    }
+                }
+            }
+
+            mapOptions = MapOptions(this@MapView, mapController)
+            directionsOptions = DirectionsOptions(mapController)
+
+            if (async) {
+                if (customTheme.isBlank()) {
+                    mapOptions.theme = mapTheme
+                } else {
+                    mapOptions.customTheme = customTheme
+                }
+
+            } else {
+                mapController.loadSceneFile(customTheme)
+            }
         }
 
-        initMapController(mapTheme, onMapReadyCallback)
-        initUiControls()
+        return mapfitMap
     }
 
     private fun initUiControls() {
@@ -181,10 +260,7 @@ class MapView(
 
         btnCompass.setOnClickListener {
             launch {
-
-
-                val currentAngle =
-                    (Math.toDegrees(mapController.rotation.toDouble()) + 360) % 360
+                val currentAngle = (Math.toDegrees(mapController.rotation.toDouble()) + 360) % 360
 
                 val toAngle = if (currentAngle > 180) {
                     360 - currentAngle
@@ -205,7 +281,6 @@ class MapView(
                 btnCompass.startAnimation(anim)
 
                 mapController.setRotationEased(0f, ANIMATION_DURATION, DEFAULT_EASE)
-
             }
         }
 
@@ -236,47 +311,6 @@ class MapView(
         reCentered = recenter
     }
 
-    private fun initMapController(mapTheme: MapTheme, onMapReadyCallback: OnMapReadyCallback) {
-        mapController = MapController(getGLSurfaceView())
-
-        mapController.apply {
-            setHttpHandler(getHttpHandler())
-
-            init()
-
-            setTapResponder(singleTapResponder())
-            setDoubleTapResponder(doubleTapResponder())
-            setLongPressResponder(longClickResponder())
-            setPanResponder(panResponder())
-            setShoveResponder(shoveResponder())
-            setScaleResponder(scaleResponder())
-            setRotateResponder(rotateResponder())
-
-            setAnnotationClickListener(onAnnotationClickListener)
-
-            setSceneLoadListener { sceneId, sceneError ->
-                mapController.reAddMarkers()
-                if (!sceneUpdateFlag) {
-                    onMapReadyCallback.onMapReady(mapfitMap)
-                    sceneUpdateFlag = true
-                }
-
-                mapThemeLoadListener?.let {
-                    if (sceneError == null) {
-                        it.onLoaded()
-                    } else {
-                        it.onError()
-                    }
-                }
-            }
-
-            mapOptions = MapOptions(this@MapView, this)
-            directionsOptions = DirectionsOptions(this)
-            mapOptions.theme = mapTheme
-
-        }
-    }
-
     private val onAnnotationClickListener = object : OnAnnotationClickListener {
         override fun onAnnotationClicked(annotation: Annotation) {
             annotation.let {
@@ -289,13 +323,11 @@ class MapView(
                     }
                     is Polyline -> polylineClickListener?.onPolylineClicked(it)
                     is Polygon -> polygonClickListener?.onPolygonClicked(it)
-
                     else -> Unit
                 }
             }
         }
     }
-
 
     private fun hideCompassButton(matrix: Matrix? = null) {
         launch(UI) {
@@ -329,11 +361,14 @@ class MapView(
     private var scaledMin = false
     private var max = false
     private var min = false
-
     private var scaleFlingJob = Job()
 
-    private fun scaleResponder() = TouchInput.ScaleResponder { x, y, scale, velocity ->
+    private fun scaleResponder() = TouchInput.ScaleResponder { _, _, scale, _ ->
         var consumed = false
+
+        if (!::mapOptions.isInitialized) {
+            return@ScaleResponder consumed
+        }
 
         scaledMax = mapController.zoom * scale > mapOptions.getMaxZoom() // will exceed
         scaledMin = mapController.zoom * scale < mapOptions.getMinZoom() // will exceed
@@ -351,7 +386,7 @@ class MapView(
             updatePlaceInfoPosition(false)
         }
 
-        if (mapOptions.userLocationButtonEnabled) resizeAccuracyMarker()
+        if (mapOptions.isUserLocationButtonVisible) resizeAccuracyMarker()
 
         launch {
             scaleFlingJob.cancelAndJoin()
@@ -360,7 +395,6 @@ class MapView(
                 resizeAccuracyMarker()
             }
         }
-
 
         consumed
     }
@@ -407,16 +441,14 @@ class MapView(
     private fun singleTapResponder(): TouchInput.TapResponder {
         return object : TouchInput.TapResponder {
             override fun onSingleTapUp(x: Float, y: Float): Boolean {
-                Log.e("onSingleTapUp!!!", "")
                 return true
             }
 
             override fun onSingleTapConfirmed(x: Float, y: Float): Boolean {
-
                 mapController.pickMarker(x, y)
                 mapController.pickFeature(x, y)
 
-                mapClickListener?.onMapClicked(mapController.screenPositionToLatLng(PointF(x, y)))
+                mapClickListener?.onMapClicked(PointF(x, y).toLatLng(mapController.zoom))
                 placeInfoRemoveJob = launch(UI) {
                     delay(20)
                     activePlaceInfo?.dispose()
@@ -463,243 +495,8 @@ class MapView(
         }
     }
 
-    private val mapfitMap = object : MapfitMap() {
-
-        override fun setOnPolygonClickListener(listener: OnPolygonClickListener) {
-            polygonClickListener = listener
-        }
-
-        override fun setOnPolylineClickListener(listener: OnPolylineClickListener) {
-            polylineClickListener = listener
-        }
-
-        override fun setOnMapThemeLoadListener(listener: OnMapThemeLoadListener) {
-            mapThemeLoadListener = listener
-        }
-
-        override fun getTilt(): Float = mapController.tilt
-
-        override fun setTilt(angle: Float, duration: Long) {
-            mapController.setTiltEased(angle, duration, DEFAULT_EASE)
-        }
-
-        override fun setTilt(angle: Float) {
-            mapController.tilt = angle
-        }
-
-        override fun setRotation(rotation: Float, duration: Long) {
-            mapController.setRotationEased(rotation, duration.toInt(), DEFAULT_EASE)
-        }
-
-        override fun setRotation(rotation: Float) {
-            mapController.rotation = rotation
-        }
-
-        override fun getRotation(): Float = mapController.rotation
-
-        @TestOnly
-        override fun has(annotation: Annotation): Boolean = mapController.contains(annotation)
-
-        override fun setOnPlaceInfoClickListener(listener: OnPlaceInfoClickListener) {
-            this@MapView.onPlaceInfoClickListener = listener
-        }
-
-        override fun setPlaceInfoAdapter(adapter: PlaceInfoAdapter) {
-            this@MapView.placeInfoAdapter = adapter
-        }
-
-        override fun setOnMapPinchListener(listener: OnMapPinchListener) {
-            mapPinchListener = listener
-        }
-
-        override fun addMarker(
-            address: String,
-            withBuilding: Boolean,
-            onMarkerAddedCallback: OnMarkerAddedCallback
-        ) {
-            geocoder.geocode(address,
-                withBuilding,
-                object : GeocoderCallback {
-                    override fun onSuccess(addressList: List<Address>) {
-
-                        var latLng = LatLng()
-                        addressList.forEach { address ->
-                            latLng = address.getPrimaryEntrance()
-                        }
-
-                        if (latLng.isEmpty()) {
-                            onMarkerAddedCallback?.onError(IOException("No coordinates found for given address."))
-
-                        } else {
-                            val marker = mapController.addMarker()
-
-                            marker.apply {
-                                setPosition(latLng)
-                                this@apply.address = addressList[0]
-
-                                if (addressList.isNotEmpty() && addressList[0].building.polygon.isNotEmpty()) {
-                                    this@apply.buildingPolygon =
-                                            mapController.addPolygon(addressList[0].building.polygon)
-                                }
-                            }
-
-                            launch(UI) {
-                                onMarkerAddedCallback?.onMarkerAdded(marker)
-                            }
-                        }
-                    }
-
-                    override fun onError(message: String, e: Exception) {
-                        launch(UI) {
-                            onMarkerAddedCallback?.onError(e)
-                        }
-                    }
-                })
-        }
-
-        override fun addMarker(latLng: LatLng): Marker {
-            val marker = mapController.addMarker()
-            marker.setPosition(latLng)
-            return marker
-        }
-
-        override fun addPolyline(line: List<LatLng>): Polyline {
-            return mapController.addPolyline(line)
-        }
-
-        override fun addPolygon(polygon: List<List<LatLng>>): Polygon {
-            return mapController.addPolygon(polygon)
-        }
-
-        override fun getLayers(): List<Layer> {
-            return layers
-        }
-
-        override fun setCenterWithLayer(layer: Layer) {
-            mapController.position = layer.getLatLngBounds().center
-            updatePlaceInfoPosition(true)
-        }
-
-        override fun setLatLngBounds(bounds: LatLngBounds, padding: Float) {
-            mapController.setLatLngBounds(bounds, padding)
-            updatePlaceInfoPosition(true)
-        }
-
-        override fun getLatLngBounds(): LatLngBounds {
-            val sw = mapController.screenPositionToLatLng(PointF(0f, viewHeight?.toFloat() ?: 0f))
-            val ne = mapController.screenPositionToLatLng(PointF(viewWidth?.toFloat() ?: 0f, 0f))
-            return LatLngBounds(ne ?: LatLng(), sw ?: LatLng())
-        }
-
-        override fun setOnMapClickListener(listener: OnMapClickListener) {
-            mapClickListener = listener
-        }
-
-        override fun setOnMapDoubleClickListener(listener: OnMapDoubleClickListener) {
-            mapDoubleClickListener = listener
-        }
-
-        override fun setOnMapLongClickListener(listener: OnMapLongClickListener) {
-            mapLongClickListener = listener
-        }
-
-        override fun setOnMapPanListener(listener: OnMapPanListener) {
-            mapPanListener = listener
-        }
-
-        override fun getDirectionsOptions(): DirectionsOptions = directionsOptions
-
-        override fun setOnMarkerClickListener(listener: OnMarkerClickListener) {
-            markerClickListener = listener
-        }
-
-        override fun getZoom(): Float {
-            return mapController.zoom
-        }
-
-        override fun setCenter(latLng: LatLng) {
-            setCenter(latLng, 0)
-        }
-
-        override fun setCenter(latLng: LatLng, duration: Long) {
-            if (duration.toInt() == 0) {
-                mapController.position = latLng
-
-            } else {
-                mapController.setPositionEased(
-                    latLng,
-                    duration.toInt(),
-                    DEFAULT_EASE,
-                    true
-                )
-            }
-            updatePlaceInfoPosition(true)
-        }
-
-        override fun getCenter(): LatLng = mapController.position
-
-        override fun reCenter() {
-            mapController.reCenter()
-            updatePlaceInfoPosition(true)
-        }
-
-        override fun addLayer(layer: Layer) {
-            if (!layers.contains(layer)) {
-                layers.add(layer)
-                layer.addMap(mapController)
-            }
-        }
-
-        override fun removeLayer(layer: Layer) {
-            layer.annotations.forEach {
-                it.mapBindings[mapController]?.let { id ->
-                    if (it is Marker && activePlaceInfo?.marker == it) {
-                        activePlaceInfo?.dispose(true)
-                    }
-                    mapController.removeMarker(id)
-                    it.mapBindings.remove(mapController)
-                }
-            }
-
-            layers.remove(layer)
-        }
-
-        override fun removeMarker(marker: Marker) {
-            marker.remove(mapController)
-        }
-
-        override fun removePolygon(polygon: Polygon) {
-            polygon.remove(mapController)
-        }
-
-        override fun removePolyline(polyline: Polyline) {
-            polyline.remove(mapController)
-        }
-
-        override fun getMapOptions(): MapOptions {
-            return mapOptions
-        }
-
-
-        override fun setZoom(zoomLevel: Float) {
-            setZoom(zoomLevel, 0)
-        }
-
-        override fun setZoom(zoomLevel: Float, duration: Long) {
-            val normalizedZoomLevel = normalizeZoomLevel(zoomLevel)
-
-            if (duration.toInt() == 0) {
-                mapController.zoom = (normalizedZoomLevel)
-            } else {
-                mapController.setZoomEased(normalizedZoomLevel, duration.toInt())
-            }
-        }
-
-
-    }
-
-    private fun normalizeZoomLevel(zoomLevel: Float, warn: Boolean = true): Float =
-        when {
+    internal fun normalizeZoomLevel(zoomLevel: Float, warn: Boolean = true): Float {
+        return when {
             zoomLevel > mapOptions.getMaxZoom() -> {
                 if (warn) {
                     logWarning(
@@ -718,10 +515,10 @@ class MapView(
             }
             else -> zoomLevel
         }
+    }
 
     private fun showPlaceInfo(marker: Marker) {
         if (marker.hasPlaceInfoFields()) {
-
             if (activePlaceInfo != null
                 && activePlaceInfo?.marker == marker
                 && activePlaceInfo?.getVisibility()!!
@@ -752,7 +549,7 @@ class MapView(
             } else {
                 val view =
                     LayoutInflater.from(context)
-                        .inflate(R.layout.mf_widget_place_info, placeInfoFrame)
+                        .inflate(R.layout.mf_widget_place_info, placeInfoFrame,true)
 
                 val child = (view as FrameLayout).getChildAt(0)
                 child.tag = "default"
@@ -774,10 +571,10 @@ class MapView(
 
     private fun isCustomPlaceInfo() = placeInfoAdapter != null
 
-    private fun updatePlaceInfoPosition(repeating: Boolean) {
+    internal fun updatePlaceInfoPosition(repeating: Boolean) {
         activePlaceInfo
             ?.takeIf { it.getVisibility() }
-            .let {
+            ?.let {
                 if (!repeating) {
                     activePlaceInfo?.onPositionChanged()
                 } else {
@@ -794,11 +591,6 @@ class MapView(
         glSurfaceView.id = R.id.glSurface
         addView(glSurfaceView)
         return glSurfaceView
-    }
-
-    @TestOnly
-    internal fun getMapSnap(callback: (bitmap: Bitmap) -> Unit) {
-        mapController.captureFrame(callback, true)
     }
 
     private fun disposeMap() {
@@ -853,7 +645,24 @@ class MapView(
         return HttpHandler()
     }
 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        viewHeight = h
+        viewWidth = w
+    }
+
     @TestOnly
-    internal fun getScreenPosition(latLng: LatLng) = mapController.lngLatToScreenPosition(latLng)
+    internal fun getScreenPosition(latLng: LatLng) = mapController.latLngToScreenPosition(latLng)
+
+    @TestOnly
+    internal fun getMap(scenePath: String) = initMapController(scenePath, async = false)
+
+    @TestOnly
+    internal fun getMapSnap(
+        callback: MapController.FrameCaptureCallback,
+        waitForCompleteView: Boolean = true
+    ) {
+        mapController.captureFrame(callback, waitForCompleteView)
+    }
 
 }

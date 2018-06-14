@@ -2,7 +2,7 @@
 # Last updated Mar 19, 2018
 
 import:
-    - sample-base-theme.yaml
+    - mapfit-base-theme.yaml
 
 global:
 
