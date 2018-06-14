@@ -60,8 +60,6 @@ class MapListenersTest {
         true
     )
 
-    private lateinit var idlingResource: CountingIdlingResource
-
     @Before
     @UiThreadTest
     fun init() {
@@ -77,7 +75,6 @@ class MapListenersTest {
             setOnMapPinchListener(onMapPinchListener)
         }
 
-        IdlingRegistry.getInstance().register(idlingResource)
     }
 
     @After
