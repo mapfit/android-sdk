@@ -53,7 +53,6 @@ class MapView(
 
     companion object {
         internal const val ANIMATION_DURATION = 200
-        internal val DEFAULT_EASE = MapController.EaseType.CUBIC
         private const val ZOOM_STEP_LEVEL = 1
     }
 
@@ -280,7 +279,11 @@ class MapView(
                 anim.duration = ANIMATION_DURATION.toLong()
                 btnCompass.startAnimation(anim)
 
-                mapController.setRotationEased(0f, ANIMATION_DURATION, DEFAULT_EASE)
+                mapController.setRotationEased(
+                    0f,
+                    ANIMATION_DURATION,
+                    mapController.DEFAULT_EASE_TYPE
+                )
             }
         }
 
@@ -473,7 +476,12 @@ class MapView(
 
     private fun setZoomOnDoubleTap(x: Float, y: Float) {
         val lngLat = mapController.screenPositionToLatLng(PointF(x, y))
-        mapController.setPositionEased(lngLat, ANIMATION_DURATION, DEFAULT_EASE, false)
+        mapController.setPositionEased(
+            lngLat,
+            ANIMATION_DURATION,
+            mapController.DEFAULT_EASE_TYPE,
+            false
+        )
         mapfitMap.setZoom(mapController.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION.toLong())
     }
 
@@ -549,7 +557,7 @@ class MapView(
             } else {
                 val view =
                     LayoutInflater.from(context)
-                        .inflate(R.layout.mf_widget_place_info, placeInfoFrame,true)
+                        .inflate(R.layout.mf_widget_place_info, placeInfoFrame, true)
 
                 val child = (view as FrameLayout).getChildAt(0)
                 child.tag = "default"

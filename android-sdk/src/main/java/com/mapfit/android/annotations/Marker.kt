@@ -330,9 +330,17 @@ class Marker internal constructor(
     }
 
     /**
+     * Sets marker position with animation.
      *
+     * @param latLng new position for the marker
+     * @param duration for the animation
+     * @param easeType easing type for the animation
      */
-    fun setPositionEased(latLng: LatLng, duration: Int) {
+    fun setPositionEased(
+        latLng: LatLng,
+        duration: Int,
+        easeType: MapController.EaseType = MapController.EaseType.QUART_IN_OUT
+    ) {
         if (latLng.isValid()) {
             mapBindings.forEach {
                 val markerPositionSet = it.key.setMarkerPointEased(
@@ -340,7 +348,7 @@ class Marker internal constructor(
                     latLng.lng,
                     latLng.lat,
                     duration,
-                    MapController.EaseType.CUBIC
+                    easeType
                 )
 
                 checkPositionUpdate(markerPositionSet, latLng)

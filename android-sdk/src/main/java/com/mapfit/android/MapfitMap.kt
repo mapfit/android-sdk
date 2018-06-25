@@ -32,18 +32,20 @@ class MapfitMap internal constructor(
      *
      * @param latLng coordinates
      * @param duration for centering animation
+     * @param easeType easing type for the animation
      */
     @JvmOverloads
     fun setCenter(
         latLng: LatLng,
-        duration: Long = 0
+        duration: Long = 0,
+        easeType: MapController.EaseType = mapController.DEFAULT_EASE_TYPE
     ) {
         when (duration) {
             0L -> mapController.position = latLng
             else -> mapController.setPositionEased(
                 latLng,
                 duration.toInt(),
-                MapView.DEFAULT_EASE,
+                easeType,
                 true
             )
         }
@@ -56,6 +58,13 @@ class MapfitMap internal constructor(
      *
      * @param layer the map will center accordingly to
      */
+    @Deprecated(
+        message = "Use setLatLngBounds instead",
+        replaceWith = ReplaceWith(
+            "setLatLngBounds(layer.getLatLngBounds())",
+            "package com.mapfit.android.Layer"
+        )
+    )
     fun setCenterWithLayer(layer: Layer) {
         mapController.position = layer.getLatLngBounds().center
         mapView.updatePlaceInfoPosition(true)
@@ -70,13 +79,15 @@ class MapfitMap internal constructor(
      * @param offsetX x axis offset in pixels
      * @param offsetY y xis offset in pixels
      * @param duration for the animation
+     * @param easeType easing type for the animation
      */
     @JvmOverloads
     fun setCenterWithOffset(
         latLng: LatLng,
         offsetX: Float = 0f,
         offsetY: Float = 0f,
-        duration: Long = 0
+        duration: Long = 0,
+        easeType: MapController.EaseType = mapController.DEFAULT_EASE_TYPE
     ) {
         val screenPosition = latLng.toPointF(mapController.zoom)
         val vanishingPointOffset = mapView.mapOptions.getVanishingPointOffset()
@@ -89,7 +100,7 @@ class MapfitMap internal constructor(
 
         val geoPosition = screenPosition.toLatLng(mapController.zoom)
 
-        setCenter(geoPosition, duration)
+        setCenter(geoPosition, duration, easeType)
     }
 
     /**
@@ -202,17 +213,19 @@ class MapfitMap internal constructor(
      *
      * @param zoomLevel Zoom level for the view
      * @param duration optional duration for zooming in milliseconds
+     * @param easeType easing type for the animation
      */
     @JvmOverloads
     fun setZoom(
         zoomLevel: Float,
-        duration: Long = 0
+        duration: Long = 0,
+        easeType: MapController.EaseType = mapController.DEFAULT_EASE_TYPE
     ) {
         val normalizedZoomLevel = mapView.normalizeZoomLevel(zoomLevel)
 
         when (duration) {
             0L -> mapController.zoom = normalizedZoomLevel
-            else -> mapController.setZoomEased(normalizedZoomLevel, duration.toInt())
+            else -> mapController.setZoomEased(normalizedZoomLevel, duration.toInt(), easeType)
         }
     }
 
@@ -230,18 +243,21 @@ class MapfitMap internal constructor(
      * @param bounds
      * @param padding between map and bounds as percentage. For 10% padding, you can pass 0.1f
      * @param duration of the centering and zooming animation
+     * @param easeType easing type for the animation
      */
     @JvmOverloads
     fun setLatLngBounds(
         bounds: LatLngBounds,
         padding: Float = 0f,
-        duration: Long = 0
+        duration: Long = 0,
+        easeType: MapController.EaseType = mapController.DEFAULT_EASE_TYPE
     ) {
         mapController.setLatLngBounds(
             bounds,
             padding,
             duration,
-            mapView.mapOptions.getVanishingPointOffset()
+            mapView.mapOptions.getVanishingPointOffset(),
+            easeType
         )
         mapView.updatePlaceInfoPosition(true)
     }
@@ -366,15 +382,21 @@ class MapfitMap internal constructor(
      *
      * @param rotation in radians
      * @param duration duration of the rotation in milliseconds
+     * @param easeType easing type for the animation
      */
     @JvmOverloads
     fun setRotation(
         rotation: Float,
-        duration: Long = 0
+        duration: Long = 0,
+        easeType: MapController.EaseType = mapController.DEFAULT_EASE_TYPE
     ) {
         when (duration) {
             0L -> mapController.rotation = rotation
-            else -> mapController.setRotationEased(rotation, duration.toInt(), MapView.DEFAULT_EASE)
+            else -> mapController.setRotationEased(
+                rotation,
+                duration.toInt(),
+                easeType
+            )
         }
     }
 
@@ -383,15 +405,18 @@ class MapfitMap internal constructor(
      *
      * @param angle in radians, 0 is straight down
      * @param duration duration of the tilting in milliseconds
+     * @param easeType easing type for the animation
      */
     @JvmOverloads
     fun setTilt(
         angle: Float,
-        duration: Long = 0
+        duration: Long = 0,
+        easeType: MapController.EaseType = mapController.DEFAULT_EASE_TYPE
+
     ) {
         when (duration) {
             0L -> mapController.tilt = angle
-            else -> mapController.setTiltEased(angle, duration, MapView.DEFAULT_EASE)
+            else -> mapController.setTiltEased(angle, duration, easeType)
         }
     }
 
