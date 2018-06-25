@@ -58,9 +58,21 @@ public class MapController implements Renderer {
     @Keep
     public enum EaseType {
         LINEAR,
-        CUBIC,
-        QUINT,
-        SINE,
+        CUBIC_IN,
+        CUBIC_OUT,
+        CUBIC_IN_OUT,
+        QUART_IN,
+        QUART_OUT,
+        QUART_IN_OUT,
+        QUINT_IN,
+        QUINT_OUT,
+        QUINT_IN_OUT,
+        SINE_IN,
+        SINE_OUT,
+        SINE_IN_OUT,
+        EXP_IN,
+        EXP_OUT,
+        EXP_IN_OUT
     }
 
     /**
@@ -83,7 +95,7 @@ public class MapController implements Renderer {
         NO_VALID_SCENE,
     }
 
-    private static EaseType DEFAULT_EASE_TYPE = EaseType.SINE;
+    public EaseType DEFAULT_EASE_TYPE = EaseType.QUART_IN_OUT;
 
     /**
      * Options for enabling debug rendering features
@@ -507,21 +519,22 @@ public class MapController implements Renderer {
     public void setLatLngBounds(final LatLngBounds latlngBounds,
                                 final float padding,
                                 final long duration,
-                                final Pair<Float, Float> vanishingPointOffset) {
+                                final Pair<Float, Float> vanishingPointOffset,
+                                final EaseType easeType) {
         mapView.post(new Runnable() {
             @Override
             public void run() {
                 kotlin.Pair<LatLng, Float> pair = latlngBounds.getVisibleBounds(
                         mapView.getWidth(),
                         mapView.getHeight(),
-                        padding,vanishingPointOffset);
+                        padding, vanishingPointOffset);
 
                 if (duration <= 0) {
                     setZoom(pair.component2());
                     setPosition(pair.component1());
                 } else {
-                    setZoomEased(pair.component2(), (int) duration);
-                    setPositionEased(pair.component1(), (int) duration);
+                    setZoomEased(pair.component2(), (int) duration, easeType);
+                    setPositionEased(pair.component1(), (int) duration, easeType, true);
                 }
             }
         });
