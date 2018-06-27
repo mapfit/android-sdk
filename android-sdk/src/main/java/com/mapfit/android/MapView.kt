@@ -476,12 +476,15 @@ class MapView(
 
     private fun setZoomOnDoubleTap(x: Float, y: Float) {
         val lngLat = mapController.screenPositionToLatLng(PointF(x, y))
-        mapController.setPositionEased(
-            lngLat,
-            ANIMATION_DURATION,
-            mapController.DEFAULT_EASE_TYPE,
-            false
-        )
+
+        if (mapOptions.isPanEnabled) {
+            mapController.setPositionEased(
+                lngLat,
+                ANIMATION_DURATION,
+                MapController.EaseType.LINEAR,
+                false
+            )
+        }
         mapfitMap.setZoom(mapController.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION.toLong())
     }
 
