@@ -4,18 +4,21 @@ package com.mapfit.android.camera
 
 import com.mapfit.android.MapController
 
-open class CameraOptions<T>  {
+/**
+ * Defines options for a [CameraAnimation].
+ */
+open class CameraOptions<T> {
 
     internal var duration = 0L
     internal var tiltAngle: Float = Float.NaN
     internal var tiltDuration = 0L
-    internal var tiltEaseType = MapController.EaseType.QUINT_IN_OUT
+    internal var tiltEaseType = MapController.EaseType.QUART_IN_OUT
     internal var rotationAngle: Float = Float.NaN
     internal var rotationDuration = 0L
-    internal var rotationEaseType = MapController.EaseType.QUINT_IN_OUT
+    internal var rotationEaseType = MapController.EaseType.QUART_IN_OUT
     internal var zoomLevel: Float = Float.NaN
     internal var zoomDuration = 0L
-    internal var zoomEaseType = MapController.EaseType.QUINT_IN_OUT
+    internal var zoomEaseType = MapController.EaseType.QUART_IN_OUT
 
     /**
      * Sets duration for the animation.
@@ -28,7 +31,7 @@ open class CameraOptions<T>  {
     }
 
     /**
-     * Sets the tilting options for the camera.
+     * Sets the tilting animation options for the camera.
      *
      * @param angle angle in radians, 0 is to straight down
      * @param duration of the animation
@@ -38,7 +41,7 @@ open class CameraOptions<T>  {
     fun tiltTo(
         angle: Float,
         duration: Long = 0,
-        easeType: MapController.EaseType = MapController.EaseType.QUINT_IN_OUT
+        easeType: MapController.EaseType = MapController.EaseType.QUART_IN_OUT
     ): T {
         this.tiltAngle = angle
         this.tiltDuration = duration
@@ -47,17 +50,17 @@ open class CameraOptions<T>  {
     }
 
     /**
-     * Sets the rotation options for the camera.
+     * Sets the rotation animation options for the camera.
      *
      * @param angle angle in radians, 0 is facing north
      * @param duration of the animation
      * @param easeType for the animation
      */
     @JvmOverloads
-    fun rotationTo(
+    fun rotateTo(
         angle: Float,
         duration: Long = 0,
-        easeType: MapController.EaseType = MapController.EaseType.QUINT_IN_OUT
+        easeType: MapController.EaseType = MapController.EaseType.QUART_IN_OUT
     ): T {
         this.rotationAngle = angle
         this.rotationDuration = duration
@@ -66,7 +69,7 @@ open class CameraOptions<T>  {
     }
 
     /**
-     * Sets the zoom options for the camera.
+     * Sets the zoom animation options for the camera.
      *
      * @param zoomLevel
      * @param duration of the animation
@@ -76,7 +79,7 @@ open class CameraOptions<T>  {
     fun zoomTo(
         zoomLevel: Float,
         duration: Long = 0,
-        easeType: MapController.EaseType = MapController.EaseType.QUINT_IN_OUT
+        easeType: MapController.EaseType = MapController.EaseType.QUART_IN_OUT
     ): T {
         this.zoomLevel = zoomLevel
         this.zoomDuration = duration
