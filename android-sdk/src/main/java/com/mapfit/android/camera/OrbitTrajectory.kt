@@ -4,17 +4,21 @@ import android.support.annotation.FloatRange
 import com.mapfit.android.MapController
 import com.mapfit.android.geometry.LatLng
 
+
+/**
+ * Defines orbit animation options for [OrbitAnimation].
+ */
 class OrbitTrajectory : CameraOptions<OrbitTrajectory>() {
 
     internal lateinit var pivotPosition: LatLng
     internal var loop: Boolean = true
     internal var centerToPivot = false
     internal var centeringDuration = 0L
-    internal var centeringEaseType = MapController.EaseType.QUINT_IN_OUT
+    internal var centeringEaseType = MapController.EaseType.QUART_IN_OUT
     internal var speedMultiplier = 1f
 
     /**
-     * Pivot position for camera to pan around of.
+     * Sets the pivot position for the camera to pan around of.
      *
      * @param position
      * @param centerToPivot set true to center to pivot
@@ -25,7 +29,7 @@ class OrbitTrajectory : CameraOptions<OrbitTrajectory>() {
         position: LatLng,
         centerToPivot: Boolean = true,
         duration: Long = 0,
-        easeType: MapController.EaseType
+        easeType: MapController.EaseType = MapController.EaseType.QUART_IN_OUT
     ): OrbitTrajectory {
         this.pivotPosition = position
         this.centerToPivot = centerToPivot
@@ -35,7 +39,7 @@ class OrbitTrajectory : CameraOptions<OrbitTrajectory>() {
     }
 
     /**
-     * Camera will be rotating infinitely if loop is set to true.
+     * Sets if the camera animation will run infinitely.
      *
      * @param loop
      */
@@ -45,7 +49,8 @@ class OrbitTrajectory : CameraOptions<OrbitTrajectory>() {
     }
 
     /**
-     * Sets the multiplier for rotation speed.
+     * Sets the multiplier for rotation speed. For half speed, you can set `0.5f` where `1` is default
+     * speed.
      *
      * @param multiplier
      */
