@@ -9,13 +9,13 @@ import com.mapfit.android.camera.CameraAnimationCallback
 import com.mapfit.android.camera.Cinematography
 import com.mapfit.android.camera.OrbitTrajectory
 import com.mapfit.android.geometry.LatLng
+import junit.framework.Assert
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito
 import org.mockito.MockitoAnnotations
 
 @RunWith(AndroidJUnit4::class)
@@ -46,10 +46,6 @@ class CameraTest {
 
         mapView = activityRule.activity.findViewById(R.id.mapView)
         mapfitMap = mapView.getMap(MapTheme.MAPFIT_DAY.toString())
-        mapfitMap.apply {
-            mapfitMap.setOnMapPanListener(onMapPanListener)
-        }
-
         IdlingRegistry.getInstance().register(idlingResource)
     }
 
@@ -58,7 +54,6 @@ class CameraTest {
         Mapfit.dispose()
         IdlingRegistry.getInstance().unregister(idlingResource)
     }
-
 
     @Test
     fun testOrbitAnimation() {
@@ -86,7 +81,7 @@ class CameraTest {
         idlingResource.increment() // wait for onFinish
         suspendViaGLSurface()
 
-        Mockito.verify(onMapPanListener, Mockito.atLeastOnce()) // verify map is panned'
+        Assert.assertNotSame(0f, mapfitMap.getRotation()) // check if camera rotated
     }
 
 }
