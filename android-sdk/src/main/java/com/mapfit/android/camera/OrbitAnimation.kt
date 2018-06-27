@@ -22,7 +22,6 @@ class OrbitAnimation(
     private var runInitialAnimations = true
     private val rotationDegrees = 1.0 * orbitTrajectory.speedMultiplier
 
-
     override fun start() {
         isRunning = true
 
@@ -130,6 +129,5 @@ class OrbitAnimation(
     override fun stop() {
         isRunning = false
     }
-
 
 }
