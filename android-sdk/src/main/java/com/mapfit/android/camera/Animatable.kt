@@ -3,7 +3,7 @@ package com.mapfit.android.camera
 interface Animatable {
 
     /**
-     * Returns if there is a running animation.
+     * Returns if the animation is running.
      *
      * @return true if animation is running
      */
