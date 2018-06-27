@@ -50,11 +50,12 @@ class OrbitTrajectory : CameraOptions<OrbitTrajectory>() {
 
     /**
      * Sets the multiplier for rotation speed. For half speed, you can set `0.5f` where `1` is default
-     * speed.
+     * speed. Positive values will rotate anti-clockwise whereas negative values will rotate
+     * clockwise.
      *
      * @param multiplier
      */
-    fun speedMultiplier(@FloatRange(from = 0.0) multiplier: Float): OrbitTrajectory {
+    fun speedMultiplier(multiplier: Float): OrbitTrajectory {
         this.speedMultiplier = multiplier
         return this
     }
