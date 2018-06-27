@@ -2,8 +2,11 @@ package com.mapfit.android.camera
 
 import com.mapfit.android.MapfitMap
 
-
-class Cinematography(val mapfitMap: MapfitMap) {
+/**
+ * Cinematography class makes it easier to implement camera animations by providing pre-made
+ * animations.
+ */
+class Cinematography(private val mapfitMap: MapfitMap) {
 
     /**
      * Creates an animation with the given [CameraOptions].
