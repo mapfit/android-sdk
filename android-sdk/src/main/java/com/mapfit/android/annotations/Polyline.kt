@@ -17,7 +17,11 @@ class Polyline(
     mapController: MapController
 ) : Annotation(polylineId, mapController), PolyFeature {
 
-    val points = polylineOptions.points.toMutableList()
+    var points = polylineOptions.points.toMutableList()
+        set(value) {
+            field = value
+            refreshPolyline()
+        }
 
     var strokeWidth = polylineOptions.strokeWidth
         set(value) {
@@ -75,15 +79,17 @@ class Polyline(
             }
         }
 
-    internal val coordinates by lazy {
-        val coordinates = DoubleArray(points.size * 2)
-        var i = 0
-        for (point in points) {
-            coordinates[i++] = point.lng
-            coordinates[i++] = point.lat
+    internal var coordinates = doubleArrayOf()
+        get() {
+            val coordinates = DoubleArray(points.size * 2)
+            var i = 0
+            for (point in points) {
+                coordinates[i++] = point.lng
+                coordinates[i++] = point.lat
+            }
+            return coordinates
         }
-        coordinates
-    }
+
 
     init {
         data = polylineOptions.data
