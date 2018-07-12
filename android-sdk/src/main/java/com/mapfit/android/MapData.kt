@@ -62,8 +62,6 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
             polyline.coordinates
         }
 
-        Log.d("POINTS", "${coordinates.size}")
-
         map?.let {
             it.addFeature(
                 id,
