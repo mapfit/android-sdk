@@ -5,7 +5,7 @@ import android.support.test.espresso.IdlingRegistry
 import android.support.test.espresso.idling.CountingIdlingResource
 import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
-import com.mapfit.android.camera.CameraAnimationCallback
+import com.mapfit.android.anim.AnimationListener
 import com.mapfit.android.camera.Cinematography
 import com.mapfit.android.camera.OrbitTrajectory
 import com.mapfit.android.geometry.LatLng
@@ -63,7 +63,7 @@ class CameraTest {
                     .loop(false)
                     .duration(1000)
                     .pivot(latLng)
-                , object : CameraAnimationCallback {
+                , object : AnimationListener {
                     override fun onStart() {
                         idlingResource.decrement()
                     }
