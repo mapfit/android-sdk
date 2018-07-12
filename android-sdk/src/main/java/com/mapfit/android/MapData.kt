@@ -1,5 +1,6 @@
 package com.mapfit.android
 
+import android.util.Log
 import com.mapfit.android.annotations.Marker
 import com.mapfit.android.annotations.Polygon
 import com.mapfit.android.annotations.Polyline
@@ -50,10 +51,23 @@ internal constructor(var name: String, var id: Long, private var map: MapControl
     }
 
     fun addPolyline(polyline: Polyline): MapData {
+
+        // skip drawing if polyline has animation
+        val coordinates = if (polyline.animation != null &&
+            !polyline.animation!!.isRunning &&
+            !polyline.animation!!.finished
+        ) {
+            doubleArrayOf()
+        } else {
+            polyline.coordinates
+        }
+
+        Log.d("POINTS", "${coordinates.size}")
+
         map?.let {
             it.addFeature(
                 id,
-                polyline.coordinates,
+                coordinates,
                 null,
                 polyline.getProperties(polyline.getIdForMap(it).toString())
             )
