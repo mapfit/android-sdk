@@ -21,7 +21,7 @@ abstract class AnimationOptions<out T> {
      *
      * @param listener
      */
-    fun setAnimationListener(listener: AnimationListener): T {
+    fun animationListener(listener: AnimationListener): T {
         this.listener = listener
         return this as T
     }
