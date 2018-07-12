@@ -481,11 +481,14 @@ class MapView(
             mapController.setPositionEased(
                 lngLat,
                 ANIMATION_DURATION,
-                MapController.EaseType.LINEAR,
                 false
             )
         }
-        mapfitMap.setZoom(mapController.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION.toLong())
+
+        mapfitMap.setZoom(
+            mapController.zoom + ZOOM_STEP_LEVEL,
+            ANIMATION_DURATION.toLong()
+        )
     }
 
     @Synchronized

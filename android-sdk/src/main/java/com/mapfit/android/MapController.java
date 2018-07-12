@@ -501,11 +501,23 @@ public class MapController implements Renderer {
     }
 
     /**
+     * Set the geographic position of the center of the map view with default easing
+     *
+     * @param position LngLat of the position to set
+     * @param duration Time in milliseconds to ease to the given position
+     * @param save     true if want to set center to be re-centered to
+     */
+    public void setPositionEased(LatLng position, int duration, boolean save) {
+        setPositionEased(position, duration, DEFAULT_EASE_TYPE, save);
+    }
+
+    /**
      * Set the geographic position of the center of the map view with custom easing
      *
      * @param position LngLat of the position to set
      * @param duration Time in milliseconds to ease to the given position
      * @param ease     Type of easing to use
+     * @param save     true if want to set center to be re-centered to
      */
     public void setPositionEased(LatLng position, int duration, EaseType ease, boolean save) {
         float seconds = duration / 1000.f;
