@@ -12,9 +12,9 @@ import com.mapfit.android.geometry.LatLngBounds
  */
 class Polyline(
     internal val context: Context,
-    private val polylineId: Long,
-    private val polylineOptions: PolylineOptions,
-    mapController: MapController
+    internal val polylineId: Long,
+    internal val polylineOptions: PolylineOptions,
+    internal val mapController: MapController
 ) : Annotation(polylineId, mapController), PolyFeature {
 
     var points = polylineOptions.points.toMutableList()
@@ -79,21 +79,28 @@ class Polyline(
             }
         }
 
+    var animation = polylineOptions.animation
+
     internal var coordinates = doubleArrayOf()
+        private set
         get() {
             val coordinates = DoubleArray(points.size * 2)
             var i = 0
+
             for (point in points) {
                 coordinates[i++] = point.lng
                 coordinates[i++] = point.lat
             }
-            return coordinates
-        }
 
+            field = coordinates
+            return field
+        }
 
     init {
         data = polylineOptions.data
         initAnnotation(mapController, polylineId)
+
+        animation?.polyline = this
     }
 
     override fun initAnnotation(mapController: MapController, id: Long) {

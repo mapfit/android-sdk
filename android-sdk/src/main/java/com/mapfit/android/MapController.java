@@ -728,6 +728,7 @@ public class MapController implements Renderer {
         double[] tmp = {lngLat.getLng(), lngLat.getLat()};
         checkPointer(mapPointer);
         nativeLngLatToScreenPosition(mapPointer, tmp);
+        requestRender();
         return new PointF((float) tmp[0], (float) tmp[1]);
     }
 
@@ -1156,7 +1157,6 @@ public class MapController implements Renderer {
         mapDatas.put(polylineData.getId(), polylineData);
         polylines.put(polylineData.getId(), polyline);
 
-        requestRender();
         return polyline;
     }
 
@@ -1257,6 +1257,7 @@ public class MapController implements Renderer {
         checkPointer(mapPointer);
         checkId(polylineId);
         polylines.remove(polylineId);
+        mapDatas.remove(polylineId);
         nativeRemoveTileSource(mapPointer, polylineId);
         requestRender();
     }

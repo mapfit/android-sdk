@@ -329,7 +329,7 @@ class MapfitMap internal constructor(
     }
 
     /**
-     * Sets [OnMapPinchListener] for [MapView] that pan events will be passed to.x
+     * Sets [OnMapPinchListener] for [MapView] that pan events will be passed to.
 
      * @param listener pinch events will be passed to
      */
@@ -353,7 +353,7 @@ class MapfitMap internal constructor(
      *                 To unset the callback, use null.
      */
     fun setOnPlaceInfoClickListener(listener: OnPlaceInfoClickListener) {
-        mapView.onPlaceInfoClickListener = listener
+        mapView.placeInfoClickListener = listener
     }
 
     /**
@@ -368,7 +368,6 @@ class MapfitMap internal constructor(
      * @return [DirectionsOptions]
      */
     fun getDirectionsOptions() = mapView.directionsOptions
-
 
     /**
      * Returns the current rotation of the map.
@@ -459,6 +458,8 @@ class MapfitMap internal constructor(
      * @return [PointF]
      */
     fun latLngToScreenPosition(latLng: LatLng) = latLng.toPointF(mapController.zoom)
+
+    fun latLngToScreenPosition2(latLng: LatLng) = mapController.latLngToScreenPosition(latLng)
 
     /**
      * Interface to be used to set custom view for Place Info.
