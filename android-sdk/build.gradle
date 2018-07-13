@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 apply plugin: "org.jetbrains.kotlin.android.extensions"
 
 project.ext {
-    mapfitSdkVersion = '2.0.1'
+    mapfitSdkVersion = '2.1-SNAPSHOT'
     mapfitSdkVersionCode = 12
 }
 
