@@ -13,7 +13,7 @@ import kotlinx.coroutines.experimental.launch
 class OrbitAnimation(
     private val orbitTrajectory: OrbitTrajectory,
     private val mapfitMap: MapfitMap,
-    private val cameraAnimationCallback: AnimationListener?
+    private val animationListener: AnimationListener?
 ) : CameraAnimation {
 
     private val STEP_DURATION = 150L
@@ -26,7 +26,7 @@ class OrbitAnimation(
     override fun start() {
         isRunning = true
 
-        cameraAnimationCallback?.let { launch(UI) { it.onStart(this@OrbitAnimation) } }
+        animationListener?.let { launch(UI) { it.onStart(this@OrbitAnimation) } }
         launch {
             if (orbitTrajectory.loop) {
                 while (orbitTrajectory.loop && isRunning) {
@@ -44,7 +44,7 @@ class OrbitAnimation(
                     animate()
 
                     if (it == repeatCount - 1) {
-                        cameraAnimationCallback?.let { launch(UI) { it.onFinish(this@OrbitAnimation) } }
+                        animationListener?.let { launch(UI) { it.onFinish(this@OrbitAnimation) } }
                     }
 
                     if (!isRunning) {

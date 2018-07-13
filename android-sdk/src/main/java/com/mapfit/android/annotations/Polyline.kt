@@ -80,6 +80,10 @@ class Polyline(
         }
 
     var animation = polylineOptions.animation
+        set(value) {
+            value?.polyline = this
+            field = value
+        }
 
     internal var coordinates = doubleArrayOf()
         private set

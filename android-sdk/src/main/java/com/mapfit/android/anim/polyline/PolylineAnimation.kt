@@ -5,6 +5,6 @@ import com.mapfit.android.annotations.Polyline
 
 abstract class PolylineAnimation : Animation() {
 
-    lateinit var polyline: Polyline
+    internal var polyline: Polyline? = null
 
 }
