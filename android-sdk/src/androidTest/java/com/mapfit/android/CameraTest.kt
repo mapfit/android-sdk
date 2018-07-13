@@ -1,11 +1,12 @@
 package com.mapfit.android
 
+import android.graphics.drawable.Animatable
 import android.support.test.annotation.UiThreadTest
 import android.support.test.espresso.IdlingRegistry
 import android.support.test.espresso.idling.CountingIdlingResource
 import android.support.test.rule.ActivityTestRule
 import android.support.test.runner.AndroidJUnit4
-import com.mapfit.android.camera.CameraAnimationCallback
+import com.mapfit.android.anim.AnimationListener
 import com.mapfit.android.camera.Cinematography
 import com.mapfit.android.camera.OrbitTrajectory
 import com.mapfit.android.geometry.LatLng
@@ -63,12 +64,12 @@ class CameraTest {
                     .loop(false)
                     .duration(1000)
                     .pivot(latLng)
-                , object : CameraAnimationCallback {
-                    override fun onStart() {
+                , object : AnimationListener {
+                    override fun onStart(animatable: Animatable) {
                         idlingResource.decrement()
                     }
 
-                    override fun onFinish() {
+                    override fun onFinish(animatable: Animatable) {
                         idlingResource.decrement()
                     }
                 }

@@ -501,11 +501,23 @@ public class MapController implements Renderer {
     }
 
     /**
+     * Set the geographic position of the center of the map view with default easing
+     *
+     * @param position LngLat of the position to set
+     * @param duration Time in milliseconds to ease to the given position
+     * @param save     true if want to set center to be re-centered to
+     */
+    public void setPositionEased(LatLng position, int duration, boolean save) {
+        setPositionEased(position, duration, DEFAULT_EASE_TYPE, save);
+    }
+
+    /**
      * Set the geographic position of the center of the map view with custom easing
      *
      * @param position LngLat of the position to set
      * @param duration Time in milliseconds to ease to the given position
      * @param ease     Type of easing to use
+     * @param save     true if want to set center to be re-centered to
      */
     public void setPositionEased(LatLng position, int duration, EaseType ease, boolean save) {
         float seconds = duration / 1000.f;
@@ -728,6 +740,7 @@ public class MapController implements Renderer {
         double[] tmp = {lngLat.getLng(), lngLat.getLat()};
         checkPointer(mapPointer);
         nativeLngLatToScreenPosition(mapPointer, tmp);
+        requestRender();
         return new PointF((float) tmp[0], (float) tmp[1]);
     }
 
@@ -1156,7 +1169,6 @@ public class MapController implements Renderer {
         mapDatas.put(polylineData.getId(), polylineData);
         polylines.put(polylineData.getId(), polyline);
 
-        requestRender();
         return polyline;
     }
 
@@ -1257,6 +1269,7 @@ public class MapController implements Renderer {
         checkPointer(mapPointer);
         checkId(polylineId);
         polylines.remove(polylineId);
+        mapDatas.remove(polylineId);
         nativeRemoveTileSource(mapPointer, polylineId);
         requestRender();
     }

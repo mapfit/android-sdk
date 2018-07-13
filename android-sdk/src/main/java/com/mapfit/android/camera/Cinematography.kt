@@ -1,6 +1,7 @@
 package com.mapfit.android.camera
 
 import com.mapfit.android.MapfitMap
+import com.mapfit.android.anim.AnimationListener
 
 /**
  * Cinematography class makes it easier to implement camera animations by providing pre-made
@@ -16,7 +17,7 @@ class Cinematography(private val mapfitMap: MapfitMap) {
      */
     fun <T> create(
         cameraOptions: CameraOptions<T>,
-        cameraAnimationCallback: CameraAnimationCallback? = null
+        cameraAnimationCallback: AnimationListener? = null
     ): CameraAnimation {
         return when (cameraOptions) {
             is OrbitTrajectory -> OrbitAnimation(cameraOptions, mapfitMap, cameraAnimationCallback)

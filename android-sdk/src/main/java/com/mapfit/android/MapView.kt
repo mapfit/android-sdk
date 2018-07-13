@@ -88,7 +88,7 @@ class MapView(
     internal var mapThemeLoadListener: OnMapThemeLoadListener? = null
     internal var mapPinchListener: OnMapPinchListener? = null
     internal var placeInfoAdapter: MapfitMap.PlaceInfoAdapter? = null
-    internal var onPlaceInfoClickListener: MapfitMap.OnPlaceInfoClickListener? = null
+    internal var placeInfoClickListener: MapfitMap.OnPlaceInfoClickListener? = null
 
     internal var viewWidth: Int? = null
     internal var viewHeight: Int? = null
@@ -481,11 +481,14 @@ class MapView(
             mapController.setPositionEased(
                 lngLat,
                 ANIMATION_DURATION,
-                MapController.EaseType.LINEAR,
                 false
             )
         }
-        mapfitMap.setZoom(mapController.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION.toLong())
+
+        mapfitMap.setZoom(
+            mapController.zoom + ZOOM_STEP_LEVEL,
+            ANIMATION_DURATION.toLong()
+        )
     }
 
     @Synchronized
@@ -547,7 +550,7 @@ class MapView(
                 marker.hasCustomPlaceInfo = true
 
                 view?.setOnClickListener {
-                    onPlaceInfoClickListener?.onPlaceInfoClicked(marker)
+                    placeInfoClickListener?.onPlaceInfoClicked(marker)
                 }
 
                 if (view?.parent != null) {
@@ -566,7 +569,7 @@ class MapView(
                 child.tag = "default"
                 child.findViewById<View>(R.id.container)
                     .setOnClickListener {
-                        onPlaceInfoClickListener?.onPlaceInfoClicked(marker)
+                        placeInfoClickListener?.onPlaceInfoClicked(marker)
                     }
                 child
             }

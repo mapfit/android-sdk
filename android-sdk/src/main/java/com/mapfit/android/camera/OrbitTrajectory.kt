@@ -1,6 +1,5 @@
 package com.mapfit.android.camera
 
-import android.support.annotation.FloatRange
 import com.mapfit.android.MapController
 import com.mapfit.android.geometry.LatLng
 

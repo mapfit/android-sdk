@@ -3,6 +3,7 @@ package com.mapfit.android.camera
 import android.graphics.PointF
 import com.mapfit.android.MapController
 import com.mapfit.android.MapfitMap
+import com.mapfit.android.anim.AnimationListener
 import com.mapfit.android.geometry.toLatLng
 import com.mapfit.android.geometry.toPointF
 import kotlinx.coroutines.experimental.android.UI
@@ -12,7 +13,7 @@ import kotlinx.coroutines.experimental.launch
 class OrbitAnimation(
     private val orbitTrajectory: OrbitTrajectory,
     private val mapfitMap: MapfitMap,
-    private val cameraAnimationCallback: CameraAnimationCallback?
+    private val animationListener: AnimationListener?
 ) : CameraAnimation {
 
     private val STEP_DURATION = 150L
@@ -25,7 +26,7 @@ class OrbitAnimation(
     override fun start() {
         isRunning = true
 
-        cameraAnimationCallback?.let { launch(UI) { it.onStart() } }
+        animationListener?.let { launch(UI) { it.onStart(this@OrbitAnimation) } }
         launch {
             if (orbitTrajectory.loop) {
                 while (orbitTrajectory.loop && isRunning) {
@@ -43,7 +44,7 @@ class OrbitAnimation(
                     animate()
 
                     if (it == repeatCount - 1) {
-                        cameraAnimationCallback?.let { launch(UI) { it.onFinish() } }
+                        animationListener?.let { launch(UI) { it.onFinish(this@OrbitAnimation) } }
                     }
 
                     if (!isRunning) {
