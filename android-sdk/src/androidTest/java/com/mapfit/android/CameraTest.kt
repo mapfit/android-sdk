@@ -1,5 +1,6 @@
 package com.mapfit.android
 
+import android.graphics.drawable.Animatable
 import android.support.test.annotation.UiThreadTest
 import android.support.test.espresso.IdlingRegistry
 import android.support.test.espresso.idling.CountingIdlingResource
@@ -64,11 +65,11 @@ class CameraTest {
                     .duration(1000)
                     .pivot(latLng)
                 , object : AnimationListener {
-                    override fun onStart() {
+                    override fun onStart(animatable: Animatable) {
                         idlingResource.decrement()
                     }
 
-                    override fun onFinish() {
+                    override fun onFinish(animatable: Animatable) {
                         idlingResource.decrement()
                     }
                 }
