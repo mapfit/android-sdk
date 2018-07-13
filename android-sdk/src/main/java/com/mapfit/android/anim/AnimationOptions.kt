@@ -1,9 +1,13 @@
 package com.mapfit.android.anim
 
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.Interpolator
+
 @Suppress("UNCHECKED_CAST")
 abstract class AnimationOptions<out T> {
 
-    internal var duration: Long = 0L
+    internal var duration: Long = 2000L
+    internal var interpolator: Interpolator = AccelerateDecelerateInterpolator()
     internal var listener: AnimationListener? = null
 
     /**
@@ -17,6 +21,16 @@ abstract class AnimationOptions<out T> {
     }
 
     /**
+     * Sets the interpolator for the animation.
+     *
+     * @param interpolator
+     */
+    fun interpolator(interpolator: Interpolator): T {
+        this.interpolator = interpolator
+        return this as T
+    }
+
+    /**
      * Sets [AnimationListener] for animation events.
      *
      * @param listener
@@ -25,5 +39,6 @@ abstract class AnimationOptions<out T> {
         this.listener = listener
         return this as T
     }
+
 
 }

@@ -1,55 +1,50 @@
 package com.mapfit.android.anim.polyline
 
 import android.animation.Animator
-import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.support.annotation.Keep
-import android.view.animation.LinearInterpolator
-import com.mapfit.android.annotations.Polyline
 import com.mapfit.android.anim.RouteEvaluator
+import com.mapfit.android.annotations.Polyline
 import com.mapfit.android.geometry.LatLng
 import com.mapfit.android.geometry.isEmpty
 import com.mapfit.android.utils.logWarning
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 
-class SnakeAnimation(animationOptions: SnakeAnimationOptions) : PolylineAnimation() {
+class SnakeAnimation(private val animationOptions: SnakeAnimationOptions) : PolylineAnimation() {
 
-    private var running = false
     private var duration = animationOptions.duration
     private var listener = animationOptions.listener
-    private var animatorSet = AnimatorSet()
     private var polylinePoints = mutableListOf<LatLng>()
     private val evaluatedLatLngs = mutableListOf<LatLng>()
     private var smoothingPolylines = mutableListOf<Polyline>()
+    private var routeAnimator: Animator? = null
     private val overlappingPolylineCount = 4
     private var smoothingIndex = 0
 
     override fun start() {
-        if (polyline.points.size < 2) {
-            logWarning("SnakeAnimation couldn't be executed with ${polyline.points.size} points. You need at least 2 points to animate.")
-        } else {
-            animatePath()
+        when {
+            polyline == null -> logWarning("SnakeAnimation couldn't be executed without a polyline. Did you bind the animation to a polyline?")
+            polyline?.points?.size ?: 0 < 2 -> logWarning("SnakeAnimation couldn't be executed with ${polyline?.points?.size} points. You need at least 2 points to animate.")
+            else -> animatePath()
         }
     }
 
     override fun stop() {
-        launch(UI) { animatorSet.cancel() }
+        launch(UI) { routeAnimator?.cancel() }
     }
 
-
     private fun animatePath() {
-        val routeAnimator = getRouteAnimator()
+        routeAnimator = getRouteAnimator()
 
+        polyline?.let {
+            // copy of the original points
+            polylinePoints = it.points.toMutableList()
 
-        // copy of the original points
-        polylinePoints = polyline.points.toMutableList()
-
-        // clear the points
-        polyline.points = mutableListOf()
-        polyline.polylineOptions.points = mutableListOf()
-
-
+            // clear the points
+            it.points = mutableListOf()
+            it.polylineOptions.points = mutableListOf()
+        }
 
         addAnimatingPolylines()
 
@@ -62,7 +57,6 @@ class SnakeAnimation(animationOptions: SnakeAnimationOptions) : PolylineAnimatio
                 }
 
                 override fun onAnimationEnd(animation: Animator?) {
-                    cancel()
                     dispose()
                     running = false
                     finished = true
@@ -85,35 +79,38 @@ class SnakeAnimation(animationOptions: SnakeAnimationOptions) : PolylineAnimatio
     }
 
     private fun addAnimatingPolylines() {
-        polyline.polylineOptions.animation = null
+        polyline?.let {
+            it.polylineOptions.animation = null
 
-        var pCount = overlappingPolylineCount
-        while (pCount > 0) {
-            smoothingPolylines.add(polyline.mapController.addPolyline(polyline.polylineOptions))
-            pCount--
+            var pCount = overlappingPolylineCount
+            while (pCount > 0) {
+                smoothingPolylines.add(it.mapController.addPolyline(it.polylineOptions))
+                pCount--
+            }
         }
     }
 
     private fun getRouteAnimator(): ObjectAnimator? {
+        val points = polyline?.points ?: listOf<LatLng>()
+
         val routeAnimator = ObjectAnimator.ofObject(
             this,
             "evaluatedLatLng",
             RouteEvaluator(),
-            *polyline.points.toTypedArray()
+            *points.toTypedArray()
         )
-        routeAnimator.interpolator = LinearInterpolator()
+        routeAnimator.interpolator = animationOptions.interpolator
 
         return routeAnimator
     }
 
     private fun dispose() {
-        polyline.points = polylinePoints
+        polyline?.points = polylinePoints
         smoothingPolylines.forEach { it.remove() }
         smoothingPolylines.clear()
         evaluatedLatLngs.clear()
         smoothingIndex = 0
     }
-
 
     @Keep
     fun setEvaluatedLatLng(evaluatedLatLng: LatLng) {
