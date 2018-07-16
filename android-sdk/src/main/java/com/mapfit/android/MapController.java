@@ -52,6 +52,8 @@ import okhttp3.Response;
  */
 public class MapController implements Renderer {
 
+    public static final int TILE_SIZE = 512;
+
     /**
      * Options for interpolating map parameters
      */
