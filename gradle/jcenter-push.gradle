@@ -1,7 +1,6 @@
 apply plugin: 'com.novoda.bintray-release'
 apply plugin: 'maven-publish'
 
-assert file(project.rootProject.file('mapfit_local.properties')).exists()
 
 Properties properties = new Properties()
 properties.load(project.rootProject.file('mapfit_local.properties').newDataInputStream())
