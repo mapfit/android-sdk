@@ -450,7 +450,7 @@ class MapfitMap internal constructor(
      * @param pointF screen position
      * @return [LatLng]
      */
-    fun screenPositionToLatLng(pointF: PointF) = mapController.screenPositionToLatLng(pointF)
+    fun screenPositionToLatLng(pointF: PointF): LatLng = mapController.screenPositionToLatLng(pointF)
 
     /**
      * Returns the screen position for the given [LatLng] coordinate.
@@ -458,7 +458,7 @@ class MapfitMap internal constructor(
      * @param latLng coordinate
      * @return [PointF]
      */
-    fun latLngToScreenPosition(latLng: LatLng) = mapController.latLngToScreenPosition(latLng)
+    fun latLngToScreenPosition(latLng: LatLng): PointF = mapController.latLngToScreenPosition(latLng)
 
     /**
      * Interface to be used to set custom view for Place Info.
