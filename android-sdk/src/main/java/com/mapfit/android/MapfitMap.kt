@@ -488,7 +488,8 @@ class MapfitMap internal constructor(
     }
 
     /**
-     * Extrudes the building on given [LatLng]. if exists. This call will force a scene update.
+     * Extrudes the building on given [LatLng]. To extrude, the buildings should be visible in the
+     * current map view. Else it will be ignored. Additionally, this call will force a scene update.
      *
      * @param latLng coordinates of the building
      * @param buildingOptions applies all extruded buildings
@@ -502,7 +503,9 @@ class MapfitMap internal constructor(
     }
 
     /**
-     * Extrudes the building on given list of [LatLng]s. This call will force a scene update.
+     * Extrudes the buildings on given list of [LatLng]s. To extrude, the buildings should be visible
+     * in the current map view. Else it will be ignored. Additionally, this call will force a scene
+     * update.
      *
      * @param latLngs list of the coordinates of the buildings
      * @param buildingOptions applies all extruded buildings
@@ -525,7 +528,7 @@ class MapfitMap internal constructor(
     }
 
     /**
-     * Flattens the extruded building on given [LatLng]. This call will force a scene update.
+     * Flattens the extruded buildings on given [LatLng]. This call will force a scene update.
      *
      * @param latLngs list of the coordinates of the buildings
      */

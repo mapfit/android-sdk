@@ -230,14 +230,11 @@ internal class BuildingExtruder(
             return
         }
 
-        if (rootId != 0L) {
-            appendRootId(rootId)
-            building.rootId = rootId
-        }
-
         if (id != 0L) {
             appendId(id)
+            appendRootId(id)
             building.id = id
+            building.rootId = id
         }
 
         buildings.add(building)
