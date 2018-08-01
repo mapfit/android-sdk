@@ -1,5 +1,5 @@
 # Mapfit Day Theme
-# Last updated Mar 19, 2018
+# Last updated April 16, 2018
 
 import:
     - mapfit-base-theme.yaml
@@ -33,6 +33,8 @@ global:
     road_directional_arrows_fill:   rgba(240, 240, 240,1)
     pedestrian_path_fill:	          rgba(255, 255, 255,1)
     pedestrian_path_outline:        rgba(255, 255, 255,1)
+    pedestrian_paths_in_park_fill:  rgba(163,204,163,1)
+    pedestrian_paths_in_universities_fill: rgba(219, 203, 152,1)
     pedestrian_steps_fill:          rgba(242, 242, 242,1)
     roads_in_park_fill:           	rgba(189, 222, 197,1)
     roads_in_cemetary_fill:       	rgba(255, 255, 255,1)
@@ -55,7 +57,8 @@ global:
 
     # BUILDINGS
     building_fill:	                rgba(235, 235, 235,1)
-    building_outline:	              rgba(230, 230, 230,1)
+    building_outline:	            rgba(230, 230, 230,1)
+    building_extruded_fill:         rgba(125, 134, 224, 0.8)
 
     # AIRPORTS
     airport_road_fill:	            rgba(192, 195, 214,1)
@@ -98,4 +101,4 @@ cameras:
 
 textures:
     pois:
-        url: https://cdn.mapfit.com/v2-2/themes/images/refill@2x.png
+        url: https://cdn.mapfit.com/v2-3/themes/images/refill@2x.png

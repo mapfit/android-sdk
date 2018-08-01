@@ -9,8 +9,6 @@ import kotlinx.android.parcel.Parcelize
  *
  * @param lat Latitude, in degrees.
  * @param lng Longitude, in degrees.
- *
- * Created by dogangulcan on 12/19/17.
  */
 @Parcelize
 data class LatLng(
@@ -20,5 +18,4 @@ data class LatLng(
     init {
         isValid()
     }
-
 }

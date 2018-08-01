@@ -23,7 +23,6 @@ import com.mapfit.android.annotations.callback.OnPolygonClickListener
 import com.mapfit.android.annotations.callback.OnPolylineClickListener
 import com.mapfit.android.annotations.widget.PlaceInfo
 import com.mapfit.android.geometry.LatLng
-import com.mapfit.android.geometry.toLatLng
 import com.mapfit.android.utils.logWarning
 import com.mapfit.android.utils.startActivitySafe
 import com.mapfit.tetragon.CachePolicy
@@ -451,7 +450,7 @@ class MapView(
                 mapController.pickMarker(x, y)
                 mapController.pickFeature(x, y)
 
-                mapClickListener?.onMapClicked(PointF(x, y).toLatLng(mapController.zoom))
+                mapClickListener?.onMapClicked(mapController.screenPositionToLatLng(PointF(x, y)))
                 placeInfoRemoveJob = launch(UI) {
                     delay(20)
                     activePlaceInfo?.dispose()

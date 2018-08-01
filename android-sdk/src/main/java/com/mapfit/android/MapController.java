@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 
 import com.mapfit.android.annotations.Annotation;
+import com.mapfit.android.annotations.BuildingOptions;
 import com.mapfit.android.annotations.Marker;
 import com.mapfit.android.annotations.MarkerOptions;
 import com.mapfit.android.annotations.OnAnnotationClickListener;
@@ -1009,8 +1010,16 @@ public class MapController implements Renderer {
         setFeaturePickListener();
     }
 
+    void extrudeBuildingFeature(BuildingOptions buildingOptions, LatLng... latLng) {
+        buildingExtruder.extrude(latLng, buildingOptions);
+    }
+
+    void flattenBuildingFeature(LatLng... latLng) {
+        buildingExtruder.flatten(latLng);
+    }
+
     /**
-     * Set a listener for feature pick events
+     * Set a listener for feature pick events.
      */
     private void setFeaturePickListener() {
         featurePickListener = new FeaturePickListener() {
@@ -1018,6 +1027,8 @@ public class MapController implements Renderer {
             public void onFeaturePick(Map<String, String> properties, final float positionX, final float positionY) {
                 if (properties.size() > 0) {
                     final Annotation annotation = pickAnnotation(properties);
+
+                    buildingExtruder.handleFeature(properties);
 
                     uiThreadHandler.post(new Runnable() {
                         @Override
@@ -1412,9 +1423,6 @@ public class MapController implements Renderer {
             setPositionEased(lastCenter, 200);
     }
 
-    // Package private methods
-    // =======================
-
     void onLowMemory() {
         checkPointer(mapPointer);
         nativeOnLowMemory(mapPointer);
@@ -1568,59 +1576,111 @@ public class MapController implements Renderer {
     }
 
     private synchronized native void nativeOnLowMemory(long mapPtr);
+
     private synchronized native long nativeInit(MapController instance, AssetManager assetManager);
+
     private synchronized native void nativeDispose(long mapPtr);
+
     private synchronized native int nativeLoadScene(long mapPtr, String path, String[] updateStrings);
+
     private synchronized native int nativeLoadSceneAsync(long mapPtr, String path, String[] updateStrings);
+
     private synchronized native int nativeLoadSceneYaml(long mapPtr, String yaml, String resourceRoot, String[] updateStrings);
+
     private synchronized native int nativeLoadSceneYamlAsync(long mapPtr, String yaml, String resourceRoot, String[] updateStrings);
+
     private synchronized native void nativeSetupGL(long mapPtr);
+
     private synchronized native void nativeResize(long mapPtr, int width, int height);
+
     private synchronized native boolean nativeUpdate(long mapPtr, float dt);
+
     private synchronized native void nativeRender(long mapPtr);
+
     private synchronized native void nativeSetPosition(long mapPtr, double lon, double lat);
+
     private synchronized native void nativeSetPositionEased(long mapPtr, double lon, double lat, float seconds, int ease);
+
     private synchronized native void nativeGetPosition(long mapPtr, double[] lonLatOut);
+
     private synchronized native void nativeSetZoom(long mapPtr, float zoom);
+
     private synchronized native void nativeSetZoomEased(long mapPtr, float zoom, float seconds, int ease);
+
     private synchronized native float nativeGetZoom(long mapPtr);
+
     private synchronized native void nativeSetRotation(long mapPtr, float radians);
+
     private synchronized native void nativeSetRotationEased(long mapPtr, float radians, float seconds, int ease);
+
     private synchronized native float nativeGetRotation(long mapPtr);
+
     private synchronized native void nativeSetTilt(long mapPtr, float radians);
+
     private synchronized native void nativeSetTiltEased(long mapPtr, float radians, float seconds, int ease);
+
     private synchronized native float nativeGetTilt(long mapPtr);
+
     private synchronized native boolean nativeScreenPositionToLngLat(long mapPtr, double[] coordinates);
+
     private synchronized native boolean nativeLngLatToScreenPosition(long mapPtr, double[] coordinates);
+
     private synchronized native void nativeSetPixelScale(long mapPtr, float scale);
+
     private synchronized native void nativeSetCameraType(long mapPtr, int type);
+
     private synchronized native int nativeGetCameraType(long mapPtr);
+
     private synchronized native void nativeHandleTapGesture(long mapPtr, float posX, float posY);
+
     private synchronized native void nativeHandleDoubleTapGesture(long mapPtr, float posX, float posY);
+
     private synchronized native void nativeHandlePanGesture(long mapPtr, float startX, float startY, float endX, float endY);
+
     private synchronized native void nativeHandleFlingGesture(long mapPtr, float posX, float posY, float velocityX, float velocityY);
+
     private synchronized native void nativeHandlePinchGesture(long mapPtr, float posX, float posY, float scale, float velocity);
+
     private synchronized native void nativeHandleRotateGesture(long mapPtr, float posX, float posY, float rotation);
+
     private synchronized native void nativeHandleShoveGesture(long mapPtr, float distance);
+
     private synchronized native int nativeUpdateScene(long mapPtr, String[] updateStrings);
+
     private synchronized native void nativeSetPickRadius(long mapPtr, float radius);
+
     private synchronized native void nativePickFeature(long mapPtr, float posX, float posY, FeaturePickListener listener);
+
     private synchronized native void nativePickLabel(long mapPtr, float posX, float posY, LabelPickListener listener);
+
     private synchronized native void nativePickMarker(MapController instance, long mapPtr, float posX, float posY, MarkerPickListener listener);
+
     private synchronized native long nativeMarkerAdd(long mapPtr);
+
     private synchronized native boolean nativeMarkerRemove(long mapPtr, long markerID);
+
     private synchronized native boolean nativeMarkerSetStylingFromString(long mapPtr, long markerID, String styling);
+
     private synchronized native boolean nativeMarkerSetStylingFromPath(long mapPtr, long markerID, String path);
+
     private synchronized native boolean nativeMarkerSetBitmap(long mapPtr, long markerID, int width, int height, int[] data);
+
     private synchronized native boolean nativeMarkerSetPoint(long mapPtr, long markerID, double lng, double lat);
+
     private synchronized native boolean nativeMarkerSetPointEased(long mapPtr, long markerID, double lng, double lat, float duration, int ease);
+
     private synchronized native boolean nativeMarkerSetPolyline(long mapPtr, long markerID, double[] coordinates, int count);
+
     private synchronized native boolean nativeMarkerSetPolygon(long mapPtr, long markerID, double[] coordinates, int[] rings, int count);
+
     private synchronized native boolean nativeMarkerSetVisible(long mapPtr, long markerID, boolean visible);
+
     private synchronized native boolean nativeMarkerSetDrawOrder(long mapPtr, long markerID, int drawOrder);
+
     private synchronized native void nativeMarkerRemoveAll(long mapPtr);
 
     private synchronized native void nativeUseCachedGlState(long mapPtr, boolean use);
+
     private synchronized native void nativeCaptureSnapshot(long mapPtr, int[] buffer);
 
     private synchronized native void nativeSetDefaultBackgroundColor(long mapPtr, float r, float g, float b);
@@ -1628,9 +1688,13 @@ public class MapController implements Renderer {
     private native void nativeOnUrlComplete(long mapPtr, long requestHandle, byte[] rawDataBytes, String errorMessage);
 
     synchronized native long nativeAddTileSource(long mapPtr, String name, boolean generateCentroid);
+
     synchronized native void nativeRemoveTileSource(long mapPtr, long sourcePtr);
+
     synchronized native void nativeClearTileSource(long mapPtr, long sourcePtr);
+
     synchronized native void nativeAddFeature(long mapPtr, long sourcePtr, double[] coordinates, int[] rings, String[] properties);
+
     synchronized native void nativeAddGeoJson(long mapPtr, long sourcePtr, String geoJson);
 
     native void nativeSetDebugFlag(int flag, boolean on);
@@ -1658,6 +1722,7 @@ public class MapController implements Renderer {
     private Map<Long, Polygon> polygons = new HashMap<>();
     private Map<Long, MapData> mapDatas = new HashMap<>();
     private OnAnnotationClickListener annotationClickListener;
+    private BuildingExtruder buildingExtruder = new BuildingExtruder(this);
 
     private Handler uiThreadHandler;
     TouchInput touchInput;
@@ -1746,14 +1811,17 @@ public class MapController implements Renderer {
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, Response response) {
+                try {
+                    if (!response.isSuccessful()) {
+                        nativeOnUrlComplete(mapPointer, requestHandle, null, response.message());
+                        DebugUtils.logException(new IOException("Unexpected response code: " + response + " for URL: " + url));
+                    }
+                    byte[] bytes = response.body().bytes();
+                    nativeOnUrlComplete(mapPointer, requestHandle, bytes, null);
+                } catch (Exception ignored) {
 
-                if (!response.isSuccessful()) {
-                    nativeOnUrlComplete(mapPointer, requestHandle, null, response.message());
-                    DebugUtils.logException(new IOException("Unexpected response code: " + response + " for URL: " + url));
                 }
-                byte[] bytes = response.body().bytes();
-                nativeOnUrlComplete(mapPointer, requestHandle, bytes, null);
             }
         };
 

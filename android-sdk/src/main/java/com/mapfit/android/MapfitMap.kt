@@ -19,8 +19,6 @@ import org.jetbrains.annotations.TestOnly
 
 /**
  * Controller for the map.
- *
- * Created by dogangulcan on 12/19/17.
  */
 class MapfitMap internal constructor(
     private val mapView: MapView,
@@ -412,7 +410,6 @@ class MapfitMap internal constructor(
         angle: Float,
         duration: Long = 0,
         easeType: MapController.EaseType = mapController.DEFAULT_EASE_TYPE
-
     ) {
         when (duration) {
             0L -> mapController.tilt = angle
@@ -450,7 +447,8 @@ class MapfitMap internal constructor(
      * @param pointF screen position
      * @return [LatLng]
      */
-    fun screenPositionToLatLng(pointF: PointF): LatLng = mapController.screenPositionToLatLng(pointF)
+    fun screenPositionToLatLng(pointF: PointF): LatLng =
+        mapController.screenPositionToLatLng(pointF)
 
     /**
      * Returns the screen position for the given [LatLng] coordinate.
@@ -458,7 +456,8 @@ class MapfitMap internal constructor(
      * @param latLng coordinate
      * @return [PointF]
      */
-    fun latLngToScreenPosition(latLng: LatLng): PointF = mapController.latLngToScreenPosition(latLng)
+    fun latLngToScreenPosition(latLng: LatLng): PointF =
+        mapController.latLngToScreenPosition(latLng)
 
     /**
      * Interface to be used to set custom view for Place Info.
@@ -486,6 +485,55 @@ class MapfitMap internal constructor(
          * @param marker The marker is clicked on.
          */
         fun onPlaceInfoClicked(marker: Marker)
+    }
+
+    /**
+     * Extrudes the building on given [LatLng]. To extrude, the buildings should be visible in the
+     * current map view. Else it will be ignored. Additionally, this call will force a scene update.
+     *
+     * @param latLng coordinates of the building
+     * @param buildingOptions applies all extruded buildings
+     */
+    @JvmOverloads
+    fun extrudeBuilding(
+        latLng: LatLng,
+        buildingOptions: BuildingOptions = BuildingOptions()
+    ) {
+        mapController.extrudeBuildingFeature(buildingOptions, latLng)
+    }
+
+    /**
+     * Extrudes the buildings on given list of [LatLng]s. To extrude, the buildings should be visible
+     * in the current map view. Else it will be ignored. Additionally, this call will force a scene
+     * update.
+     *
+     * @param latLngs list of the coordinates of the buildings
+     * @param buildingOptions applies all extruded buildings
+     */
+    @JvmOverloads
+    fun extrudeBuilding(
+        latLngs: List<LatLng>,
+        buildingOptions: BuildingOptions = BuildingOptions()
+    ) {
+        mapController.extrudeBuildingFeature(buildingOptions, *latLngs.toTypedArray())
+    }
+
+    /**
+     * Flattens the extruded building on given [LatLng]. This call will force a scene update.
+     *
+     * @param latLng coordinates of the building
+     */
+    fun flattenBuilding(latLng: LatLng) {
+        mapController.flattenBuildingFeature(latLng)
+    }
+
+    /**
+     * Flattens the extruded buildings on given [LatLng]. This call will force a scene update.
+     *
+     * @param latLngs list of the coordinates of the buildings
+     */
+    fun flattenBuilding(latLngs: List<LatLng>) {
+        mapController.flattenBuildingFeature(*latLngs.toTypedArray())
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
