@@ -1811,14 +1811,17 @@ public class MapController implements Renderer {
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, Response response) {
+                try {
+                    if (!response.isSuccessful()) {
+                        nativeOnUrlComplete(mapPointer, requestHandle, null, response.message());
+                        DebugUtils.logException(new IOException("Unexpected response code: " + response + " for URL: " + url));
+                    }
+                    byte[] bytes = response.body().bytes();
+                    nativeOnUrlComplete(mapPointer, requestHandle, bytes, null);
+                } catch (Exception ignored) {
 
-                if (!response.isSuccessful()) {
-                    nativeOnUrlComplete(mapPointer, requestHandle, null, response.message());
-                    DebugUtils.logException(new IOException("Unexpected response code: " + response + " for URL: " + url));
                 }
-                byte[] bytes = response.body().bytes();
-                nativeOnUrlComplete(mapPointer, requestHandle, bytes, null);
             }
         };
 
