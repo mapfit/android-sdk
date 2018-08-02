@@ -107,5 +107,29 @@ fun PointF.toLatLng(zoomLevel: Float): LatLng {
  */
 fun toWorldWidthPixels(zoomLevel: Float) = (256 * Math.pow(2.0, zoomLevel.toDouble())).toFloat()
 
+/**
+ * Calculates the middle angle between 3 coordinates.
+ *
+ * @param p1 first point
+ * @param p2 middle point
+ * @param p3 last point
+ */
+fun calculateMidAngle(
+    p1: LatLng,
+    p2: LatLng,
+    p3: LatLng
+): Double {
+    val numerator =
+        p2.lng * (p1.lat - p3.lat) + p1.lng * (p3.lat - p2.lat) + p3.lng * (p2.lat - p1.lat)
+    val denominator = (p2.lat - p1.lat) * (p1.lat - p3.lat) + (p2.lng - p1.lng) * (p1.lng - p3.lng)
+    val ratio = numerator / denominator
 
+    val angleRad = Math.atan(ratio)
+    var angleDeg = angleRad * 180 / Math.PI
 
+    if (angleDeg < 0) {
+        angleDeg += 180
+    }
+
+    return angleDeg
+}

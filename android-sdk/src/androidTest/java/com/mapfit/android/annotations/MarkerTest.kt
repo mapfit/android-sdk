@@ -27,14 +27,8 @@ import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
 
 
-/**
- * Instrumentation tests for [Marker] functionality.
- *
- * Created by dogangulcan on 1/17/18.
- */
 @RunWith(AndroidJUnit4::class)
 class MarkerTest {
-
 
     private lateinit var mapfitMap: MapfitMap
     private lateinit var mapView: MapView

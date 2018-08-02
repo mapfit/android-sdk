@@ -23,7 +23,6 @@ import com.mapfit.android.annotations.callback.OnPolygonClickListener
 import com.mapfit.android.annotations.callback.OnPolylineClickListener
 import com.mapfit.android.annotations.widget.PlaceInfo
 import com.mapfit.android.geometry.LatLng
-import com.mapfit.android.geometry.toLatLng
 import com.mapfit.android.utils.logWarning
 import com.mapfit.android.utils.startActivitySafe
 import com.mapfit.tetragon.CachePolicy
@@ -53,7 +52,6 @@ class MapView(
 
     companion object {
         internal const val ANIMATION_DURATION = 200
-        internal val DEFAULT_EASE = MapController.EaseType.CUBIC
         private const val ZOOM_STEP_LEVEL = 1
     }
 
@@ -89,7 +87,7 @@ class MapView(
     internal var mapThemeLoadListener: OnMapThemeLoadListener? = null
     internal var mapPinchListener: OnMapPinchListener? = null
     internal var placeInfoAdapter: MapfitMap.PlaceInfoAdapter? = null
-    internal var onPlaceInfoClickListener: MapfitMap.OnPlaceInfoClickListener? = null
+    internal var placeInfoClickListener: MapfitMap.OnPlaceInfoClickListener? = null
 
     internal var viewWidth: Int? = null
     internal var viewHeight: Int? = null
@@ -280,7 +278,11 @@ class MapView(
                 anim.duration = ANIMATION_DURATION.toLong()
                 btnCompass.startAnimation(anim)
 
-                mapController.setRotationEased(0f, ANIMATION_DURATION, DEFAULT_EASE)
+                mapController.setRotationEased(
+                    0f,
+                    ANIMATION_DURATION,
+                    mapController.DEFAULT_EASE_TYPE
+                )
             }
         }
 
@@ -448,7 +450,7 @@ class MapView(
                 mapController.pickMarker(x, y)
                 mapController.pickFeature(x, y)
 
-                mapClickListener?.onMapClicked(PointF(x, y).toLatLng(mapController.zoom))
+                mapClickListener?.onMapClicked(mapController.screenPositionToLatLng(PointF(x, y)))
                 placeInfoRemoveJob = launch(UI) {
                     delay(20)
                     activePlaceInfo?.dispose()
@@ -473,8 +475,19 @@ class MapView(
 
     private fun setZoomOnDoubleTap(x: Float, y: Float) {
         val lngLat = mapController.screenPositionToLatLng(PointF(x, y))
-        mapController.setPositionEased(lngLat, ANIMATION_DURATION, DEFAULT_EASE, false)
-        mapfitMap.setZoom(mapController.zoom + ZOOM_STEP_LEVEL, ANIMATION_DURATION.toLong())
+
+        if (mapOptions.isPanEnabled) {
+            mapController.setPositionEased(
+                lngLat,
+                ANIMATION_DURATION,
+                false
+            )
+        }
+
+        mapfitMap.setZoom(
+            mapController.zoom + ZOOM_STEP_LEVEL,
+            ANIMATION_DURATION.toLong()
+        )
     }
 
     @Synchronized
@@ -536,7 +549,7 @@ class MapView(
                 marker.hasCustomPlaceInfo = true
 
                 view?.setOnClickListener {
-                    onPlaceInfoClickListener?.onPlaceInfoClicked(marker)
+                    placeInfoClickListener?.onPlaceInfoClicked(marker)
                 }
 
                 if (view?.parent != null) {
@@ -549,13 +562,13 @@ class MapView(
             } else {
                 val view =
                     LayoutInflater.from(context)
-                        .inflate(R.layout.mf_widget_place_info, placeInfoFrame,true)
+                        .inflate(R.layout.mf_widget_place_info, placeInfoFrame, true)
 
                 val child = (view as FrameLayout).getChildAt(0)
                 child.tag = "default"
                 child.findViewById<View>(R.id.container)
                     .setOnClickListener {
-                        onPlaceInfoClickListener?.onPlaceInfoClicked(marker)
+                        placeInfoClickListener?.onPlaceInfoClicked(marker)
                     }
                 child
             }
