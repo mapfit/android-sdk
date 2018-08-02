@@ -11,6 +11,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 
 import com.mapfit.android.annotations.Annotation;
+import com.mapfit.android.annotations.BuildingOptions;
 import com.mapfit.android.annotations.Marker;
 import com.mapfit.android.annotations.MarkerOptions;
 import com.mapfit.android.annotations.OnAnnotationClickListener;
@@ -52,15 +53,29 @@ import okhttp3.Response;
  */
 public class MapController implements Renderer {
 
+    public static final int TILE_SIZE = 512;
+
     /**
      * Options for interpolating map parameters
      */
     @Keep
     public enum EaseType {
         LINEAR,
-        CUBIC,
-        QUINT,
-        SINE,
+        CUBIC_IN,
+        CUBIC_OUT,
+        CUBIC_IN_OUT,
+        QUART_IN,
+        QUART_OUT,
+        QUART_IN_OUT,
+        QUINT_IN,
+        QUINT_OUT,
+        QUINT_IN_OUT,
+        SINE_IN,
+        SINE_OUT,
+        SINE_IN_OUT,
+        EXP_IN,
+        EXP_OUT,
+        EXP_IN_OUT
     }
 
     /**
@@ -83,7 +98,7 @@ public class MapController implements Renderer {
         NO_VALID_SCENE,
     }
 
-    private static EaseType DEFAULT_EASE_TYPE = EaseType.SINE;
+    public EaseType DEFAULT_EASE_TYPE = EaseType.QUART_IN_OUT;
 
     /**
      * Options for enabling debug rendering features
@@ -489,11 +504,23 @@ public class MapController implements Renderer {
     }
 
     /**
+     * Set the geographic position of the center of the map view with default easing
+     *
+     * @param position LngLat of the position to set
+     * @param duration Time in milliseconds to ease to the given position
+     * @param save     true if want to set center to be re-centered to
+     */
+    public void setPositionEased(LatLng position, int duration, boolean save) {
+        setPositionEased(position, duration, DEFAULT_EASE_TYPE, save);
+    }
+
+    /**
      * Set the geographic position of the center of the map view with custom easing
      *
      * @param position LngLat of the position to set
      * @param duration Time in milliseconds to ease to the given position
      * @param ease     Type of easing to use
+     * @param save     true if want to set center to be re-centered to
      */
     public void setPositionEased(LatLng position, int duration, EaseType ease, boolean save) {
         float seconds = duration / 1000.f;
@@ -507,21 +534,22 @@ public class MapController implements Renderer {
     public void setLatLngBounds(final LatLngBounds latlngBounds,
                                 final float padding,
                                 final long duration,
-                                final Pair<Float, Float> vanishingPointOffset) {
+                                final Pair<Float, Float> vanishingPointOffset,
+                                final EaseType easeType) {
         mapView.post(new Runnable() {
             @Override
             public void run() {
                 kotlin.Pair<LatLng, Float> pair = latlngBounds.getVisibleBounds(
                         mapView.getWidth(),
                         mapView.getHeight(),
-                        padding,vanishingPointOffset);
+                        padding, vanishingPointOffset);
 
                 if (duration <= 0) {
                     setZoom(pair.component2());
                     setPosition(pair.component1());
                 } else {
-                    setZoomEased(pair.component2(), (int) duration);
-                    setPositionEased(pair.component1(), (int) duration);
+                    setZoomEased(pair.component2(), (int) duration, easeType);
+                    setPositionEased(pair.component1(), (int) duration, easeType, true);
                 }
             }
         });
@@ -715,6 +743,7 @@ public class MapController implements Renderer {
         double[] tmp = {lngLat.getLng(), lngLat.getLat()};
         checkPointer(mapPointer);
         nativeLngLatToScreenPosition(mapPointer, tmp);
+        requestRender();
         return new PointF((float) tmp[0], (float) tmp[1]);
     }
 
@@ -981,8 +1010,16 @@ public class MapController implements Renderer {
         setFeaturePickListener();
     }
 
+    void extrudeBuildingFeature(BuildingOptions buildingOptions, LatLng... latLng) {
+        buildingExtruder.extrude(latLng, buildingOptions);
+    }
+
+    void flattenBuildingFeature(LatLng... latLng) {
+        buildingExtruder.flatten(latLng);
+    }
+
     /**
-     * Set a listener for feature pick events
+     * Set a listener for feature pick events.
      */
     private void setFeaturePickListener() {
         featurePickListener = new FeaturePickListener() {
@@ -990,6 +1027,8 @@ public class MapController implements Renderer {
             public void onFeaturePick(Map<String, String> properties, final float positionX, final float positionY) {
                 if (properties.size() > 0) {
                     final Annotation annotation = pickAnnotation(properties);
+
+                    buildingExtruder.handleFeature(properties);
 
                     uiThreadHandler.post(new Runnable() {
                         @Override
@@ -1143,7 +1182,6 @@ public class MapController implements Renderer {
         mapDatas.put(polylineData.getId(), polylineData);
         polylines.put(polylineData.getId(), polyline);
 
-        requestRender();
         return polyline;
     }
 
@@ -1244,6 +1282,7 @@ public class MapController implements Renderer {
         checkPointer(mapPointer);
         checkId(polylineId);
         polylines.remove(polylineId);
+        mapDatas.remove(polylineId);
         nativeRemoveTileSource(mapPointer, polylineId);
         requestRender();
     }
@@ -1383,9 +1422,6 @@ public class MapController implements Renderer {
         if (lastCenter != null)
             setPositionEased(lastCenter, 200);
     }
-
-    // Package private methods
-    // =======================
 
     void onLowMemory() {
         checkPointer(mapPointer);
@@ -1539,9 +1575,9 @@ public class MapController implements Renderer {
         System.loadLibrary("tangram");
     }
 
-    synchronized native void nativeOnLowMemory(long mapPtr);
+    private synchronized native void nativeOnLowMemory(long mapPtr);
 
-    synchronized native long nativeInit(MapController instance, AssetManager assetManager);
+    private synchronized native long nativeInit(MapController instance, AssetManager assetManager);
 
     private synchronized native void nativeDispose(long mapPtr);
 
@@ -1686,6 +1722,7 @@ public class MapController implements Renderer {
     private Map<Long, Polygon> polygons = new HashMap<>();
     private Map<Long, MapData> mapDatas = new HashMap<>();
     private OnAnnotationClickListener annotationClickListener;
+    private BuildingExtruder buildingExtruder = new BuildingExtruder(this);
 
     private Handler uiThreadHandler;
     TouchInput touchInput;
@@ -1774,14 +1811,17 @@ public class MapController implements Renderer {
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
+            public void onResponse(Call call, Response response) {
+                try {
+                    if (!response.isSuccessful()) {
+                        nativeOnUrlComplete(mapPointer, requestHandle, null, response.message());
+                        DebugUtils.logException(new IOException("Unexpected response code: " + response + " for URL: " + url));
+                    }
+                    byte[] bytes = response.body().bytes();
+                    nativeOnUrlComplete(mapPointer, requestHandle, bytes, null);
+                } catch (Exception ignored) {
 
-                if (!response.isSuccessful()) {
-                    nativeOnUrlComplete(mapPointer, requestHandle, null, response.message());
-                    DebugUtils.logException(new IOException("Unexpected response code: " + response + " for URL: " + url));
                 }
-                byte[] bytes = response.body().bytes();
-                nativeOnUrlComplete(mapPointer, requestHandle, bytes, null);
             }
         };
 

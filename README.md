@@ -75,7 +75,7 @@ mapView.getMapAsync(new OnMapReadyCallback() {
 });
 ```
 
-If you are looking for detailed documentation, see [Mapfit Documentation](https://mapfit-android.readme.io/docs)
+If you are looking for detailed documentation, please see [Mapfit Documentation](https://mapfit-android.readme.io/docs).
 
 
 ## License

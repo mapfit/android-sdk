@@ -1,9 +1,6 @@
 package com.mapfit.android.annotations
 
-import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Color
-import android.support.test.InstrumentationRegistry
 import android.support.test.annotation.UiThreadTest
 import android.support.test.espresso.Espresso
 import android.support.test.espresso.IdlingRegistry
@@ -14,7 +11,6 @@ import android.support.test.runner.AndroidJUnit4
 import com.mapfit.android.*
 import com.mapfit.android.annotations.callback.OnPolylineClickListener
 import com.mapfit.android.geometry.LatLng
-import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.delay
 import kotlinx.coroutines.experimental.runBlocking
 import org.junit.After

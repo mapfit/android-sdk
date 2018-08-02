@@ -1,5 +1,5 @@
 
-task cleanAssemble(dependsOn: ['clean', 'assemble', 'assembleAndroidTest']) {
+task assembleBintrayRelease(dependsOn: ['clean', 'build', 'assemble', 'generatePomFileForReleasePublication']) {
     group = 'mapfit'
     description = "Clean and assemble project artifacts"
 }

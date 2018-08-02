@@ -11,7 +11,7 @@ import com.mapfit.android.geometry.LatLng
  */
 fun decodePolyline(encodedPath: String): List<LatLng> {
     val len = encodedPath.length
-    val path = ArrayList<LatLng>()
+    val decodedPath = ArrayList<LatLng>()
     var index = 0
     var lat = 0
     var lng = 0
@@ -36,8 +36,8 @@ fun decodePolyline(encodedPath: String): List<LatLng> {
         } while (b >= 0x1f)
         lng += if (result and 1 != 0) (result shr 1).inv() else result shr 1
 
-        path.add(LatLng(lat * 1e-6, lng * 1e-6))
+        decodedPath.add(LatLng(lat * 1e-6, lng * 1e-6))
     }
 
-    return path
+    return decodedPath
 }
