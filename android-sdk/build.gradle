@@ -2,20 +2,25 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: "org.jetbrains.kotlin.android.extensions"
 
-project.ext {
-    mapfitSdkVersion = '2.1-SNAPSHOT'
-    mapfitSdkVersionCode = 12
-}
+
+ext.mapfit = [
+        'sdk_version'        : '2.1',
+        'sdk_version_code'   : 14,
+        'compile_sdk_version': 27,
+        'build_tools_version': '27.0.3',
+        'min_sdk_version'    : 16,
+        'target_sdk_version' : 27
+]
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    compileSdkVersion project.mapfit.compile_sdk_version
+    buildToolsVersion project.mapfit.build_tools_version
 
     defaultConfig {
-        minSdkVersion 16
-        targetSdkVersion 27
-        versionCode project.mapfitSdkVersionCode
-        versionName project.mapfitSdkVersion
+        minSdkVersion project.mapfit.min_sdk_version
+        targetSdkVersion project.mapfit.target_sdk_Version
+        versionName project.mapfit.sdk_version
+        versionCode project.mapfit.sdk_version_code
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -95,21 +100,21 @@ android {
 
 dependencies {
     api fileTree(include: ['*.jar'], dir: 'libs')
-    api "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    api "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutine_version"
-    api "com.android.support:appcompat-v7:$support_lib_version"
-    api "com.android.support:support-annotations:$support_lib_version"
-    api "com.squareup.okhttp3:okhttp:$okhttp_version"
-    api "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
-    api "com.squareup.moshi:moshi-kotlin:$moshi_version"
+    api "org.jetbrains.kotlin:kotlin-stdlib:${versions.kotlin}"
+    api "org.jetbrains.kotlin:kotlin-reflect:${versions.kotlin}"
+    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.kotlin_coroutine}"
+    api "com.android.support:appcompat-v7:${versions.support_lib}"
+    api "com.android.support:support-annotations:${versions.support_lib_version}"
+    api "com.squareup.okhttp3:okhttp:${versions.okHttp}"
+    api "com.squareup.okhttp3:logging-interceptor:${versions.okHttp}"
+    api "com.squareup.moshi:moshi-kotlin:${versions.moshi}"
 
     testImplementation 'junit:junit:4.12'
     testImplementation 'org.json:json:20140107'
-    testImplementation "org.mockito:mockito-core:$mockito_version"
-    testImplementation "org.mockito:mockito-inline:$mockito_version"
-    testImplementation "com.squareup.okhttp3:mockwebserver:$okhttp_version"
-    androidTestImplementation "org.mockito:mockito-android:$mockito_version"
+    testImplementation "org.mockito:mockito-core:${versions.mockito}"
+    testImplementation "org.mockito:mockito-inline:${versions.mockito}"
+    testImplementation "com.squareup.okhttp3:mockwebserver:${versions.okHttp}"
+    androidTestImplementation "org.mockito:mockito-android:${versions.mockito}"
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test:rules:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
