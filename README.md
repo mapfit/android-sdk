@@ -19,7 +19,7 @@ allprojects {
 In your module level `build.gradle` file, add depencency as follows.
 ```
 dependencies {
-    	implementation 'com.mapfit:android-sdk:2.0.1'
+    	implementation 'com.mapfit:android-sdk:2.1'
 }
 ```
 
