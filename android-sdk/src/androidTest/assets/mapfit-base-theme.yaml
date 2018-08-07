@@ -848,7 +848,26 @@ layers:
                 outline:
                     width: 0px
                     color: white
+    my_custom_line:
+          data: { source: my_custom_line }
+          draw:
+              sdk-line-overlay:
+                  interactive: global.sdk_interactive
+                  color: '#FF0000'
+                  order: 503
+                  width: 10px
 
+    my_custom_polygon:
+            data: { source: my_custom_polygon }
+            draw:
+                sdk-polygon-overlay:
+                    interactive: global.sdk_interactive
+                    color: '#FF0000'
+                    order: 501
+                sdk-line-overlay:
+                    color: global.polygon_outline
+                    order: 502
+                    width: 2px
     earth-labels:
         data: { source: mapfit, layer: earth }
         filter:
