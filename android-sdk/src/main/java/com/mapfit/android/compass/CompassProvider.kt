@@ -2,6 +2,7 @@ package com.mapfit.android.compass
 
 import android.content.Context
 import android.content.Context.SENSOR_SERVICE
+import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -9,24 +10,24 @@ import android.hardware.SensorManager
 import android.view.Surface
 import android.view.WindowManager
 import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 
 
 /**
  * Compass provider uses accelerometer and magnetometer.
- *
- * Created by dogangulcan on 3/5/18.
  */
 internal class CompassProvider(
     context: Context,
     val compassListener: CompassListener
 ) {
+    internal var azimuth = 0f
+    private var hasAccelerometer =
+        context.packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER)
+    internal var hasMagnetometer =
+        context.packageManager.hasSystemFeature(PackageManager.FEATURE_SENSOR_COMPASS)
 
     private val sensorManager = context.getSystemService(SENSOR_SERVICE) as SensorManager
     private val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    private val accelerometer by lazy { sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) }
-    private val magnetometer by lazy { sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD) }
 
     private var gravity = FloatArray(3)
     private var geomagnetic = FloatArray(3)
@@ -35,14 +36,20 @@ internal class CompassProvider(
     private val rotationMatrix = FloatArray(9)
 
     private val alpha = 0.97f
-    internal var azimuth = 0f
 
     /**
      * Starts listening orientation changes.
      */
     fun start() {
-        registerSensor(accelerometer)
-        registerSensor(magnetometer)
+        if (hasAccelerometer) {
+            val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+            registerSensor(accelerometer)
+        }
+
+        if (hasMagnetometer) {
+            val magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)
+            registerSensor(magnetometer)
+        }
     }
 
     /**
@@ -62,9 +69,8 @@ internal class CompassProvider(
 
     private val sensorEventListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent?) {
-            async {
+            launch {
                 event?.let {
-
                     when (event.sensor.type) {
                         Sensor.TYPE_ACCELEROMETER -> {
                             gravity[0] = alpha * gravity[0] + (1 - alpha) * event.values[0]
@@ -95,7 +101,9 @@ internal class CompassProvider(
                             .toFloat()// horizontal direction
                         azimuth = (azimuth + 360) % 360
 
-                        launch(UI) { compassListener.onOrientationChanged(azimuth) }
+                        launch(UI) {
+                            compassListener.onOrientationChanged(azimuth)
+                        }
                     }
                 }
             }
@@ -104,7 +112,6 @@ internal class CompassProvider(
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
 
         }
-
     }
 
     private fun configureDeviceAngle() {

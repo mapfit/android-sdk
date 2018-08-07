@@ -42,8 +42,6 @@ import java.util.concurrent.TimeUnit
 
 /**
  * The view map is drawn on to.
- *
- * Created by dogangulcan on 12/18/17.
  */
 class MapView(
     context: Context,
@@ -491,19 +489,21 @@ class MapView(
     }
 
     @Synchronized
-    private fun rotateCompassButton() {
-        if (btnCompass.visibility != View.VISIBLE) {
-            btnCompass.visibility = View.VISIBLE
-            btnCompass.alpha = 1f
-        }
+    private fun rotateCompassButton() = launch {
+        val compassRotationMatrix = Matrix()
 
-        launch {
-            val compassRotationMatrix = Matrix()
-            compassRotationMatrix.postRotate(
-                Math.toDegrees(mapController.rotation.toDouble()).toFloat(),
-                compassPivotCenter,
-                compassPivotCenter
-            )
+        compassRotationMatrix.postRotate(
+            Math.toDegrees(mapController.rotation.toDouble()).toFloat(),
+            compassPivotCenter,
+            compassPivotCenter
+        )
+
+        launch(UI) {
+            if (btnCompass.visibility != View.VISIBLE) {
+                btnCompass.visibility = View.VISIBLE
+                btnCompass.alpha = 1f
+            }
+
             btnCompass.imageMatrix = compassRotationMatrix
         }
     }
